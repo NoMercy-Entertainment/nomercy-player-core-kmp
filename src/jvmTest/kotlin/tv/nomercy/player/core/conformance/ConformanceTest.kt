@@ -31,7 +31,6 @@ class ConformanceTest {
     // them by id rather than by a "skip if it fails" rule keeps that honest:
     // this list can only be shortened, and shortening it is the work.
     private val notYetOwnedByCore = setOf(
-        "backend/time",
         "backend/stalled",
         "backend/waiting",
         "backend/level-switched",

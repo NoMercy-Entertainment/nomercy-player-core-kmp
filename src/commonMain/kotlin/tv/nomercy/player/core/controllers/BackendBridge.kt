@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
@@ -52,14 +53,14 @@ public class BackendBridge(private val ctx: PlayerContext) {
             val duration: Double = backend.duration()
             ctx.internalCurrentTime = time
             if (duration > 0.0) ctx.internalDuration = duration
-            ctx.emit(
-                CoreEvents.Time,
-                TimeUpdate(
-                    time = time,
-                    duration = duration,
-                    percentage = if (duration <= 0.0) 0.0 else time / duration * PERCENT,
-                ),
-            )
+            val percentage: Double = if (duration <= 0.0) 0.0 else time / duration * PERCENT
+
+            // Two events for one engine tick, in the web's order. progress is
+            // what a scrubber binds to and time is what a clock binds to; they
+            // carry the same numbers because they are the same moment, and a
+            // consumer should not have to subscribe to both to get one.
+            ctx.emit(CoreEvents.Progress, ProgressPayload(time, duration, percentage))
+            ctx.emit(CoreEvents.Time, TimeUpdate(time = time, duration = duration, percentage = percentage))
         }
     }
 

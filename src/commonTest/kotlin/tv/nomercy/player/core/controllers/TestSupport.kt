@@ -52,6 +52,9 @@ class FakeMediaBackend : MediaBackend {
     override suspend fun load(url: String, opts: LoadOptions) {
         loadedUrls += url
         loadedOptions += opts
+        // What a real engine reports once it has read the container.
+        fire(CanonicalBackendEvent.LOADED_METADATA)
+        fire(CanonicalBackendEvent.CAN_PLAY)
     }
 
     // A real engine confirms the action on its own event stream, and the
