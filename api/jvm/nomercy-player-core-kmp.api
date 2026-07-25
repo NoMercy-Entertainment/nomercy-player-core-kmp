@@ -8,6 +8,12 @@ public class tv/nomercy/player/core/controllers/AuthController {
 	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/controllers/BackendBridge {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;)V
+	public final fun attach (Ltv/nomercy/player/core/ports/MediaBackend;)V
+	public final fun detach (Ltv/nomercy/player/core/ports/MediaBackend;)V
+}
+
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
 	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Lkotlinx/coroutines/CoroutineScope;)V
@@ -22,6 +28,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun duration ()D
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getBridge ()Ltv/nomercy/player/core/controllers/BackendBridge;
 	public final fun getContext ()Ltv/nomercy/player/core/controllers/PlayerContext;
 	public final fun getLifecycle ()Ltv/nomercy/player/core/controllers/LifecycleController;
 	public final fun getPlugins ()Ltv/nomercy/player/core/plugin/PluginRegistry;

@@ -61,3 +61,11 @@ The pack runs against the player library itself, where it is a hard failure
 rather than advice — the library is the example everyone else reads. It has
 already earned its keep: switching it on flagged the two unchecked casts in the
 codebase, and both now carry the argument for why they are there.
+
+## Known issue
+
+`NoSingleLetterIdent` flags a lambda's `_` placeholder when detekt runs it over
+this repository, but not when the rule's own test lints the same shape. `_` is
+in the allowed set and the unit test proves it, so the two runs are seeing
+different PSI and the reason is not yet understood. Until it is, `_` is worth
+avoiding in this repo anyway — a named parameter reads better than a hole.

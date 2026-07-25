@@ -965,6 +965,13 @@ final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.co
     final fun sort(kotlin/Comparator<#A>) // tv.nomercy.player.core.media/MediaList.sort|sort(kotlin.Comparator<1:0>){}[0]
 }
 
+final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.player.core.controllers/BackendBridge|null[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext) // tv.nomercy.player.core.controllers/BackendBridge.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext){}[0]
+
+    final fun attach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.attach|attach(tv.nomercy.player.core.ports.MediaBackend){}[0]
+    final fun detach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.detach|detach(tv.nomercy.player.core.ports.MediaBackend){}[0]
+}
+
 final class tv.nomercy.player.core.controllers/InMemoryStorage : tv.nomercy.player.core.ports/Storage { // tv.nomercy.player.core.controllers/InMemoryStorage|null[0]
     constructor <init>() // tv.nomercy.player.core.controllers/InMemoryStorage.<init>|<init>(){}[0]
 
@@ -3160,6 +3167,8 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
     constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., kotlinx.coroutines/CoroutineScope = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;kotlinx.coroutines.CoroutineScope){}[0]
 
+    final val bridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge|{}bridge[0]
+        final fun <get-bridge>(): tv.nomercy.player.core.controllers/BackendBridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge.<get-bridge>|<get-bridge>(){}[0]
     final val context // tv.nomercy.player.core.controllers/ComposedPlayer.context|{}context[0]
         final fun <get-context>(): tv.nomercy.player.core.controllers/PlayerContext // tv.nomercy.player.core.controllers/ComposedPlayer.context.<get-context>|<get-context>(){}[0]
     final val lifecycle // tv.nomercy.player.core.controllers/ComposedPlayer.lifecycle|{}lifecycle[0]

@@ -249,6 +249,21 @@ class PlayerRulesTest {
     }
 
     @Test
+    fun anUnderscoreIsDeliberatelyUnusedRatherThanUninformative() {
+        val findings = idents(
+            """
+            class Thing {
+                fun go() {
+                    bus.onAll { name, _ -> record(name) }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertTrue(findings.isEmpty())
+    }
+
+    @Test
     fun aLoopVariableIsNotAName() {
         val findings = idents(
             """

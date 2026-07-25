@@ -59,7 +59,8 @@ class NoSingleLetterIdent(config: Config) : Rule(config) {
 
     private companion object {
         // Counters and coordinates, where the letter is the convention and a
-        // longer name would read worse.
-        val ALLOWED: Set<String> = setOf("i", "j", "k", "n", "x", "y", "z", "t")
+        // longer name would read worse. Underscore is Kotlin for deliberately
+        // unused, which is the opposite of the problem this rule is about.
+        val ALLOWED: Set<String> = setOf("_", "i", "j", "k", "n", "x", "y", "z", "t")
     }
 }

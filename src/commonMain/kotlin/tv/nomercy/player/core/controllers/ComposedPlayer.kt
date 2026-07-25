@@ -70,9 +70,14 @@ public open class ComposedPlayer(
     public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, scope)
     public val lifecycle: LifecycleController = LifecycleController(context, plugins)
 
+    // What the engine reports, turned into what the player says. Without it
+    // the controllers drive the engine and nothing listens to it come back.
+    public val bridge: BackendBridge = BackendBridge(context)
+
     init {
         queue.transport = transport
         queue.wireQueue()
+        backend?.let { bridge.attach(it) }
     }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────

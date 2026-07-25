@@ -11,6 +11,7 @@ package tv.nomercy.player.core.controllers
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.ports.BackendState
+import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.core.ports.LoadOptions
 import tv.nomercy.player.core.ports.MediaBackend
 
@@ -53,8 +54,20 @@ class FakeMediaBackend : MediaBackend {
         loadedOptions += opts
     }
 
-    override suspend fun play() { playCount += 1 }
-    override fun pause() { pauseCount += 1 }
+    // A real engine confirms the action on its own event stream, and the
+    // difference between play and playing is the whole reason the bridge
+    // exists. A fake that stayed silent would let that gap pass unnoticed.
+    override suspend fun play() {
+        playCount += 1
+        fire(CanonicalBackendEvent.PLAY)
+        fire(CanonicalBackendEvent.PLAYING)
+    }
+
+    override fun pause() {
+        pauseCount += 1
+        fire(CanonicalBackendEvent.PAUSE)
+    }
+
     override fun stop() { stopCount += 1 }
 
     override fun currentTime(): Double = currentTimeValue

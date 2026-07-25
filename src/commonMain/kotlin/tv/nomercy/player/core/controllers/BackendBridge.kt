@@ -1,0 +1,78 @@
+// -----------------------------------------------------------------------------
+//  Copyright (c) NoMercy Entertainment
+//
+//  Licensed under the Apache License, Version 2.0. See LICENSE for details.
+//
+//  SPDX-License-Identifier: Apache-2.0
+// -----------------------------------------------------------------------------
+
+package tv.nomercy.player.core.controllers
+
+import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.TimeUpdate
+import tv.nomercy.player.core.player.PlayState
+import tv.nomercy.player.core.player.PlayerPhase
+import tv.nomercy.player.core.ports.CanonicalBackendEvent
+import tv.nomercy.player.core.ports.MediaBackend
+
+private const val PERCENT = 100.0
+
+// What the engine says, turned into what the player says.
+//
+// The controllers drive the engine; nothing was listening to it come back. That
+// is the difference between `play` and `playing`: one is the action, the other
+// is the engine confirming it actually started, and only the engine knows when.
+// Without this bridge a chrome bound to `playing` shows a spinner forever while
+// audio comes out of the speakers.
+//
+// Found by running the shared conformance scenarios against the native player:
+// transport/play observed [beforePlay, phase, play] and stopped there.
+public class BackendBridge(private val ctx: PlayerContext) {
+
+    private val handlers: MutableList<Pair<String, (Any?) -> Unit>> = mutableListOf()
+
+    public fun attach(backend: MediaBackend) {
+        listen(backend, CanonicalBackendEvent.PLAYING) {
+            ctx.playState = PlayState.PLAYING
+            if (ctx.phase == PlayerPhase.STARTING) ctx.transitionPhase(PlayerPhase.PLAYING)
+            ctx.emit(CoreEvents.Playing, Unit)
+        }
+
+        listen(backend, CanonicalBackendEvent.PAUSE) {
+            ctx.playState = PlayState.PAUSED
+        }
+
+        listen(backend, CanonicalBackendEvent.ENDED) {
+            ctx.transitionPhase(PlayerPhase.ENDED)
+            ctx.emit(CoreEvents.Ended, Unit)
+        }
+
+        listen(backend, CanonicalBackendEvent.TIME_UPDATE) {
+            val time: Double = backend.currentTime()
+            val duration: Double = backend.duration()
+            ctx.internalCurrentTime = time
+            if (duration > 0.0) ctx.internalDuration = duration
+            ctx.emit(
+                CoreEvents.Time,
+                TimeUpdate(
+                    time = time,
+                    duration = duration,
+                    percentage = if (duration <= 0.0) 0.0 else time / duration * PERCENT,
+                ),
+            )
+        }
+    }
+
+    // Every subscription is remembered so detaching a backend really detaches
+    // it. Swapping engines mid-session otherwise leaves the old one's listeners
+    // emitting into a player that has moved on.
+    public fun detach(backend: MediaBackend) {
+        for ((event, handler) in handlers) backend.off(event, handler)
+        handlers.clear()
+    }
+
+    private fun listen(backend: MediaBackend, event: String, handler: (Any?) -> Unit) {
+        backend.on(event, handler)
+        handlers.add(event to handler)
+    }
+}
