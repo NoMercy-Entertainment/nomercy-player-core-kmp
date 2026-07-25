@@ -795,6 +795,34 @@ final class tv.nomercy.player.core.player/PlayerStateHolder { // tv.nomercy.play
     final fun update(kotlin/Function1<tv.nomercy.player.core.player/PlayerState, tv.nomercy.player.core.player/PlayerState>) // tv.nomercy.player.core.player/PlayerStateHolder.update|update(kotlin.Function1<tv.nomercy.player.core.player.PlayerState,tv.nomercy.player.core.player.PlayerState>){}[0]
 }
 
+final class tv.nomercy.player.core.plugin/ContributionBinding { // tv.nomercy.player.core.plugin/ContributionBinding|null[0]
+    constructor <init>(kotlin/String, tv.nomercy.player.core.plugin/ChromeContribution) // tv.nomercy.player.core.plugin/ContributionBinding.<init>|<init>(kotlin.String;tv.nomercy.player.core.plugin.ChromeContribution){}[0]
+
+    final val contribution // tv.nomercy.player.core.plugin/ContributionBinding.contribution|{}contribution[0]
+        final fun <get-contribution>(): tv.nomercy.player.core.plugin/ChromeContribution // tv.nomercy.player.core.plugin/ContributionBinding.contribution.<get-contribution>|<get-contribution>(){}[0]
+    final val pluginId // tv.nomercy.player.core.plugin/ContributionBinding.pluginId|{}pluginId[0]
+        final fun <get-pluginId>(): kotlin/String // tv.nomercy.player.core.plugin/ContributionBinding.pluginId.<get-pluginId>|<get-pluginId>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugin/ContributionBinding.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.plugin/ChromeContribution // tv.nomercy.player.core.plugin/ContributionBinding.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., tv.nomercy.player.core.plugin/ChromeContribution = ...): tv.nomercy.player.core.plugin/ContributionBinding // tv.nomercy.player.core.plugin/ContributionBinding.copy|copy(kotlin.String;tv.nomercy.player.core.plugin.ChromeContribution){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugin/ContributionBinding.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugin/ContributionBinding.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/ContributionBinding.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugin/PluginRegistry { // tv.nomercy.player.core.plugin/PluginRegistry|null[0]
+    constructor <init>(tv.nomercy.player.core.plugin/PluginHost, kotlin/String, kotlinx.coroutines/CoroutineScope) // tv.nomercy.player.core.plugin/PluginRegistry.<init>|<init>(tv.nomercy.player.core.plugin.PluginHost;kotlin.String;kotlinx.coroutines.CoroutineScope){}[0]
+
+    final fun <#A1: kotlin/Any> register(tv.nomercy.player.core.plugin/Plugin<#A1>, #A1? = ...): tv.nomercy.player.core.plugin/PluginRegistry // tv.nomercy.player.core.plugin/PluginRegistry.register|register(tv.nomercy.player.core.plugin.Plugin<0:0>;0:0?){0§<kotlin.Any>}[0]
+    final fun contributions(tv.nomercy.player.core.plugin/ChromeSlot): kotlin.collections/List<tv.nomercy.player.core.plugin/ContributionBinding> // tv.nomercy.player.core.plugin/PluginRegistry.contributions|contributions(tv.nomercy.player.core.plugin.ChromeSlot){}[0]
+    final fun dispose() // tv.nomercy.player.core.plugin/PluginRegistry.dispose|dispose(){}[0]
+    final fun getById(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.core.plugin/PluginRegistry.getById|getById(kotlin.String){}[0]
+    final fun isDisposed(): kotlin/Boolean // tv.nomercy.player.core.plugin/PluginRegistry.isDisposed|isDisposed(){}[0]
+    final fun plugins(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.plugin/PluginRegistry.plugins|plugins(){}[0]
+    final fun remove(kotlin/String) // tv.nomercy.player.core.plugin/PluginRegistry.remove|remove(kotlin.String){}[0]
+}
+
 final class tv.nomercy.player.core.plugin/Requirement { // tv.nomercy.player.core.plugin/Requirement|null[0]
     constructor <init>(tv.nomercy.player.core.plugin/PluginManifest, kotlin/Boolean = ..., kotlin/String? = ...) // tv.nomercy.player.core.plugin/Requirement.<init>|<init>(tv.nomercy.player.core.plugin.PluginManifest;kotlin.Boolean;kotlin.String?){}[0]
 
@@ -972,6 +1000,27 @@ final object tv.nomercy.player.core.player/ActionSource { // tv.nomercy.player.c
         final fun <get-REMOTE>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.REMOTE.<get-REMOTE>|<get-REMOTE>(){}[0]
     final const val USER // tv.nomercy.player.core.player/ActionSource.USER|{}USER[0]
         final fun <get-USER>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.USER.<get-USER>|<get-USER>(){}[0]
+}
+
+final object tv.nomercy.player.core.plugin/PluginErrorCodes { // tv.nomercy.player.core.plugin/PluginErrorCodes|null[0]
+    final const val DISPOSE_FAILED // tv.nomercy.player.core.plugin/PluginErrorCodes.DISPOSE_FAILED|{}DISPOSE_FAILED[0]
+        final fun <get-DISPOSE_FAILED>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.DISPOSE_FAILED.<get-DISPOSE_FAILED>|<get-DISPOSE_FAILED>(){}[0]
+    final const val DUPLICATE_ID // tv.nomercy.player.core.plugin/PluginErrorCodes.DUPLICATE_ID|{}DUPLICATE_ID[0]
+        final fun <get-DUPLICATE_ID>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.DUPLICATE_ID.<get-DUPLICATE_ID>|<get-DUPLICATE_ID>(){}[0]
+    final const val HAS_DEPENDENTS // tv.nomercy.player.core.plugin/PluginErrorCodes.HAS_DEPENDENTS|{}HAS_DEPENDENTS[0]
+        final fun <get-HAS_DEPENDENTS>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.HAS_DEPENDENTS.<get-HAS_DEPENDENTS>|<get-HAS_DEPENDENTS>(){}[0]
+    final const val INCOMPATIBLE_CORE_VERSION // tv.nomercy.player.core.plugin/PluginErrorCodes.INCOMPATIBLE_CORE_VERSION|{}INCOMPATIBLE_CORE_VERSION[0]
+        final fun <get-INCOMPATIBLE_CORE_VERSION>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.INCOMPATIBLE_CORE_VERSION.<get-INCOMPATIBLE_CORE_VERSION>|<get-INCOMPATIBLE_CORE_VERSION>(){}[0]
+    final const val INIT_TIMEOUT // tv.nomercy.player.core.plugin/PluginErrorCodes.INIT_TIMEOUT|{}INIT_TIMEOUT[0]
+        final fun <get-INIT_TIMEOUT>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.INIT_TIMEOUT.<get-INIT_TIMEOUT>|<get-INIT_TIMEOUT>(){}[0]
+    final const val MISSING_DEP // tv.nomercy.player.core.plugin/PluginErrorCodes.MISSING_DEP|{}MISSING_DEP[0]
+        final fun <get-MISSING_DEP>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.MISSING_DEP.<get-MISSING_DEP>|<get-MISSING_DEP>(){}[0]
+    final const val STATE_UNINITIALIZED // tv.nomercy.player.core.plugin/PluginErrorCodes.STATE_UNINITIALIZED|{}STATE_UNINITIALIZED[0]
+        final fun <get-STATE_UNINITIALIZED>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.STATE_UNINITIALIZED.<get-STATE_UNINITIALIZED>|<get-STATE_UNINITIALIZED>(){}[0]
+    final const val USE_AFTER_DISPOSE // tv.nomercy.player.core.plugin/PluginErrorCodes.USE_AFTER_DISPOSE|{}USE_AFTER_DISPOSE[0]
+        final fun <get-USE_AFTER_DISPOSE>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.USE_AFTER_DISPOSE.<get-USE_AFTER_DISPOSE>|<get-USE_AFTER_DISPOSE>(){}[0]
+    final const val VERSION_MISMATCH // tv.nomercy.player.core.plugin/PluginErrorCodes.VERSION_MISMATCH|{}VERSION_MISMATCH[0]
+        final fun <get-VERSION_MISMATCH>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.VERSION_MISMATCH.<get-VERSION_MISMATCH>|<get-VERSION_MISMATCH>(){}[0]
 }
 
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]

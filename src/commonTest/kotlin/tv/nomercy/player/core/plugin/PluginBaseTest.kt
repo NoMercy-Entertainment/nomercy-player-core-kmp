@@ -11,6 +11,7 @@ package tv.nomercy.player.core.plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.fakes.FakePluginHost
@@ -152,11 +153,13 @@ class PluginBaseTest {
     }
 
     @Test
-    fun usingAPluginBeforeItIsRegisteredSaysWhichPluginItWas() {
+    fun usingAPluginBeforeItIsRegisteredIsACodedErrorNamingThePlugin() {
         val plugin = DemoPlugin()
 
-        val failure = assertFailsWith<IllegalStateException> { plugin.writeTheme() }
+        val failure = assertFailsWith<PlayerError> { plugin.writeTheme() }
 
+        assertEquals(PluginErrorCodes.STATE_UNINITIALIZED, failure.code)
+        assertEquals("demo", failure.scope.id)
         assertTrue(failure.message.orEmpty().contains("demo"))
     }
 }

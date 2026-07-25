@@ -65,9 +65,11 @@ public abstract class Plugin<O : Any> {
     private var wiring: Wiring<O>? = null
 
     private val wired: Wiring<O>
-        get() = checkNotNull(wiring) {
-            "plugin '$id' was used before the registry initialized it — construct it, then register it"
-        }
+        get() = wiring ?: throw PlayerError(
+            code = PluginErrorCodes.STATE_UNINITIALIZED,
+            scope = ErrorScope.plugin(id),
+            message = "Plugin \"$id\" was used before it was registered. Construct it, then register it.",
+        )
 
     // Prefixed [nmplayer][<id>], so a log line says which plugin was talking.
     protected val logger: Logger get() = wired.logger

@@ -706,6 +706,19 @@ public final class tv/nomercy/player/core/plugin/ChromeSlot : java/lang/Enum {
 	public static fun values ()[Ltv/nomercy/player/core/plugin/ChromeSlot;
 }
 
+public final class tv/nomercy/player/core/plugin/ContributionBinding {
+	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/plugin/ChromeContribution;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ltv/nomercy/player/core/plugin/ChromeContribution;
+	public final fun copy (Ljava/lang/String;Ltv/nomercy/player/core/plugin/ChromeContribution;)Ltv/nomercy/player/core/plugin/ContributionBinding;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugin/ContributionBinding;Ljava/lang/String;Ltv/nomercy/player/core/plugin/ChromeContribution;ILjava/lang/Object;)Ltv/nomercy/player/core/plugin/ContributionBinding;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContribution ()Ltv/nomercy/player/core/plugin/ChromeContribution;
+	public final fun getPluginId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public class tv/nomercy/player/core/plugin/LifecycleRegistry {
 	public static final field FRAME_INTERVAL_MS J
 	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
@@ -750,6 +763,19 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public static synthetic fun websocket$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ltv/nomercy/player/core/ports/SocketOptions;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/RealtimeChannel;
 }
 
+public final class tv/nomercy/player/core/plugin/PluginErrorCodes {
+	public static final field DISPOSE_FAILED Ljava/lang/String;
+	public static final field DUPLICATE_ID Ljava/lang/String;
+	public static final field HAS_DEPENDENTS Ljava/lang/String;
+	public static final field INCOMPATIBLE_CORE_VERSION Ljava/lang/String;
+	public static final field INIT_TIMEOUT Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/plugin/PluginErrorCodes;
+	public static final field MISSING_DEP Ljava/lang/String;
+	public static final field STATE_UNINITIALIZED Ljava/lang/String;
+	public static final field USE_AFTER_DISPOSE Ljava/lang/String;
+	public static final field VERSION_MISMATCH Ljava/lang/String;
+}
+
 public abstract interface class tv/nomercy/player/core/plugin/PluginHost {
 	public abstract fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
@@ -784,6 +810,18 @@ public final class tv/nomercy/player/core/plugin/PluginManifest$DefaultImpls {
 
 public final class tv/nomercy/player/core/plugin/PluginManifestKt {
 	public static final fun pluginEventKey (Ltv/nomercy/player/core/plugin/PluginManifest;Ljava/lang/String;)Ltv/nomercy/player/core/events/EventKey;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginRegistry {
+	public fun <init> (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
+	public final fun dispose ()V
+	public final fun getById (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
+	public final fun isDisposed ()Z
+	public final fun plugins ()Ljava/util/List;
+	public final fun register (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;)Ltv/nomercy/player/core/plugin/PluginRegistry;
+	public static synthetic fun register$default (Ltv/nomercy/player/core/plugin/PluginRegistry;Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;ILjava/lang/Object;)Ltv/nomercy/player/core/plugin/PluginRegistry;
+	public final fun remove (Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/plugin/Requirement {
