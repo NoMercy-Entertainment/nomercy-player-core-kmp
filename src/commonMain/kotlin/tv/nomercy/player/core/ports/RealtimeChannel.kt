@@ -8,14 +8,45 @@
 
 package tv.nomercy.player.core.ports
 
-public data class SocketOptions(val protocols: List<String> = emptyList())
-
-// A long-lived connection that reconnects itself. Sockets and SignalR both fit;
-// the host decides which, and a plugin only ever sends and listens.
-public interface RealtimeChannel {
-    // One of "connecting", "open", "closing", "closed" — the WebSocket vocabulary,
-    // because every platform's implementation already speaks it.
-    public val readyState: String
-    public fun send(data: String)
-    public fun close()
+// The WebSocket vocabulary, because every implementation already speaks it.
+public enum class RealtimeState(public val wire: String) {
+    CONNECTING("connecting"),
+    OPEN("open"),
+    CLOSING("closing"),
+    CLOSED("closed"),
 }
+
+public enum class RealtimeEvent(public val wire: String) {
+    OPEN("open"),
+    MESSAGE("message"),
+    CLOSE("close"),
+    ERROR("error"),
+}
+
+// A long-lived connection, whatever protocol carries it.
+//
+// NoMercy Connect runs over SignalR and the app supplies that implementation;
+// a plain WebSocket default ships with the transport work. Neither is baked in
+// here, because a consumer's realtime layer is theirs.
+public interface RealtimeChannel {
+    public fun send(data: String)
+    public fun send(data: ByteArray)
+
+    // Both optional: the close code and reason are protocol detail most callers
+    // have nothing to say about.
+    public fun close(code: Int? = null, reason: String? = null)
+
+    public fun on(event: RealtimeEvent, fn: (Any?) -> Unit)
+    public fun off(event: RealtimeEvent, fn: (Any?) -> Unit)
+
+    public val readyState: RealtimeState
+}
+
+public data class RealtimeFactoryOptions(
+    val protocols: List<String> = emptyList(),
+    val reconnect: Boolean = false,
+    val baseDelayMs: Long = 1_000,
+    val maxDelayMs: Long = 30_000,
+)
+
+public typealias RealtimeFactory = (url: String, opts: RealtimeFactoryOptions) -> RealtimeChannel

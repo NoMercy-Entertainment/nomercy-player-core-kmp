@@ -23,6 +23,7 @@ import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.RealtimeChannel
+import tv.nomercy.player.core.ports.RealtimeState
 import tv.nomercy.player.core.plugin.fakes.FakePluginHost
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -105,11 +106,11 @@ class PluginSurfaceTest {
         val host = FakePluginHost()
         val (plugin, lifecycle) = wire(host, CoroutineScope(StandardTestDispatcher(testScheduler)))
         val channel = plugin.openSocket()
-        assertEquals("open", channel.readyState)
+        assertEquals(RealtimeState.OPEN, channel.readyState)
 
         lifecycle.dispose()
 
-        assertEquals("closed", channel.readyState)
+        assertEquals(RealtimeState.CLOSED, channel.readyState)
     }
 
     @Test

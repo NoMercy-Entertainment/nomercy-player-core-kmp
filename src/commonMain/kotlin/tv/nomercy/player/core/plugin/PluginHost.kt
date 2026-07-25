@@ -17,7 +17,7 @@ import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.RealtimeChannel
-import tv.nomercy.player.core.ports.SocketOptions
+import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.Storage
 
 // The slice of the player a plugin can reach, and nothing else.
@@ -42,7 +42,7 @@ public interface PluginHost {
     // The token, the refresh-and-retry and the base URL live behind this, so a
     // plugin cannot get authentication wrong by not knowing about it.
     public suspend fun fetch(url: String, opts: FetchOptions): FetchResponse
-    public fun websocket(url: String, opts: SocketOptions): RealtimeChannel
+    public fun websocket(url: String, opts: RealtimeFactoryOptions): RealtimeChannel
 
     // Takes an already-namespaced key: the Plugin base builds plugin.<id>.<key>.
     public fun t(namespacedKey: String, vars: Map<String, String>): String

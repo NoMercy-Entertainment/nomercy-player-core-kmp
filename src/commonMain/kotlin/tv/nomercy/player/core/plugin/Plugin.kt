@@ -21,11 +21,9 @@ import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.RealtimeChannel
-import tv.nomercy.player.core.ports.SocketOptions
+import tv.nomercy.player.core.ports.RealtimeFactoryOptions
+import tv.nomercy.player.core.ports.RealtimeState
 import tv.nomercy.player.core.ports.Storage
-
-private const val CLOSED = "closed"
-private const val CLOSING = "closing"
 
 // What a plugin author writes against.
 //
@@ -157,10 +155,10 @@ public abstract class Plugin<O : Any> {
         wired.host.fetch(url, opts)
 
     // Closes itself when the plugin goes away, unless it is already closing.
-    protected fun websocket(url: String, opts: SocketOptions = SocketOptions()): RealtimeChannel {
+    protected fun websocket(url: String, opts: RealtimeFactoryOptions = RealtimeFactoryOptions()): RealtimeChannel {
         val channel: RealtimeChannel = wired.host.websocket(url, opts)
         wired.lifecycle.addCleanup {
-            if (channel.readyState != CLOSED && channel.readyState != CLOSING) {
+            if (channel.readyState != RealtimeState.CLOSED && channel.readyState != RealtimeState.CLOSING) {
                 channel.close()
             }
         }
