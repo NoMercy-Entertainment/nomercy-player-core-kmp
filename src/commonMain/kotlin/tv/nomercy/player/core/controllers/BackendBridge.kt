@@ -32,15 +32,39 @@ public class BackendBridge(private val ctx: PlayerContext) {
 
     private val handlers: MutableList<Pair<String, (Any?) -> Unit>> = mutableListOf()
 
+    private var announcedFirstFrame: Boolean = false
+
     public fun attach(backend: MediaBackend) {
+        listen(backend, CanonicalBackendEvent.LOADED_METADATA) {
+            val duration: Double = backend.duration()
+            if (duration > 0.0) {
+                ctx.internalDuration = duration
+                ctx.emit(CoreEvents.Duration, duration)
+            }
+        }
+
         listen(backend, CanonicalBackendEvent.PLAYING) {
             ctx.playState = PlayState.PLAYING
             if (ctx.phase == PlayerPhase.STARTING) ctx.transitionPhase(PlayerPhase.PLAYING)
             ctx.emit(CoreEvents.Playing, Unit)
+
+            // Once per item, after the first frame is actually on screen. A
+            // chrome waiting for mediaReady to take its poster down needs the
+            // frame to exist first, or it swaps a still image for a black one.
+            if (!announcedFirstFrame) {
+                announcedFirstFrame = true
+                ctx.emit(CoreEvents.FirstFrame, Unit)
+                ctx.emit(CoreEvents.MediaReady, Unit)
+            }
         }
 
         listen(backend, CanonicalBackendEvent.PAUSE) {
             ctx.playState = PlayState.PAUSED
+        }
+
+        listen(backend, CanonicalBackendEvent.LOAD_START) {
+            // A new item has its own first frame.
+            announcedFirstFrame = false
         }
 
         listen(backend, CanonicalBackendEvent.ENDED) {

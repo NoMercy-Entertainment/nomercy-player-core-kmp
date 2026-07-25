@@ -34,7 +34,6 @@ class ConformanceTest {
         "backend/stalled",
         "backend/waiting",
         "backend/level-switched",
-        "lifecycle/play-reaches-media-ready",
         "lifecycle/video-reports-duration-and-canplay",
     )
 
