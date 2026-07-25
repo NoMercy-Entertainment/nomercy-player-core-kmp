@@ -8,6 +8,95 @@ public class tv/nomercy/player/core/controllers/AuthController {
 	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
 }
 
+public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Lkotlinx/coroutines/CoroutineScope;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun addPlugin$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun buffered ()D
+	public fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
+	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun dispose (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun dispose$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun duration ()D
+	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getContext ()Ltv/nomercy/player/core/controllers/PlayerContext;
+	public final fun getLifecycle ()Ltv/nomercy/player/core/controllers/LifecycleController;
+	public final fun getPlugins ()Ltv/nomercy/player/core/plugin/PluginRegistry;
+	public final fun getQueue ()Ltv/nomercy/player/core/controllers/QueueController;
+	public fun getRootLogger ()Ltv/nomercy/player/core/ports/Logger;
+	public fun getRootStorage ()Ltv/nomercy/player/core/ports/Storage;
+	public final fun getState ()Ltv/nomercy/player/core/controllers/StateController;
+	public fun getStateFlow ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getTime ()Ltv/nomercy/player/core/controllers/TimeController;
+	public final fun getTransport ()Ltv/nomercy/player/core/controllers/TransportController;
+	public final fun getVolume ()Ltv/nomercy/player/core/controllers/VolumeController;
+	public fun index ()I
+	public fun item ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public fun item (Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun item$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun mute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun mute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun next (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun next$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun pause (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun pause$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun phase ()Ltv/nomercy/player/core/player/PlayerPhase;
+	public fun play (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun play$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun playItem (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playbackRate ()D
+	public fun playbackRate (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun playbackRate$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun pluginList ()Ljava/util/List;
+	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun queue ()Ljava/util/List;
+	public fun queue (Ljava/util/List;)V
+	public fun ready ()Lkotlinx/coroutines/Deferred;
+	public fun removePluginById (Ljava/lang/String;)V
+	public fun repeatState ()Ltv/nomercy/player/core/player/RepeatState;
+	public fun repeatState (Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun repeatState$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun report (Ltv/nomercy/player/core/errors/PlayerError;)V
+	public fun restart (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun restart$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun setup$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun shuffleState ()Ltv/nomercy/player/core/player/ShuffleState;
+	public fun shuffleState (Ltv/nomercy/player/core/player/ShuffleState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun shuffleState$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ShuffleState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
+	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun stop$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public fun time ()D
+	public fun time (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun time$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun toggleMute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun toggleMute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun togglePlayback (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun togglePlayback$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun unmute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun unmute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun volume ()I
+	public fun volume (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun volume$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun websocket (Ljava/lang/String;Ltv/nomercy/player/core/ports/RealtimeFactoryOptions;)Ltv/nomercy/player/core/ports/RealtimeChannel;
+}
+
+public final class tv/nomercy/player/core/controllers/InMemoryStorage : tv/nomercy/player/core/ports/Storage {
+	public fun <init> ()V
+	public fun get (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getJSON (Ljava/lang/String;Lkotlinx/serialization/DeserializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun set (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun setJSON (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/SerializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class tv/nomercy/player/core/controllers/LifecycleController {
 	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -93,6 +182,15 @@ public class tv/nomercy/player/core/controllers/QueueController {
 	public final fun seekToIndex (I)V
 	public final fun setTransport (Ltv/nomercy/player/core/controllers/TransportController;)V
 	public final fun wireQueue ()V
+}
+
+public final class tv/nomercy/player/core/controllers/SilentLogger : tv/nomercy/player/core/ports/Logger {
+	public static final field INSTANCE Ltv/nomercy/player/core/controllers/SilentLogger;
+	public fun child (Ljava/lang/String;)Ltv/nomercy/player/core/ports/Logger;
+	public fun debug (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun error (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
 }
 
 public final class tv/nomercy/player/core/controllers/StateController {
