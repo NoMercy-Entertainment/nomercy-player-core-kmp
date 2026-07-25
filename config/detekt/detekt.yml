@@ -15,6 +15,15 @@ config:
   validation: true
   warningsAsErrors: true
 
+comments:
+  active: true
+  # Machine-enforced so nobody has to remember it. Template lives beside this
+  # file; detekt reports the first line that stops matching.
+  AbsentOrWrongFileLicense:
+    active: true
+    licenseTemplateFile: 'license.template'
+    licenseTemplateIsRegex: false
+
 complexity:
   active: true
 

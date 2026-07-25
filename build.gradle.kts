@@ -35,6 +35,14 @@ val generateKitVersion: TaskProvider<Task> = tasks.register("generateKitVersion"
         packageDirectory.mkdirs()
         packageDirectory.resolve("KitVersion.kt").writeText(
             """
+            // -----------------------------------------------------------------------------
+            //  Copyright (c) NoMercy Entertainment
+            //
+            //  Licensed under the Apache License, Version 2.0. See LICENSE for details.
+            //
+            //  SPDX-License-Identifier: Apache-2.0
+            // -----------------------------------------------------------------------------
+
             package tv.nomercy.player.core
 
             /**
