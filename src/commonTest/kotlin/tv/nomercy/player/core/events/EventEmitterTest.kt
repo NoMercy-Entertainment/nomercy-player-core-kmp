@@ -23,6 +23,30 @@ class EventEmitterTest {
         bus = EventEmitter()
     }
 
+    // Restored after a budget-driven refactor deleted it. For one commit the most
+    // basic behaviour the class has — a typed payload reaching a typed listener —
+    // was asserted nowhere, and everything else still passed.
+    @Test
+    fun deliversTheTypedPayloadToATypedListener() {
+        var received: Int? = null
+        bus.on(ping) { received = it }
+
+        bus.emit(ping, 42)
+
+        assertEquals(42, received)
+    }
+
+    @Test
+    fun typedListenersOnlyHearTheirOwnKey() {
+        val other = EventKey<Int>("pong")
+        var pings = 0
+
+        bus.on(ping) { pings++ }
+        bus.emit(other, 1)
+
+        assertEquals(0, pings)
+    }
+
     @Test
     fun rawStringHatchAndFirehoseCarryAnyPayloads() {
         var raw: Any? = null
