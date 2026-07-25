@@ -24,6 +24,10 @@ public object CanonicalBackendEvent {
     public const val PLAYING: String = "playing"
     public const val TIME_UPDATE: String = "timeupdate"
     public const val WAITING: String = "waiting"
+
+    // The pipeline being hungry and the network having stopped feeding it are
+    // different things, and a chrome shows different things for the two.
+    public const val STALLED: String = "stalled"
     public const val PAUSE: String = "pause"
     public const val ENDED: String = "ended"
     public const val ERROR: String = "error"
@@ -57,6 +61,7 @@ public object CanonicalBackendEvent {
         PLAYING,
         TIME_UPDATE,
         WAITING,
+        STALLED,
         PAUSE,
         ENDED,
         ERROR,

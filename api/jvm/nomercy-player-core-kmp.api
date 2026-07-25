@@ -2635,6 +2635,7 @@ public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
 	public static final field PAUSE Ljava/lang/String;
 	public static final field PLAY Ljava/lang/String;
 	public static final field PLAYING Ljava/lang/String;
+	public static final field STALLED Ljava/lang/String;
 	public static final field STREAM_ERROR Ljava/lang/String;
 	public static final field TIME_UPDATE Ljava/lang/String;
 	public static final field WAITING Ljava/lang/String;

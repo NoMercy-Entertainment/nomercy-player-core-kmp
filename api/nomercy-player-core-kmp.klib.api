@@ -3828,6 +3828,8 @@ final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.
         final fun <get-PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAY.<get-PLAY>|<get-PLAY>(){}[0]
     final const val PLAYING // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAYING|{}PLAYING[0]
         final fun <get-PLAYING>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAYING.<get-PLAYING>|<get-PLAYING>(){}[0]
+    final const val STALLED // tv.nomercy.player.core.ports/CanonicalBackendEvent.STALLED|{}STALLED[0]
+        final fun <get-STALLED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.STALLED.<get-STALLED>|<get-STALLED>(){}[0]
     final const val STREAM_ERROR // tv.nomercy.player.core.ports/CanonicalBackendEvent.STREAM_ERROR|{}STREAM_ERROR[0]
         final fun <get-STREAM_ERROR>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.STREAM_ERROR.<get-STREAM_ERROR>|<get-STREAM_ERROR>(){}[0]
     final const val TIME_UPDATE // tv.nomercy.player.core.ports/CanonicalBackendEvent.TIME_UPDATE|{}TIME_UPDATE[0]

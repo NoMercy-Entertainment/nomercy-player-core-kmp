@@ -113,6 +113,7 @@ class BackendConformanceTest {
             CanonicalBackendEvent.PLAYING,
             CanonicalBackendEvent.TIME_UPDATE,
             CanonicalBackendEvent.WAITING,
+            CanonicalBackendEvent.STALLED,
             CanonicalBackendEvent.PAUSE,
             CanonicalBackendEvent.ENDED,
             CanonicalBackendEvent.ERROR,
