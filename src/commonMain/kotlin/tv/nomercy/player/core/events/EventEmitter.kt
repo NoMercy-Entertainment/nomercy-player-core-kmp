@@ -17,7 +17,7 @@ package tv.nomercy.player.core.events
 // EventKey, never from E.
 public class EventEmitter<E> {
 
-    private class Listener(val userFn: Any, val invoke: (Any?) -> Unit, val once: Boolean)
+    private class Listener(val userFn: Any, val invoke: (Any?) -> Unit)
 
     private val listeners: MutableMap<String, MutableList<Listener>> = mutableMapOf()
     private val firehose: MutableList<(String, Any?) -> Unit> = mutableListOf()
@@ -38,7 +38,10 @@ public class EventEmitter<E> {
     public fun <T> once(key: EventKey<T>, fn: (T) -> Unit): Subscription =
         register(key.name, userFn = fn, invoke = wrap(fn), once = true)
 
-    // Firehose — called with (name, data) on every emit.
+    // Firehose — called with (name, data) on every emit. It does NOT see the
+    // before* dispatch: those listeners are invoked directly so that
+    // stopImmediatePropagation can cut the loop, and they never pass through
+    // emit(). Anything observing the cancellable seam must subscribe by name.
     public fun onAll(fn: (name: String, data: Any?) -> Unit): Subscription {
         firehose.add(fn)
         return idempotent { firehose.remove(fn) }
@@ -56,11 +59,50 @@ public class EventEmitter<E> {
         dispatch(name, data)
     }
 
+    // Runs the cancellable before* dispatch for [key] and reports what the
+    // caller should do. Kotlin mirror of the web runDispatchBefore.
+    //
+    // Listeners run in registration order against one shared, mutable
+    // BeforeEvent; the first stopImmediatePropagation ends the loop. Any delay
+    // gates they registered are then awaited together under [timeoutMs].
+    //
+    // Order matters and is not arbitrary: the gates are resolved before
+    // preventDefault is read, so a listener that both refuses the action and
+    // registers a gate still reports the gate's failure. The gate is the more
+    // specific answer to why the action did not happen.
+    @Suppress("TooGenericExceptionCaught")
+    public suspend fun <T> dispatchBefore(
+        key: EventKey<BeforeEvent<T>>,
+        data: T,
+        timeoutMs: Long = DEFAULT_BEFORE_TIMEOUT_MS,
+    ): BeforeDispatchResult<T> {
+        val event: BeforeEvent<T> = BeforeEvent(data)
+        for (listener in listenersOf(key.name)) {
+            if (event.isPropagationStopped()) break
+            try {
+                listener(event)
+            } catch (err: Throwable) {
+                onListenerError?.invoke(key.name, err)
+            }
+        }
+
+        val gateFailure: String? = awaitDelayGates(event.consumeDelays(), timeoutMs)
+        if (gateFailure != null) {
+            return BeforeDispatchResult(prevented = true, data = event.data, reason = gateFailure)
+        }
+        if (event.isDefaultPrevented()) {
+            return BeforeDispatchResult(prevented = true, data = event.data, reason = PreventReason.ListenerPrevented)
+        }
+        return BeforeDispatchResult(prevented = false, data = event.data, reason = null)
+    }
+
     public fun hasListeners(name: String): Boolean = listeners[name]?.isNotEmpty() == true
 
     public fun listenerCount(): Int = firehose.size + listeners.values.sumOf { it.size }
 
-    // Ordered live invokers for name. Used by dispatchBefore (Task 5). Plugin
+    // Ordered live invokers for name, already snapshotted. Used by
+    // dispatchBefore, which needs to call listeners directly rather than
+    // through emit() so stopImmediatePropagation can end the loop. Plugin
     // authors: do not call this — use on(event, fn) to listen.
     internal fun listenersOf(name: String): List<(Any?) -> Unit> =
         listeners[name]?.map { it.invoke } ?: emptyList()
@@ -69,10 +111,22 @@ public class EventEmitter<E> {
     // registered twice is deduplicated by identity, matching the web Set. A
     // repeat registration still gets back a valid handle so dispose() always
     // works, even though no second Listener was created.
+    //
+    // once removes itself inside the wrapper rather than in the dispatch loop,
+    // so both dispatch paths get the behaviour: a before-listener registered
+    // with once() must fire once too, and dispatchBefore never sees this flag.
     private fun register(name: String, userFn: Any, invoke: (Any?) -> Unit, once: Boolean): Subscription {
         val list = listeners.getOrPut(name) { mutableListOf() }
         if (list.none { it.userFn === userFn }) {
-            list.add(Listener(userFn, invoke, once))
+            val call: (Any?) -> Unit = if (once) {
+                { data ->
+                    removeByReference(name, userFn)
+                    invoke(data)
+                }
+            } else {
+                invoke
+            }
+            list.add(Listener(userFn, call))
         }
         return idempotent { removeByReference(name, userFn) }
     }
@@ -83,19 +137,14 @@ public class EventEmitter<E> {
         if (list.isEmpty()) listeners.remove(name)
     }
 
-    // Listener throws are isolated here by design — every registered handler,
-    // however it fails, must not stop the remaining ones. Broad Throwable is
-    // intentional, not an oversight.
+    // Listener throws are isolated here and in dispatchBefore by design — every
+    // registered handler, however it fails, must not stop the remaining ones.
+    // Broad Throwable is intentional, not an oversight.
     @Suppress("TooGenericExceptionCaught")
     private fun dispatch(name: String, data: Any?) {
-        val snapshot = listeners[name]?.toList() ?: emptyList()
-        for (listener in snapshot) {
-            // once() self-removes before invoking, matching the web wrapper,
-            // so a listener that re-emits the same event from inside itself
-            // cannot re-trigger it.
-            if (listener.once) removeByReference(name, listener.userFn)
+        for (listener in listenersOf(name)) {
             try {
-                listener.invoke(data)
+                listener(data)
             } catch (err: Throwable) {
                 onListenerError?.invoke(name, err)
             }
@@ -108,25 +157,10 @@ public class EventEmitter<E> {
             }
         }
     }
-}
 
-// Neither helper below touches EventEmitter state, so both live at file scope
-// rather than as class members — keeping EventEmitter's own member count under
-// the class function-count gate without duplicating either one per call site.
-
-@Suppress("UNCHECKED_CAST")
-private fun <T> wrap(fn: (T) -> Unit): (Any?) -> Unit = { data -> fn(data as T) }
-
-// Wraps a removal so a second Subscription.dispose() is a no-op. Every handle
-// EventEmitter hands out goes through here: a plugin's auto-dispose calls
-// dispose() blindly, and running remove() twice could otherwise drop a
-// listener registered in between the two calls.
-private fun idempotent(remove: () -> Unit): Subscription {
-    var live = true
-    return Subscription {
-        if (live) {
-            live = false
-            remove()
-        }
+    public companion object {
+        // The web core's cap on how long every delay gate together may hold an
+        // action open before it is refused.
+        public const val DEFAULT_BEFORE_TIMEOUT_MS: Long = 10_000
     }
 }

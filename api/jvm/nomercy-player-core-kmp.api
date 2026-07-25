@@ -3,8 +3,50 @@ public final class tv/nomercy/player/core/KitVersionKt {
 	public static final field KIT_VERSION Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/BeforeDispatchResult {
+	public fun <init> (ZLjava/lang/Object;Ljava/lang/String;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (ZLjava/lang/Object;Ljava/lang/String;)Ltv/nomercy/player/core/events/BeforeDispatchResult;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/BeforeDispatchResult;ZLjava/lang/Object;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/events/BeforeDispatchResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/Object;
+	public final fun getPrevented ()Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/BeforeEvent {
+	public fun <init> (Ljava/lang/Object;)V
+	public final fun delay (Lkotlin/jvm/functions/Function1;)V
+	public final fun getData ()Ljava/lang/Object;
+	public final fun isDefaultPrevented ()Z
+	public final fun isDelayed ()Z
+	public final fun isPropagationStopped ()Z
+	public final fun preventDefault ()V
+	public final fun setData (Ljava/lang/Object;)V
+	public final fun stopImmediatePropagation ()V
+}
+
+public final class tv/nomercy/player/core/events/CoreEvents {
+	public static final field INSTANCE Ltv/nomercy/player/core/events/CoreEvents;
+	public final fun getBeforePlay ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getEnded ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getItem ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPause ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPlay ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getStreamError ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getTime ()Ltv/nomercy/player/core/events/EventKey;
+}
+
 public final class tv/nomercy/player/core/events/EventEmitter {
+	public static final field Companion Ltv/nomercy/player/core/events/EventEmitter$Companion;
+	public static final field DEFAULT_BEFORE_TIMEOUT_MS J
 	public fun <init> ()V
+	public final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun dispatchBefore$default (Ltv/nomercy/player/core/events/EventEmitter;Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun emit (Ljava/lang/String;Ljava/lang/Object;)V
 	public final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public final fun getOnListenerError ()Lkotlin/jvm/functions/Function2;
@@ -18,12 +60,80 @@ public final class tv/nomercy/player/core/events/EventEmitter {
 	public final fun setOnListenerError (Lkotlin/jvm/functions/Function2;)V
 }
 
+public final class tv/nomercy/player/core/events/EventEmitter$Companion {
+}
+
 public final class tv/nomercy/player/core/events/EventKey {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getName ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/ItemChange {
+	public fun <init> (Ltv/nomercy/player/core/media/PlaylistItem;I)V
+	public final fun component1 ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun component2 ()I
+	public final fun copy (Ltv/nomercy/player/core/media/PlaylistItem;I)Ltv/nomercy/player/core/events/ItemChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/ItemChange;Ltv/nomercy/player/core/media/PlaylistItem;IILjava/lang/Object;)Ltv/nomercy/player/core/events/ItemChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/PlaySource {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/events/PlaySource;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/PlaySource;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/events/PlaySource;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSource ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/PreventReason {
+	public static final field DelayRejected Ljava/lang/String;
+	public static final field DelayTimeout Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/events/PreventReason;
+	public static final field ListenerPrevented Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/StreamError {
+	public fun <init> (Ljava/lang/String;Z)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun copy (Ljava/lang/String;Z)Ltv/nomercy/player/core/events/StreamError;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/StreamError;Ljava/lang/String;ZILjava/lang/Object;)Ltv/nomercy/player/core/events/StreamError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDetails ()Ljava/lang/String;
+	public final fun getFatal ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class tv/nomercy/player/core/events/Subscription {
 	public abstract fun dispose ()V
+}
+
+public final class tv/nomercy/player/core/events/TimeUpdate {
+	public fun <init> (DDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (DDD)Ltv/nomercy/player/core/events/TimeUpdate;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/TimeUpdate;DDDILjava/lang/Object;)Ltv/nomercy/player/core/events/TimeUpdate;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()D
+	public final fun getPercentage ()D
+	public final fun getTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/media/PlaylistItem {
+	public abstract fun getId ()Ljava/lang/String;
 }
 
