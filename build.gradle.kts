@@ -101,6 +101,9 @@ kotlin {
         target.binaries.framework {
             baseName = "NoMercyPlayerCore"
             isStatic = true
+            // Without this the linker warns and falls back to the bundle name,
+            // which collides with any other framework that also went unnamed.
+            binaryOption("bundleId", "tv.nomercy.player.core")
             playerCoreXcf.add(this)
         }
     }
@@ -117,6 +120,14 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+    }
+}
+
+skie {
+    // SKIE uploads build analytics to Touchlab by default. Off: nothing about
+    // this build leaves the machine that ran it.
+    analytics {
+        enabled.set(false)
     }
 }
 
