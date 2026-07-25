@@ -51,6 +51,80 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun transitionPhase (Ltv/nomercy/player/core/player/PlayerPhase;)V
 }
 
+public class tv/nomercy/player/core/controllers/QueueController {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;)V
+	public final fun backlog ()Ljava/util/List;
+	public final fun backlogAppend (Ljava/util/List;)V
+	public final fun backlogClear ()V
+	public final fun backlogRemove (Ljava/lang/String;)V
+	public final fun getTransport ()Ltv/nomercy/player/core/controllers/TransportController;
+	public final fun index ()I
+	protected fun ingest (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun item ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun item (Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun item$default (Ltv/nomercy/player/core/controllers/QueueController;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun peekNext ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun peekPrevious ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun playItem (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun queue ()Ljava/util/List;
+	public final fun queue (Ljava/util/List;)V
+	public final fun queueAppend (Ljava/util/List;)V
+	public final fun queueClear ()V
+	public final fun queueIndexOf (Ljava/lang/String;)I
+	public final fun queueInsert (Ljava/util/List;I)V
+	public final fun queueLength ()I
+	public final fun queueMove (II)V
+	public final fun queuePrepend (Ljava/util/List;)V
+	public final fun queueRemove (Ljava/lang/String;)V
+	public final fun queueRemoveAt (I)V
+	public final fun queueShuffle ()V
+	public final fun queueSort (Ljava/util/Comparator;)V
+	public final fun seekToIndex (I)V
+	public final fun setTransport (Ltv/nomercy/player/core/controllers/TransportController;)V
+	public final fun wireQueue ()V
+}
+
+public final class tv/nomercy/player/core/controllers/TransportController {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;)V
+	public final fun forward (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun forward$default (Ltv/nomercy/player/core/controllers/TransportController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun next (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun next$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun pause (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun pause$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun play (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun play$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun restart (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun restart$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun rewind (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun rewind$default (Ltv/nomercy/player/core/controllers/TransportController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun seek (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun seek$default (Ltv/nomercy/player/core/controllers/TransportController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun stop (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun stop$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun togglePlayback (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun togglePlayback$default (Ltv/nomercy/player/core/controllers/TransportController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/controllers/VolumeController {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;)V
+	public final fun mute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun mute$default (Ltv/nomercy/player/core/controllers/VolumeController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun toggleMute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun toggleMute$default (Ltv/nomercy/player/core/controllers/VolumeController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun unmute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun unmute$default (Ltv/nomercy/player/core/controllers/VolumeController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun volume ()I
+	public final fun volume (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun volume$default (Ltv/nomercy/player/core/controllers/VolumeController;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun volumeDown (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun volumeDown$default (Ltv/nomercy/player/core/controllers/VolumeController;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun volumeUp (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun volumeUp$default (Ltv/nomercy/player/core/controllers/VolumeController;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
 public class tv/nomercy/player/core/errors/AuthError : tv/nomercy/player/core/errors/NetworkError {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -238,14 +312,50 @@ public final class tv/nomercy/player/core/events/BeforeEvent {
 
 public final class tv/nomercy/player/core/events/CoreEvents {
 	public static final field INSTANCE Ltv/nomercy/player/core/events/CoreEvents;
+	public final fun getBacklog ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBacklogAppend ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBacklogClear ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBacklogRemove ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeMute ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeNext ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforePause ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforePlay ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforePrevious ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeSeek ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeStop ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeVolume ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getEnded ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getItem ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getMute ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getMutePrevented ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getNext ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getNextPrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPause ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPausePrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPhase ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPlay ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPlayPrevented ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPrevious ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPreviousPrevented ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueue ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueAppend ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueClear ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueExhausted ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueInsert ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueMove ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueuePrepend ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueRemove ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueShuffle ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getQueueSort ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getSeek ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getSeekPrevented ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getSeeked ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getStop ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getStopPrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getStreamError ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getTime ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getVolume ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getVolumePrevented ()Ltv/nomercy/player/core/events/EventKey;
 }
 
 public final class tv/nomercy/player/core/events/EventEmitter {
@@ -288,6 +398,17 @@ public final class tv/nomercy/player/core/events/ItemChange {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/MuteChange {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Ltv/nomercy/player/core/events/MuteChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/MuteChange;ZILjava/lang/Object;)Ltv/nomercy/player/core/events/MuteChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMuted ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/events/PhaseChange {
 	public fun <init> (Ltv/nomercy/player/core/player/PlayerPhase;Ltv/nomercy/player/core/player/PlayerPhase;)V
 	public final fun component1 ()Ltv/nomercy/player/core/player/PlayerPhase;
@@ -321,6 +442,121 @@ public final class tv/nomercy/player/core/events/PreventReason {
 	public static final field ListenerPrevented Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/PreventedAction {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/events/PreventedAction;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/PreventedAction;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/events/PreventedAction;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public final fun getSource ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueueAppend {
+	public fun <init> (Ljava/util/List;I)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun copy (Ljava/util/List;I)Ltv/nomercy/player/core/events/QueueAppend;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueueAppend;Ljava/util/List;IILjava/lang/Object;)Ltv/nomercy/player/core/events/QueueAppend;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()I
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueueChange {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ltv/nomercy/player/core/events/QueueChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueueChange;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/events/QueueChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueueClear {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Ltv/nomercy/player/core/events/QueueClear;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueueClear;IILjava/lang/Object;)Ltv/nomercy/player/core/events/QueueClear;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPreviousLength ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueueInsert {
+	public fun <init> (Ljava/util/List;I)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun copy (Ljava/util/List;I)Ltv/nomercy/player/core/events/QueueInsert;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueueInsert;Ljava/util/List;IILjava/lang/Object;)Ltv/nomercy/player/core/events/QueueInsert;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueueMove {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ltv/nomercy/player/core/events/QueueMove;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueueMove;IIILjava/lang/Object;)Ltv/nomercy/player/core/events/QueueMove;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()I
+	public final fun getTo ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueuePrepend {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ltv/nomercy/player/core/events/QueuePrepend;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueuePrepend;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/events/QueuePrepend;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/QueueRemove {
+	public fun <init> (Ljava/lang/String;ILtv/nomercy/player/core/media/PlaylistItem;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun copy (Ljava/lang/String;ILtv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/events/QueueRemove;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/QueueRemove;Ljava/lang/String;ILtv/nomercy/player/core/media/PlaylistItem;ILjava/lang/Object;)Ltv/nomercy/player/core/events/QueueRemove;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getIndex ()I
+	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/SeekPosition {
+	public fun <init> (DLjava/lang/String;)V
+	public synthetic fun <init> (DLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()D
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (DLjava/lang/String;)Ltv/nomercy/player/core/events/SeekPosition;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/SeekPosition;DLjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/events/SeekPosition;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getSource ()Ljava/lang/String;
+	public final fun getTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/events/StreamError {
 	public fun <init> (Ljava/lang/String;Z)V
 	public final fun component1 ()Ljava/lang/String;
@@ -349,6 +585,17 @@ public final class tv/nomercy/player/core/events/TimeUpdate {
 	public final fun getDuration ()D
 	public final fun getPercentage ()D
 	public final fun getTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/VolumeChange {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Ltv/nomercy/player/core/events/VolumeChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/VolumeChange;IILjava/lang/Object;)Ltv/nomercy/player/core/events/VolumeChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLevel ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

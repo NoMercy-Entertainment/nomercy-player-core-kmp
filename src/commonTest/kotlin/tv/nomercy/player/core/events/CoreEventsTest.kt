@@ -10,6 +10,7 @@ package tv.nomercy.player.core.events
 
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.player.ActionOptions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -82,11 +83,11 @@ class CoreEventsTest {
     fun beforePlayIsCancellableAndItsPayloadIsReshapedInPlace() = runTest {
         val bus = EventEmitter<Any>()
         bus.on(CoreEvents.BeforePlay) {
-            it.data = PlaySource(source = "connect")
+            it.data = ActionOptions(source = "connect")
             it.preventDefault()
         }
 
-        val result = bus.dispatchBefore(CoreEvents.BeforePlay, PlaySource(source = "ui"))
+        val result = bus.dispatchBefore(CoreEvents.BeforePlay, ActionOptions(source = "ui"))
 
         assertTrue(result.prevented)
         assertEquals("connect", result.data.source)

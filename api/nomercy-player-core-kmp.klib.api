@@ -1025,6 +1025,33 @@ final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.pla
     final suspend fun load(tv.nomercy.player.core.media/PlaylistItem, tv.nomercy.player.core.ports/LoadOptions = ...) // tv.nomercy.player.core.controllers/PlayerContext.load|load(tv.nomercy.player.core.media.PlaylistItem;tv.nomercy.player.core.ports.LoadOptions){}[0]
 }
 
+final class tv.nomercy.player.core.controllers/TransportController { // tv.nomercy.player.core.controllers/TransportController|null[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext, tv.nomercy.player.core.controllers/QueueController) // tv.nomercy.player.core.controllers/TransportController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext;tv.nomercy.player.core.controllers.QueueController){}[0]
+
+    final suspend fun forward(kotlin/Double, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.forward|forward(kotlin.Double;tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun next(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.next|next(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun pause(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.pause|pause(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun play(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.play|play(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun previous(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.previous|previous(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun restart(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.restart|restart(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun rewind(kotlin/Double, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.rewind|rewind(kotlin.Double;tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun seek(kotlin/Double, tv.nomercy.player.core.player/ActionOptions = ...): kotlin/Boolean // tv.nomercy.player.core.controllers/TransportController.seek|seek(kotlin.Double;tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun stop(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.stop|stop(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun togglePlayback(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/TransportController.togglePlayback|togglePlayback(tv.nomercy.player.core.player.ActionOptions){}[0]
+}
+
+final class tv.nomercy.player.core.controllers/VolumeController { // tv.nomercy.player.core.controllers/VolumeController|null[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext) // tv.nomercy.player.core.controllers/VolumeController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext){}[0]
+
+    final fun volume(): kotlin/Int // tv.nomercy.player.core.controllers/VolumeController.volume|volume(){}[0]
+    final suspend fun mute(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/VolumeController.mute|mute(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun toggleMute(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/VolumeController.toggleMute|toggleMute(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun unmute(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/VolumeController.unmute|unmute(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun volume(kotlin/Int, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/VolumeController.volume|volume(kotlin.Int;tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun volumeDown(kotlin/Int = ..., tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/VolumeController.volumeDown|volumeDown(kotlin.Int;tv.nomercy.player.core.player.ActionOptions){}[0]
+    final suspend fun volumeUp(kotlin/Int = ..., tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/VolumeController.volumeUp|volumeUp(kotlin.Int;tv.nomercy.player.core.player.ActionOptions){}[0]
+}
+
 final class tv.nomercy.player.core.errors/ErrorCode { // tv.nomercy.player.core.errors/ErrorCode|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.errors/ErrorCode.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
 
@@ -1089,6 +1116,19 @@ final class tv.nomercy.player.core.events/ItemChange { // tv.nomercy.player.core
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/ItemChange.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.events/MuteChange { // tv.nomercy.player.core.events/MuteChange|null[0]
+    constructor <init>(kotlin/Boolean) // tv.nomercy.player.core.events/MuteChange.<init>|<init>(kotlin.Boolean){}[0]
+
+    final val muted // tv.nomercy.player.core.events/MuteChange.muted|{}muted[0]
+        final fun <get-muted>(): kotlin/Boolean // tv.nomercy.player.core.events/MuteChange.muted.<get-muted>|<get-muted>(){}[0]
+
+    final fun component1(): kotlin/Boolean // tv.nomercy.player.core.events/MuteChange.component1|component1(){}[0]
+    final fun copy(kotlin/Boolean = ...): tv.nomercy.player.core.events/MuteChange // tv.nomercy.player.core.events/MuteChange.copy|copy(kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/MuteChange.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/MuteChange.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/MuteChange.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.events/PhaseChange { // tv.nomercy.player.core.events/PhaseChange|null[0]
     constructor <init>(tv.nomercy.player.core.player/PlayerPhase, tv.nomercy.player.core.player/PlayerPhase) // tv.nomercy.player.core.events/PhaseChange.<init>|<init>(tv.nomercy.player.core.player.PlayerPhase;tv.nomercy.player.core.player.PlayerPhase){}[0]
 
@@ -1116,6 +1156,144 @@ final class tv.nomercy.player.core.events/PlaySource { // tv.nomercy.player.core
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/PlaySource.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/PlaySource.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/PlaySource.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/PreventedAction { // tv.nomercy.player.core.events/PreventedAction|null[0]
+    constructor <init>(kotlin/String?, kotlin/String? = ...) // tv.nomercy.player.core.events/PreventedAction.<init>|<init>(kotlin.String?;kotlin.String?){}[0]
+
+    final val reason // tv.nomercy.player.core.events/PreventedAction.reason|{}reason[0]
+        final fun <get-reason>(): kotlin/String? // tv.nomercy.player.core.events/PreventedAction.reason.<get-reason>|<get-reason>(){}[0]
+    final val source // tv.nomercy.player.core.events/PreventedAction.source|{}source[0]
+        final fun <get-source>(): kotlin/String? // tv.nomercy.player.core.events/PreventedAction.source.<get-source>|<get-source>(){}[0]
+
+    final fun component1(): kotlin/String? // tv.nomercy.player.core.events/PreventedAction.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tv.nomercy.player.core.events/PreventedAction.component2|component2(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ...): tv.nomercy.player.core.events/PreventedAction // tv.nomercy.player.core.events/PreventedAction.copy|copy(kotlin.String?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/PreventedAction.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/PreventedAction.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/PreventedAction.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueueAppend { // tv.nomercy.player.core.events/QueueAppend|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>, kotlin/Int) // tv.nomercy.player.core.events/QueueAppend.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlin.Int){}[0]
+
+    final val from // tv.nomercy.player.core.events/QueueAppend.from|{}from[0]
+        final fun <get-from>(): kotlin/Int // tv.nomercy.player.core.events/QueueAppend.from.<get-from>|<get-from>(){}[0]
+    final val items // tv.nomercy.player.core.events/QueueAppend.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueueAppend.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueueAppend.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.events/QueueAppend.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ..., kotlin/Int = ...): tv.nomercy.player.core.events/QueueAppend // tv.nomercy.player.core.events/QueueAppend.copy|copy(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueueAppend.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueueAppend.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueueAppend.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueueChange { // tv.nomercy.player.core.events/QueueChange|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.events/QueueChange.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+
+    final val items // tv.nomercy.player.core.events/QueueChange.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueueChange.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueueChange.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ...): tv.nomercy.player.core.events/QueueChange // tv.nomercy.player.core.events/QueueChange.copy|copy(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueueChange.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueueChange.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueueChange.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueueClear { // tv.nomercy.player.core.events/QueueClear|null[0]
+    constructor <init>(kotlin/Int) // tv.nomercy.player.core.events/QueueClear.<init>|<init>(kotlin.Int){}[0]
+
+    final val previousLength // tv.nomercy.player.core.events/QueueClear.previousLength|{}previousLength[0]
+        final fun <get-previousLength>(): kotlin/Int // tv.nomercy.player.core.events/QueueClear.previousLength.<get-previousLength>|<get-previousLength>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.events/QueueClear.component1|component1(){}[0]
+    final fun copy(kotlin/Int = ...): tv.nomercy.player.core.events/QueueClear // tv.nomercy.player.core.events/QueueClear.copy|copy(kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueueClear.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueueClear.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueueClear.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueueInsert { // tv.nomercy.player.core.events/QueueInsert|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>, kotlin/Int) // tv.nomercy.player.core.events/QueueInsert.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlin.Int){}[0]
+
+    final val index // tv.nomercy.player.core.events/QueueInsert.index|{}index[0]
+        final fun <get-index>(): kotlin/Int // tv.nomercy.player.core.events/QueueInsert.index.<get-index>|<get-index>(){}[0]
+    final val items // tv.nomercy.player.core.events/QueueInsert.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueueInsert.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueueInsert.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.events/QueueInsert.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ..., kotlin/Int = ...): tv.nomercy.player.core.events/QueueInsert // tv.nomercy.player.core.events/QueueInsert.copy|copy(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueueInsert.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueueInsert.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueueInsert.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueueMove { // tv.nomercy.player.core.events/QueueMove|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.events/QueueMove.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
+
+    final val from // tv.nomercy.player.core.events/QueueMove.from|{}from[0]
+        final fun <get-from>(): kotlin/Int // tv.nomercy.player.core.events/QueueMove.from.<get-from>|<get-from>(){}[0]
+    final val to // tv.nomercy.player.core.events/QueueMove.to|{}to[0]
+        final fun <get-to>(): kotlin/Int // tv.nomercy.player.core.events/QueueMove.to.<get-to>|<get-to>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.events/QueueMove.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.events/QueueMove.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ...): tv.nomercy.player.core.events/QueueMove // tv.nomercy.player.core.events/QueueMove.copy|copy(kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueueMove.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueueMove.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueueMove.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueuePrepend { // tv.nomercy.player.core.events/QueuePrepend|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.events/QueuePrepend.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+
+    final val items // tv.nomercy.player.core.events/QueuePrepend.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueuePrepend.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.events/QueuePrepend.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ...): tv.nomercy.player.core.events/QueuePrepend // tv.nomercy.player.core.events/QueuePrepend.copy|copy(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueuePrepend.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueuePrepend.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueuePrepend.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/QueueRemove { // tv.nomercy.player.core.events/QueueRemove|null[0]
+    constructor <init>(kotlin/String, kotlin/Int, tv.nomercy.player.core.media/PlaylistItem) // tv.nomercy.player.core.events/QueueRemove.<init>|<init>(kotlin.String;kotlin.Int;tv.nomercy.player.core.media.PlaylistItem){}[0]
+
+    final val id // tv.nomercy.player.core.events/QueueRemove.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.events/QueueRemove.id.<get-id>|<get-id>(){}[0]
+    final val index // tv.nomercy.player.core.events/QueueRemove.index|{}index[0]
+        final fun <get-index>(): kotlin/Int // tv.nomercy.player.core.events/QueueRemove.index.<get-index>|<get-index>(){}[0]
+    final val item // tv.nomercy.player.core.events/QueueRemove.item|{}item[0]
+        final fun <get-item>(): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.events/QueueRemove.item.<get-item>|<get-item>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.events/QueueRemove.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.events/QueueRemove.component2|component2(){}[0]
+    final fun component3(): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.events/QueueRemove.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Int = ..., tv.nomercy.player.core.media/PlaylistItem = ...): tv.nomercy.player.core.events/QueueRemove // tv.nomercy.player.core.events/QueueRemove.copy|copy(kotlin.String;kotlin.Int;tv.nomercy.player.core.media.PlaylistItem){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/QueueRemove.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/QueueRemove.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/QueueRemove.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/SeekPosition { // tv.nomercy.player.core.events/SeekPosition|null[0]
+    constructor <init>(kotlin/Double, kotlin/String? = ...) // tv.nomercy.player.core.events/SeekPosition.<init>|<init>(kotlin.Double;kotlin.String?){}[0]
+
+    final val source // tv.nomercy.player.core.events/SeekPosition.source|{}source[0]
+        final fun <get-source>(): kotlin/String? // tv.nomercy.player.core.events/SeekPosition.source.<get-source>|<get-source>(){}[0]
+    final val time // tv.nomercy.player.core.events/SeekPosition.time|{}time[0]
+        final fun <get-time>(): kotlin/Double // tv.nomercy.player.core.events/SeekPosition.time.<get-time>|<get-time>(){}[0]
+
+    final fun component1(): kotlin/Double // tv.nomercy.player.core.events/SeekPosition.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tv.nomercy.player.core.events/SeekPosition.component2|component2(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/String? = ...): tv.nomercy.player.core.events/SeekPosition // tv.nomercy.player.core.events/SeekPosition.copy|copy(kotlin.Double;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/SeekPosition.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/SeekPosition.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/SeekPosition.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.events/StreamError { // tv.nomercy.player.core.events/StreamError|null[0]
@@ -1151,6 +1329,19 @@ final class tv.nomercy.player.core.events/TimeUpdate { // tv.nomercy.player.core
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/TimeUpdate.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/TimeUpdate.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/TimeUpdate.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.events/VolumeChange { // tv.nomercy.player.core.events/VolumeChange|null[0]
+    constructor <init>(kotlin/Int) // tv.nomercy.player.core.events/VolumeChange.<init>|<init>(kotlin.Int){}[0]
+
+    final val level // tv.nomercy.player.core.events/VolumeChange.level|{}level[0]
+        final fun <get-level>(): kotlin/Int // tv.nomercy.player.core.events/VolumeChange.level.<get-level>|<get-level>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.events/VolumeChange.component1|component1(){}[0]
+    final fun copy(kotlin/Int = ...): tv.nomercy.player.core.events/VolumeChange // tv.nomercy.player.core.events/VolumeChange.copy|copy(kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/VolumeChange.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/VolumeChange.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/VolumeChange.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.media/MediaListClear { // tv.nomercy.player.core.media/MediaListClear|null[0]
@@ -1794,6 +1985,41 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
     open fun transformUrl(kotlin/String): kotlin/String // tv.nomercy.player.core.controllers/AuthController.transformUrl|transformUrl(kotlin.String){}[0]
 }
 
+open class tv.nomercy.player.core.controllers/QueueController { // tv.nomercy.player.core.controllers/QueueController|null[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext) // tv.nomercy.player.core.controllers/QueueController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext){}[0]
+
+    final var transport // tv.nomercy.player.core.controllers/QueueController.transport|{}transport[0]
+        final fun <get-transport>(): tv.nomercy.player.core.controllers/TransportController? // tv.nomercy.player.core.controllers/QueueController.transport.<get-transport>|<get-transport>(){}[0]
+        final fun <set-transport>(tv.nomercy.player.core.controllers/TransportController?) // tv.nomercy.player.core.controllers/QueueController.transport.<set-transport>|<set-transport>(tv.nomercy.player.core.controllers.TransportController?){}[0]
+
+    final fun backlog(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.controllers/QueueController.backlog|backlog(){}[0]
+    final fun backlogAppend(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/QueueController.backlogAppend|backlogAppend(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun backlogClear() // tv.nomercy.player.core.controllers/QueueController.backlogClear|backlogClear(){}[0]
+    final fun backlogRemove(kotlin/String) // tv.nomercy.player.core.controllers/QueueController.backlogRemove|backlogRemove(kotlin.String){}[0]
+    final fun index(): kotlin/Int // tv.nomercy.player.core.controllers/QueueController.index|index(){}[0]
+    final fun item(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/QueueController.item|item(){}[0]
+    final fun peekNext(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/QueueController.peekNext|peekNext(){}[0]
+    final fun peekPrevious(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/QueueController.peekPrevious|peekPrevious(){}[0]
+    final fun queue(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.controllers/QueueController.queue|queue(){}[0]
+    final fun queue(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/QueueController.queue|queue(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun queueAppend(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/QueueController.queueAppend|queueAppend(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun queueClear() // tv.nomercy.player.core.controllers/QueueController.queueClear|queueClear(){}[0]
+    final fun queueIndexOf(kotlin/String): kotlin/Int // tv.nomercy.player.core.controllers/QueueController.queueIndexOf|queueIndexOf(kotlin.String){}[0]
+    final fun queueInsert(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>, kotlin/Int) // tv.nomercy.player.core.controllers/QueueController.queueInsert|queueInsert(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlin.Int){}[0]
+    final fun queueLength(): kotlin/Int // tv.nomercy.player.core.controllers/QueueController.queueLength|queueLength(){}[0]
+    final fun queueMove(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.controllers/QueueController.queueMove|queueMove(kotlin.Int;kotlin.Int){}[0]
+    final fun queuePrepend(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/QueueController.queuePrepend|queuePrepend(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun queueRemove(kotlin/String) // tv.nomercy.player.core.controllers/QueueController.queueRemove|queueRemove(kotlin.String){}[0]
+    final fun queueRemoveAt(kotlin/Int) // tv.nomercy.player.core.controllers/QueueController.queueRemoveAt|queueRemoveAt(kotlin.Int){}[0]
+    final fun queueShuffle() // tv.nomercy.player.core.controllers/QueueController.queueShuffle|queueShuffle(){}[0]
+    final fun queueSort(kotlin/Comparator<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/QueueController.queueSort|queueSort(kotlin.Comparator<tv.nomercy.player.core.media.PlaylistItem>){}[0]
+    final fun seekToIndex(kotlin/Int) // tv.nomercy.player.core.controllers/QueueController.seekToIndex|seekToIndex(kotlin.Int){}[0]
+    final fun wireQueue() // tv.nomercy.player.core.controllers/QueueController.wireQueue|wireQueue(){}[0]
+    final suspend fun item(kotlin/String, kotlin/Boolean = ...) // tv.nomercy.player.core.controllers/QueueController.item|item(kotlin.String;kotlin.Boolean){}[0]
+    final suspend fun playItem(kotlin/String) // tv.nomercy.player.core.controllers/QueueController.playItem|playItem(kotlin.String){}[0]
+    open fun ingest(tv.nomercy.player.core.media/PlaylistItem): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.controllers/QueueController.ingest|ingest(tv.nomercy.player.core.media.PlaylistItem){}[0]
+}
+
 open class tv.nomercy.player.core.errors/AuthError : tv.nomercy.player.core.errors/NetworkError { // tv.nomercy.player.core.errors/AuthError|null[0]
     constructor <init>(kotlin/String, tv.nomercy.player.core.errors/ErrorScope = ..., tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ..., kotlin/String? = ...) // tv.nomercy.player.core.errors/AuthError.<init>|<init>(kotlin.String;tv.nomercy.player.core.errors.ErrorScope;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>;kotlin.String?){}[0]
 }
@@ -1869,22 +2095,94 @@ open class tv.nomercy.player.core.plugin/LifecycleRegistry { // tv.nomercy.playe
 }
 
 final object tv.nomercy.player.core.events/CoreEvents { // tv.nomercy.player.core.events/CoreEvents|null[0]
+    final val Backlog // tv.nomercy.player.core.events/CoreEvents.Backlog|{}Backlog[0]
+        final fun <get-Backlog>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueChange> // tv.nomercy.player.core.events/CoreEvents.Backlog.<get-Backlog>|<get-Backlog>(){}[0]
+    final val BacklogAppend // tv.nomercy.player.core.events/CoreEvents.BacklogAppend|{}BacklogAppend[0]
+        final fun <get-BacklogAppend>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueAppend> // tv.nomercy.player.core.events/CoreEvents.BacklogAppend.<get-BacklogAppend>|<get-BacklogAppend>(){}[0]
+    final val BacklogClear // tv.nomercy.player.core.events/CoreEvents.BacklogClear|{}BacklogClear[0]
+        final fun <get-BacklogClear>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueClear> // tv.nomercy.player.core.events/CoreEvents.BacklogClear.<get-BacklogClear>|<get-BacklogClear>(){}[0]
+    final val BacklogRemove // tv.nomercy.player.core.events/CoreEvents.BacklogRemove|{}BacklogRemove[0]
+        final fun <get-BacklogRemove>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueRemove> // tv.nomercy.player.core.events/CoreEvents.BacklogRemove.<get-BacklogRemove>|<get-BacklogRemove>(){}[0]
+    final val BeforeMute // tv.nomercy.player.core.events/CoreEvents.BeforeMute|{}BeforeMute[0]
+        final fun <get-BeforeMute>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.events/MuteChange>> // tv.nomercy.player.core.events/CoreEvents.BeforeMute.<get-BeforeMute>|<get-BeforeMute>(){}[0]
+    final val BeforeNext // tv.nomercy.player.core.events/CoreEvents.BeforeNext|{}BeforeNext[0]
+        final fun <get-BeforeNext>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.player/ActionOptions>> // tv.nomercy.player.core.events/CoreEvents.BeforeNext.<get-BeforeNext>|<get-BeforeNext>(){}[0]
+    final val BeforePause // tv.nomercy.player.core.events/CoreEvents.BeforePause|{}BeforePause[0]
+        final fun <get-BeforePause>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.player/ActionOptions>> // tv.nomercy.player.core.events/CoreEvents.BeforePause.<get-BeforePause>|<get-BeforePause>(){}[0]
     final val BeforePlay // tv.nomercy.player.core.events/CoreEvents.BeforePlay|{}BeforePlay[0]
-        final fun <get-BeforePlay>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.events/PlaySource>> // tv.nomercy.player.core.events/CoreEvents.BeforePlay.<get-BeforePlay>|<get-BeforePlay>(){}[0]
+        final fun <get-BeforePlay>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.player/ActionOptions>> // tv.nomercy.player.core.events/CoreEvents.BeforePlay.<get-BeforePlay>|<get-BeforePlay>(){}[0]
+    final val BeforePrevious // tv.nomercy.player.core.events/CoreEvents.BeforePrevious|{}BeforePrevious[0]
+        final fun <get-BeforePrevious>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.player/ActionOptions>> // tv.nomercy.player.core.events/CoreEvents.BeforePrevious.<get-BeforePrevious>|<get-BeforePrevious>(){}[0]
+    final val BeforeSeek // tv.nomercy.player.core.events/CoreEvents.BeforeSeek|{}BeforeSeek[0]
+        final fun <get-BeforeSeek>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.events/SeekPosition>> // tv.nomercy.player.core.events/CoreEvents.BeforeSeek.<get-BeforeSeek>|<get-BeforeSeek>(){}[0]
+    final val BeforeStop // tv.nomercy.player.core.events/CoreEvents.BeforeStop|{}BeforeStop[0]
+        final fun <get-BeforeStop>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.player/ActionOptions>> // tv.nomercy.player.core.events/CoreEvents.BeforeStop.<get-BeforeStop>|<get-BeforeStop>(){}[0]
+    final val BeforeVolume // tv.nomercy.player.core.events/CoreEvents.BeforeVolume|{}BeforeVolume[0]
+        final fun <get-BeforeVolume>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<tv.nomercy.player.core.events/VolumeChange>> // tv.nomercy.player.core.events/CoreEvents.BeforeVolume.<get-BeforeVolume>|<get-BeforeVolume>(){}[0]
     final val Ended // tv.nomercy.player.core.events/CoreEvents.Ended|{}Ended[0]
         final fun <get-Ended>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.events/CoreEvents.Ended.<get-Ended>|<get-Ended>(){}[0]
     final val Item // tv.nomercy.player.core.events/CoreEvents.Item|{}Item[0]
         final fun <get-Item>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/ItemChange> // tv.nomercy.player.core.events/CoreEvents.Item.<get-Item>|<get-Item>(){}[0]
+    final val Mute // tv.nomercy.player.core.events/CoreEvents.Mute|{}Mute[0]
+        final fun <get-Mute>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/MuteChange> // tv.nomercy.player.core.events/CoreEvents.Mute.<get-Mute>|<get-Mute>(){}[0]
+    final val MutePrevented // tv.nomercy.player.core.events/CoreEvents.MutePrevented|{}MutePrevented[0]
+        final fun <get-MutePrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.MutePrevented.<get-MutePrevented>|<get-MutePrevented>(){}[0]
+    final val Next // tv.nomercy.player.core.events/CoreEvents.Next|{}Next[0]
+        final fun <get-Next>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Next.<get-Next>|<get-Next>(){}[0]
+    final val NextPrevented // tv.nomercy.player.core.events/CoreEvents.NextPrevented|{}NextPrevented[0]
+        final fun <get-NextPrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.NextPrevented.<get-NextPrevented>|<get-NextPrevented>(){}[0]
     final val Pause // tv.nomercy.player.core.events/CoreEvents.Pause|{}Pause[0]
         final fun <get-Pause>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Pause.<get-Pause>|<get-Pause>(){}[0]
+    final val PausePrevented // tv.nomercy.player.core.events/CoreEvents.PausePrevented|{}PausePrevented[0]
+        final fun <get-PausePrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.PausePrevented.<get-PausePrevented>|<get-PausePrevented>(){}[0]
     final val Phase // tv.nomercy.player.core.events/CoreEvents.Phase|{}Phase[0]
         final fun <get-Phase>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PhaseChange> // tv.nomercy.player.core.events/CoreEvents.Phase.<get-Phase>|<get-Phase>(){}[0]
     final val Play // tv.nomercy.player.core.events/CoreEvents.Play|{}Play[0]
         final fun <get-Play>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Play.<get-Play>|<get-Play>(){}[0]
+    final val PlayPrevented // tv.nomercy.player.core.events/CoreEvents.PlayPrevented|{}PlayPrevented[0]
+        final fun <get-PlayPrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.PlayPrevented.<get-PlayPrevented>|<get-PlayPrevented>(){}[0]
+    final val Previous // tv.nomercy.player.core.events/CoreEvents.Previous|{}Previous[0]
+        final fun <get-Previous>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Previous.<get-Previous>|<get-Previous>(){}[0]
+    final val PreviousPrevented // tv.nomercy.player.core.events/CoreEvents.PreviousPrevented|{}PreviousPrevented[0]
+        final fun <get-PreviousPrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.PreviousPrevented.<get-PreviousPrevented>|<get-PreviousPrevented>(){}[0]
+    final val Queue // tv.nomercy.player.core.events/CoreEvents.Queue|{}Queue[0]
+        final fun <get-Queue>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueChange> // tv.nomercy.player.core.events/CoreEvents.Queue.<get-Queue>|<get-Queue>(){}[0]
+    final val QueueAppend // tv.nomercy.player.core.events/CoreEvents.QueueAppend|{}QueueAppend[0]
+        final fun <get-QueueAppend>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueAppend> // tv.nomercy.player.core.events/CoreEvents.QueueAppend.<get-QueueAppend>|<get-QueueAppend>(){}[0]
+    final val QueueClear // tv.nomercy.player.core.events/CoreEvents.QueueClear|{}QueueClear[0]
+        final fun <get-QueueClear>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueClear> // tv.nomercy.player.core.events/CoreEvents.QueueClear.<get-QueueClear>|<get-QueueClear>(){}[0]
+    final val QueueExhausted // tv.nomercy.player.core.events/CoreEvents.QueueExhausted|{}QueueExhausted[0]
+        final fun <get-QueueExhausted>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.events/CoreEvents.QueueExhausted.<get-QueueExhausted>|<get-QueueExhausted>(){}[0]
+    final val QueueInsert // tv.nomercy.player.core.events/CoreEvents.QueueInsert|{}QueueInsert[0]
+        final fun <get-QueueInsert>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueInsert> // tv.nomercy.player.core.events/CoreEvents.QueueInsert.<get-QueueInsert>|<get-QueueInsert>(){}[0]
+    final val QueueMove // tv.nomercy.player.core.events/CoreEvents.QueueMove|{}QueueMove[0]
+        final fun <get-QueueMove>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueMove> // tv.nomercy.player.core.events/CoreEvents.QueueMove.<get-QueueMove>|<get-QueueMove>(){}[0]
+    final val QueuePrepend // tv.nomercy.player.core.events/CoreEvents.QueuePrepend|{}QueuePrepend[0]
+        final fun <get-QueuePrepend>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueuePrepend> // tv.nomercy.player.core.events/CoreEvents.QueuePrepend.<get-QueuePrepend>|<get-QueuePrepend>(){}[0]
+    final val QueueRemove // tv.nomercy.player.core.events/CoreEvents.QueueRemove|{}QueueRemove[0]
+        final fun <get-QueueRemove>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueRemove> // tv.nomercy.player.core.events/CoreEvents.QueueRemove.<get-QueueRemove>|<get-QueueRemove>(){}[0]
+    final val QueueShuffle // tv.nomercy.player.core.events/CoreEvents.QueueShuffle|{}QueueShuffle[0]
+        final fun <get-QueueShuffle>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueChange> // tv.nomercy.player.core.events/CoreEvents.QueueShuffle.<get-QueueShuffle>|<get-QueueShuffle>(){}[0]
+    final val QueueSort // tv.nomercy.player.core.events/CoreEvents.QueueSort|{}QueueSort[0]
+        final fun <get-QueueSort>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/QueueChange> // tv.nomercy.player.core.events/CoreEvents.QueueSort.<get-QueueSort>|<get-QueueSort>(){}[0]
+    final val Seek // tv.nomercy.player.core.events/CoreEvents.Seek|{}Seek[0]
+        final fun <get-Seek>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/SeekPosition> // tv.nomercy.player.core.events/CoreEvents.Seek.<get-Seek>|<get-Seek>(){}[0]
+    final val SeekPrevented // tv.nomercy.player.core.events/CoreEvents.SeekPrevented|{}SeekPrevented[0]
+        final fun <get-SeekPrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.SeekPrevented.<get-SeekPrevented>|<get-SeekPrevented>(){}[0]
+    final val Seeked // tv.nomercy.player.core.events/CoreEvents.Seeked|{}Seeked[0]
+        final fun <get-Seeked>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/SeekPosition> // tv.nomercy.player.core.events/CoreEvents.Seeked.<get-Seeked>|<get-Seeked>(){}[0]
+    final val Stop // tv.nomercy.player.core.events/CoreEvents.Stop|{}Stop[0]
+        final fun <get-Stop>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Stop.<get-Stop>|<get-Stop>(){}[0]
+    final val StopPrevented // tv.nomercy.player.core.events/CoreEvents.StopPrevented|{}StopPrevented[0]
+        final fun <get-StopPrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.StopPrevented.<get-StopPrevented>|<get-StopPrevented>(){}[0]
     final val StreamError // tv.nomercy.player.core.events/CoreEvents.StreamError|{}StreamError[0]
         final fun <get-StreamError>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/StreamError> // tv.nomercy.player.core.events/CoreEvents.StreamError.<get-StreamError>|<get-StreamError>(){}[0]
     final val Time // tv.nomercy.player.core.events/CoreEvents.Time|{}Time[0]
         final fun <get-Time>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/TimeUpdate> // tv.nomercy.player.core.events/CoreEvents.Time.<get-Time>|<get-Time>(){}[0]
+    final val Volume // tv.nomercy.player.core.events/CoreEvents.Volume|{}Volume[0]
+        final fun <get-Volume>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/VolumeChange> // tv.nomercy.player.core.events/CoreEvents.Volume.<get-Volume>|<get-Volume>(){}[0]
+    final val VolumePrevented // tv.nomercy.player.core.events/CoreEvents.VolumePrevented|{}VolumePrevented[0]
+        final fun <get-VolumePrevented>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PreventedAction> // tv.nomercy.player.core.events/CoreEvents.VolumePrevented.<get-VolumePrevented>|<get-VolumePrevented>(){}[0]
 }
 
 final object tv.nomercy.player.core.events/PreventReason { // tv.nomercy.player.core.events/PreventReason|null[0]
