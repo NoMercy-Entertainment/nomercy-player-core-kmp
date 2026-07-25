@@ -103,7 +103,9 @@ private class FakePlayer : Player<Unit> {
         return this
     }
 
-    @Suppress("UNCHECKED_CAST")
+    // KClass.isInstance has already checked it; Kotlin cannot see that the
+    // check and the cast are about the same type.
+    @Suppress("UNCHECKED_CAST", "NoUncheckedCast")
     override fun <P : Plugin<*>> getPlugin(type: KClass<P>): P? =
         plugins.firstOrNull { type.isInstance(it) } as? P
 

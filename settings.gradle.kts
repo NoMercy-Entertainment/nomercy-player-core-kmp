@@ -21,3 +21,7 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "nomercy-player-core-kmp"
+
+// The advisory rule pack. Its own JVM module because a detekt ruleset is a
+// plain jar detekt loads, not part of the multiplatform library it checks.
+include(":detekt-player")

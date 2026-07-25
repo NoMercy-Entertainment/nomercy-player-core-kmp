@@ -17,7 +17,9 @@ package tv.nomercy.player.core.events
 // as (Any?) -> Unit so one listener list can serve every payload type; the cast
 // is safe because the only way to reach a listener is through the EventKey it
 // was registered with, and that key carries T.
-@Suppress("UNCHECKED_CAST")
+// The one cast in the library, and the pack is told so here rather than
+// switched off: a second one should have to argue for itself the same way.
+@Suppress("UNCHECKED_CAST", "NoUncheckedCast")
 internal fun <T> wrap(fn: (T) -> Unit): (Any?) -> Unit = { data -> fn(data as T) }
 
 // Wraps a removal so a second Subscription.dispose() is a no-op. Every handle

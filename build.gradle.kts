@@ -144,6 +144,13 @@ skie {
     }
 }
 
+// The advisory pack runs against this library too. It is guidance for a
+// consumer and a hard failure for us: we are the ones writing the examples
+// everybody else reads.
+dependencies {
+    detektPlugins(project(":detekt-player"))
+}
+
 detekt {
     // Hand-written sources only. Generated code is not something a human can fix.
     source.setFrom(
@@ -162,6 +169,12 @@ detekt {
 
 @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
 apiValidation {
+    // The rule pack is a build-tool jar detekt loads through a service file, not
+    // something application code links against. Its real contract is the ruleset
+    // id and the six rule ids, and PlayerRulesTest asserts those exactly. A dump
+    // of its class signatures would churn on every rule without guarding anyone.
+    ignoredProjects.add("detekt-player")
+
     // On covers Apple. Kotlin/Native compiles klibs on any host — only linking a
     // framework needs macOS — so the iOS and tvOS public surface is checked on
     // Windows and Linux too, not just on the Mac runner.

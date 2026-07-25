@@ -172,8 +172,21 @@ style:
     active: true
     comments: ['TODO:', 'FIXME:', 'STOPSHIP:']   # unfinished work does not ship in a library
 
-# The player-specific pack (P08) layers on top of this file:
-#   NoRawPlayerBus · NoRawTimersInPlugin · NoRawFetchInPlugin
-#   PluginManifestRequired · NoUncheckedCast · NoSingleLetterIdent
-# Those are advisory and @Suppress-able by consumers — guidance, never walls.
-# Everything in THIS file is a hard build failure for our own code.
+# The player-specific pack. Advisory and @Suppress-able for a consumer —
+# guidance, never walls — and a hard failure here, because the library is the
+# example everyone else reads.
+player:
+  active: true
+  NoRawPlayerBus:
+    active: true
+  NoRawTimersInPlugin:
+    active: true
+  NoRawFetchInPlugin:
+    active: true
+  PluginManifestRequired:
+    active: true
+  NoUncheckedCast:
+    active: true
+  NoSingleLetterIdent:
+    active: true
+    excludes: ['**/commonTest/**', '**/androidHostTest/**']
