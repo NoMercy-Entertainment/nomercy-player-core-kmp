@@ -8,6 +8,17 @@ public class tv/nomercy/player/core/controllers/AuthController {
 	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/controllers/LifecycleController {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun config ()Ltv/nomercy/player/core/player/PlayerConfig;
+	public final fun dispose (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun dispose$default (Ltv/nomercy/player/core/controllers/LifecycleController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun ready ()Lkotlinx/coroutines/Deferred;
+	public final fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun setup$default (Ltv/nomercy/player/core/controllers/LifecycleController;Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+}
+
 public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public fun <init> ()V
 	public fun <init> (Ltv/nomercy/player/core/events/EventEmitter;Ltv/nomercy/player/core/ports/MediaBackend;)V
@@ -82,6 +93,41 @@ public class tv/nomercy/player/core/controllers/QueueController {
 	public final fun seekToIndex (I)V
 	public final fun setTransport (Ltv/nomercy/player/core/controllers/TransportController;)V
 	public final fun wireQueue ()V
+}
+
+public final class tv/nomercy/player/core/controllers/StateController {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;Ltv/nomercy/player/core/controllers/TimeController;)V
+	public final fun getStateFlow ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun playState ()Ltv/nomercy/player/core/player/PlayState;
+	public final fun repeatState ()Ltv/nomercy/player/core/player/RepeatState;
+	public final fun repeatState (Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun repeatState$default (Ltv/nomercy/player/core/controllers/StateController;Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun shuffleState ()Ltv/nomercy/player/core/player/ShuffleState;
+	public final fun shuffleState (Ltv/nomercy/player/core/player/ShuffleState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun shuffleState (ZLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun shuffleState$default (Ltv/nomercy/player/core/controllers/StateController;Ltv/nomercy/player/core/player/ShuffleState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static synthetic fun shuffleState$default (Ltv/nomercy/player/core/controllers/StateController;ZLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun state ()Ltv/nomercy/player/core/player/PlayerState;
+	public final fun volumeState ()Ltv/nomercy/player/core/player/VolumeState;
+}
+
+public final class tv/nomercy/player/core/controllers/TimeController {
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;Ltv/nomercy/player/core/controllers/TransportController;)V
+	public final fun buffered ()D
+	public final fun checkItemEndingSoon (DDD)V
+	public static synthetic fun checkItemEndingSoon$default (Ltv/nomercy/player/core/controllers/TimeController;DDDILjava/lang/Object;)V
+	public final fun duration ()D
+	public final fun percentage ()D
+	public final fun playbackRate ()D
+	public final fun playbackRate (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun playbackRate$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun playbackRates ()Ljava/util/List;
+	public final fun resetItemEndingSoonLatch ()V
+	public final fun seekByPercentage (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun seekByPercentage$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun time ()D
+	public final fun time (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun time$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
 public final class tv/nomercy/player/core/controllers/TransportController {
@@ -312,20 +358,30 @@ public final class tv/nomercy/player/core/events/BeforeEvent {
 
 public final class tv/nomercy/player/core/events/CoreEvents {
 	public static final field INSTANCE Ltv/nomercy/player/core/events/CoreEvents;
+	public final fun getBackendRateChange ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBacklog ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBacklogAppend ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBacklogClear ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBacklogRemove ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeDispose ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforeMute ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforeNext ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforePause ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforePlay ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforePlaybackRate ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforePrevious ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeRepeat ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforeSeek ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeSetup ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBeforeShuffle ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforeStop ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getBeforeVolume ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getDispose ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getDisposePrevented ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getDuration ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getEnded ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getItem ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getItemEndingSoon ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getMute ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getMutePrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getNext ()Ltv/nomercy/player/core/events/EventKey;
@@ -335,6 +391,8 @@ public final class tv/nomercy/player/core/events/CoreEvents {
 	public final fun getPhase ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPlay ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPlayPrevented ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPlaybackRate ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPlaybackRatePrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPrevious ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPreviousPrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getQueue ()Ltv/nomercy/player/core/events/EventKey;
@@ -347,9 +405,14 @@ public final class tv/nomercy/player/core/events/CoreEvents {
 	public final fun getQueueRemove ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getQueueShuffle ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getQueueSort ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getReady ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getRepeat ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getRepeatPrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getSeek ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getSeekPrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getSeeked ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getShuffle ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getShufflePrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getStop ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getStopPrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getStreamError ()Ltv/nomercy/player/core/events/EventKey;
@@ -394,6 +457,19 @@ public final class tv/nomercy/player/core/events/ItemChange {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIndex ()I
 	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/ItemEndingSoon {
+	public fun <init> (Ltv/nomercy/player/core/media/PlaylistItem;D)V
+	public final fun component1 ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun component2 ()D
+	public final fun copy (Ltv/nomercy/player/core/media/PlaylistItem;D)Ltv/nomercy/player/core/events/ItemEndingSoon;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/ItemEndingSoon;Ltv/nomercy/player/core/media/PlaylistItem;DILjava/lang/Object;)Ltv/nomercy/player/core/events/ItemEndingSoon;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun getRemaining ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -543,6 +619,28 @@ public final class tv/nomercy/player/core/events/QueueRemove {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/RateChange {
+	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Ltv/nomercy/player/core/events/RateChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/RateChange;DILjava/lang/Object;)Ltv/nomercy/player/core/events/RateChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRate ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/RepeatChange {
+	public fun <init> (Ltv/nomercy/player/core/player/RepeatState;)V
+	public final fun component1 ()Ltv/nomercy/player/core/player/RepeatState;
+	public final fun copy (Ltv/nomercy/player/core/player/RepeatState;)Ltv/nomercy/player/core/events/RepeatChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/RepeatChange;Ltv/nomercy/player/core/player/RepeatState;ILjava/lang/Object;)Ltv/nomercy/player/core/events/RepeatChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getState ()Ltv/nomercy/player/core/player/RepeatState;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/events/SeekPosition {
 	public fun <init> (DLjava/lang/String;)V
 	public synthetic fun <init> (DLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -553,6 +651,17 @@ public final class tv/nomercy/player/core/events/SeekPosition {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getSource ()Ljava/lang/String;
 	public final fun getTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/ShuffleChange {
+	public fun <init> (Ltv/nomercy/player/core/player/ShuffleState;)V
+	public final fun component1 ()Ltv/nomercy/player/core/player/ShuffleState;
+	public final fun copy (Ltv/nomercy/player/core/player/ShuffleState;)Ltv/nomercy/player/core/events/ShuffleChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/ShuffleChange;Ltv/nomercy/player/core/player/ShuffleState;ILjava/lang/Object;)Ltv/nomercy/player/core/events/ShuffleChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getState ()Ltv/nomercy/player/core/player/ShuffleState;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

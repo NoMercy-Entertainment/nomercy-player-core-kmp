@@ -88,4 +88,31 @@ public object CoreEvents {
     // resolves EventKey<StreamError> in the type namespace and the property in
     // the value namespace, so both read as the event they belong to.
     public val StreamError: EventKey<StreamError> = EventKey("stream:error")
+
+    public val PlaybackRate: EventKey<RateChange> = EventKey("playbackRate")
+    public val BeforePlaybackRate: EventKey<BeforeEvent<RateChange>> = EventKey("beforePlaybackRate")
+    public val PlaybackRatePrevented: EventKey<PreventedAction> = EventKey("playbackRatePrevented")
+
+    // What the engine reports, separate from what was asked for. A backend that
+    // silently clamps a rate it cannot do says so here.
+    public val BackendRateChange: EventKey<RateChange> = EventKey("backend:ratechange")
+
+    public val Repeat: EventKey<RepeatChange> = EventKey("repeat")
+    public val BeforeRepeat: EventKey<BeforeEvent<RepeatChange>> = EventKey("beforeRepeat")
+    public val RepeatPrevented: EventKey<PreventedAction> = EventKey("repeatPrevented")
+
+    public val Shuffle: EventKey<ShuffleChange> = EventKey("shuffle")
+    public val BeforeShuffle: EventKey<BeforeEvent<ShuffleChange>> = EventKey("beforeShuffle")
+    public val ShufflePrevented: EventKey<PreventedAction> = EventKey("shufflePrevented")
+
+    public val ItemEndingSoon: EventKey<tv.nomercy.player.core.events.ItemEndingSoon> =
+        EventKey("itemEndingSoon")
+
+    public val Duration: EventKey<Double> = EventKey("duration")
+
+    public val BeforeSetup: EventKey<BeforeEvent<Unit>> = EventKey("beforeSetup")
+    public val Ready: EventKey<Unit> = EventKey("ready")
+    public val BeforeDispose: EventKey<BeforeEvent<Unit>> = EventKey("beforeDispose")
+    public val DisposePrevented: EventKey<PreventedAction> = EventKey("disposePrevented")
+    public val Dispose: EventKey<Unit> = EventKey("dispose")
 }

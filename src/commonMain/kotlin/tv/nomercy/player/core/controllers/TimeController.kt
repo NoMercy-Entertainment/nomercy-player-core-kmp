@@ -1,0 +1,104 @@
+// -----------------------------------------------------------------------------
+//  Copyright (c) NoMercy Entertainment
+//
+//  Licensed under the Apache License, Version 2.0. See LICENSE for details.
+//
+//  SPDX-License-Identifier: Apache-2.0
+// -----------------------------------------------------------------------------
+
+package tv.nomercy.player.core.controllers
+
+import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.ItemEndingSoon
+import tv.nomercy.player.core.events.PreventedAction
+import tv.nomercy.player.core.events.RateChange
+import tv.nomercy.player.core.player.ActionOptions
+
+private const val MIN_RATE = 0.25
+private const val MAX_RATE = 2.0
+private const val PERCENT = 100.0
+private const val DEFAULT_ENDING_SOON_SECONDS = 10.0
+
+private val OFFERED_RATES: List<Double> = listOf(0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
+
+// Where the playhead is, how fast it is moving, and how close to the end.
+//
+// Seeking goes through the transport rather than being reimplemented here: a
+// seek from a scrubber and a seek from `time(seconds)` are the same action and
+// must produce the same events in the same order. Two copies of that cycle is
+// two places for it to drift.
+public class TimeController(
+    private val ctx: PlayerContext,
+    private val queue: QueueController,
+    private val transport: TransportController,
+) {
+
+    public fun time(): Double = ctx.internalCurrentTime
+
+    public suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()) {
+        transport.seek(seconds.coerceAtLeast(0.0), opts)
+    }
+
+    public fun duration(): Double = ctx.internalDuration
+
+    public fun buffered(): Double = ctx.backend?.buffered() ?: 0.0
+
+    // How far through, as a number a progress bar can bind to directly. Zero
+    // rather than a division by zero before the duration is known.
+    public fun percentage(): Double =
+        if (ctx.internalDuration <= 0.0) 0.0 else ctx.internalCurrentTime / ctx.internalDuration * PERCENT
+
+    // A scrubber reports where the viewer let go as a fraction of the bar, and
+    // it cannot know the duration before metadata arrives. Seeking to a
+    // percentage of an unknown duration would jump to zero, so it does nothing.
+    public suspend fun seekByPercentage(percent: Double, opts: ActionOptions = ActionOptions()) {
+        if (ctx.internalDuration <= 0.0) return
+        time(ctx.internalDuration * percent.coerceIn(0.0, PERCENT) / PERCENT, opts)
+    }
+
+    public fun playbackRate(): Double = ctx.playbackRate
+
+    // The rates a UI should offer. Not a limit on what can be set — a consumer
+    // driving 1.85 from a slider is fine — just the ones worth a menu item.
+    public fun playbackRates(): List<Double> = OFFERED_RATES
+
+    public suspend fun playbackRate(rate: Double, opts: ActionOptions = ActionOptions()) {
+        val target: Double = rate.coerceIn(MIN_RATE, MAX_RATE)
+        val outcome = ctx.dispatchBefore(CoreEvents.BeforePlaybackRate, RateChange(target))
+        if (outcome.prevented) {
+            ctx.emit(CoreEvents.PlaybackRatePrevented, PreventedAction(outcome.reason, opts.source))
+            return
+        }
+
+        val resolved: Double = outcome.data.rate
+        ctx.playbackRate = resolved
+        ctx.emit(CoreEvents.PlaybackRate, RateChange(resolved))
+        ctx.backend?.playbackRate(resolved)
+        // What was asked for and what the engine did are announced separately,
+        // so a backend that clamps silently is still visible to a listener.
+        ctx.emit(CoreEvents.BackendRateChange, RateChange(ctx.backend?.playbackRate() ?: resolved))
+    }
+
+    // Fires once per item, not once per time update inside the window. A
+    // preloader that started again on every tick would fetch the next item
+    // forty times.
+    public fun checkItemEndingSoon(
+        currentTime: Double,
+        duration: Double,
+        thresholdSeconds: Double = DEFAULT_ENDING_SOON_SECONDS,
+    ) {
+        if (ctx.itemEndingSoonEmitted || duration <= 0.0) return
+
+        val remaining: Double = duration - currentTime
+        if (remaining > thresholdSeconds || remaining < 0.0) return
+
+        ctx.itemEndingSoonEmitted = true
+        ctx.emit(CoreEvents.ItemEndingSoon, ItemEndingSoon(queue.item(), remaining))
+    }
+
+    // Loading an item clears the latch on its own; this is for a caller that
+    // rewound past the window and wants the warning again.
+    public fun resetItemEndingSoonLatch() {
+        ctx.itemEndingSoonEmitted = false
+    }
+}
