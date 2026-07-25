@@ -3343,10 +3343,109 @@ public abstract interface class tv/nomercy/player/core/ports/WakeLock {
 	public abstract fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class tv/nomercy/player/core/stream/ClientCapabilities {
+	public static final field Companion Ltv/nomercy/player/core/stream/ClientCapabilities$Companion;
+	public static final field STEREO I
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZII)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()Z
+	public final fun component7 ()Z
+	public final fun component8 ()I
+	public final fun component9 ()I
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZII)Ltv/nomercy/player/core/stream/ClientCapabilities;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/stream/ClientCapabilities;Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZIIILjava/lang/Object;)Ltv/nomercy/player/core/stream/ClientCapabilities;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioCodecs ()Ljava/util/List;
+	public final fun getContainers ()Ljava/util/List;
+	public final fun getMaxAudioChannels ()I
+	public final fun getMaxBitrateKbps ()I
+	public final fun getMaxHeight ()I
+	public final fun getMaxWidth ()I
+	public final fun getSupports10Bit ()Z
+	public final fun getSupportsHdr ()Z
+	public final fun getVideoCodecs ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class tv/nomercy/player/core/stream/ClientCapabilities$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ltv/nomercy/player/core/stream/ClientCapabilities$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltv/nomercy/player/core/stream/ClientCapabilities;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltv/nomercy/player/core/stream/ClientCapabilities;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class tv/nomercy/player/core/stream/ClientCapabilities$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class tv/nomercy/player/core/stream/LiveSessionRequest {
+	public static final field Companion Ltv/nomercy/player/core/stream/LiveSessionRequest$Companion;
+	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ltv/nomercy/player/core/stream/ClientCapabilities;
+	public final fun component3 ()D
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/stream/LiveSessionRequest;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/stream/LiveSessionRequest;Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/stream/LiveSessionRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioLanguage ()Ljava/lang/String;
+	public final fun getClientCaps ()Ltv/nomercy/player/core/stream/ClientCapabilities;
+	public final fun getPreferredQuality ()Ljava/lang/String;
+	public final fun getStartTimeSeconds ()D
+	public final fun getVideoFileId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class tv/nomercy/player/core/stream/LiveSessionRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ltv/nomercy/player/core/stream/LiveSessionRequest$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltv/nomercy/player/core/stream/LiveSessionRequest;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltv/nomercy/player/core/stream/LiveSessionRequest;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class tv/nomercy/player/core/stream/LiveSessionRequest$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class tv/nomercy/player/core/stream/LiveSessionRequestKt {
+	public static final fun toJson (Ltv/nomercy/player/core/stream/LiveSessionRequest;)Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/stream/MasterPlaylistRewriter {
 	public static final field INSTANCE Ltv/nomercy/player/core/stream/MasterPlaylistRewriter;
 	public final fun descriptorOf (Ljava/lang/String;)Ltv/nomercy/player/core/media/QualityDescriptor;
 	public final fun rewrite (Ljava/lang/String;Ljava/util/Collection;)Ljava/lang/String;
 	public final fun variants (Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class tv/nomercy/player/core/stream/ServerCodecNames {
+	public static final field AAC Ljava/lang/String;
+	public static final field AC3 Ljava/lang/String;
+	public static final field AV1 Ljava/lang/String;
+	public static final field EAC3 Ljava/lang/String;
+	public static final field FLAC Ljava/lang/String;
+	public static final field H264 Ljava/lang/String;
+	public static final field H265 Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/stream/ServerCodecNames;
+	public static final field MP3 Ljava/lang/String;
+	public static final field OPUS Ljava/lang/String;
+	public static final field VP9 Ljava/lang/String;
 }
 
