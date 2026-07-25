@@ -41,7 +41,7 @@ class EventEmitterTest {
         bus.emit(ping, 7)
         bus.emit("plugin:x:y", "z")
 
-        assertEquals(listOf("ping" to 7, "plugin:x:y" to "z"), seen)
+        assertEquals(listOf<Pair<String, Any?>>("ping" to 7, "plugin:x:y" to "z"), seen)
     }
 
     @Test
