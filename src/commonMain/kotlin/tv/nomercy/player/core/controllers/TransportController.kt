@@ -37,10 +37,21 @@ public class TransportController(
         ctx.assertReady()
         if (!allowed(CoreEvents.BeforePlay, opts, CoreEvents.PlayPrevented)) return
 
+        loadCurrentItemIfTheEngineHasNothing()
+
         ctx.playState = PlayState.PLAYING
         ctx.transitionPhase(PlayerPhase.STARTING)
         ctx.emit(CoreEvents.Play, PlaySource(opts.source))
         ctx.backend?.play()
+    }
+
+    // queue(items) then play() plays the first item. Without this the engine is
+    // told to play with nothing loaded and the viewer gets silence and a running
+    // clock, which is the hardest kind of bug to report.
+    private suspend fun loadCurrentItemIfTheEngineHasNothing() {
+        if (ctx.loadedItemId != null || ctx.queue.length() == 0) return
+        if (ctx.queue.currentIndex() < 0) ctx.queue.setCurrent(0)
+        ctx.queue.current()?.let { ctx.load(it) }
     }
 
     public suspend fun pause(opts: ActionOptions = ActionOptions()) {

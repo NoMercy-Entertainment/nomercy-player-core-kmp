@@ -108,9 +108,15 @@ public class PlayerContext(
     // The one path from an item to the engine. Every transport route ends up
     // here, so authorisation and the ending-soon latch are handled once instead
     // of at each call site.
+    // Which item the engine currently holds, so play() can tell an engine
+    // that has something loaded from one that has nothing.
+    public var loadedItemId: String? = null
+        private set
+
     public suspend fun load(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
         val url: String = auth?.transformUrl(item.url) ?: item.url
         backend?.load(url, opts)
+        loadedItemId = item.id
         itemEndingSoonEmitted = false
     }
 }

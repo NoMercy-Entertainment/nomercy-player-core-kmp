@@ -1017,6 +1017,8 @@ final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.pla
     final var itemEndingSoonEmitted // tv.nomercy.player.core.controllers/PlayerContext.itemEndingSoonEmitted|{}itemEndingSoonEmitted[0]
         final fun <get-itemEndingSoonEmitted>(): kotlin/Boolean // tv.nomercy.player.core.controllers/PlayerContext.itemEndingSoonEmitted.<get-itemEndingSoonEmitted>|<get-itemEndingSoonEmitted>(){}[0]
         final fun <set-itemEndingSoonEmitted>(kotlin/Boolean) // tv.nomercy.player.core.controllers/PlayerContext.itemEndingSoonEmitted.<set-itemEndingSoonEmitted>|<set-itemEndingSoonEmitted>(kotlin.Boolean){}[0]
+    final var loadedItemId // tv.nomercy.player.core.controllers/PlayerContext.loadedItemId|{}loadedItemId[0]
+        final fun <get-loadedItemId>(): kotlin/String? // tv.nomercy.player.core.controllers/PlayerContext.loadedItemId.<get-loadedItemId>|<get-loadedItemId>(){}[0]
     final var phase // tv.nomercy.player.core.controllers/PlayerContext.phase|{}phase[0]
         final fun <get-phase>(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.controllers/PlayerContext.phase.<get-phase>|<get-phase>(){}[0]
     final var playState // tv.nomercy.player.core.controllers/PlayerContext.playState|{}playState[0]

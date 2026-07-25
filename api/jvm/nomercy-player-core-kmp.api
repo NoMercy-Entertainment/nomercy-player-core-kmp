@@ -130,6 +130,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun getInternalDuration ()D
 	public final fun getInternalVolume ()I
 	public final fun getItemEndingSoonEmitted ()Z
+	public final fun getLoadedItemId ()Ljava/lang/String;
 	public final fun getPhase ()Ltv/nomercy/player/core/player/PlayerPhase;
 	public final fun getPlayState ()Ltv/nomercy/player/core/player/PlayState;
 	public final fun getPlaybackRate ()D
