@@ -3866,6 +3866,12 @@ final object tv.nomercy.player.core.ports/PlayerJson { // tv.nomercy.player.core
         final fun <get-instance>(): kotlinx.serialization.json/Json // tv.nomercy.player.core.ports/PlayerJson.instance.<get-instance>|<get-instance>(){}[0]
 }
 
+final object tv.nomercy.player.core.stream/MasterPlaylistRewriter { // tv.nomercy.player.core.stream/MasterPlaylistRewriter|null[0]
+    final fun descriptorOf(kotlin/String): tv.nomercy.player.core.media/QualityDescriptor? // tv.nomercy.player.core.stream/MasterPlaylistRewriter.descriptorOf|descriptorOf(kotlin.String){}[0]
+    final fun rewrite(kotlin/String, kotlin.collections/Collection<tv.nomercy.player.core.media/QualityDescriptor>): kotlin/String // tv.nomercy.player.core.stream/MasterPlaylistRewriter.rewrite|rewrite(kotlin.String;kotlin.collections.Collection<tv.nomercy.player.core.media.QualityDescriptor>){}[0]
+    final fun variants(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.media/QualityDescriptor> // tv.nomercy.player.core.stream/MasterPlaylistRewriter.variants|variants(kotlin.String){}[0]
+}
+
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
     final fun <get-CONTRACT_VERSION>(): kotlin/String // tv.nomercy.player.core/CONTRACT_VERSION.<get-CONTRACT_VERSION>|<get-CONTRACT_VERSION>(){}[0]
 final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]

@@ -3309,3 +3309,10 @@ public abstract interface class tv/nomercy/player/core/ports/WakeLock {
 	public abstract fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class tv/nomercy/player/core/stream/MasterPlaylistRewriter {
+	public static final field INSTANCE Ltv/nomercy/player/core/stream/MasterPlaylistRewriter;
+	public final fun descriptorOf (Ljava/lang/String;)Ltv/nomercy/player/core/media/QualityDescriptor;
+	public final fun rewrite (Ljava/lang/String;Ljava/util/Collection;)Ljava/lang/String;
+	public final fun variants (Ljava/lang/String;)Ljava/util/List;
+}
+
