@@ -682,6 +682,189 @@ public final class tv/nomercy/player/core/player/WakeLockPolicy$Companion {
 	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/player/WakeLockPolicy;
 }
 
-public abstract interface class tv/nomercy/player/core/plugin/Plugin {
+public abstract interface class tv/nomercy/player/core/plugin/ChromeContribution {
+	public fun getOrder ()I
+	public fun getReplaces ()Z
+	public abstract fun getSlot ()Ltv/nomercy/player/core/plugin/ChromeSlot;
+}
+
+public final class tv/nomercy/player/core/plugin/ChromeContribution$DefaultImpls {
+	public static fun getOrder (Ltv/nomercy/player/core/plugin/ChromeContribution;)I
+	public static fun getReplaces (Ltv/nomercy/player/core/plugin/ChromeContribution;)Z
+}
+
+public final class tv/nomercy/player/core/plugin/ChromeSlot : java/lang/Enum {
+	public static final field Background Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static final field Overlay Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static final field Scrubber Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static final field SettingsMenu Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static final field SidePanel Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static final field TopBar Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static final field Transport Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/ChromeSlot;
+	public static fun values ()[Ltv/nomercy/player/core/plugin/ChromeSlot;
+}
+
+public class tv/nomercy/player/core/plugin/LifecycleRegistry {
+	public static final field FRAME_INTERVAL_MS J
+	public fun <init> (Lkotlinx/coroutines/CoroutineScope;)V
+	public final fun addCleanup (Lkotlin/jvm/functions/Function0;)V
+	public final fun dispose ()V
+	public final fun frame (Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
+	public final fun getOnCleanupError ()Lkotlin/jvm/functions/Function1;
+	public final fun interval (JLkotlin/jvm/functions/Function0;)Lkotlinx/coroutines/Job;
+	public final fun isDisposed ()Z
+	public final fun launch (Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/Job;
+	public final fun listen (Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
+	public final fun setOnCleanupError (Lkotlin/jvm/functions/Function1;)V
+	public final fun timeout (JLkotlin/jvm/functions/Function0;)Lkotlinx/coroutines/Job;
+}
+
+public abstract class tv/nomercy/player/core/plugin/Plugin {
+	public fun <init> ()V
+	protected final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun dispose ()V
+	protected final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	protected final fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun fetch$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	protected final fun frame (Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
+	public final fun getId ()Ljava/lang/String;
+	protected final fun getLogger ()Ltv/nomercy/player/core/ports/Logger;
+	public abstract fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public fun getOptions ()Ljava/lang/Object;
+	protected final fun getResolvedOptions ()Ljava/lang/Object;
+	protected final fun getStorage ()Ltv/nomercy/player/core/ports/Storage;
+	protected final fun interval (JLkotlin/jvm/functions/Function0;)Lkotlinx/coroutines/Job;
+	protected final fun listen (Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
+	protected final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	protected final fun report (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;)V
+	public static synthetic fun report$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)V
+	protected final fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public static synthetic fun t$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+	protected final fun throwError (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;)Ljava/lang/Void;
+	public static synthetic fun throwError$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/Void;
+	protected final fun timeout (JLkotlin/jvm/functions/Function0;)Lkotlinx/coroutines/Job;
+	public fun use ()V
+	protected final fun websocket (Ljava/lang/String;Ltv/nomercy/player/core/ports/SocketOptions;)Ltv/nomercy/player/core/ports/RealtimeChannel;
+	public static synthetic fun websocket$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ltv/nomercy/player/core/ports/SocketOptions;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/RealtimeChannel;
+}
+
+public abstract interface class tv/nomercy/player/core/plugin/PluginHost {
+	public abstract fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public abstract fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun getRootLogger ()Ltv/nomercy/player/core/ports/Logger;
+	public abstract fun getRootStorage ()Ltv/nomercy/player/core/ports/Storage;
+	public abstract fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public abstract fun report (Ltv/nomercy/player/core/errors/PlayerError;)V
+	public abstract fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public abstract fun websocket (Ljava/lang/String;Ltv/nomercy/player/core/ports/SocketOptions;)Ltv/nomercy/player/core/ports/RealtimeChannel;
+}
+
+public abstract interface class tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public abstract fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public abstract fun getVersion ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginManifest$DefaultImpls {
+	public static fun getContributions (Ltv/nomercy/player/core/plugin/PluginManifest;)Ljava/util/List;
+	public static fun getMinCoreVersion (Ltv/nomercy/player/core/plugin/PluginManifest;)Ljava/lang/String;
+	public static fun getPriority (Ltv/nomercy/player/core/plugin/PluginManifest;)I
+	public static fun getReplaces (Ltv/nomercy/player/core/plugin/PluginManifest;)Ljava/util/List;
+	public static fun getRequires (Ltv/nomercy/player/core/plugin/PluginManifest;)Ljava/util/List;
+	public static fun getTranslations (Ltv/nomercy/player/core/plugin/PluginManifest;)Ljava/util/Map;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginManifestKt {
+	public static final fun pluginEventKey (Ltv/nomercy/player/core/plugin/PluginManifest;Ljava/lang/String;)Ltv/nomercy/player/core/events/EventKey;
+}
+
+public final class tv/nomercy/player/core/plugin/Requirement {
+	public fun <init> (Ltv/nomercy/player/core/plugin/PluginManifest;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/PluginManifest;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ltv/nomercy/player/core/plugin/PluginManifest;ZLjava/lang/String;)Ltv/nomercy/player/core/plugin/Requirement;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugin/Requirement;Ltv/nomercy/player/core/plugin/PluginManifest;ZLjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugin/Requirement;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public final fun getMinVersion ()Ljava/lang/String;
+	public final fun getOptional ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/FetchOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;)Ltv/nomercy/player/core/ports/FetchOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/FetchOptions;Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/FetchOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getHeaders ()Ljava/util/Map;
+	public final fun getMethod ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/FetchResponse {
+	public fun <init> (ILjava/util/Map;Ljava/lang/String;)V
+	public synthetic fun <init> (ILjava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (ILjava/util/Map;Ljava/lang/String;)Ltv/nomercy/player/core/ports/FetchResponse;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/FetchResponse;ILjava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/FetchResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getHeaders ()Ljava/util/Map;
+	public final fun getStatus ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/Logger {
+	public abstract fun child (Ljava/lang/String;)Ltv/nomercy/player/core/ports/Logger;
+	public abstract fun debug (Ljava/lang/String;[Ljava/lang/Object;)V
+	public abstract fun error (Ljava/lang/String;[Ljava/lang/Object;)V
+	public abstract fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public abstract fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
+}
+
+public abstract interface class tv/nomercy/player/core/ports/RealtimeChannel {
+	public abstract fun close ()V
+	public abstract fun getReadyState ()Ljava/lang/String;
+	public abstract fun send (Ljava/lang/String;)V
+}
+
+public final class tv/nomercy/player/core/ports/SocketOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ltv/nomercy/player/core/ports/SocketOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/SocketOptions;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/SocketOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProtocols ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/Storage {
+	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun remove (Ljava/lang/String;)V
+	public abstract fun set (Ljava/lang/String;Ljava/lang/String;)V
 }
 

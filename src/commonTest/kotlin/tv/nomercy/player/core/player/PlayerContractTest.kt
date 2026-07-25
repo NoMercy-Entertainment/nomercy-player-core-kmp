@@ -14,6 +14,7 @@ import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.plugin.Plugin
+import tv.nomercy.player.core.plugin.PluginManifest
 import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,7 +24,14 @@ import kotlin.test.assertTrue
 
 private data class FakeTrack(override val id: String) : PlaylistItem
 
-private class CountingPlugin : Plugin<Unit>
+private class CountingPlugin : Plugin<Unit>() {
+    companion object Manifest : PluginManifest {
+        override val id: String = "counting"
+        override val version: String = "1.0.0"
+    }
+
+    override val manifest: PluginManifest get() = Manifest
+}
 
 // A player small enough to read in one sitting, built only from what this plan
 // ships: the state holder for state, the P03 emitter for events. It exists to
