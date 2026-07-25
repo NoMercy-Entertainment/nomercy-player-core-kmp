@@ -3,6 +3,54 @@ public final class tv/nomercy/player/core/KitVersionKt {
 	public static final field KIT_VERSION Ljava/lang/String;
 }
 
+public class tv/nomercy/player/core/controllers/AuthController {
+	public fun <init> ()V
+	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/controllers/PlayerContext {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/events/EventEmitter;Ltv/nomercy/player/core/ports/MediaBackend;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/events/EventEmitter;Ltv/nomercy/player/core/ports/MediaBackend;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun assertReady ()V
+	public final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public final fun getAuth ()Ltv/nomercy/player/core/controllers/AuthController;
+	public final fun getBackend ()Ltv/nomercy/player/core/ports/MediaBackend;
+	public final fun getBacklog ()Ltv/nomercy/player/core/media/MediaList;
+	public final fun getEmitter ()Ltv/nomercy/player/core/events/EventEmitter;
+	public final fun getInternalCurrentTime ()D
+	public final fun getInternalDuration ()D
+	public final fun getInternalVolume ()I
+	public final fun getItemEndingSoonEmitted ()Z
+	public final fun getPhase ()Ltv/nomercy/player/core/player/PlayerPhase;
+	public final fun getPlayState ()Ltv/nomercy/player/core/player/PlayState;
+	public final fun getPlaybackRate ()D
+	public final fun getQueue ()Ltv/nomercy/player/core/media/MediaList;
+	public final fun getQueueWired ()Z
+	public final fun getRepeatState ()Ltv/nomercy/player/core/player/RepeatState;
+	public final fun getShuffleState ()Ltv/nomercy/player/core/player/ShuffleState;
+	public final fun getVolumeBeforeMute ()I
+	public final fun getVolumeState ()Ltv/nomercy/player/core/player/VolumeState;
+	public final fun load (Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun load$default (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun setAuth (Ltv/nomercy/player/core/controllers/AuthController;)V
+	public final fun setBackend (Ltv/nomercy/player/core/ports/MediaBackend;)V
+	public final fun setInternalCurrentTime (D)V
+	public final fun setInternalDuration (D)V
+	public final fun setInternalVolume (I)V
+	public final fun setItemEndingSoonEmitted (Z)V
+	public final fun setPlayState (Ltv/nomercy/player/core/player/PlayState;)V
+	public final fun setPlaybackRate (D)V
+	public final fun setQueueWired (Z)V
+	public final fun setRepeatState (Ltv/nomercy/player/core/player/RepeatState;)V
+	public final fun setShuffleState (Ltv/nomercy/player/core/player/ShuffleState;)V
+	public final fun setVolumeBeforeMute (I)V
+	public final fun setVolumeState (Ltv/nomercy/player/core/player/VolumeState;)V
+	public final fun transitionPhase (Ltv/nomercy/player/core/player/PlayerPhase;)V
+}
+
 public class tv/nomercy/player/core/errors/AuthError : tv/nomercy/player/core/errors/NetworkError {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
