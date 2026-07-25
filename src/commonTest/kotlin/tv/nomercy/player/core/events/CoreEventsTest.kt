@@ -15,7 +15,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class CoreEventsTest {
-    private data class Track(override val id: String) : PlaylistItem
+    private data class Track(
+        override val id: String,
+        override val url: String = "https://example.test/$id",
+        override val title: String? = null,
+    ) : PlaylistItem
 
     @Test
     fun everyKeyNameIsTheWebBaseEventMapKeyVerbatim() {

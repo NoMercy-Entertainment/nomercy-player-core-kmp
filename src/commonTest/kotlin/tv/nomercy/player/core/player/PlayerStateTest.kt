@@ -14,7 +14,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 
-private data class FakeItem(override val id: String) : PlaylistItem
+private data class FakeItem(
+    override val id: String,
+    override val url: String = "https://example.test/$id",
+    override val title: String? = null,
+) : PlaylistItem
 
 class PlayerStateTest {
 

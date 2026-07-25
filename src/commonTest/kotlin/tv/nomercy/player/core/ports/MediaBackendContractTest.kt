@@ -24,6 +24,7 @@ private class FakeAudioBackend : AudioBackend {
     private var level: Float = 1.0f
     private var levelBeforeMute: Float = 1.0f
     private var secondary: Float = 0.0f
+    private var rate: Double = 1.0
     private val listeners = mutableMapOf<String, MutableList<(Any?) -> Unit>>()
 
     private fun fire(event: String, data: Any?) {
@@ -76,6 +77,14 @@ private class FakeAudioBackend : AudioBackend {
 
     override fun unmute() {
         level = levelBeforeMute
+    }
+
+    override fun buffered(): Double = position + 10.0
+
+    override fun playbackRate(): Double = rate
+
+    override fun playbackRate(rate: Double) {
+        this.rate = rate
     }
 
     override fun state(): BackendState = backendState

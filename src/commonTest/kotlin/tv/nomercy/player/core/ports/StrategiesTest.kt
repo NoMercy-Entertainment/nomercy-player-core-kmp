@@ -17,7 +17,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-private data class Track(override val id: String) : PlaylistItem
+private data class Track(
+    override val id: String,
+    override val url: String = "https://example.test/$id",
+    override val title: String? = null,
+) : PlaylistItem
 
 private class GainSpyBackend(private val capable: Boolean = true) : TransitionBackend {
     var gain: Float = 0.0f

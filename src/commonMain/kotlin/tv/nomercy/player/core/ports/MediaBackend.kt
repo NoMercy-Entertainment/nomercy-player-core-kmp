@@ -18,7 +18,7 @@ package tv.nomercy.player.core.ports
 //
 // Wide because a media engine is wide. Splitting it would let an implementation
 // claim to be a backend while being unable to report its own duration.
-@Suppress("ComplexInterface")
+@Suppress("ComplexInterface", "TooManyFunctions")
 public interface MediaBackend {
     public suspend fun load(url: String, opts: LoadOptions = LoadOptions())
     public suspend fun play()
@@ -37,6 +37,13 @@ public interface MediaBackend {
     public fun volume(value: Float)
     public fun mute()
     public fun unmute()
+
+    // How far ahead of the playhead the engine has data, in seconds. What a
+    // scrubber draws its buffered bar from.
+    public fun buffered(): Double
+
+    public fun playbackRate(): Double
+    public fun playbackRate(rate: Double)
 
     public fun state(): BackendState
 

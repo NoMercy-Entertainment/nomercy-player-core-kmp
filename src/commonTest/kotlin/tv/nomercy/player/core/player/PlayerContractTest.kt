@@ -22,7 +22,11 @@ import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
-private data class FakeTrack(override val id: String) : PlaylistItem
+private data class FakeTrack(
+    override val id: String,
+    override val url: String = "https://example.test/$id",
+    override val title: String? = null,
+) : PlaylistItem
 
 private class CountingPlugin : Plugin<Unit>() {
     companion object Manifest : PluginManifest {

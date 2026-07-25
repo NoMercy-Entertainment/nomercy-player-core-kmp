@@ -194,6 +194,7 @@ public final class tv/nomercy/player/core/events/CoreEvents {
 	public final fun getEnded ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getItem ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPause ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPhase ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getPlay ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getStreamError ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getTime ()Ltv/nomercy/player/core/events/EventKey;
@@ -235,6 +236,19 @@ public final class tv/nomercy/player/core/events/ItemChange {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getIndex ()I
 	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/PhaseChange {
+	public fun <init> (Ltv/nomercy/player/core/player/PlayerPhase;Ltv/nomercy/player/core/player/PlayerPhase;)V
+	public final fun component1 ()Ltv/nomercy/player/core/player/PlayerPhase;
+	public final fun component2 ()Ltv/nomercy/player/core/player/PlayerPhase;
+	public final fun copy (Ltv/nomercy/player/core/player/PlayerPhase;Ltv/nomercy/player/core/player/PlayerPhase;)Ltv/nomercy/player/core/events/PhaseChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/PhaseChange;Ltv/nomercy/player/core/player/PlayerPhase;Ltv/nomercy/player/core/player/PlayerPhase;ILjava/lang/Object;)Ltv/nomercy/player/core/events/PhaseChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()Ltv/nomercy/player/core/player/PlayerPhase;
+	public final fun getTo ()Ltv/nomercy/player/core/player/PlayerPhase;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -291,8 +305,149 @@ public final class tv/nomercy/player/core/events/TimeUpdate {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/media/MediaList {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/ports/ShuffleStrategy;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/ShuffleStrategy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun append (Ljava/util/List;)V
+	public final fun clear ()V
+	public final fun current ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun currentIndex ()I
+	public final fun dispose ()V
+	public final fun get ()Ljava/util/List;
+	public final fun indexOf (Ljava/lang/String;)I
+	public final fun insert (Ljava/util/List;I)V
+	public final fun length ()I
+	public final fun move (II)V
+	public final fun onAppend (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onChange (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onClear (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onCurrent (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onInsert (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onMove (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onPrepend (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onRemove (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onShuffle (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onSort (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun peekNext ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun peekPrevious ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun prepend (Ljava/util/List;)V
+	public final fun remove (Ljava/lang/String;)V
+	public final fun removeAt (I)V
+	public final fun replaceItem (Ljava/lang/String;Ltv/nomercy/player/core/media/PlaylistItem;)V
+	public final fun set (Ljava/util/List;)V
+	public final fun setCurrent (I)V
+	public final fun setCurrent (Ljava/lang/String;)V
+	public final fun setCurrent (Lkotlin/jvm/functions/Function1;)V
+	public final fun setCurrent (Ltv/nomercy/player/core/media/PlaylistItem;)V
+	public final fun shuffle ()V
+	public final fun sort (Ljava/util/Comparator;)V
+}
+
+public final class tv/nomercy/player/core/media/MediaListAppend {
+	public fun <init> (Ljava/util/List;I)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun copy (Ljava/util/List;I)Ltv/nomercy/player/core/media/MediaListAppend;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListAppend;Ljava/util/List;IILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListAppend;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()I
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListChange {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ltv/nomercy/player/core/media/MediaListChange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListChange;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListChange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListClear {
+	public fun <init> (I)V
+	public final fun component1 ()I
+	public final fun copy (I)Ltv/nomercy/player/core/media/MediaListClear;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListClear;IILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListClear;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPreviousLength ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListCurrent {
+	public fun <init> (Ljava/lang/Object;I)V
+	public final fun component1 ()Ljava/lang/Object;
+	public final fun component2 ()I
+	public final fun copy (Ljava/lang/Object;I)Ltv/nomercy/player/core/media/MediaListCurrent;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListCurrent;Ljava/lang/Object;IILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListCurrent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public final fun getItem ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListInsert {
+	public fun <init> (Ljava/util/List;I)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun copy (Ljava/util/List;I)Ltv/nomercy/player/core/media/MediaListInsert;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListInsert;Ljava/util/List;IILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListInsert;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIndex ()I
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListMove {
+	public fun <init> (II)V
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun copy (II)Ltv/nomercy/player/core/media/MediaListMove;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListMove;IIILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListMove;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()I
+	public final fun getTo ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListPrepend {
+	public fun <init> (Ljava/util/List;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Ltv/nomercy/player/core/media/MediaListPrepend;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListPrepend;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListPrepend;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/MediaListRemove {
+	public fun <init> (Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Ljava/lang/Object;
+	public final fun copy (Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListRemove;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/MediaListRemove;Ljava/lang/String;ILjava/lang/Object;ILjava/lang/Object;)Ltv/nomercy/player/core/media/MediaListRemove;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getIndex ()I
+	public final fun getItem ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class tv/nomercy/player/core/media/PlaylistItem {
 	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getTitle ()Ljava/lang/String;
+	public abstract fun getUrl ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/player/ActionOptions {
@@ -1087,6 +1242,7 @@ public abstract interface class tv/nomercy/player/core/ports/Logger {
 }
 
 public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
+	public abstract fun buffered ()D
 	public abstract fun currentTime ()D
 	public abstract fun currentTime (D)V
 	public abstract fun duration ()D
@@ -1097,6 +1253,8 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun pause ()V
 	public abstract fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun playbackRate ()D
+	public abstract fun playbackRate (D)V
 	public abstract fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public abstract fun stop ()V
 	public abstract fun unmute ()V

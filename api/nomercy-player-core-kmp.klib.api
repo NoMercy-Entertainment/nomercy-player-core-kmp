@@ -492,6 +492,10 @@ abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.player/Player { // t
 abstract interface tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/PlaylistItem|null[0]
     abstract val id // tv.nomercy.player.core.media/PlaylistItem.id|{}id[0]
         abstract fun <get-id>(): kotlin/String // tv.nomercy.player.core.media/PlaylistItem.id.<get-id>|<get-id>(){}[0]
+    abstract val title // tv.nomercy.player.core.media/PlaylistItem.title|{}title[0]
+        abstract fun <get-title>(): kotlin/String? // tv.nomercy.player.core.media/PlaylistItem.title.<get-title>|<get-title>(){}[0]
+    abstract val url // tv.nomercy.player.core.media/PlaylistItem.url|{}url[0]
+        abstract fun <get-url>(): kotlin/String // tv.nomercy.player.core.media/PlaylistItem.url.<get-url>|<get-url>(){}[0]
 }
 
 abstract interface tv.nomercy.player.core.player/TokenEnum { // tv.nomercy.player.core.player/TokenEnum|null[0]
@@ -574,6 +578,7 @@ abstract interface tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.co
 }
 
 abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.core.ports/MediaBackend|null[0]
+    abstract fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.buffered|buffered(){}[0]
     abstract fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.currentTime|currentTime(){}[0]
     abstract fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.currentTime|currentTime(kotlin.Double){}[0]
     abstract fun duration(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.duration|duration(){}[0]
@@ -581,6 +586,8 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     abstract fun off(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/MediaBackend.off|off(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
     abstract fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/MediaBackend.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
     abstract fun pause() // tv.nomercy.player.core.ports/MediaBackend.pause|pause(){}[0]
+    abstract fun playbackRate(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.playbackRate|playbackRate(){}[0]
+    abstract fun playbackRate(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.playbackRate|playbackRate(kotlin.Double){}[0]
     abstract fun state(): tv.nomercy.player.core.ports/BackendState // tv.nomercy.player.core.ports/MediaBackend.state|state(){}[0]
     abstract fun stop() // tv.nomercy.player.core.ports/MediaBackend.stop|stop(){}[0]
     abstract fun unmute() // tv.nomercy.player.core.ports/MediaBackend.unmute|unmute(){}[0]
@@ -827,6 +834,137 @@ final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventKey { // tv.nom
         final fun <get-name>(): kotlin/String // tv.nomercy.player.core.events/EventKey.name.<get-name>|<get-name>(){}[0]
 }
 
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListAppend { // tv.nomercy.player.core.media/MediaListAppend|null[0]
+    constructor <init>(kotlin.collections/List<#A>, kotlin/Int) // tv.nomercy.player.core.media/MediaListAppend.<init>|<init>(kotlin.collections.List<1:0>;kotlin.Int){}[0]
+
+    final val from // tv.nomercy.player.core.media/MediaListAppend.from|{}from[0]
+        final fun <get-from>(): kotlin/Int // tv.nomercy.player.core.media/MediaListAppend.from.<get-from>|<get-from>(){}[0]
+    final val items // tv.nomercy.player.core.media/MediaListAppend.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListAppend.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListAppend.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.media/MediaListAppend.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<#A> = ..., kotlin/Int = ...): tv.nomercy.player.core.media/MediaListAppend<#A> // tv.nomercy.player.core.media/MediaListAppend.copy|copy(kotlin.collections.List<1:0>;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListAppend.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListAppend.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListAppend.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListChange { // tv.nomercy.player.core.media/MediaListChange|null[0]
+    constructor <init>(kotlin.collections/List<#A>) // tv.nomercy.player.core.media/MediaListChange.<init>|<init>(kotlin.collections.List<1:0>){}[0]
+
+    final val items // tv.nomercy.player.core.media/MediaListChange.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListChange.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListChange.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<#A> = ...): tv.nomercy.player.core.media/MediaListChange<#A> // tv.nomercy.player.core.media/MediaListChange.copy|copy(kotlin.collections.List<1:0>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListChange.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListChange.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListChange.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListCurrent { // tv.nomercy.player.core.media/MediaListCurrent|null[0]
+    constructor <init>(#A?, kotlin/Int) // tv.nomercy.player.core.media/MediaListCurrent.<init>|<init>(1:0?;kotlin.Int){}[0]
+
+    final val index // tv.nomercy.player.core.media/MediaListCurrent.index|{}index[0]
+        final fun <get-index>(): kotlin/Int // tv.nomercy.player.core.media/MediaListCurrent.index.<get-index>|<get-index>(){}[0]
+    final val item // tv.nomercy.player.core.media/MediaListCurrent.item|{}item[0]
+        final fun <get-item>(): #A? // tv.nomercy.player.core.media/MediaListCurrent.item.<get-item>|<get-item>(){}[0]
+
+    final fun component1(): #A? // tv.nomercy.player.core.media/MediaListCurrent.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.media/MediaListCurrent.component2|component2(){}[0]
+    final fun copy(#A? = ..., kotlin/Int = ...): tv.nomercy.player.core.media/MediaListCurrent<#A> // tv.nomercy.player.core.media/MediaListCurrent.copy|copy(1:0?;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListCurrent.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListCurrent.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListCurrent.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListInsert { // tv.nomercy.player.core.media/MediaListInsert|null[0]
+    constructor <init>(kotlin.collections/List<#A>, kotlin/Int) // tv.nomercy.player.core.media/MediaListInsert.<init>|<init>(kotlin.collections.List<1:0>;kotlin.Int){}[0]
+
+    final val index // tv.nomercy.player.core.media/MediaListInsert.index|{}index[0]
+        final fun <get-index>(): kotlin/Int // tv.nomercy.player.core.media/MediaListInsert.index.<get-index>|<get-index>(){}[0]
+    final val items // tv.nomercy.player.core.media/MediaListInsert.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListInsert.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListInsert.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.media/MediaListInsert.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<#A> = ..., kotlin/Int = ...): tv.nomercy.player.core.media/MediaListInsert<#A> // tv.nomercy.player.core.media/MediaListInsert.copy|copy(kotlin.collections.List<1:0>;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListInsert.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListInsert.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListInsert.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListPrepend { // tv.nomercy.player.core.media/MediaListPrepend|null[0]
+    constructor <init>(kotlin.collections/List<#A>) // tv.nomercy.player.core.media/MediaListPrepend.<init>|<init>(kotlin.collections.List<1:0>){}[0]
+
+    final val items // tv.nomercy.player.core.media/MediaListPrepend.items|{}items[0]
+        final fun <get-items>(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListPrepend.items.<get-items>|<get-items>(){}[0]
+
+    final fun component1(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaListPrepend.component1|component1(){}[0]
+    final fun copy(kotlin.collections/List<#A> = ...): tv.nomercy.player.core.media/MediaListPrepend<#A> // tv.nomercy.player.core.media/MediaListPrepend.copy|copy(kotlin.collections.List<1:0>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListPrepend.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListPrepend.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListPrepend.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListRemove { // tv.nomercy.player.core.media/MediaListRemove|null[0]
+    constructor <init>(kotlin/String, kotlin/Int, #A) // tv.nomercy.player.core.media/MediaListRemove.<init>|<init>(kotlin.String;kotlin.Int;1:0){}[0]
+
+    final val id // tv.nomercy.player.core.media/MediaListRemove.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.media/MediaListRemove.id.<get-id>|<get-id>(){}[0]
+    final val index // tv.nomercy.player.core.media/MediaListRemove.index|{}index[0]
+        final fun <get-index>(): kotlin/Int // tv.nomercy.player.core.media/MediaListRemove.index.<get-index>|<get-index>(){}[0]
+    final val item // tv.nomercy.player.core.media/MediaListRemove.item|{}item[0]
+        final fun <get-item>(): #A // tv.nomercy.player.core.media/MediaListRemove.item.<get-item>|<get-item>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.media/MediaListRemove.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.media/MediaListRemove.component2|component2(){}[0]
+    final fun component3(): #A // tv.nomercy.player.core.media/MediaListRemove.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Int = ..., #A = ...): tv.nomercy.player.core.media/MediaListRemove<#A> // tv.nomercy.player.core.media/MediaListRemove.copy|copy(kotlin.String;kotlin.Int;1:0){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListRemove.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListRemove.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListRemove.toString|toString(){}[0]
+}
+
+final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.core.media/MediaList { // tv.nomercy.player.core.media/MediaList|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/ShuffleStrategy = ...) // tv.nomercy.player.core.media/MediaList.<init>|<init>(tv.nomercy.player.core.ports.ShuffleStrategy){}[0]
+
+    final fun append(kotlin.collections/List<#A>) // tv.nomercy.player.core.media/MediaList.append|append(kotlin.collections.List<1:0>){}[0]
+    final fun clear() // tv.nomercy.player.core.media/MediaList.clear|clear(){}[0]
+    final fun current(): #A? // tv.nomercy.player.core.media/MediaList.current|current(){}[0]
+    final fun currentIndex(): kotlin/Int // tv.nomercy.player.core.media/MediaList.currentIndex|currentIndex(){}[0]
+    final fun dispose() // tv.nomercy.player.core.media/MediaList.dispose|dispose(){}[0]
+    final fun get(): kotlin.collections/List<#A> // tv.nomercy.player.core.media/MediaList.get|get(){}[0]
+    final fun indexOf(kotlin/String): kotlin/Int // tv.nomercy.player.core.media/MediaList.indexOf|indexOf(kotlin.String){}[0]
+    final fun insert(kotlin.collections/List<#A>, kotlin/Int) // tv.nomercy.player.core.media/MediaList.insert|insert(kotlin.collections.List<1:0>;kotlin.Int){}[0]
+    final fun length(): kotlin/Int // tv.nomercy.player.core.media/MediaList.length|length(){}[0]
+    final fun move(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.media/MediaList.move|move(kotlin.Int;kotlin.Int){}[0]
+    final fun onAppend(kotlin/Function1<tv.nomercy.player.core.media/MediaListAppend<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onAppend|onAppend(kotlin.Function1<tv.nomercy.player.core.media.MediaListAppend<1:0>,kotlin.Unit>){}[0]
+    final fun onChange(kotlin/Function1<tv.nomercy.player.core.media/MediaListChange<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onChange|onChange(kotlin.Function1<tv.nomercy.player.core.media.MediaListChange<1:0>,kotlin.Unit>){}[0]
+    final fun onClear(kotlin/Function1<tv.nomercy.player.core.media/MediaListClear, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onClear|onClear(kotlin.Function1<tv.nomercy.player.core.media.MediaListClear,kotlin.Unit>){}[0]
+    final fun onCurrent(kotlin/Function1<tv.nomercy.player.core.media/MediaListCurrent<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onCurrent|onCurrent(kotlin.Function1<tv.nomercy.player.core.media.MediaListCurrent<1:0>,kotlin.Unit>){}[0]
+    final fun onInsert(kotlin/Function1<tv.nomercy.player.core.media/MediaListInsert<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onInsert|onInsert(kotlin.Function1<tv.nomercy.player.core.media.MediaListInsert<1:0>,kotlin.Unit>){}[0]
+    final fun onMove(kotlin/Function1<tv.nomercy.player.core.media/MediaListMove, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onMove|onMove(kotlin.Function1<tv.nomercy.player.core.media.MediaListMove,kotlin.Unit>){}[0]
+    final fun onPrepend(kotlin/Function1<tv.nomercy.player.core.media/MediaListPrepend<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onPrepend|onPrepend(kotlin.Function1<tv.nomercy.player.core.media.MediaListPrepend<1:0>,kotlin.Unit>){}[0]
+    final fun onRemove(kotlin/Function1<tv.nomercy.player.core.media/MediaListRemove<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onRemove|onRemove(kotlin.Function1<tv.nomercy.player.core.media.MediaListRemove<1:0>,kotlin.Unit>){}[0]
+    final fun onShuffle(kotlin/Function1<tv.nomercy.player.core.media/MediaListChange<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onShuffle|onShuffle(kotlin.Function1<tv.nomercy.player.core.media.MediaListChange<1:0>,kotlin.Unit>){}[0]
+    final fun onSort(kotlin/Function1<tv.nomercy.player.core.media/MediaListChange<#A>, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.media/MediaList.onSort|onSort(kotlin.Function1<tv.nomercy.player.core.media.MediaListChange<1:0>,kotlin.Unit>){}[0]
+    final fun peekNext(): #A? // tv.nomercy.player.core.media/MediaList.peekNext|peekNext(){}[0]
+    final fun peekPrevious(): #A? // tv.nomercy.player.core.media/MediaList.peekPrevious|peekPrevious(){}[0]
+    final fun prepend(kotlin.collections/List<#A>) // tv.nomercy.player.core.media/MediaList.prepend|prepend(kotlin.collections.List<1:0>){}[0]
+    final fun remove(kotlin/String) // tv.nomercy.player.core.media/MediaList.remove|remove(kotlin.String){}[0]
+    final fun removeAt(kotlin/Int) // tv.nomercy.player.core.media/MediaList.removeAt|removeAt(kotlin.Int){}[0]
+    final fun replaceItem(kotlin/String, #A) // tv.nomercy.player.core.media/MediaList.replaceItem|replaceItem(kotlin.String;1:0){}[0]
+    final fun set(kotlin.collections/List<#A>) // tv.nomercy.player.core.media/MediaList.set|set(kotlin.collections.List<1:0>){}[0]
+    final fun setCurrent(#A) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(1:0){}[0]
+    final fun setCurrent(kotlin/Function1<#A, kotlin/Boolean>) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.Function1<1:0,kotlin.Boolean>){}[0]
+    final fun setCurrent(kotlin/Int) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.Int){}[0]
+    final fun setCurrent(kotlin/String) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.String){}[0]
+    final fun shuffle() // tv.nomercy.player.core.media/MediaList.shuffle|shuffle(){}[0]
+    final fun sort(kotlin/Comparator<#A>) // tv.nomercy.player.core.media/MediaList.sort|sort(kotlin.Comparator<1:0>){}[0]
+}
+
 final class tv.nomercy.player.core.errors/ErrorCode { // tv.nomercy.player.core.errors/ErrorCode|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.errors/ErrorCode.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
 
@@ -891,6 +1029,22 @@ final class tv.nomercy.player.core.events/ItemChange { // tv.nomercy.player.core
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/ItemChange.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.events/PhaseChange { // tv.nomercy.player.core.events/PhaseChange|null[0]
+    constructor <init>(tv.nomercy.player.core.player/PlayerPhase, tv.nomercy.player.core.player/PlayerPhase) // tv.nomercy.player.core.events/PhaseChange.<init>|<init>(tv.nomercy.player.core.player.PlayerPhase;tv.nomercy.player.core.player.PlayerPhase){}[0]
+
+    final val from // tv.nomercy.player.core.events/PhaseChange.from|{}from[0]
+        final fun <get-from>(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.events/PhaseChange.from.<get-from>|<get-from>(){}[0]
+    final val to // tv.nomercy.player.core.events/PhaseChange.to|{}to[0]
+        final fun <get-to>(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.events/PhaseChange.to.<get-to>|<get-to>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.events/PhaseChange.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.events/PhaseChange.component2|component2(){}[0]
+    final fun copy(tv.nomercy.player.core.player/PlayerPhase = ..., tv.nomercy.player.core.player/PlayerPhase = ...): tv.nomercy.player.core.events/PhaseChange // tv.nomercy.player.core.events/PhaseChange.copy|copy(tv.nomercy.player.core.player.PlayerPhase;tv.nomercy.player.core.player.PlayerPhase){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/PhaseChange.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/PhaseChange.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/PhaseChange.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.events/PlaySource { // tv.nomercy.player.core.events/PlaySource|null[0]
     constructor <init>(kotlin/String? = ...) // tv.nomercy.player.core.events/PlaySource.<init>|<init>(kotlin.String?){}[0]
 
@@ -937,6 +1091,35 @@ final class tv.nomercy.player.core.events/TimeUpdate { // tv.nomercy.player.core
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/TimeUpdate.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/TimeUpdate.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/TimeUpdate.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/MediaListClear { // tv.nomercy.player.core.media/MediaListClear|null[0]
+    constructor <init>(kotlin/Int) // tv.nomercy.player.core.media/MediaListClear.<init>|<init>(kotlin.Int){}[0]
+
+    final val previousLength // tv.nomercy.player.core.media/MediaListClear.previousLength|{}previousLength[0]
+        final fun <get-previousLength>(): kotlin/Int // tv.nomercy.player.core.media/MediaListClear.previousLength.<get-previousLength>|<get-previousLength>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.media/MediaListClear.component1|component1(){}[0]
+    final fun copy(kotlin/Int = ...): tv.nomercy.player.core.media/MediaListClear // tv.nomercy.player.core.media/MediaListClear.copy|copy(kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListClear.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListClear.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListClear.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/MediaListMove { // tv.nomercy.player.core.media/MediaListMove|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.media/MediaListMove.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
+
+    final val from // tv.nomercy.player.core.media/MediaListMove.from|{}from[0]
+        final fun <get-from>(): kotlin/Int // tv.nomercy.player.core.media/MediaListMove.from.<get-from>|<get-from>(){}[0]
+    final val to // tv.nomercy.player.core.media/MediaListMove.to|{}to[0]
+        final fun <get-to>(): kotlin/Int // tv.nomercy.player.core.media/MediaListMove.to.<get-to>|<get-to>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.media/MediaListMove.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.media/MediaListMove.component2|component2(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ...): tv.nomercy.player.core.media/MediaListMove // tv.nomercy.player.core.media/MediaListMove.copy|copy(kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListMove.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListMove.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListMove.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.player/ActionOptions { // tv.nomercy.player.core.player/ActionOptions|null[0]
@@ -1628,6 +1811,8 @@ final object tv.nomercy.player.core.events/CoreEvents { // tv.nomercy.player.cor
         final fun <get-Item>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/ItemChange> // tv.nomercy.player.core.events/CoreEvents.Item.<get-Item>|<get-Item>(){}[0]
     final val Pause // tv.nomercy.player.core.events/CoreEvents.Pause|{}Pause[0]
         final fun <get-Pause>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Pause.<get-Pause>|<get-Pause>(){}[0]
+    final val Phase // tv.nomercy.player.core.events/CoreEvents.Phase|{}Phase[0]
+        final fun <get-Phase>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PhaseChange> // tv.nomercy.player.core.events/CoreEvents.Phase.<get-Phase>|<get-Phase>(){}[0]
     final val Play // tv.nomercy.player.core.events/CoreEvents.Play|{}Play[0]
         final fun <get-Play>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/PlaySource> // tv.nomercy.player.core.events/CoreEvents.Play.<get-Play>|<get-Play>(){}[0]
     final val StreamError // tv.nomercy.player.core.events/CoreEvents.StreamError|{}StreamError[0]

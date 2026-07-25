@@ -9,11 +9,19 @@
 package tv.nomercy.player.core.events
 
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.player.PlayerPhase
 
 // Payload for play and pause. Mirror of the web ActionOptions.source: who asked
 // for the action, so a listener can tell a UI click from a Connect handoff from
 // an autoplay chain.
 public data class PlaySource(val source: String? = null)
+
+// Payload for phase. Carries both ends of the move, because a listener that
+// only knows where the player arrived cannot tell a pause from a stall.
+public data class PhaseChange(
+    val from: PlayerPhase,
+    val to: PlayerPhase,
+)
 
 // Payload for time. Mirror of the web TimeState core fields. Seconds, not
 // milliseconds, matching the web contract and the HTML media element.

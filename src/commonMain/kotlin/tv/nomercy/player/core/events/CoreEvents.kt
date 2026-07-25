@@ -28,6 +28,7 @@ public object CoreEvents {
     public val Time: EventKey<TimeUpdate> = EventKey("time")
     public val Item: EventKey<ItemChange> = EventKey("item")
     public val Ended: EventKey<Unit> = EventKey("ended")
+    public val Phase: EventKey<PhaseChange> = EventKey("phase")
     public val BeforePlay: EventKey<BeforeEvent<PlaySource>> = EventKey("beforePlay")
 
     // The property and the payload class deliberately share a spelling: Kotlin
