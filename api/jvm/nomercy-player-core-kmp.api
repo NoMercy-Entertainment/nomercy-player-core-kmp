@@ -3,6 +3,21 @@ public final class tv/nomercy/player/core/KitVersionKt {
 	public static final field KIT_VERSION Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/EventEmitter {
+	public fun <init> ()V
+	public final fun emit (Ljava/lang/String;Ljava/lang/Object;)V
+	public final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public final fun getOnListenerError ()Lkotlin/jvm/functions/Function2;
+	public final fun hasListeners (Ljava/lang/String;)Z
+	public final fun listenerCount ()I
+	public final fun off (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)V
+	public final fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun once (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun setOnListenerError (Lkotlin/jvm/functions/Function2;)V
+}
+
 public final class tv/nomercy/player/core/events/EventKey {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getName ()Ljava/lang/String;

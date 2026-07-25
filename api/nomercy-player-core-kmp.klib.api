@@ -10,6 +10,24 @@ abstract fun interface tv.nomercy.player.core.events/Subscription { // tv.nomerc
     abstract fun dispose() // tv.nomercy.player.core.events/Subscription.dispose|dispose(){}[0]
 }
 
+final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventEmitter { // tv.nomercy.player.core.events/EventEmitter|null[0]
+    constructor <init>() // tv.nomercy.player.core.events/EventEmitter.<init>|<init>(){}[0]
+
+    final var onListenerError // tv.nomercy.player.core.events/EventEmitter.onListenerError|{}onListenerError[0]
+        final fun <get-onListenerError>(): kotlin/Function2<kotlin/String, kotlin/Throwable, kotlin/Unit>? // tv.nomercy.player.core.events/EventEmitter.onListenerError.<get-onListenerError>|<get-onListenerError>(){}[0]
+        final fun <set-onListenerError>(kotlin/Function2<kotlin/String, kotlin/Throwable, kotlin/Unit>?) // tv.nomercy.player.core.events/EventEmitter.onListenerError.<set-onListenerError>|<set-onListenerError>(kotlin.Function2<kotlin.String,kotlin.Throwable,kotlin.Unit>?){}[0]
+
+    final fun <#A1: kotlin/Any?> emit(tv.nomercy.player.core.events/EventKey<#A1>, #A1) // tv.nomercy.player.core.events/EventEmitter.emit|emit(tv.nomercy.player.core.events.EventKey<0:0>;0:0){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> off(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>) // tv.nomercy.player.core.events/EventEmitter.off|off(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.events/EventEmitter.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> once(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.events/EventEmitter.once|once(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun emit(kotlin/String, kotlin/Any?) // tv.nomercy.player.core.events/EventEmitter.emit|emit(kotlin.String;kotlin.Any?){}[0]
+    final fun hasListeners(kotlin/String): kotlin/Boolean // tv.nomercy.player.core.events/EventEmitter.hasListeners|hasListeners(kotlin.String){}[0]
+    final fun listenerCount(): kotlin/Int // tv.nomercy.player.core.events/EventEmitter.listenerCount|listenerCount(){}[0]
+    final fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.events/EventEmitter.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun onAll(kotlin/Function2<kotlin/String, kotlin/Any?, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.events/EventEmitter.onAll|onAll(kotlin.Function2<kotlin.String,kotlin.Any?,kotlin.Unit>){}[0]
+}
+
 final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventKey { // tv.nomercy.player.core.events/EventKey|null[0]
     constructor <init>(kotlin/String) // tv.nomercy.player.core.events/EventKey.<init>|<init>(kotlin.String){}[0]
 

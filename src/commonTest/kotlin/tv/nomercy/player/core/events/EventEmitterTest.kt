@@ -95,7 +95,7 @@ class EventEmitterTest {
         var goodRan = false
         var capturedName: String? = null
         bus.onListenerError = { name, _ -> capturedName = name }
-        bus.on(ping) { throw RuntimeException("boom") }
+        bus.on(ping) { throw IllegalStateException("boom") }
         bus.on(ping) { goodRan = true }
 
         bus.emit(ping, 1)
@@ -108,7 +108,7 @@ class EventEmitterTest {
     fun throwingListenerIsSwallowedByDefaultWithNoErrorHookInstalled() {
         val bus = EventEmitter<Any>()
         var goodRan = false
-        bus.on(ping) { throw RuntimeException("boom") }
+        bus.on(ping) { throw IllegalStateException("boom") }
         bus.on(ping) { goodRan = true }
 
         bus.emit(ping, 1)
