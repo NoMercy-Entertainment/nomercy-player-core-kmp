@@ -1,0 +1,12 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, iosX64, tvosArm64, tvosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <nomercy-player-core-kmp>
+final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
+    final fun <get-CONTRACT_VERSION>(): kotlin/String // tv.nomercy.player.core/CONTRACT_VERSION.<get-CONTRACT_VERSION>|<get-CONTRACT_VERSION>(){}[0]
+final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]
+    final fun <get-KIT_VERSION>(): kotlin/String // tv.nomercy.player.core/KIT_VERSION.<get-KIT_VERSION>|<get-KIT_VERSION>(){}[0]

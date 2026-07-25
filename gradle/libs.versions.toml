@@ -1,0 +1,28 @@
+[versions]
+# Pinned to nomercy-app-kmp's catalog. The app consumes this library, and a
+# Kotlin/AGP split between the two produces metadata the app cannot read.
+# Changing either of these two lines requires changing the app in the same pass.
+kotlin = "2.2.21"
+agp = "9.0.1"
+
+coroutines = "1.10.2"
+serialization = "1.9.0"
+
+detekt = "1.23.8"
+binaryCompatibilityValidator = "0.18.1"
+mavenPublish = "0.37.0"
+skie = "0.10.13"
+
+[libraries]
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+
+[plugins]
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+binary-compatibility-validator = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "binaryCompatibilityValidator" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }

@@ -1,0 +1,5 @@
+public final class tv/nomercy/player/core/KitVersionKt {
+	public static final field CONTRACT_VERSION Ljava/lang/String;
+	public static final field KIT_VERSION Ljava/lang/String;
+}
+
