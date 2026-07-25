@@ -2536,6 +2536,44 @@ final class tv.nomercy.player.core.events/VolumeChange { // tv.nomercy.player.co
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/VolumeChange.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.media/Chapter { // tv.nomercy.player.core.media/Chapter|null[0]
+    constructor <init>(kotlin/Double, kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.media/Chapter.<init>|<init>(kotlin.Double;kotlin.String;kotlin.String?){}[0]
+
+    final val imageUrl // tv.nomercy.player.core.media/Chapter.imageUrl|{}imageUrl[0]
+        final fun <get-imageUrl>(): kotlin/String? // tv.nomercy.player.core.media/Chapter.imageUrl.<get-imageUrl>|<get-imageUrl>(){}[0]
+    final val startTime // tv.nomercy.player.core.media/Chapter.startTime|{}startTime[0]
+        final fun <get-startTime>(): kotlin/Double // tv.nomercy.player.core.media/Chapter.startTime.<get-startTime>|<get-startTime>(){}[0]
+    final val title // tv.nomercy.player.core.media/Chapter.title|{}title[0]
+        final fun <get-title>(): kotlin/String // tv.nomercy.player.core.media/Chapter.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/Double // tv.nomercy.player.core.media/Chapter.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.media/Chapter.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // tv.nomercy.player.core.media/Chapter.component3|component3(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/String = ..., kotlin/String? = ...): tv.nomercy.player.core.media/Chapter // tv.nomercy.player.core.media/Chapter.copy|copy(kotlin.Double;kotlin.String;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/Chapter.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/Chapter.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/Chapter.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/ChapterTrack { // tv.nomercy.player.core.media/ChapterTrack|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>) // tv.nomercy.player.core.media/ChapterTrack.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>){}[0]
+
+    final val chapters // tv.nomercy.player.core.media/ChapterTrack.chapters|{}chapters[0]
+        final fun <get-chapters>(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.media/ChapterTrack.chapters.<get-chapters>|<get-chapters>(){}[0]
+
+    final fun at(kotlin/Double): tv.nomercy.player.core.media/Chapter? // tv.nomercy.player.core.media/ChapterTrack.at|at(kotlin.Double){}[0]
+    final fun indexAt(kotlin/Double): kotlin/Int // tv.nomercy.player.core.media/ChapterTrack.indexAt|indexAt(kotlin.Double){}[0]
+    final fun isEmpty(): kotlin/Boolean // tv.nomercy.player.core.media/ChapterTrack.isEmpty|isEmpty(){}[0]
+    final fun nextStart(kotlin/Double): kotlin/Double? // tv.nomercy.player.core.media/ChapterTrack.nextStart|nextStart(kotlin.Double){}[0]
+    final fun previousStart(kotlin/Double, kotlin/Double = ...): kotlin/Double? // tv.nomercy.player.core.media/ChapterTrack.previousStart|previousStart(kotlin.Double;kotlin.Double){}[0]
+    final fun size(): kotlin/Int // tv.nomercy.player.core.media/ChapterTrack.size|size(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.media/ChapterTrack.Companion|null[0]
+        final const val DEFAULT_RESTART_WINDOW // tv.nomercy.player.core.media/ChapterTrack.Companion.DEFAULT_RESTART_WINDOW|{}DEFAULT_RESTART_WINDOW[0]
+            final fun <get-DEFAULT_RESTART_WINDOW>(): kotlin/Double // tv.nomercy.player.core.media/ChapterTrack.Companion.DEFAULT_RESTART_WINDOW.<get-DEFAULT_RESTART_WINDOW>|<get-DEFAULT_RESTART_WINDOW>(){}[0]
+    }
+}
+
 final class tv.nomercy.player.core.media/MediaListClear { // tv.nomercy.player.core.media/MediaListClear|null[0]
     constructor <init>(kotlin/Int) // tv.nomercy.player.core.media/MediaListClear.<init>|<init>(kotlin.Int){}[0]
 
