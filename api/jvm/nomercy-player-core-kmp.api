@@ -1562,6 +1562,24 @@ public final class tv/nomercy/player/core/ports/Backoff : java/lang/Enum {
 	public static fun values ()[Ltv/nomercy/player/core/ports/Backoff;
 }
 
+public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
+	public static final field CAN_PLAY Ljava/lang/String;
+	public static final field ENDED Ljava/lang/String;
+	public static final field ERROR Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/CanonicalBackendEvent;
+	public static final field LOADED_METADATA Ljava/lang/String;
+	public static final field LOAD_START Ljava/lang/String;
+	public static final field PAUSE Ljava/lang/String;
+	public static final field PLAY Ljava/lang/String;
+	public static final field PLAYING Ljava/lang/String;
+	public static final field STREAM_ERROR Ljava/lang/String;
+	public static final field TIME_UPDATE Ljava/lang/String;
+	public static final field WAITING Ljava/lang/String;
+	public final fun getALL ()Ljava/util/List;
+	public final fun getFULL_ORDER ()Ljava/util/List;
+	public final fun getPLAY_PAUSE_SPINE ()Ljava/util/List;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/CapabilitiesProbe {
 	public abstract fun canDecode (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun supportedCodecs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -2113,6 +2131,15 @@ public final class tv/nomercy/player/core/ports/StreamSourceState : java/lang/En
 	public final fun getWire ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamSourceState;
 	public static fun values ()[Ltv/nomercy/player/core/ports/StreamSourceState;
+}
+
+public final class tv/nomercy/player/core/ports/StringEventBus {
+	public fun <init> ()V
+	public final fun clear ()V
+	public final fun emit (Ljava/lang/String;Ljava/lang/Object;)V
+	public static synthetic fun emit$default (Ltv/nomercy/player/core/ports/StringEventBus;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
+	public final fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 }
 
 public final class tv/nomercy/player/core/ports/SubtitleTrack {

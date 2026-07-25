@@ -2033,6 +2033,15 @@ final class tv.nomercy.player.core.ports/StreamLevel { // tv.nomercy.player.core
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/StreamLevel.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/StringEventBus { // tv.nomercy.player.core.ports/StringEventBus|null[0]
+    constructor <init>() // tv.nomercy.player.core.ports/StringEventBus.<init>|<init>(){}[0]
+
+    final fun clear() // tv.nomercy.player.core.ports/StringEventBus.clear|clear(){}[0]
+    final fun emit(kotlin/String, kotlin/Any? = ...) // tv.nomercy.player.core.ports/StringEventBus.emit|emit(kotlin.String;kotlin.Any?){}[0]
+    final fun off(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/StringEventBus.off|off(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/StringEventBus.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+}
+
 final class tv.nomercy.player.core.ports/SubtitleTrack { // tv.nomercy.player.core.ports/SubtitleTrack|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/String = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.ports/SubtitleTrack.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String;kotlin.Boolean){}[0]
 
@@ -2468,6 +2477,38 @@ final object tv.nomercy.player.core.ports/BackendEvents { // tv.nomercy.player.c
         final fun <get-TIME_UPDATE>(): kotlin/String // tv.nomercy.player.core.ports/BackendEvents.TIME_UPDATE.<get-TIME_UPDATE>|<get-TIME_UPDATE>(){}[0]
     final const val WAITING // tv.nomercy.player.core.ports/BackendEvents.WAITING|{}WAITING[0]
         final fun <get-WAITING>(): kotlin/String // tv.nomercy.player.core.ports/BackendEvents.WAITING.<get-WAITING>|<get-WAITING>(){}[0]
+}
+
+final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.player.core.ports/CanonicalBackendEvent|null[0]
+    final const val CAN_PLAY // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY|{}CAN_PLAY[0]
+        final fun <get-CAN_PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY.<get-CAN_PLAY>|<get-CAN_PLAY>(){}[0]
+    final const val ENDED // tv.nomercy.player.core.ports/CanonicalBackendEvent.ENDED|{}ENDED[0]
+        final fun <get-ENDED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ENDED.<get-ENDED>|<get-ENDED>(){}[0]
+    final const val ERROR // tv.nomercy.player.core.ports/CanonicalBackendEvent.ERROR|{}ERROR[0]
+        final fun <get-ERROR>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ERROR.<get-ERROR>|<get-ERROR>(){}[0]
+    final const val LOADED_METADATA // tv.nomercy.player.core.ports/CanonicalBackendEvent.LOADED_METADATA|{}LOADED_METADATA[0]
+        final fun <get-LOADED_METADATA>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.LOADED_METADATA.<get-LOADED_METADATA>|<get-LOADED_METADATA>(){}[0]
+    final const val LOAD_START // tv.nomercy.player.core.ports/CanonicalBackendEvent.LOAD_START|{}LOAD_START[0]
+        final fun <get-LOAD_START>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.LOAD_START.<get-LOAD_START>|<get-LOAD_START>(){}[0]
+    final const val PAUSE // tv.nomercy.player.core.ports/CanonicalBackendEvent.PAUSE|{}PAUSE[0]
+        final fun <get-PAUSE>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.PAUSE.<get-PAUSE>|<get-PAUSE>(){}[0]
+    final const val PLAY // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAY|{}PLAY[0]
+        final fun <get-PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAY.<get-PLAY>|<get-PLAY>(){}[0]
+    final const val PLAYING // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAYING|{}PLAYING[0]
+        final fun <get-PLAYING>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAYING.<get-PLAYING>|<get-PLAYING>(){}[0]
+    final const val STREAM_ERROR // tv.nomercy.player.core.ports/CanonicalBackendEvent.STREAM_ERROR|{}STREAM_ERROR[0]
+        final fun <get-STREAM_ERROR>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.STREAM_ERROR.<get-STREAM_ERROR>|<get-STREAM_ERROR>(){}[0]
+    final const val TIME_UPDATE // tv.nomercy.player.core.ports/CanonicalBackendEvent.TIME_UPDATE|{}TIME_UPDATE[0]
+        final fun <get-TIME_UPDATE>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.TIME_UPDATE.<get-TIME_UPDATE>|<get-TIME_UPDATE>(){}[0]
+    final const val WAITING // tv.nomercy.player.core.ports/CanonicalBackendEvent.WAITING|{}WAITING[0]
+        final fun <get-WAITING>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.WAITING.<get-WAITING>|<get-WAITING>(){}[0]
+
+    final val ALL // tv.nomercy.player.core.ports/CanonicalBackendEvent.ALL|{}ALL[0]
+        final fun <get-ALL>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CanonicalBackendEvent.ALL.<get-ALL>|<get-ALL>(){}[0]
+    final val FULL_ORDER // tv.nomercy.player.core.ports/CanonicalBackendEvent.FULL_ORDER|{}FULL_ORDER[0]
+        final fun <get-FULL_ORDER>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CanonicalBackendEvent.FULL_ORDER.<get-FULL_ORDER>|<get-FULL_ORDER>(){}[0]
+    final val PLAY_PAUSE_SPINE // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAY_PAUSE_SPINE|{}PLAY_PAUSE_SPINE[0]
+        final fun <get-PLAY_PAUSE_SPINE>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAY_PAUSE_SPINE.<get-PLAY_PAUSE_SPINE>|<get-PLAY_PAUSE_SPINE>(){}[0]
 }
 
 final object tv.nomercy.player.core.ports/NoopWakeLock : tv.nomercy.player.core.ports/WakeLock { // tv.nomercy.player.core.ports/NoopWakeLock|null[0]

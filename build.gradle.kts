@@ -122,6 +122,10 @@ kotlin {
             dependencies {
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.serialization.json)
+                // A backend's callbacks arrive on whatever thread the engine
+                // uses — VLCJ's native thread, AVPlayer's main queue — and
+                // kotlin.synchronized does not exist in commonMain.
+                implementation(libs.kotlinx.atomicfu)
             }
         }
         // androidx.startup captures the application Context at process start so
