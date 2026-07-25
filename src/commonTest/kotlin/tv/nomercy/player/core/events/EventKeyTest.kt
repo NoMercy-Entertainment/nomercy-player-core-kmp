@@ -11,12 +11,7 @@ package tv.nomercy.player.core.events
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-/**
- * Idempotency is deliberately not asserted here. A `fun interface` runs
- * whatever body it was given, so guarding a second [Subscription.dispose]
- * call is the responsibility of whoever constructs one — `EventEmitter`, and
- * only there, per P03 Task 3.
- */
+// Idempotency of dispose() is P03 Task 3's job (EventEmitter), not asserted here.
 class EventKeyTest {
 
     @Test

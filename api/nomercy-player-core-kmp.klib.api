@@ -6,6 +6,17 @@
 // - Show declarations: true
 
 // Library unique name: <nomercy-player-core-kmp>
+abstract fun interface tv.nomercy.player.core.events/Subscription { // tv.nomercy.player.core.events/Subscription|null[0]
+    abstract fun dispose() // tv.nomercy.player.core.events/Subscription.dispose|dispose(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventKey { // tv.nomercy.player.core.events/EventKey|null[0]
+    constructor <init>(kotlin/String) // tv.nomercy.player.core.events/EventKey.<init>|<init>(kotlin.String){}[0]
+
+    final val name // tv.nomercy.player.core.events/EventKey.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tv.nomercy.player.core.events/EventKey.name.<get-name>|<get-name>(){}[0]
+}
+
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
     final fun <get-CONTRACT_VERSION>(): kotlin/String // tv.nomercy.player.core/CONTRACT_VERSION.<get-CONTRACT_VERSION>|<get-CONTRACT_VERSION>(){}[0]
 final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]
