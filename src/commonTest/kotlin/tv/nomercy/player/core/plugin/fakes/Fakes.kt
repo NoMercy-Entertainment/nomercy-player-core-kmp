@@ -41,9 +41,9 @@ class RecordingLogger(private val prefix: String, private val sink: MutableList<
 // actually happened rather than being claimed.
 class RecordingStorage : Storage {
     val map: MutableMap<String, String> = mutableMapOf()
-    override fun get(key: String): String? = map[key]
-    override fun set(key: String, value: String) { map[key] = value }
-    override fun remove(key: String) { map.remove(key) }
+    override suspend fun get(key: String): String? = map[key]
+    override suspend fun set(key: String, value: String) { map[key] = value }
+    override suspend fun remove(key: String) { map.remove(key) }
 }
 
 // A host built on the real EventEmitter rather than a stub map, so the plugin

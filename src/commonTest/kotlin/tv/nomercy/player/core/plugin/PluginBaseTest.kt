@@ -49,8 +49,8 @@ private class DemoPlugin(private val authorDefault: DemoOptions? = null) : Plugi
 
     fun fireBare() = emit(EventKey<String>("tick"), "x")
     fun fireOwnRegistryKey() = emit(Events.Line, "lyric")
-    fun writeTheme() = storage.set("theme", "dark")
-    fun readTheme(): String? = storage.get("theme")
+    suspend fun writeTheme() = storage.set("theme", "dark")
+    suspend fun readTheme(): String? = storage.get("theme")
     fun logHello() = logger.info("hello")
     fun currentOptions(): DemoOptions? = resolvedOptions
 }
@@ -153,7 +153,7 @@ class PluginBaseTest {
     }
 
     @Test
-    fun usingAPluginBeforeItIsRegisteredIsACodedErrorNamingThePlugin() {
+    fun usingAPluginBeforeItIsRegisteredIsACodedErrorNamingThePlugin() = runTest {
         val plugin = DemoPlugin()
 
         val failure = assertFailsWith<PlayerError> { plugin.writeTheme() }

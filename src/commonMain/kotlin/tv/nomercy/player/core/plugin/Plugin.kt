@@ -213,7 +213,7 @@ public abstract class Plugin<O : Any> {
 // Every key a plugin writes goes through here, which is what makes two plugins
 // storing "enabled" safe.
 internal class NamespacedStorage(private val backend: Storage, private val prefix: String) : Storage {
-    override fun get(key: String): String? = backend.get(prefix + key)
-    override fun set(key: String, value: String) = backend.set(prefix + key, value)
-    override fun remove(key: String) = backend.remove(prefix + key)
+    override suspend fun get(key: String): String? = backend.get(prefix + key)
+    override suspend fun set(key: String, value: String) = backend.set(prefix + key, value)
+    override suspend fun remove(key: String) = backend.remove(prefix + key)
 }

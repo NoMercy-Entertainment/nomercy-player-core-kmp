@@ -840,6 +840,12 @@ public final class tv/nomercy/player/core/plugin/Requirement {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/ports/AlwaysVisible : tv/nomercy/player/core/ports/VisibilityMonitor {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/AlwaysVisible;
+	public fun isVisible ()Z
+	public fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+}
+
 public final class tv/nomercy/player/core/ports/AudioTrack {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -873,6 +879,19 @@ public final class tv/nomercy/player/core/ports/BackendState : java/lang/Enum {
 	public static fun values ()[Ltv/nomercy/player/core/ports/BackendState;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/CapabilitiesProbe {
+	public abstract fun canDecode (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun supportedCodecs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/Clock {
+	public abstract fun now ()J
+}
+
+public final class tv/nomercy/player/core/ports/ClockKt {
+	public static final fun defaultClock ()Ltv/nomercy/player/core/ports/Clock;
+}
+
 public final class tv/nomercy/player/core/ports/CrossfadeCurve : java/lang/Enum {
 	public static final field EQUAL_POWER Ltv/nomercy/player/core/ports/CrossfadeCurve;
 	public static final field LINEAR Ltv/nomercy/player/core/ports/CrossfadeCurve;
@@ -881,6 +900,41 @@ public final class tv/nomercy/player/core/ports/CrossfadeCurve : java/lang/Enum 
 	public final fun getWire ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/CrossfadeCurve;
 	public static fun values ()[Ltv/nomercy/player/core/ports/CrossfadeCurve;
+}
+
+public final class tv/nomercy/player/core/ports/DecodeCapability {
+	public fun <init> (ZZZ)V
+	public final fun component1 ()Z
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun copy (ZZZ)Ltv/nomercy/player/core/ports/DecodeCapability;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/DecodeCapability;ZZZILjava/lang/Object;)Ltv/nomercy/player/core/ports/DecodeCapability;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPowerEfficient ()Z
+	public final fun getSmooth ()Z
+	public final fun getSupported ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/DecodeProfile {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Ljava/lang/Integer;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)Ltv/nomercy/player/core/ports/DecodeProfile;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/DecodeProfile;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/DecodeProfile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBitrate ()Ljava/lang/Integer;
+	public final fun getContentType ()Ljava/lang/String;
+	public final fun getFramerate ()Ljava/lang/Integer;
+	public final fun getHeight ()Ljava/lang/Integer;
+	public final fun getWidth ()Ljava/lang/Integer;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/DynamicRange : java/lang/Enum {
@@ -927,6 +981,22 @@ public final class tv/nomercy/player/core/ports/FetchResponse {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/FullscreenController {
+	public abstract fun enter (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun exit (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun isActive ()Z
+	public abstract fun isSupported ()Z
+	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/IdGenerator {
+	public abstract fun next ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/IdGeneratorKt {
+	public static final fun defaultIdGenerator ()Ltv/nomercy/player/core/ports/IdGenerator;
+}
+
 public final class tv/nomercy/player/core/ports/LoadOptions {
 	public fun <init> ()V
 	public fun <init> (JZLjava/util/Map;)V
@@ -952,6 +1022,75 @@ public abstract interface class tv/nomercy/player/core/ports/Logger {
 	public abstract fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
 }
 
+public abstract interface class tv/nomercy/player/core/ports/NetworkMonitor {
+	public abstract fun downlinkMbps ()Ljava/lang/Double;
+	public abstract fun isOnline ()Z
+	public abstract fun rttMs ()Ljava/lang/Double;
+	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public abstract fun type ()Ltv/nomercy/player/core/ports/NetworkType;
+}
+
+public final class tv/nomercy/player/core/ports/NetworkSnapshot {
+	public fun <init> (ZLtv/nomercy/player/core/ports/NetworkType;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ltv/nomercy/player/core/ports/NetworkType;
+	public final fun copy (ZLtv/nomercy/player/core/ports/NetworkType;)Ltv/nomercy/player/core/ports/NetworkSnapshot;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/NetworkSnapshot;ZLtv/nomercy/player/core/ports/NetworkType;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/NetworkSnapshot;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnline ()Z
+	public final fun getType ()Ltv/nomercy/player/core/ports/NetworkType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/NetworkType : java/lang/Enum {
+	public static final field CELLULAR Ltv/nomercy/player/core/ports/NetworkType;
+	public static final field ETHERNET Ltv/nomercy/player/core/ports/NetworkType;
+	public static final field NONE Ltv/nomercy/player/core/ports/NetworkType;
+	public static final field UNKNOWN Ltv/nomercy/player/core/ports/NetworkType;
+	public static final field WIFI Ltv/nomercy/player/core/ports/NetworkType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getWire ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/NetworkType;
+	public static fun values ()[Ltv/nomercy/player/core/ports/NetworkType;
+}
+
+public final class tv/nomercy/player/core/ports/NoopWakeLock : tv/nomercy/player/core/ports/WakeLock {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/NoopWakeLock;
+	public fun acquire (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun isHeld ()Z
+	public fun isSupported ()Z
+	public fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/PermissiveCapabilitiesProbe : tv/nomercy/player/core/ports/CapabilitiesProbe {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/PermissiveCapabilitiesProbe;
+	public fun canDecode (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun supportedCodecs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/PipController {
+	public abstract fun enter (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun exit (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun isActive ()Z
+	public abstract fun isSupported ()Z
+	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/Platform {
+	public abstract fun getCapabilities ()Ltv/nomercy/player/core/ports/CapabilitiesProbe;
+	public fun getFullscreen ()Ltv/nomercy/player/core/ports/FullscreenController;
+	public abstract fun getNetwork ()Ltv/nomercy/player/core/ports/NetworkMonitor;
+	public fun getPip ()Ltv/nomercy/player/core/ports/PipController;
+	public abstract fun getVisibility ()Ltv/nomercy/player/core/ports/VisibilityMonitor;
+	public abstract fun getWakeLock ()Ltv/nomercy/player/core/ports/WakeLock;
+}
+
+public final class tv/nomercy/player/core/ports/Platform$DefaultImpls {
+	public static fun getFullscreen (Ltv/nomercy/player/core/ports/Platform;)Ltv/nomercy/player/core/ports/FullscreenController;
+	public static fun getPip (Ltv/nomercy/player/core/ports/Platform;)Ltv/nomercy/player/core/ports/PipController;
+}
+
 public final class tv/nomercy/player/core/ports/PlatformContext {
 	public fun <init> ()V
 }
@@ -961,6 +1100,15 @@ public final class tv/nomercy/player/core/ports/PlatformEnvironment {
 	public final fun install (Ltv/nomercy/player/core/ports/PlatformContext;)V
 	public final fun isInstalled ()Z
 	public final fun requireContext ()Ltv/nomercy/player/core/ports/PlatformContext;
+}
+
+public final class tv/nomercy/player/core/ports/PlatformKt {
+	public static final fun defaultPlatform ()Ltv/nomercy/player/core/ports/Platform;
+}
+
+public final class tv/nomercy/player/core/ports/PlayerJson {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/PlayerJson;
+	public final fun getInstance ()Lkotlinx/serialization/json/Json;
 }
 
 public final class tv/nomercy/player/core/ports/QualityLevel {
@@ -1004,10 +1152,38 @@ public final class tv/nomercy/player/core/ports/SocketOptions {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/ports/StaticNetworkMonitor : tv/nomercy/player/core/ports/NetworkMonitor {
+	public fun <init> ()V
+	public fun <init> (ZLtv/nomercy/player/core/ports/NetworkType;)V
+	public synthetic fun <init> (ZLtv/nomercy/player/core/ports/NetworkType;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun downlinkMbps ()Ljava/lang/Double;
+	public fun isOnline ()Z
+	public fun rttMs ()Ljava/lang/Double;
+	public fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun type ()Ltv/nomercy/player/core/ports/NetworkType;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/Storage {
-	public abstract fun get (Ljava/lang/String;)Ljava/lang/String;
-	public abstract fun remove (Ljava/lang/String;)V
-	public abstract fun set (Ljava/lang/String;Ljava/lang/String;)V
+	public static final field Companion Ltv/nomercy/player/core/ports/Storage$Companion;
+	public abstract fun get (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getJSON (Ljava/lang/String;Lkotlinx/serialization/DeserializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun set (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun setJSON (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/SerializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/Storage$Companion {
+	public final fun getOnStorageDecodeError ()Lkotlin/jvm/functions/Function2;
+	public final fun setOnStorageDecodeError (Lkotlin/jvm/functions/Function2;)V
+}
+
+public final class tv/nomercy/player/core/ports/Storage$DefaultImpls {
+	public static fun getJSON (Ltv/nomercy/player/core/ports/Storage;Ljava/lang/String;Lkotlinx/serialization/DeserializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static fun setJSON (Ltv/nomercy/player/core/ports/Storage;Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/SerializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/StorageKt {
+	public static final fun defaultStorage (Ljava/lang/String;)Ltv/nomercy/player/core/ports/Storage;
 }
 
 public final class tv/nomercy/player/core/ports/StreamKind : java/lang/Enum {
@@ -1070,5 +1246,17 @@ public final class tv/nomercy/player/core/ports/SubtitleTrack {
 	public final fun getLanguage ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
+	public abstract fun isVisible ()Z
+	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/WakeLock {
+	public abstract fun acquire (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun isHeld ()Z
+	public abstract fun isSupported ()Z
+	public abstract fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
