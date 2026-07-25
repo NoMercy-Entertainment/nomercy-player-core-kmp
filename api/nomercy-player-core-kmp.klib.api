@@ -6,6 +6,20 @@
 // - Show declarations: true
 
 // Library unique name: <nomercy-player-core-kmp>
+final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventKey { // tv.nomercy.player.core.events/EventKey|null[0]
+    constructor <init>(kotlin/String) // tv.nomercy.player.core.events/EventKey.<init>|<init>(kotlin.String){}[0]
+
+    final val name // tv.nomercy.player.core.events/EventKey.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tv.nomercy.player.core.events/EventKey.name.<get-name>|<get-name>(){}[0]
+}
+
+final class tv.nomercy.player.core.events/Subscription { // tv.nomercy.player.core.events/Subscription|null[0]
+    final val isActive // tv.nomercy.player.core.events/Subscription.isActive|{}isActive[0]
+        final fun <get-isActive>(): kotlin/Boolean // tv.nomercy.player.core.events/Subscription.isActive.<get-isActive>|<get-isActive>(){}[0]
+
+    final fun unsubscribe() // tv.nomercy.player.core.events/Subscription.unsubscribe|unsubscribe(){}[0]
+}
+
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
     final fun <get-CONTRACT_VERSION>(): kotlin/String // tv.nomercy.player.core/CONTRACT_VERSION.<get-CONTRACT_VERSION>|<get-CONTRACT_VERSION>(){}[0]
 final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]

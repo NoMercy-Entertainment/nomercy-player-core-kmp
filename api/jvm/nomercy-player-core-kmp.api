@@ -3,3 +3,13 @@ public final class tv/nomercy/player/core/KitVersionKt {
 	public static final field KIT_VERSION Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/events/EventKey {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getName ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/Subscription {
+	public final fun isActive ()Z
+	public final fun unsubscribe ()V
+}
+
