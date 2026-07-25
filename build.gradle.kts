@@ -124,6 +124,11 @@ kotlin {
                 implementation(libs.kotlinx.serialization.json)
             }
         }
+        // androidx.startup captures the application Context at process start so
+        // it never has to appear in a common signature.
+        androidMain.dependencies {
+            implementation(libs.androidx.startup)
+        }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
@@ -146,6 +151,7 @@ detekt {
         "src/commonTest/kotlin",
         "src/androidMain/kotlin",
         "src/appleMain/kotlin",
+        "src/jvmTest/kotlin",
         "src/jvmMain/kotlin",
     )
     config.setFrom("config/detekt/detekt.yml")

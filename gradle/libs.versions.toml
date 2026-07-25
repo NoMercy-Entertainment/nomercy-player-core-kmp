@@ -4,6 +4,7 @@
 # Changing either of these two lines requires changing the app in the same pass.
 kotlin = "2.2.21"
 agp = "9.0.1"
+androidxStartup = "1.2.0"
 
 coroutines = "1.10.2"
 serialization = "1.9.0"
@@ -16,6 +17,7 @@ skie = "0.10.13"
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+androidx-startup = { module = "androidx.startup:startup-runtime", version.ref = "androidxStartup" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 [plugins]

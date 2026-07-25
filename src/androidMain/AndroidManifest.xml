@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.playercore-init"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="tv.nomercy.player.core.ports.PlayerCoreInitializer"
+                android:value="androidx.startup" />
+        </provider>
+    </application>
+</manifest>
