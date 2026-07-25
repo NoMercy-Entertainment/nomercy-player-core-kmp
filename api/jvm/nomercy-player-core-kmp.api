@@ -1805,6 +1805,23 @@ public final class tv/nomercy/player/core/events/VolumeChange {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/media/DynamicRange : java/lang/Enum {
+	public static final field Companion Ltv/nomercy/player/core/media/DynamicRange$Companion;
+	public static final field DolbyVision Ltv/nomercy/player/core/media/DynamicRange;
+	public static final field Hdr10 Ltv/nomercy/player/core/media/DynamicRange;
+	public static final field Hdr10Plus Ltv/nomercy/player/core/media/DynamicRange;
+	public static final field HlG Ltv/nomercy/player/core/media/DynamicRange;
+	public static final field Sdr Ltv/nomercy/player/core/media/DynamicRange;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getToken ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/media/DynamicRange;
+	public static fun values ()[Ltv/nomercy/player/core/media/DynamicRange;
+}
+
+public final class tv/nomercy/player/core/media/DynamicRange$Companion {
+	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/media/DynamicRange;
+}
+
 public final class tv/nomercy/player/core/media/MediaList {
 	public fun <init> ()V
 	public fun <init> (Ltv/nomercy/player/core/ports/ShuffleStrategy;)V
@@ -1948,6 +1965,54 @@ public abstract interface class tv/nomercy/player/core/media/PlaylistItem {
 	public abstract fun getId ()Ljava/lang/String;
 	public abstract fun getTitle ()Ljava/lang/String;
 	public abstract fun getUrl ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/QualityDescriptor : java/lang/Comparable {
+	public fun <init> (IILtv/nomercy/player/core/media/DynamicRange;Ljava/lang/String;)V
+	public synthetic fun <init> (IILtv/nomercy/player/core/media/DynamicRange;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Ltv/nomercy/player/core/media/QualityDescriptor;)I
+	public final fun component1 ()I
+	public final fun component2 ()I
+	public final fun component3 ()Ltv/nomercy/player/core/media/DynamicRange;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (IILtv/nomercy/player/core/media/DynamicRange;Ljava/lang/String;)Ltv/nomercy/player/core/media/QualityDescriptor;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/QualityDescriptor;IILtv/nomercy/player/core/media/DynamicRange;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/media/QualityDescriptor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBitrate ()I
+	public final fun getCodec ()Ljava/lang/String;
+	public final fun getDynamicRange ()Ltv/nomercy/player/core/media/DynamicRange;
+	public final fun getHeight ()I
+	public fun hashCode ()I
+	public final fun label ()Ljava/lang/String;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/media/QualityLadder {
+	public fun <init> (Ljava/util/List;)V
+	public final fun bestSmooth (Ljava/util/List;)Ltv/nomercy/player/core/media/QualityDescriptor;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescriptors ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun isEmpty ()Z
+	public final fun size ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun usable (Ltv/nomercy/player/core/ports/CapabilitiesProbe;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/media/UsableRung {
+	public fun <init> (Ltv/nomercy/player/core/media/QualityDescriptor;ZZ)V
+	public final fun component1 ()Ltv/nomercy/player/core/media/QualityDescriptor;
+	public final fun component2 ()Z
+	public final fun component3 ()Z
+	public final fun copy (Ltv/nomercy/player/core/media/QualityDescriptor;ZZ)Ltv/nomercy/player/core/media/UsableRung;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/media/UsableRung;Ltv/nomercy/player/core/media/QualityDescriptor;ZZILjava/lang/Object;)Ltv/nomercy/player/core/media/UsableRung;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescriptor ()Ltv/nomercy/player/core/media/QualityDescriptor;
+	public final fun getPowerEfficient ()Z
+	public final fun getSmooth ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/player/ActionOptions {

@@ -45,6 +45,26 @@ final enum class tv.nomercy.player.core.errors/Severity : kotlin/Enum<tv.nomercy
     }
 }
 
+final enum class tv.nomercy.player.core.media/DynamicRange : kotlin/Enum<tv.nomercy.player.core.media/DynamicRange> { // tv.nomercy.player.core.media/DynamicRange|null[0]
+    enum entry DolbyVision // tv.nomercy.player.core.media/DynamicRange.DolbyVision|null[0]
+    enum entry Hdr10 // tv.nomercy.player.core.media/DynamicRange.Hdr10|null[0]
+    enum entry Hdr10Plus // tv.nomercy.player.core.media/DynamicRange.Hdr10Plus|null[0]
+    enum entry HlG // tv.nomercy.player.core.media/DynamicRange.HlG|null[0]
+    enum entry Sdr // tv.nomercy.player.core.media/DynamicRange.Sdr|null[0]
+
+    final val entries // tv.nomercy.player.core.media/DynamicRange.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.media/DynamicRange> // tv.nomercy.player.core.media/DynamicRange.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val token // tv.nomercy.player.core.media/DynamicRange.token|{}token[0]
+        final fun <get-token>(): kotlin/String // tv.nomercy.player.core.media/DynamicRange.token.<get-token>|<get-token>(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.media/DynamicRange // tv.nomercy.player.core.media/DynamicRange.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.media/DynamicRange> // tv.nomercy.player.core.media/DynamicRange.values|values#static(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.media/DynamicRange.Companion|null[0]
+        final fun fromToken(kotlin/String): tv.nomercy.player.core.media/DynamicRange // tv.nomercy.player.core.media/DynamicRange.Companion.fromToken|fromToken(kotlin.String){}[0]
+    }
+}
+
 final enum class tv.nomercy.player.core.player/AudioTrackState : kotlin/Enum<tv.nomercy.player.core.player/AudioTrackState>, tv.nomercy.player.core.player/TokenEnum { // tv.nomercy.player.core.player/AudioTrackState|null[0]
     enum entry DEFAULT // tv.nomercy.player.core.player/AudioTrackState.DEFAULT|null[0]
     enum entry MANUAL // tv.nomercy.player.core.player/AudioTrackState.MANUAL|null[0]
@@ -2543,6 +2563,64 @@ final class tv.nomercy.player.core.media/MediaListMove { // tv.nomercy.player.co
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListMove.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListMove.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListMove.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/QualityDescriptor : kotlin/Comparable<tv.nomercy.player.core.media/QualityDescriptor> { // tv.nomercy.player.core.media/QualityDescriptor|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int, tv.nomercy.player.core.media/DynamicRange = ..., kotlin/String? = ...) // tv.nomercy.player.core.media/QualityDescriptor.<init>|<init>(kotlin.Int;kotlin.Int;tv.nomercy.player.core.media.DynamicRange;kotlin.String?){}[0]
+
+    final val bitrate // tv.nomercy.player.core.media/QualityDescriptor.bitrate|{}bitrate[0]
+        final fun <get-bitrate>(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.bitrate.<get-bitrate>|<get-bitrate>(){}[0]
+    final val codec // tv.nomercy.player.core.media/QualityDescriptor.codec|{}codec[0]
+        final fun <get-codec>(): kotlin/String? // tv.nomercy.player.core.media/QualityDescriptor.codec.<get-codec>|<get-codec>(){}[0]
+    final val dynamicRange // tv.nomercy.player.core.media/QualityDescriptor.dynamicRange|{}dynamicRange[0]
+        final fun <get-dynamicRange>(): tv.nomercy.player.core.media/DynamicRange // tv.nomercy.player.core.media/QualityDescriptor.dynamicRange.<get-dynamicRange>|<get-dynamicRange>(){}[0]
+    final val height // tv.nomercy.player.core.media/QualityDescriptor.height|{}height[0]
+        final fun <get-height>(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.height.<get-height>|<get-height>(){}[0]
+
+    final fun compareTo(tv.nomercy.player.core.media/QualityDescriptor): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.compareTo|compareTo(tv.nomercy.player.core.media.QualityDescriptor){}[0]
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.component2|component2(){}[0]
+    final fun component3(): tv.nomercy.player.core.media/DynamicRange // tv.nomercy.player.core.media/QualityDescriptor.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // tv.nomercy.player.core.media/QualityDescriptor.component4|component4(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ..., tv.nomercy.player.core.media/DynamicRange = ..., kotlin/String? = ...): tv.nomercy.player.core.media/QualityDescriptor // tv.nomercy.player.core.media/QualityDescriptor.copy|copy(kotlin.Int;kotlin.Int;tv.nomercy.player.core.media.DynamicRange;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/QualityDescriptor.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.hashCode|hashCode(){}[0]
+    final fun label(): kotlin/String // tv.nomercy.player.core.media/QualityDescriptor.label|label(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/QualityDescriptor.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/QualityLadder { // tv.nomercy.player.core.media/QualityLadder|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/QualityDescriptor>) // tv.nomercy.player.core.media/QualityLadder.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.QualityDescriptor>){}[0]
+
+    final val descriptors // tv.nomercy.player.core.media/QualityLadder.descriptors|{}descriptors[0]
+        final fun <get-descriptors>(): kotlin.collections/List<tv.nomercy.player.core.media/QualityDescriptor> // tv.nomercy.player.core.media/QualityLadder.descriptors.<get-descriptors>|<get-descriptors>(){}[0]
+
+    final fun bestSmooth(kotlin.collections/List<tv.nomercy.player.core.media/UsableRung>): tv.nomercy.player.core.media/QualityDescriptor? // tv.nomercy.player.core.media/QualityLadder.bestSmooth|bestSmooth(kotlin.collections.List<tv.nomercy.player.core.media.UsableRung>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/QualityLadder.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/QualityLadder.hashCode|hashCode(){}[0]
+    final fun isEmpty(): kotlin/Boolean // tv.nomercy.player.core.media/QualityLadder.isEmpty|isEmpty(){}[0]
+    final fun size(): kotlin/Int // tv.nomercy.player.core.media/QualityLadder.size|size(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/QualityLadder.toString|toString(){}[0]
+    final suspend fun usable(tv.nomercy.player.core.ports/CapabilitiesProbe): kotlin.collections/List<tv.nomercy.player.core.media/UsableRung> // tv.nomercy.player.core.media/QualityLadder.usable|usable(tv.nomercy.player.core.ports.CapabilitiesProbe){}[0]
+}
+
+final class tv.nomercy.player.core.media/UsableRung { // tv.nomercy.player.core.media/UsableRung|null[0]
+    constructor <init>(tv.nomercy.player.core.media/QualityDescriptor, kotlin/Boolean, kotlin/Boolean) // tv.nomercy.player.core.media/UsableRung.<init>|<init>(tv.nomercy.player.core.media.QualityDescriptor;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val descriptor // tv.nomercy.player.core.media/UsableRung.descriptor|{}descriptor[0]
+        final fun <get-descriptor>(): tv.nomercy.player.core.media/QualityDescriptor // tv.nomercy.player.core.media/UsableRung.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+    final val powerEfficient // tv.nomercy.player.core.media/UsableRung.powerEfficient|{}powerEfficient[0]
+        final fun <get-powerEfficient>(): kotlin/Boolean // tv.nomercy.player.core.media/UsableRung.powerEfficient.<get-powerEfficient>|<get-powerEfficient>(){}[0]
+    final val smooth // tv.nomercy.player.core.media/UsableRung.smooth|{}smooth[0]
+        final fun <get-smooth>(): kotlin/Boolean // tv.nomercy.player.core.media/UsableRung.smooth.<get-smooth>|<get-smooth>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.media/QualityDescriptor // tv.nomercy.player.core.media/UsableRung.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // tv.nomercy.player.core.media/UsableRung.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // tv.nomercy.player.core.media/UsableRung.component3|component3(){}[0]
+    final fun copy(tv.nomercy.player.core.media/QualityDescriptor = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.media/UsableRung // tv.nomercy.player.core.media/UsableRung.copy|copy(tv.nomercy.player.core.media.QualityDescriptor;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/UsableRung.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/UsableRung.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/UsableRung.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.player/ActionOptions { // tv.nomercy.player.core.player/ActionOptions|null[0]
