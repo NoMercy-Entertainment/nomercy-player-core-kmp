@@ -45,7 +45,7 @@ public interface PluginHost {
     public fun websocket(url: String, opts: RealtimeFactoryOptions): RealtimeChannel
 
     // Takes an already-namespaced key: the Plugin base builds plugin.<id>.<key>.
-    public fun t(namespacedKey: String, vars: Map<String, String>): String
+    public fun t(namespacedKey: String, vars: Map<String, String> = emptyMap()): String
 
     public fun report(error: PlayerError)
 }

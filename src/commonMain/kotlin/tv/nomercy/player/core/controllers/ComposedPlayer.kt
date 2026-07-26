@@ -50,6 +50,7 @@ import tv.nomercy.player.core.ports.MediaBackend
 import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.Translations
 import tv.nomercy.player.core.ports.Translator
 
 // The controllers wired together over one context, and the proof that they are
@@ -65,6 +66,15 @@ import tv.nomercy.player.core.ports.Translator
 // Ten seconds, which is what every player's skip button does and what a viewer
 // expects without being told.
 private const val SKIP_SECONDS = 10.0
+
+// Five points per nudge, which is fine enough to tune by and coarse enough that
+// a held-down remote key reaches the end in about the time a viewer expects.
+private const val VOLUME_STEP = 5
+
+// What language() answers when nobody injected a translator. Not "en": no
+// language was chosen, and claiming one would have a UI decide text direction
+// and number formatting from a default that means "unconfigured".
+private const val UNTRANSLATED = ""
 
 @Suppress("TooManyFunctions")
 public open class ComposedPlayer(
@@ -203,6 +213,11 @@ public open class ComposedPlayer(
 
     public open fun playbackRate(): Double = time.playbackRate()
 
+    // What a speed menu offers. Fixed rather than engine-reported: the engines
+    // disagree about what they accept and clamp what they do not, so asking
+    // them would give a different menu per platform for no gain.
+    public open fun playbackRates(): List<Double> = time.playbackRates()
+
     public open suspend fun playbackRate(rate: Double, opts: ActionOptions = ActionOptions()): Unit =
         time.playbackRate(rate, opts)
 
@@ -218,6 +233,14 @@ public open class ComposedPlayer(
     public open suspend fun unmute(opts: ActionOptions = ActionOptions()): Unit = volume.unmute(opts)
 
     public open suspend fun toggleMute(opts: ActionOptions = ActionOptions()): Unit = volume.toggleMute(opts)
+
+    // A keyboard or a remote sends a nudge, not a level: the step lives here so
+    // every surface moves the volume by the same amount.
+    public open suspend fun volumeUp(step: Int = VOLUME_STEP, opts: ActionOptions = ActionOptions()): Unit =
+        volume.volumeUp(step, opts)
+
+    public open suspend fun volumeDown(step: Int = VOLUME_STEP, opts: ActionOptions = ActionOptions()): Unit =
+        volume.volumeDown(step, opts)
 
     // ── Queue ────────────────────────────────────────────────────────────────
 
@@ -426,6 +449,33 @@ public open class ComposedPlayer(
     // than an empty label.
     override fun t(namespacedKey: String, vars: Map<String, String>): String =
         translator?.t(namespacedKey, vars) ?: namespacedKey
+
+    // The rest of the translator, reachable through the player.
+    //
+    // A plugin adds its strings and takes them away again when it leaves, and
+    // it has the player, not the translator. Routing through here is also what
+    // makes the port optional: every one of these is a no-op without a
+    // translator injected, so a host that has its own i18n system does not have
+    // to satisfy an interface it will never use.
+    public open fun language(): String = translator?.language() ?: UNTRANSLATED
+
+    public open suspend fun language(lang: String) {
+        translator?.language(lang)
+    }
+
+    public open fun addTranslations(bundle: Translations) {
+        translator?.addTranslations(bundle)
+    }
+
+    public open fun removeTranslations(prefix: String, lang: String? = null) {
+        translator?.removeTranslations(prefix, lang)
+    }
+
+    public open fun translation(lang: String, key: String): String? = translator?.translation(lang, key)
+
+    public open fun translation(lang: String, key: String, value: String) {
+        translator?.translation(lang, key, value)
+    }
 
     override fun report(error: PlayerError) {
         logger.error("${error.code}: ${error.message}")

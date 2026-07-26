@@ -38,20 +38,20 @@ private val WEB_ONLY_METHODS = setOf(
 // port, which is why it is written out rather than derived — a set difference
 // that quietly got smaller for the wrong reason would look like progress.
 private val NOT_YET_PORTED_METHODS = setOf(
-    "activityTracking", "addTranslations", "announce", "audioOutput", "audioOutputs",
+    "activityTracking", "announce", "audioOutput", "audioOutputs",
     "audioTrackMode", "auth", "backend", 
     "baseUrl", "bufferState", "bufferedRanges", "bumpActivity", "canPlay", "castState",
     "device", "dispatching", "enabledPlugins", "experimental",
     "getPluginById", "getStreamFactory", "isDesktop", "isMobile", "isTv",
-    "language", "load", "loadQueue", "metrics", "networkState", "now",
-    "options", "platform", "playNow", "playbackRates", "playerId",
+    "load", "loadQueue", "metrics", "networkState", "now",
+    "options", "platform", "playNow", "playerId",
     "preloadStrategy", "recordMetric", "refreshAuth", "registerCueParser", "registerStream",
-    "registerTitleTokens", "removeTranslations", "resolveCueParser", "resolveUrl",
+    "registerTitleTokens", "resolveCueParser", "resolveUrl",
     "seekable",
     "selectAudioOutput", "setPreloadStrategy", "setTransitionStrategy", "streamState",
     "streams", "timeData", "transferTo", "transitionStrategy",
-    "translation", "unregisterCueParser", "unregisterStream", "urlResolver",
-    "visibilityState", "volumeDown", "volumeUp",
+    "unregisterCueParser", "unregisterStream", "urlResolver",
+    "visibilityState", 
 )
 
 // The player's own method names against the contract's.
