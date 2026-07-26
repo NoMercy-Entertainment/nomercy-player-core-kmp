@@ -170,13 +170,21 @@ public class VlcjVideoBackend(
 
         // The reason, so a desktop client can say "install VLC" rather than
         // "playback failed". Null when it binds.
+        // LinkageError, not its subclasses one at a time. A machine without
+        // libVLC produced ExceptionInInitializerError from VLCJ's static
+        // initialiser, which is neither UnsatisfiedLinkError nor
+        // NoClassDefFoundError — the two this originally caught. Naming the
+        // shapes of absence individually means missing one, and the one missed
+        // is the one that reaches a user.
+        @Suppress("TooGenericExceptionCaught")
         public fun whyUnavailable(): String? = try {
             MediaPlayerFactory().release()
             null
-        } catch (missing: UnsatisfiedLinkError) {
-            "libVLC is not installed or is the wrong architecture: ${missing.message}"
-        } catch (missing: NoClassDefFoundError) {
-            "the VLCJ binding is not on the classpath: ${missing.message}"
+        } catch (missing: LinkageError) {
+            "libVLC is not installed, or is the wrong architecture: ${missing.message}"
+        } catch (refused: RuntimeException) {
+            // VLCJ's own native discovery throws this when it finds nothing.
+            "libVLC could not be located: ${refused.message}"
         }
     }
 }

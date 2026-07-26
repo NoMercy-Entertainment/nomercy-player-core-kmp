@@ -38,13 +38,14 @@ class VlcjVideoBackendTest {
     }
 
     @Test
-    fun libVlcEitherBindsOrSaysItIsNotThere() {
-        // No assertion on which: the point is that asking is cheap and answers,
-        // rather than a linker error at the first play.
-        val available: Boolean = VlcjVideoBackend.isAvailable()
+    fun askingWhetherLibVlcIsThereAnswersRatherThanThrowing() {
+        // The question has to be safe to ask on a machine that does not have it,
+        // which is most CI runners. It was not: VLCJ's static initialiser threw
+        // ExceptionInInitializerError and this test was the one that found out.
+        val reason: String? = VlcjVideoBackend.whyUnavailable()
 
-        println("libVLC available: $available")
-        assertTrue(available || !available)
+        println("libVLC: ${reason ?: "available"}")
+        assertEquals(reason == null, VlcjVideoBackend.isAvailable())
     }
 
     @Test
