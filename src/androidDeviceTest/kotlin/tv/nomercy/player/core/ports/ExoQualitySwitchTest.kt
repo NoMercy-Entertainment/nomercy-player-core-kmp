@@ -134,4 +134,65 @@ class ExoQualitySwitchTest {
     }
 }
 
+// Adaptation must not climb into a rung the display cannot show, and must not
+// argue with a viewer who chose one.
+//
+// The ladder in this clip is SDR on both rungs, so on this device the constraint
+// has nothing to cap — which is itself the case worth asserting: a cap that
+// fires when it should not is a player that silently refuses the top of every
+// ladder, and it would look exactly like a bandwidth problem.
+class ExoHdrConstraintTest {
+
+    @Test
+    fun anSdrLadderIsNotCappedOnAnyDisplay() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val media: File = writeLadderClip(File(context.cacheDir, "hdr-gate.mp4"))
+        val backend = ExoPlayerVideoBackend(context)
+        val ready = CountDownLatch(1)
+
+        try {
+            backend.on(BackendEvents.LOADED_METADATA) { ready.countDown() }
+            runBlocking { backend.load(media.absolutePath, LoadOptions()) }
+            assertTrue(ready.await(TRACKS_TIMEOUT_S, TimeUnit.SECONDS), "no metadata")
+            Thread.sleep(SETTLE_MS)
+
+            // Both rungs are SDR, so nothing is capped and the engine is free to
+            // adapt — which on two tracks means it has not pinned either.
+            val ceiling: QualityLevel? = HdrAbrConstraint.abrCeiling(backend.qualityLevels(), displayHdr = false)
+            assertEquals(null, ceiling, "an SDR-only ladder was capped")
+        } finally {
+            backend.release()
+            media.delete()
+        }
+    }
+
+    @Test
+    fun anExplicitChoiceSurvivesTheConstraint() {
+        // The constraint runs on every tracks change. A viewer who picked a rung
+        // must still be on it afterwards, or the player is arguing with them.
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val media: File = writeLadderClip(File(context.cacheDir, "hdr-pin.mp4"))
+        val backend = ExoPlayerVideoBackend(context)
+        val ready = CountDownLatch(1)
+
+        try {
+            backend.on(BackendEvents.LOADED_METADATA) { ready.countDown() }
+            runBlocking { backend.load(media.absolutePath, LoadOptions()) }
+            assertTrue(ready.await(TRACKS_TIMEOUT_S, TimeUnit.SECONDS), "no metadata")
+
+            val chosen: QualityLevel = assertNotNull(
+                backend.qualityLevels().firstOrNull { it.height == SHORT_RUNG },
+            )
+            backend.quality(chosen)
+            Thread.sleep(SETTLE_MS)
+            Thread.sleep(SETTLE_MS)
+
+            assertEquals(SHORT_RUNG, backend.quality()?.height, "the constraint overrode a viewer's choice")
+        } finally {
+            backend.release()
+            media.delete()
+        }
+    }
+}
+
 private const val SETTLE_MS = 1_500L

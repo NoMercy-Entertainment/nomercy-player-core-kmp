@@ -70,6 +70,11 @@ public class ExoPlayerVideoBackend(
 
     private val player: ExoPlayer = exoPlayer
 
+    // Read once. A display's HDR support does not change while an app runs, and
+    // asking the DisplayManager on every tracks change would be a binder call
+    // per manifest refresh.
+    private val displayIsHdr: Boolean = androidDisplayIsHdr(context)
+
     // Media3 has no periodic time callback: it expects the UI to poll on its own
     // frame loop. A backend has no frame loop, so it polls at the rate a
     // scrubber can actually show — four times a second, not sixty.
@@ -138,6 +143,7 @@ public class ExoPlayerVideoBackend(
             // incomplete.
             override fun onEvents(player: Player, events: Player.Events) {
                 refreshCache()
+                applyHdrCeiling()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -268,14 +274,45 @@ public class ExoPlayerVideoBackend(
     // Null hands the choice back to Media3's own adaptation, which is what a
     // viewer means by "auto". A descriptor pins one rung, and QualityMatcher is
     // the only thing that turns it into a number this engine understands.
+    // Whether adaptation is currently pinned by a caller. A cap is a
+    // constraint on automatic behaviour; overriding a rung the viewer chose
+    // themselves would be the player arguing with them.
+    private var pinnedByCaller: Boolean = false
+
+    // The HDR ceiling, reapplied whenever the ladder changes.
+    //
+    // Not applied once at load: a live manifest gains and loses rungs, and a cap
+    // computed against the first ladder stops matching the second. It is
+    // recomputed on every tracks change, which is the same callback the cache
+    // refreshes from.
+    private fun applyHdrCeiling() {
+        if (pinnedByCaller) return
+        val ceiling: QualityLevel = HdrAbrConstraint.abrCeiling(cachedQualityLevels, displayIsHdr) ?: return
+        pinQuality(ceiling)
+    }
+
     override fun quality(level: QualityLevel?): Unit = fireAndForget {
+        pinnedByCaller = level != null
+        applySelection(level)
+        refreshCache()
+        // Lifting a pin hands the rung back to adaptation, which is exactly when
+        // the display constraint has to come back — otherwise "automatic" means
+        // "automatic, including into HDR this screen cannot show".
+        if (level == null) applyHdrCeiling()
+    }
+
+    private fun pinQuality(level: QualityLevel) = fireAndForget {
+        applySelection(level)
+        refreshCache()
+    }
+
+    private fun applySelection(level: QualityLevel?) {
         val override: TrackSelectionOverride? = level?.let(::overrideFor)
         player.trackSelectionParameters = player.trackSelectionParameters
             .buildUpon()
             .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
             .apply { override?.let(::addOverride) }
             .build()
-        refreshCache()
     }
 
     // The descriptor is matched against the engine's own list, in the engine's
