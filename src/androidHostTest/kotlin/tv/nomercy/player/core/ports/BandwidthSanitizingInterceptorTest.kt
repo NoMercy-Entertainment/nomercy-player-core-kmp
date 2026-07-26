@@ -9,6 +9,8 @@
 package tv.nomercy.player.core.ports
 
 import okhttp3.OkHttpClient
+import tv.nomercy.player.core.media.QualityDescriptor
+import tv.nomercy.player.core.stream.MasterPlaylistRewriter
 import okhttp3.Request
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -18,6 +20,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 private const val CEILING = 4_000_000L
+private const val SHORT_RUNG = 720
 
 private val PLAYLIST = """
     #EXTM3U
@@ -110,4 +113,62 @@ class BandwidthSanitizingInterceptorTest {
         assertEquals(PLAYLIST, body)
         assertTrue(adjustments.isEmpty())
     }
+
+    // Read out of the manifest rather than hand-written, which is also how a
+    // caller builds one: probe what the server offers, drop what the device
+    // cannot decode, hand back the rest. A hand-built descriptor has to guess
+    // how the rewriter reads a CODECS attribute, and guessing wrong drops
+    // everything.
+    private fun shortRungOnly(): List<QualityDescriptor> =
+        MasterPlaylistRewriter.variants(TWO_RUNGS).filter { it.height == SHORT_RUNG }
+
+    @Test
+    fun aNarrowedLadderReachesTheEngineWithTheDroppedRungGone() {
+        // Dropping a rung here rather than refusing it later is the difference
+        // between a player that never offers a stream it cannot decode and one
+        // that offers it, starts it, and fails. Adaptation cannot climb into a
+        // variant that is not in the manifest it was given.
+        server.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/vnd.apple.mpegurl")
+                .setBody(TWO_RUNGS),
+        )
+        val client = OkHttpClient.Builder()
+            .addInterceptor(BandwidthSanitizingInterceptor(ceiling = Long.MAX_VALUE, keep = shortRungOnly()))
+            .build()
+
+        val body: String = fetch(client, "/master.m3u8")
+
+        assertTrue(body.contains("720p/index.m3u8"), "the kept rung was dropped")
+        assertTrue(!body.contains("1080p/index.m3u8"), "the dropped rung survived: $body")
+    }
+
+    @Test
+    fun narrowingHappensBeforeSanitizingSoTheLogDoesNotLie() {
+        // Reporting an adjustment to a rung the engine will never see would make
+        // the adjustment log describe work that had no effect.
+        server.enqueue(
+            MockResponse()
+                .setHeader("Content-Type", "application/vnd.apple.mpegurl")
+                .setBody(TWO_RUNGS),
+        )
+        val adjustments: MutableList<BandwidthSanitizer.Adjustment> = mutableListOf()
+        val client = OkHttpClient.Builder()
+            .addInterceptor(BandwidthSanitizingInterceptor(CEILING, keep = shortRungOnly()) { adjustments += it })
+            .build()
+
+        fetch(client, "/master.m3u8")
+
+        // The 1080p rung is above the ceiling and would have been adjusted had it
+        // survived. It did not, so nothing is reported.
+        assertTrue(adjustments.isEmpty(), "an adjustment was reported for a dropped rung: $adjustments")
+    }
 }
+
+private val TWO_RUNGS = """
+    #EXTM3U
+    #EXT-X-STREAM-INF:BANDWIDTH=6000000,CODECS="avc1.640028",RESOLUTION=1920x1080
+    1080p/index.m3u8
+    #EXT-X-STREAM-INF:BANDWIDTH=3000000,CODECS="avc1.4d401f",RESOLUTION=1280x720
+    720p/index.m3u8
+""".trimIndent()
