@@ -21,6 +21,10 @@ private const val FULL_VOLUME_PERCENT = 100
 // libVLC turns captions off with track -1.
 private const val SUBTITLES_DISABLED = -1
 
+// Long enough for a real discovery on a cold filesystem, short enough that a
+// caller waiting on it has not given up.
+private const val PROBE_TIMEOUT_MS = 5_000L
+
 // The desktop engine, over libVLC.
 //
 // libVLC decodes practically everything, which is what a desktop client needs
@@ -300,15 +304,46 @@ public class VlcjVideoBackend(
         // NoClassDefFoundError — the two this originally caught. Naming the
         // shapes of absence individually means missing one, and the one missed
         // is the one that reaches a user.
+        //
+        // Bounded, and on a thread of its own. Answering this question means
+        // building a real factory, which is how VLCJ discovers the native
+        // library — and on a machine without a display that can sit rather than
+        // fail. A caller asking "do you have VLC" is often a UI deciding what to
+        // offer; blocking it forever is worse than saying no.
+        //
+        // Memoized because the answer cannot change while the process runs, and
+        // because paying seconds for it twice would be paying it on a click.
         @Suppress("TooGenericExceptionCaught")
-        public fun whyUnavailable(): String? = try {
-            MediaPlayerFactory().release()
-            null
-        } catch (missing: LinkageError) {
-            "libVLC is not installed, or is the wrong architecture: ${missing.message}"
-        } catch (refused: RuntimeException) {
-            // VLCJ's own native discovery throws this when it finds nothing.
-            "libVLC could not be located: ${refused.message}"
+        public fun whyUnavailable(): String? = probe
+
+        private val probe: String? by lazy { probeWithin(PROBE_TIMEOUT_MS) }
+
+        @Suppress("TooGenericExceptionCaught")
+        private fun probeWithin(millis: Long): String? {
+            val answer = java.util.concurrent.atomic.AtomicReference<String?>(
+                "libVLC did not answer within ${millis}ms: it is missing, or its discovery is blocked",
+            )
+            val prober = Thread {
+                answer.set(
+                    try {
+                        MediaPlayerFactory().release()
+                        null
+                    } catch (missing: LinkageError) {
+                        "libVLC is not installed, or is the wrong architecture: ${missing.message}"
+                    } catch (refused: RuntimeException) {
+                        // VLCJ's discovery throws this when it finds nothing.
+                        "libVLC could not be located: ${refused.message}"
+                    },
+                )
+            }
+            // A daemon, so a probe that never returns cannot hold the process
+            // open at exit — which is exactly how this presented: a test task
+            // that started and never finished.
+            prober.isDaemon = true
+            prober.name = "nomercy-libvlc-probe"
+            prober.start()
+            prober.join(millis)
+            return answer.get()
         }
     }
 }
