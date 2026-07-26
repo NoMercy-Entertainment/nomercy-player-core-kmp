@@ -185,4 +185,41 @@ class AVPlayerVideoBackendTest {
                 .writeToFile(path, atomically = true)
         }
     }
+
+    @Test
+    fun aLadderCapIsExpressedToAVFoundationRatherThanByRewritingTheManifest() {
+        // Apple needs no resource-loader delegate for this. AVFoundation takes
+        // both limits directly, the same way libVLC's demuxer options do, and
+        // reaching for a delegate to cap a ladder would mean re-implementing HLS
+        // to say something the API already accepts as two numbers.
+        withBackend { backend, _, url ->
+            kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
+            settle(SETTLE_SECONDS)
+
+            backend.playableLadder = listOf(
+                QualityDescriptor(height = 720, bitrate = 3_000_000, codec = "avc1"),
+            )
+
+            val item = backend.avPlayer.currentItem
+            assertEquals(3_000_000.0, item?.preferredPeakBitRate)
+        }
+    }
+
+    @Test
+    fun anEmptyLadderLiftsTheCapRatherThanLeavingItBehind() {
+        // A stale cap keeps a device pinned to a ladder it is no longer playing,
+        // which on the next item reads as a stream that will not go above 720p
+        // for no reason anyone can find.
+        withBackend { backend, _, url ->
+            kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
+            settle(SETTLE_SECONDS)
+
+            backend.playableLadder = listOf(
+                QualityDescriptor(height = 720, bitrate = 3_000_000, codec = "avc1"),
+            )
+            backend.playableLadder = emptyList()
+
+            assertEquals(0.0, backend.avPlayer.currentItem?.preferredPeakBitRate)
+        }
+    }
 }
