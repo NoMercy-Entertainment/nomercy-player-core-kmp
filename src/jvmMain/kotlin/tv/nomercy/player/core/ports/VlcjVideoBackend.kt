@@ -8,10 +8,12 @@
 
 package tv.nomercy.player.core.ports
 
+import java.io.File
+import java.net.URI
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 
 private const val MILLIS_PER_SECOND = 1000.0
 private const val FULL_VOLUME_PERCENT = 100
@@ -93,7 +95,18 @@ public class VlcjVideoBackend(
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.
-        player.media().prepare(url)
+        player.media().prepare(playableLocation(url))
+    }
+
+    // libVLC will not open file:/C:/x, which is exactly what File.toURI()
+    // produces and therefore what a desktop caller passes without thinking about
+    // it. The failure is an error event and silence, which reads as a broken
+    // engine rather than a URL it did not like. Any file: URI becomes a plain
+    // path here; everything else is handed over untouched, because a network URL
+    // is libVLC's business and not this class's.
+    private fun playableLocation(url: String): String {
+        if (!url.startsWith("file:")) return url
+        return runCatching { File(URI(url)).absolutePath }.getOrDefault(url)
     }
 
     override suspend fun play() {

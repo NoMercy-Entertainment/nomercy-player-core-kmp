@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.ports
 
+import kotlinx.coroutines.runBlocking
+import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -107,4 +109,62 @@ class VlcjVideoBackendTest {
 
         assertEquals(BackendState.IDLE, backend.state())
     }
+
+    @Test
+    fun aFileUriFromTheStandardLibraryOpensRatherThanFailing() {
+        // File.toURI() writes file:/C:/x with one slash, which is legal and
+        // which libVLC will not open. A desktop caller building a URL the
+        // obvious way got an error event and silence, which reads as a broken
+        // engine rather than a URL the engine did not like.
+        //
+        // Duration is the falsifiable part: it is only known once the engine has
+        // opened the file and read its header. A refused URL leaves it at zero,
+        // which is what this asserted against before the normalisation landed.
+        if (!VlcjVideoBackend.isAvailable()) return
+
+        val media: File = File.createTempFile("nomercy-uri-gate", ".y4m")
+        media.writeBytes(tinyRawVideo())
+        val backend = VlcjVideoBackend()
+
+        try {
+            runBlocking {
+                backend.load(media.toURI().toString(), LoadOptions())
+                backend.play()
+            }
+            val opened: Boolean = awaitDuration(backend)
+
+            assertTrue(opened, "libVLC never opened ${media.toURI()}: duration stayed at 0")
+        } finally {
+            backend.release()
+            media.delete()
+        }
+    }
+
+    private fun awaitDuration(backend: VlcjVideoBackend): Boolean {
+        val deadline: Long = System.currentTimeMillis() + URI_GATE_TIMEOUT_MS
+        while (System.currentTimeMillis() < deadline) {
+            if (backend.duration() > 0.0) return true
+            Thread.sleep(URI_GATE_POLL_MS)
+        }
+        return false
+    }
+
+    // Two frames of uncompressed 16x16, behind Y4M's text header. libVLC demuxes
+    // it directly, so the gate needs no fixture and no encoder on the runner.
+    private fun tinyRawVideo(): ByteArray {
+        val size = 16
+        val header: String = "YUV4MPEG2 W$size H$size F10:1 Ip A1:1 C420jpeg" + NEWLINE
+        val frameMarker: String = "FRAME" + NEWLINE
+        val luma = ByteArray(size * size) { if (it % 2 == 0) LUMA_LIGHT else LUMA_DARK }
+        val chroma = ByteArray(size / 2 * (size / 2)) { CHROMA_NEUTRAL }
+        val frame: ByteArray = frameMarker.toByteArray() + luma + chroma + chroma
+        return header.toByteArray() + frame + frame
+    }
 }
+
+private const val URI_GATE_TIMEOUT_MS = 5_000L
+private const val URI_GATE_POLL_MS = 50L
+private const val LUMA_LIGHT: Byte = 235.toByte()
+private const val LUMA_DARK: Byte = 16
+private const val CHROMA_NEUTRAL: Byte = 128.toByte()
+private const val NEWLINE: String = "\n"
