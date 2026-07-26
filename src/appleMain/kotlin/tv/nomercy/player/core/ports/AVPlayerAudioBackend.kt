@@ -105,8 +105,6 @@ public class AVPlayerAudioBackend : AudioBackend {
             incoming.on(event, fn)
         }
         outgoing.stop()
-        current = incoming
-        standby = outgoing
     }
 
     override fun disposeSecondary() {
