@@ -14,6 +14,7 @@ import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
 import platform.Foundation.NSTemporaryDirectory
+import platform.Foundation.NSURL
 import platform.Foundation.create
 import platform.Foundation.writeToFile
 import kotlin.test.Test
@@ -40,11 +41,17 @@ class AVPlayerVideoBackendTest {
 
     private fun withBackend(body: (AVPlayerVideoBackend, BackendEventRecorder, String) -> Unit) {
         val path = "${NSTemporaryDirectory()}nomercy-gate.wav"
-        writeSilentWav(path, SECONDS)
+        assertTrue(writeSilentWav(path, SECONDS), "could not write the gate media to $path")
+
+        // fileURLWithPath, not "file://" + path. Hand-built file URLs are how a
+        // path with anything needing escaping becomes a URL that parses and then
+        // resolves to nothing, which reads as an engine that reported nothing.
+        val url: String = NSURL.fileURLWithPath(path).absoluteString
+            ?: error("could not build a file URL for $path")
 
         val backend = AVPlayerVideoBackend()
         try {
-            body(backend, BackendEventRecorder(backend), "file://$path")
+            body(backend, BackendEventRecorder(backend), url)
         } finally {
             backend.release()
         }
@@ -119,7 +126,7 @@ class AVPlayerVideoBackendTest {
 
     // Forty-four bytes of header and the rest zeroes. Real media for the
     // decoder, and nothing to download.
-    private fun writeSilentWav(path: String, seconds: Int) {
+    private fun writeSilentWav(path: String, seconds: Int): Boolean {
         val channels = 1
         val bitsPerSample = 16
         val byteRate = SAMPLE_RATE * channels * bitsPerSample / 8
@@ -137,7 +144,7 @@ class AVPlayerVideoBackendTest {
         repeat(dataSize) { bytes.add(0) }
 
         val array: ByteArray = bytes.toByteArray()
-        array.usePinned { pinned ->
+        return array.usePinned { pinned ->
             NSData.create(bytes = pinned.addressOf(0), length = array.size.toULong())
                 .writeToFile(path, atomically = true)
         }
