@@ -58,6 +58,10 @@ import tv.nomercy.player.core.ports.Translator
 // Open, and every member with it. A consumer replacing one behaviour overrides
 // one method; a consumer replacing the composition builds their own from the
 // same controllers.
+// Ten seconds, which is what every player's skip button does and what a viewer
+// expects without being told.
+private const val SKIP_SECONDS = 10.0
+
 @Suppress("TooManyFunctions")
 public open class ComposedPlayer(
     backend: MediaBackend? = null,
@@ -144,6 +148,17 @@ public open class ComposedPlayer(
         time.time(seconds, opts)
 
     public open fun duration(): Double = time.duration()
+
+    // Skip, clamped at both ends. A rewind landing at a negative position makes
+    // one engine seek to the start and another refuse.
+    public open suspend fun forward(seconds: Double = SKIP_SECONDS, opts: ActionOptions = ActionOptions()): Unit =
+        time.forward(seconds, opts)
+
+    public open suspend fun rewind(seconds: Double = SKIP_SECONDS, opts: ActionOptions = ActionOptions()): Unit =
+        time.rewind(seconds, opts)
+
+    public open suspend fun seekByPercentage(percent: Double, opts: ActionOptions = ActionOptions()): Unit =
+        time.seekByPercentage(percent, opts)
 
     public open fun buffered(): Double = time.buffered()
 

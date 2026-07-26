@@ -21,6 +21,10 @@ private const val DEFAULT_ENDING_SOON_SECONDS = 10.0
 
 private val OFFERED_RATES: List<Double> = listOf(0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
 
+// Ten seconds, which is what every player's skip button does and what a viewer
+// expects without being told.
+private const val DEFAULT_SKIP = 10.0
+
 // Where the playhead is, how fast it is moving, and how close to the end.
 //
 // Seeking goes through the transport rather than being reimplemented here: a
@@ -55,6 +59,25 @@ public class TimeController(
         if (ctx.internalDuration <= 0.0) return
         time(ctx.internalDuration * percent.coerceIn(0.0, PERCENT) / PERCENT, opts)
     }
+
+    // Skip forward and back by a number of seconds.
+    //
+    // Clamped at both ends rather than allowed to run past them: a rewind that
+    // lands at a negative position makes an engine seek to the start on one
+    // platform and refuse on another, and a forward skip past the end is a seek
+    // into nothing that some engines answer by ending the item.
+    public suspend fun forward(seconds: Double = DEFAULT_SKIP, opts: ActionOptions = ActionOptions()) {
+        time((time() + seconds).coerceIn(0.0, endOfItem()), opts)
+    }
+
+    public suspend fun rewind(seconds: Double = DEFAULT_SKIP, opts: ActionOptions = ActionOptions()) {
+        time((time() - seconds).coerceIn(0.0, endOfItem()), opts)
+    }
+
+    // The duration when it is known, and the current position when it is not.
+    // Clamping against zero would make every forward skip a no-op on a live
+    // stream, which is where the duration is most often unknown.
+    private fun endOfItem(): Double = if (duration() > 0.0) duration() else time() + DEFAULT_SKIP
 
     public fun playbackRate(): Double = ctx.playbackRate
 
