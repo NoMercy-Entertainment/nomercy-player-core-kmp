@@ -123,6 +123,14 @@ public class ExoPlayerVideoBackend(
             // Media3 reports "is playing" rather than a play event, and it is
             // false while buffering even though playback was requested. That is
             // exactly the play/playing distinction, so it maps to playing.
+            // Without this the track cache never moves. Every other callback
+            // here reports playback, and a selection change reports nothing —
+            // so a chrome reading back what it just chose got the previous
+            // answer, and two selections in a row read as inverted.
+            override fun onTracksChanged(tracks: Tracks) {
+                refreshCache()
+            }
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 refreshCache()
                 if (isPlaying) {
