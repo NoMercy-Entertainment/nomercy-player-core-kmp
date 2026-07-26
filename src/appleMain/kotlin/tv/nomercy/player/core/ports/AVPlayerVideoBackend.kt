@@ -11,7 +11,11 @@ package tv.nomercy.player.core.ports
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItem
+import platform.AVFoundation.AVKeyValueStatusLoaded
 import platform.AVFoundation.AVURLAsset
+import platform.AVFoundation.loadValuesAsynchronouslyForKeys
+import platform.AVFoundation.playable
+import platform.AVFoundation.statusOfValueForKey
 import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
 import platform.AVFoundation.AVPlayerItemStatusFailed
 import platform.AVFoundation.AVPlayerItemStatusReadyToPlay
@@ -36,16 +40,15 @@ import platform.CoreMedia.CMTimeMakeWithSeconds
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSURL
-import platform.AVFoundation.loadValuesAsynchronouslyForKeys
-import platform.AVFoundation.playable
-import platform.AVFoundation.statusOfValueForKey
-import platform.AVFoundation.AVKeyValueStatusLoaded
 import platform.darwin.dispatch_queue_create
 
 private const val TIME_OBSERVER_HZ = 4.0
 private const val NANOS_PER_SECOND = 1_000_000_000
 private const val MILLIS_PER_SECOND = 1000.0
 private const val PLAYABLE_KEY = "playable"
+// duration and tracks as well: without them the item reports an indefinite
+// duration and a scrubber has nothing to draw.
+private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks")
 
 // The Apple engine, over AVFoundation.
 //
@@ -113,23 +116,33 @@ public class AVPlayerVideoBackend : MediaBackend {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
 
-        val asset: AVURLAsset? = NSURL.URLWithString(url)?.let { AVURLAsset(uRL = it, options = null) }
-        val item: AVPlayerItem? = asset?.let { AVPlayerItem(asset = it) }
-        player.replaceCurrentItemWithPlayerItem(item)
-
-        // Readiness comes from the asset, not from playback having started.
+        // The asset is loaded before the item is built, rather than after.
         //
-        // The first version waited for the periodic time observer to notice the
-        // item was ready — but that observer only fires once time is moving, and
-        // time does not move until the item is ready. Nothing ever reported, and
-        // the gate read loadstart, play, pause with silence in between.
-        asset?.loadValuesAsynchronouslyForKeys(listOf(PLAYABLE_KEY)) {
-            if (asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded && asset.playable) {
-                refreshCache()
-                announceReadyOnce()
-            } else {
+        // An item made from an unloaded asset is not ready to play, and play() on
+        // a not-ready item silently does nothing — the gate saw canplay followed
+        // by a playhead that never moved. An item made from an already-loaded
+        // asset is ready as soon as the player has it.
+        //
+        // Two earlier attempts read readiness from the wrong place: the periodic
+        // time observer, which only fires once time is moving and so can never
+        // report that time may start; and the asset being playable, which is
+        // true before its item is ready.
+        val asset: AVURLAsset? = NSURL.URLWithString(url)?.let { AVURLAsset(uRL = it, options = null) }
+        if (asset == null) {
+            bus.emit(CanonicalBackendEvent.ERROR)
+            return
+        }
+
+        asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) {
+            val playable: Boolean =
+                asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded && asset.playable
+            if (!playable) {
                 bus.emit(CanonicalBackendEvent.ERROR)
+                return@loadValuesAsynchronouslyForKeys
             }
+            player.replaceCurrentItemWithPlayerItem(AVPlayerItem(asset = asset))
+            refreshCache()
+            announceReadyOnce()
         }
         if (opts.startPositionMs > 0L) {
             player.seekToTime(
