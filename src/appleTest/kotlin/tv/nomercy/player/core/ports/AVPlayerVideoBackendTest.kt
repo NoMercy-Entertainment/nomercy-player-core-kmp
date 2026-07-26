@@ -13,9 +13,13 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
+import platform.Foundation.NSDate
+import platform.Foundation.NSRunLoop
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
 import platform.Foundation.create
+import platform.Foundation.dateByAddingTimeInterval
+import platform.Foundation.runUntilDate
 import platform.Foundation.writeToFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -76,30 +80,32 @@ class AVPlayerVideoBackendTest {
 
     @Test
     fun aRealEngineReportsTheCanonicalSpineInOrder() = withBackend { backend, recorder, url ->
-        kotlinx.coroutines.runBlocking {
-            backend.load(url, LoadOptions())
-            settle(SETTLE_SECONDS)
+        kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
+        settle(SETTLE_SECONDS)
 
-            backend.play()
-            settle(PLAY_SECONDS)
-            val whilePlaying: Double = backend.currentTime()
+        kotlinx.coroutines.runBlocking { backend.play() }
+        settle(PLAY_SECONDS)
+        val whilePlaying: Double = backend.currentTime()
 
-            backend.pause()
-            settle(SETTLE_SECONDS)
+        backend.pause()
+        settle(SETTLE_SECONDS)
 
-            // The same assertion the desktop and Android gates make, against the
-            // same ruler. That is the whole point of the spike: one vocabulary,
-            // three engines that agree on it.
-            assertCanonicalSubsequence(recorder.names(), CanonicalBackendEvent.PLAY_PAUSE_SPINE)
-            assertTrue(whilePlaying > 0.0, "the playhead did not move: $whilePlaying")
-        }
+        // The same assertion the desktop and Android gates make, against the
+        // same ruler. That is the whole point of the spike: one vocabulary,
+        // three engines that agree on it.
+        assertCanonicalSubsequence(recorder.names(), CanonicalBackendEvent.PLAY_PAUSE_SPINE)
+        assertTrue(whilePlaying > 0.0, "the playhead did not move: $whilePlaying")
     }
 
-    // AVPlayer reports through a periodic observer on the main run loop, so the
-    // test has to let that loop turn rather than blocking it. A sleep here would
-    // stop the very thing being measured.
-    private suspend fun settle(seconds: Double) {
-        kotlinx.coroutines.delay((seconds * 1000).toLong())
+    // Turns the main run loop for a while rather than blocking it.
+    //
+    // AVFoundation delivers an item's status changes on the main queue, so a
+    // test that blocks the main thread — with sleep, or with runBlocking and a
+    // delay — gets an item that never becomes ready and an engine that appears
+    // to report nothing. That is exactly how this gate first read: loadstart,
+    // play, pause, and silence in between.
+    private fun settle(seconds: Double) {
+        NSRunLoop.mainRunLoop().runUntilDate(NSDate().dateByAddingTimeInterval(seconds))
     }
 
     @Test
