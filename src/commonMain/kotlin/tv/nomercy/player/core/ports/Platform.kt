@@ -22,6 +22,12 @@ public interface Platform {
 
     public val fullscreen: FullscreenController? get() = null
     public val pip: PipController? get() = null
+
+    // Null where sound cannot be routed from here. A chrome asking for a picker
+    // has to be able to tell "no other outputs" from "this platform does not let
+    // me ask", and a no-op returning an empty list would say the first when it
+    // meant the second.
+    public val audioOutput: AudioOutputRouter? get() = null
 }
 
 public expect fun defaultPlatform(): Platform

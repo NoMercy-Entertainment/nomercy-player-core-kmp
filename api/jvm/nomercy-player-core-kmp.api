@@ -42,8 +42,11 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun addTranslations (Ljava/util/Map;)V
 	public fun announce (Ljava/lang/String;Ltv/nomercy/player/core/ports/AnnouncementLevel;)V
 	public static synthetic fun announce$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;Ltv/nomercy/player/core/ports/AnnouncementLevel;ILjava/lang/Object;)V
+	public fun audioOutput (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun audioOutputs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public fun audioTrackMode ()Ltv/nomercy/player/core/player/AudioTrackState;
 	public fun audioTracks ()Ljava/util/List;
 	public fun auth ()Ltv/nomercy/player/core/controllers/AuthController;
 	public fun auth (Ltv/nomercy/player/core/controllers/AuthController;)V
@@ -195,6 +198,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun seekToChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun seekToIndex (I)V
 	public fun seekable ()Ljava/util/List;
+	public fun selectAudioOutput (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun setPreloadStrategy (Ltv/nomercy/player/core/ports/PreloadStrategy;)V
 	public fun setTransitionStrategy (Ltv/nomercy/player/core/ports/TransitionStrategy;)V
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -2864,6 +2868,43 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 }
 
+public final class tv/nomercy/player/core/ports/AudioOutput {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/AudioOutputKind;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/AudioOutputKind;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/AudioOutputKind;Z)Ltv/nomercy/player/core/ports/AudioOutput;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/AudioOutput;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/AudioOutputKind;ZILjava/lang/Object;)Ltv/nomercy/player/core/ports/AudioOutput;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getKind ()Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isDefault ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/AudioOutputKind : java/lang/Enum {
+	public static final field BLUETOOTH Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static final field CAST Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static final field HDMI Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static final field HEADPHONES Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static final field SPEAKER Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static final field UNKNOWN Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static final field USB Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/AudioOutputKind;
+	public static fun values ()[Ltv/nomercy/player/core/ports/AudioOutputKind;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/AudioOutputRouter {
+	public abstract fun current (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun outputs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun select (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public final class tv/nomercy/player/core/ports/AudioTrack {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3345,6 +3386,7 @@ public abstract interface class tv/nomercy/player/core/ports/PipController {
 }
 
 public abstract interface class tv/nomercy/player/core/ports/Platform {
+	public fun getAudioOutput ()Ltv/nomercy/player/core/ports/AudioOutputRouter;
 	public abstract fun getCapabilities ()Ltv/nomercy/player/core/ports/CapabilitiesProbe;
 	public fun getFullscreen ()Ltv/nomercy/player/core/ports/FullscreenController;
 	public abstract fun getNetwork ()Ltv/nomercy/player/core/ports/NetworkMonitor;
@@ -3354,6 +3396,7 @@ public abstract interface class tv/nomercy/player/core/ports/Platform {
 }
 
 public final class tv/nomercy/player/core/ports/Platform$DefaultImpls {
+	public static fun getAudioOutput (Ltv/nomercy/player/core/ports/Platform;)Ltv/nomercy/player/core/ports/AudioOutputRouter;
 	public static fun getFullscreen (Ltv/nomercy/player/core/ports/Platform;)Ltv/nomercy/player/core/ports/FullscreenController;
 	public static fun getPip (Ltv/nomercy/player/core/ports/Platform;)Ltv/nomercy/player/core/ports/PipController;
 }
@@ -3801,6 +3844,7 @@ public final class tv/nomercy/player/core/ports/Translator$DefaultImpls {
 
 public final class tv/nomercy/player/core/ports/UnconfiguredPlatform : tv/nomercy/player/core/ports/Platform {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/UnconfiguredPlatform;
+	public fun getAudioOutput ()Ltv/nomercy/player/core/ports/AudioOutputRouter;
 	public fun getCapabilities ()Ltv/nomercy/player/core/ports/CapabilitiesProbe;
 	public fun getFullscreen ()Ltv/nomercy/player/core/ports/FullscreenController;
 	public fun getNetwork ()Ltv/nomercy/player/core/ports/NetworkMonitor;

@@ -22,6 +22,7 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.AudioTrackStatePayload
 import tv.nomercy.player.core.events.AuthFailedPayload
 import tv.nomercy.player.core.events.AuthRefreshedPayload
 import tv.nomercy.player.core.events.CastStatePayload
@@ -37,6 +38,7 @@ import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.media.TitleTokens
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.AudioTrackState
 import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.CastState
 import tv.nomercy.player.core.player.NetworkState
@@ -57,6 +59,7 @@ import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.AnnouncementLevel
 import tv.nomercy.player.core.ports.Announcer
+import tv.nomercy.player.core.ports.AudioOutput
 import tv.nomercy.player.core.ports.BackendState
 import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.DecodeCapability
@@ -334,6 +337,27 @@ public open class ComposedPlayer(
     // filtered on supported alone puts a phone on a rung that drains it.
     public open suspend fun canPlay(profile: DecodeProfile): DecodeCapability =
         platform.capabilities.canDecode(profile)
+
+    // ── Audio output ─────────────────────────────────────────────────────────
+
+    // Where sound can go, and where it is going.
+    //
+    // Empty when the platform cannot route audio, which is not the same as
+    // having no outputs — but it is the same to a caller deciding whether to
+    // draw a picker, and the distinction is available through platform() for
+    // one that needs it.
+    public open suspend fun audioOutputs(): List<AudioOutput> =
+        platform.audioOutput?.outputs().orEmpty()
+
+    public open suspend fun audioOutput(): AudioOutput? = platform.audioOutput?.current()
+
+    // False when there was nothing to ask or the platform refused.
+    //
+    // Not a throw: iOS routes audio by policy and treats a preference as a
+    // suggestion, so "your choice did not take" is an ordinary outcome a caller
+    // has to handle rather than an exceptional one.
+    public open suspend fun selectAudioOutput(id: String): Boolean =
+        platform.audioOutput?.select(id) ?: false
 
     // ── Environment ──────────────────────────────────────────────────────────
 
@@ -826,7 +850,20 @@ public open class ComposedPlayer(
 
     public open fun audioTrack(track: AudioTrack) {
         video?.audioTrack(track)
+        audioTrackChoice = AudioTrackState.MANUAL
+        context.emit(CoreEvents.AudioTrackState, AudioTrackStatePayload(AudioTrackState.MANUAL.token))
     }
+
+    // Whether the audio track was chosen or fell out of the engine's defaults.
+    //
+    // The distinction a chrome needs to know whether to show a tick beside a
+    // language: DEFAULT means the engine picked, which is usually the item's
+    // first track and not a decision anyone made. Once a viewer chooses, the
+    // choice should survive the next item rather than being re-decided by the
+    // engine — and this is what a per-library player reads to do that.
+    public open fun audioTrackMode(): AudioTrackState = audioTrackChoice
+
+    private var audioTrackChoice: AudioTrackState = AudioTrackState.DEFAULT
 
     // subtitles() and subtitle(), not subtitleTracks() and subtitleTrack().
     //

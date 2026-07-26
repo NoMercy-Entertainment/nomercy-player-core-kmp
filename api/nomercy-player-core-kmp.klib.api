@@ -377,6 +377,22 @@ final enum class tv.nomercy.player.core.ports/AnnouncementLevel : kotlin/Enum<tv
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/AnnouncementLevel> // tv.nomercy.player.core.ports/AnnouncementLevel.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.ports/AudioOutputKind : kotlin/Enum<tv.nomercy.player.core.ports/AudioOutputKind> { // tv.nomercy.player.core.ports/AudioOutputKind|null[0]
+    enum entry BLUETOOTH // tv.nomercy.player.core.ports/AudioOutputKind.BLUETOOTH|null[0]
+    enum entry CAST // tv.nomercy.player.core.ports/AudioOutputKind.CAST|null[0]
+    enum entry HDMI // tv.nomercy.player.core.ports/AudioOutputKind.HDMI|null[0]
+    enum entry HEADPHONES // tv.nomercy.player.core.ports/AudioOutputKind.HEADPHONES|null[0]
+    enum entry SPEAKER // tv.nomercy.player.core.ports/AudioOutputKind.SPEAKER|null[0]
+    enum entry UNKNOWN // tv.nomercy.player.core.ports/AudioOutputKind.UNKNOWN|null[0]
+    enum entry USB // tv.nomercy.player.core.ports/AudioOutputKind.USB|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/AudioOutputKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/AudioOutputKind> // tv.nomercy.player.core.ports/AudioOutputKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/AudioOutputKind // tv.nomercy.player.core.ports/AudioOutputKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/AudioOutputKind> // tv.nomercy.player.core.ports/AudioOutputKind.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.ports/BackendState : kotlin/Enum<tv.nomercy.player.core.ports/BackendState> { // tv.nomercy.player.core.ports/BackendState|null[0]
     enum entry ERROR // tv.nomercy.player.core.ports/BackendState.ERROR|null[0]
     enum entry IDLE // tv.nomercy.player.core.ports/BackendState.IDLE|null[0]
@@ -674,6 +690,12 @@ abstract interface tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.
 
 abstract interface tv.nomercy.player.core.ports/AudioBackend : tv.nomercy.player.core.ports/MediaBackend, tv.nomercy.player.core.ports/TransitionBackend // tv.nomercy.player.core.ports/AudioBackend|null[0]
 
+abstract interface tv.nomercy.player.core.ports/AudioOutputRouter { // tv.nomercy.player.core.ports/AudioOutputRouter|null[0]
+    abstract suspend fun current(): tv.nomercy.player.core.ports/AudioOutput? // tv.nomercy.player.core.ports/AudioOutputRouter.current|current(){}[0]
+    abstract suspend fun outputs(): kotlin.collections/List<tv.nomercy.player.core.ports/AudioOutput> // tv.nomercy.player.core.ports/AudioOutputRouter.outputs|outputs(){}[0]
+    abstract suspend fun select(kotlin/String): kotlin/Boolean // tv.nomercy.player.core.ports/AudioOutputRouter.select|select(kotlin.String){}[0]
+}
+
 abstract interface tv.nomercy.player.core.ports/CapabilitiesProbe { // tv.nomercy.player.core.ports/CapabilitiesProbe|null[0]
     abstract suspend fun canDecode(tv.nomercy.player.core.ports/DecodeProfile): tv.nomercy.player.core.ports/DecodeCapability // tv.nomercy.player.core.ports/CapabilitiesProbe.canDecode|canDecode(tv.nomercy.player.core.ports.DecodeProfile){}[0]
     abstract suspend fun supportedCodecs(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CapabilitiesProbe.supportedCodecs|supportedCodecs(){}[0]
@@ -765,6 +787,8 @@ abstract interface tv.nomercy.player.core.ports/Platform { // tv.nomercy.player.
         abstract fun <get-visibility>(): tv.nomercy.player.core.ports/VisibilityMonitor // tv.nomercy.player.core.ports/Platform.visibility.<get-visibility>|<get-visibility>(){}[0]
     abstract val wakeLock // tv.nomercy.player.core.ports/Platform.wakeLock|{}wakeLock[0]
         abstract fun <get-wakeLock>(): tv.nomercy.player.core.ports/WakeLock // tv.nomercy.player.core.ports/Platform.wakeLock.<get-wakeLock>|<get-wakeLock>(){}[0]
+    open val audioOutput // tv.nomercy.player.core.ports/Platform.audioOutput|{}audioOutput[0]
+        open fun <get-audioOutput>(): tv.nomercy.player.core.ports/AudioOutputRouter? // tv.nomercy.player.core.ports/Platform.audioOutput.<get-audioOutput>|<get-audioOutput>(){}[0]
     open val fullscreen // tv.nomercy.player.core.ports/Platform.fullscreen|{}fullscreen[0]
         open fun <get-fullscreen>(): tv.nomercy.player.core.ports/FullscreenController? // tv.nomercy.player.core.ports/Platform.fullscreen.<get-fullscreen>|<get-fullscreen>(){}[0]
     open val pip // tv.nomercy.player.core.ports/Platform.pip|{}pip[0]
@@ -3133,6 +3157,28 @@ final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.playe
     final suspend fun play() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.play|play(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/AudioOutput { // tv.nomercy.player.core.ports/AudioOutput|null[0]
+    constructor <init>(kotlin/String, kotlin/String, tv.nomercy.player.core.ports/AudioOutputKind = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.ports/AudioOutput.<init>|<init>(kotlin.String;kotlin.String;tv.nomercy.player.core.ports.AudioOutputKind;kotlin.Boolean){}[0]
+
+    final val id // tv.nomercy.player.core.ports/AudioOutput.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.ports/AudioOutput.id.<get-id>|<get-id>(){}[0]
+    final val isDefault // tv.nomercy.player.core.ports/AudioOutput.isDefault|{}isDefault[0]
+        final fun <get-isDefault>(): kotlin/Boolean // tv.nomercy.player.core.ports/AudioOutput.isDefault.<get-isDefault>|<get-isDefault>(){}[0]
+    final val kind // tv.nomercy.player.core.ports/AudioOutput.kind|{}kind[0]
+        final fun <get-kind>(): tv.nomercy.player.core.ports/AudioOutputKind // tv.nomercy.player.core.ports/AudioOutput.kind.<get-kind>|<get-kind>(){}[0]
+    final val name // tv.nomercy.player.core.ports/AudioOutput.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tv.nomercy.player.core.ports/AudioOutput.name.<get-name>|<get-name>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.ports/AudioOutput.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.ports/AudioOutput.component2|component2(){}[0]
+    final fun component3(): tv.nomercy.player.core.ports/AudioOutputKind // tv.nomercy.player.core.ports/AudioOutput.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // tv.nomercy.player.core.ports/AudioOutput.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., tv.nomercy.player.core.ports/AudioOutputKind = ..., kotlin/Boolean = ...): tv.nomercy.player.core.ports/AudioOutput // tv.nomercy.player.core.ports/AudioOutput.copy|copy(kotlin.String;kotlin.String;tv.nomercy.player.core.ports.AudioOutputKind;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/AudioOutput.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/AudioOutput.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/AudioOutput.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/AudioTrack { // tv.nomercy.player.core.ports/AudioTrack|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/Int = ..., kotlin/String? = ...) // tv.nomercy.player.core.ports/AudioTrack.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.Int;kotlin.String?){}[0]
 
@@ -3830,6 +3876,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun announce(kotlin/String, tv.nomercy.player.core.ports/AnnouncementLevel = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.announce|announce(kotlin.String;tv.nomercy.player.core.ports.AnnouncementLevel){}[0]
     open fun audioTrack(): tv.nomercy.player.core.ports/AudioTrack? // tv.nomercy.player.core.controllers/ComposedPlayer.audioTrack|audioTrack(){}[0]
     open fun audioTrack(tv.nomercy.player.core.ports/AudioTrack) // tv.nomercy.player.core.controllers/ComposedPlayer.audioTrack|audioTrack(tv.nomercy.player.core.ports.AudioTrack){}[0]
+    open fun audioTrackMode(): tv.nomercy.player.core.player/AudioTrackState // tv.nomercy.player.core.controllers/ComposedPlayer.audioTrackMode|audioTrackMode(){}[0]
     open fun audioTracks(): kotlin.collections/List<tv.nomercy.player.core.ports/AudioTrack> // tv.nomercy.player.core.controllers/ComposedPlayer.audioTracks|audioTracks(){}[0]
     open fun auth(): tv.nomercy.player.core.controllers/AuthController? // tv.nomercy.player.core.controllers/ComposedPlayer.auth|auth(){}[0]
     open fun auth(tv.nomercy.player.core.controllers/AuthController?) // tv.nomercy.player.core.controllers/ComposedPlayer.auth|auth(tv.nomercy.player.core.controllers.AuthController?){}[0]
@@ -3938,6 +3985,8 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun websocket(kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions): tv.nomercy.player.core.ports/RealtimeChannel // tv.nomercy.player.core.controllers/ComposedPlayer.websocket|websocket(kotlin.String;tv.nomercy.player.core.ports.RealtimeFactoryOptions){}[0]
     open suspend fun <#A1: kotlin/Any> addPlugin(tv.nomercy.player.core.plugin/Plugin<#A1>, #A1? = ...): tv.nomercy.player.core.controllers/ComposedPlayer // tv.nomercy.player.core.controllers/ComposedPlayer.addPlugin|addPlugin(tv.nomercy.player.core.plugin.Plugin<0:0>;0:0?){0§<kotlin.Any>}[0]
     open suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.controllers/ComposedPlayer.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
+    open suspend fun audioOutput(): tv.nomercy.player.core.ports/AudioOutput? // tv.nomercy.player.core.controllers/ComposedPlayer.audioOutput|audioOutput(){}[0]
+    open suspend fun audioOutputs(): kotlin.collections/List<tv.nomercy.player.core.ports/AudioOutput> // tv.nomercy.player.core.controllers/ComposedPlayer.audioOutputs|audioOutputs(){}[0]
     open suspend fun canPlay(tv.nomercy.player.core.ports/DecodeProfile): tv.nomercy.player.core.ports/DecodeCapability // tv.nomercy.player.core.controllers/ComposedPlayer.canPlay|canPlay(tv.nomercy.player.core.ports.DecodeProfile){}[0]
     open suspend fun dispose(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.dispose|dispose(tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.controllers/ComposedPlayer.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
@@ -3963,6 +4012,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open suspend fun rewind(kotlin/Double = ..., tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.rewind|rewind(kotlin.Double;tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun seekByPercentage(kotlin/Double, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.seekByPercentage|seekByPercentage(kotlin.Double;tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun seekToChapter(kotlin/Int, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.seekToChapter|seekToChapter(kotlin.Int;tv.nomercy.player.core.player.ActionOptions){}[0]
+    open suspend fun selectAudioOutput(kotlin/String): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.selectAudioOutput|selectAudioOutput(kotlin.String){}[0]
     open suspend fun setup(tv.nomercy.player.core.player/PlayerConfig = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.setup|setup(tv.nomercy.player.core.player.PlayerConfig){}[0]
     open suspend fun shuffleState(tv.nomercy.player.core.player/ShuffleState, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.shuffleState|shuffleState(tv.nomercy.player.core.player.ShuffleState;tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun stop(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.stop|stop(tv.nomercy.player.core.player.ActionOptions){}[0]

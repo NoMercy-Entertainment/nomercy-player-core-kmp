@@ -44,8 +44,6 @@ private val WEB_ONLY_METHODS = setOf(
 // port, which is why it is written out rather than derived — a set difference
 // that quietly got smaller for the wrong reason would look like progress.
 private val NOT_YET_PORTED_METHODS = setOf(
-    "audioOutput", "audioOutputs",
-    "audioTrackMode", 
     
     
     
@@ -54,7 +52,9 @@ private val NOT_YET_PORTED_METHODS = setOf(
     
     
     
-    "selectAudioOutput", 
+    
+    
+    
     "transferTo", 
     
     
