@@ -27,6 +27,9 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun addPlugin$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
+	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public fun audioTracks ()Ljava/util/List;
 	public fun bandwidth ()I
 	public fun bandwidthEstimator ()Lkotlin/jvm/functions/Function0;
 	public fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
@@ -97,6 +100,9 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
 	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun stop$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
+	public fun subtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
+	public fun subtitles ()Ljava/util/List;
 	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public fun time ()D
 	public fun time (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

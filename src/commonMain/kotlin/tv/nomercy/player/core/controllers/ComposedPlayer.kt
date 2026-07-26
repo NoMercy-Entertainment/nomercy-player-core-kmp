@@ -35,7 +35,9 @@ import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.Fetcher
+import tv.nomercy.player.core.ports.AudioTrack
 import tv.nomercy.player.core.ports.QualityLevel
+import tv.nomercy.player.core.ports.SubtitleTrack
 import tv.nomercy.player.core.ports.QualityMode
 import tv.nomercy.player.core.ports.VideoBackend
 import tv.nomercy.player.core.ports.FetchResponse
@@ -200,6 +202,34 @@ public open class ComposedPlayer(
     // committed selection the viewer never made is worse than showing none.
     public open fun qualityMode(): QualityMode =
         if (video?.quality() == null) QualityMode.AUTO else QualityMode.MANUAL
+
+    // Tracks, by the thing itself rather than by its place in a list. An
+    // audio-only engine reports none rather than throwing, the same as the
+    // ladder does.
+    public open fun audioTracks(): List<AudioTrack> = video?.audioTracks().orEmpty()
+
+    public open fun audioTrack(): AudioTrack? = video?.audioTrack()
+
+    public open fun audioTrack(track: AudioTrack) {
+        video?.audioTrack(track)
+    }
+
+    // subtitles() and subtitle(), not subtitleTracks() and subtitleTrack().
+    //
+    // The backend port uses the longer names because there it sits beside
+    // audioTrack and the symmetry helps; the player surface uses the contract's,
+    // because a consumer reading a name in the web docs has to find it here. A
+    // renamed method is a divergence a conformance gate cannot forgive and a
+    // developer cannot search for.
+    public open fun subtitles(): List<SubtitleTrack> = video?.subtitleTracks().orEmpty()
+
+    public open fun subtitle(): SubtitleTrack? = video?.subtitleTrack()
+
+    // Null turns captions off, which is a selection a viewer makes rather than
+    // an error — and it is the one every engine spells differently underneath.
+    public open fun subtitle(track: SubtitleTrack?) {
+        video?.subtitleTrack(track)
+    }
 
     public open fun bandwidth(): Int = bandwidth.bandwidth()
 
