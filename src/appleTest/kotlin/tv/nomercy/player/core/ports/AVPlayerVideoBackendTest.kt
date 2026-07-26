@@ -8,13 +8,18 @@
 
 package tv.nomercy.player.core.ports
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.cinterop.BetaInteropApi
-import platform.AVFAudio.AVAudioSession
-import platform.AVFAudio.AVAudioSessionCategoryPlayback
-import platform.AVFAudio.setActive
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
+import platform.AVFAudio.AVAudioSession
+import platform.AVFAudio.AVAudioSessionCategoryPlayback
+import platform.AVFAudio.setActive
+import platform.AVFoundation.currentItem
+import platform.AVFoundation.preferredPeakBitRate
 import platform.Foundation.NSData
 import platform.Foundation.NSDate
 import platform.Foundation.NSRunLoop
@@ -24,9 +29,7 @@ import platform.Foundation.create
 import platform.Foundation.dateByAddingTimeInterval
 import platform.Foundation.runUntilDate
 import platform.Foundation.writeToFile
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import tv.nomercy.player.core.media.QualityDescriptor
 
 private const val SAMPLE_RATE = 44_100
 private const val SECONDS = 3
