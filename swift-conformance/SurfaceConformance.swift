@@ -44,8 +44,30 @@ enum SurfaceConformance {
     // The value types a SwiftUI view binds to. A struct-like Kotlin data class
     // has to arrive with readable properties, not as an opaque handle.
     static func state() {
-        let holder = PlayerStateHolder(initial: PlayerState())
-        let snapshot = holder.snapshot()
+        // Every field, because Kotlin default arguments do not cross to Swift:
+        // PlayerState() is unavailable here even though it is the common way to
+        // build one from Kotlin. Worth knowing before the iOS docs promise
+        // otherwise, and worth a factory on the Apple side eventually.
+        let snapshot = PlayerState(
+            phase: PlayerPhase.idle,
+            playState: PlayState.idle,
+            setupState: SetupState.notSetup,
+            time: 0,
+            duration: 0,
+            buffered: 0,
+            volume: 100,
+            muted: false,
+            volumeState: VolumeState.unmuted,
+            playbackRate: 1,
+            item: nil,
+            index: -1,
+            queueLength: 0,
+            repeatState: RepeatState.off,
+            shuffleState: ShuffleState.off,
+            bufferState: BufferState.idle,
+            networkState: NetworkState.online,
+            castState: CastState.unavailable
+        )
 
         // A SwiftUI view binds to these, so they have to arrive as readable
         // properties rather than as an opaque handle.
