@@ -18,6 +18,7 @@ detekt = "1.23.8"
 binaryCompatibilityValidator = "0.18.1"
 mavenPublish = "0.37.0"
 skie = "0.10.13"
+robolectric = "4.14.1"
 junit = "5.11.4"
 junitLauncher = "1.11.4"
 
@@ -35,6 +36,7 @@ androidx-test-runner = { module = "androidx.test:runner", version.ref = "android
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
 detekt-api = { module = "io.gitlab.arturbosch.detekt:detekt-api", version.ref = "detekt" }
 detekt-test = { module = "io.gitlab.arturbosch.detekt:detekt-test", version.ref = "detekt" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitLauncher" }
 

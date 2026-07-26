@@ -152,6 +152,13 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.vlcj)
         }
+        getByName("androidHostTest").dependencies {
+            // Media3's Format.Builder reaches into android.text.TextUtils, which
+            // a plain JVM unit test does not have. Returning defaults instead
+            // would make the mapper's tests pass over a framework that answered
+            // nothing, which is worse than not testing it.
+            implementation(libs.robolectric)
+        }
         getByName("androidDeviceTest").dependencies {
             implementation(libs.androidx.test.runner)
             implementation(libs.androidx.test.core)
