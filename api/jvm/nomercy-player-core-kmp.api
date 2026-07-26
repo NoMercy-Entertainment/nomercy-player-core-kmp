@@ -14,6 +14,7 @@ public final class tv/nomercy/player/core/controllers/ActivityController {
 
 public class tv/nomercy/player/core/controllers/AuthController {
 	public fun <init> ()V
+	public fun refresh (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
 }
 
@@ -44,6 +45,9 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
 	public fun audioTracks ()Ljava/util/List;
+	public fun auth ()Ltv/nomercy/player/core/controllers/AuthController;
+	public fun auth (Ltv/nomercy/player/core/controllers/AuthController;)V
+	public fun backend ()Ltv/nomercy/player/core/ports/MediaBackend;
 	public fun backlog ()Ljava/util/List;
 	public fun backlog (Ljava/util/List;)V
 	public fun backlogAppend (Ljava/util/List;)V
@@ -57,6 +61,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun bufferState ()Ltv/nomercy/player/core/player/BufferState;
 	public fun buffered ()D
 	public fun bumpActivity ()V
+	public fun canPlay (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun castState ()Ltv/nomercy/player/core/player/CastState;
 	public fun castState (Ltv/nomercy/player/core/player/CastState;)V
 	public fun chapter ()Ltv/nomercy/player/core/media/Chapter;
@@ -104,6 +109,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun item$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun language ()Ljava/lang/String;
 	public fun language (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun load (Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun load$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun loadQueue (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun metrics ()Ltv/nomercy/player/core/events/PlaybackMetrics;
 	public fun mute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -158,6 +165,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun ready ()Lkotlinx/coroutines/Deferred;
 	public fun recordMetric (Ljava/lang/String;D)V
 	public fun recordMetric (Ltv/nomercy/player/core/controllers/Metric;D)V
+	public fun refreshAuth (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun registerCueParser (Ltv/nomercy/player/core/ports/CueParser;Z)V
 	public static synthetic fun registerCueParser$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/ports/CueParser;ZILjava/lang/Object;)V
 	public fun registerStream (Ltv/nomercy/player/core/ports/StreamFactory;Z)Ltv/nomercy/player/core/controllers/ComposedPlayer;

@@ -22,6 +22,8 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.AuthFailedPayload
+import tv.nomercy.player.core.events.AuthRefreshedPayload
 import tv.nomercy.player.core.events.CastStatePayload
 import tv.nomercy.player.core.events.PlayerErrorEvent
 import tv.nomercy.player.core.events.TransitionCancelledPayload
@@ -56,6 +58,8 @@ import tv.nomercy.player.core.ports.AnnouncementLevel
 import tv.nomercy.player.core.ports.Announcer
 import tv.nomercy.player.core.ports.BackendState
 import tv.nomercy.player.core.ports.Clock
+import tv.nomercy.player.core.ports.DecodeCapability
+import tv.nomercy.player.core.ports.DecodeProfile
 import tv.nomercy.player.core.ports.Platform
 import tv.nomercy.player.core.ports.UnconfiguredPlatform
 import tv.nomercy.player.core.ports.CueParser
@@ -75,6 +79,7 @@ import tv.nomercy.player.core.ports.SubtitleTrack
 import tv.nomercy.player.core.ports.QualityMode
 import tv.nomercy.player.core.ports.VideoBackend
 import tv.nomercy.player.core.ports.FetchResponse
+import tv.nomercy.player.core.ports.LoadOptions
 import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.MediaBackend
 import tv.nomercy.player.core.ports.RealtimeChannel
@@ -270,6 +275,63 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Auth ─────────────────────────────────────────────────────────────────
+
+    // How an item's url becomes one the backend can fetch.
+    //
+    // No token crosses this surface in either direction. A NoMercy server signs
+    // playback urls, and the signing belongs behind the controller — a getter
+    // for the bearer would put the secret in reach of every plugin and every
+    // consumer who can see the player, which is the whole population.
+    public open fun auth(): AuthController? = context.auth
+
+    public open fun auth(controller: AuthController?) {
+        context.auth = controller
+    }
+
+    // Ask for a new token, because the one in use stopped working.
+    //
+    // Announced either way. A cached fetcher and a telemetry sink both need to
+    // know a refresh happened; a player with no auth configured has nothing to
+    // refresh and reports success, because there is no failure in having no
+    // token to renew.
+    public open suspend fun refreshAuth(): Boolean {
+        val refreshed: Boolean = context.auth?.refresh() ?: true
+        if (refreshed) {
+            context.emit(CoreEvents.AuthRefreshed, AuthRefreshedPayload(now().toDouble()))
+        } else {
+            context.emit(CoreEvents.AuthFailed, AuthFailedPayload())
+        }
+        return refreshed
+    }
+
+    // ── Engine ───────────────────────────────────────────────────────────────
+
+    // The engine, for the things no port covers.
+    //
+    // Public because pretending otherwise does not work: a consumer needing an
+    // ExoPlayer reference for a Media3 UI component, or an AVPlayer for a
+    // picture-in-picture controller, will reach for it, and a library that hid
+    // it would be forcing a cast through a property that happens to be public
+    // somewhere else. Guidance, not walls.
+    public open fun backend(): MediaBackend? = context.backend
+
+    // Load an item without going through the queue.
+    //
+    // What a caller wants when the queue is not the model: a preview, a trailer,
+    // a single file opened from a file manager.
+    public open suspend fun load(item: PlaylistItem, opts: LoadOptions = LoadOptions()): Unit =
+        context.load(item, opts)
+
+    // Whether this device can decode that.
+    //
+    // Three answers, not one: supported says it plays, smooth says it plays at
+    // full rate, powerEfficient says it does so in hardware. A rendition can be
+    // supported and still be the wrong choice on a battery, and a ladder
+    // filtered on supported alone puts a phone on a rung that drains it.
+    public open suspend fun canPlay(profile: DecodeProfile): DecodeCapability =
+        platform.capabilities.canDecode(profile)
 
     // ── Environment ──────────────────────────────────────────────────────────
 

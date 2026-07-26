@@ -19,4 +19,16 @@ package tv.nomercy.player.core.controllers
 // one method.
 public open class AuthController {
     public open fun transformUrl(url: String): String = url
+
+    // Get a fresh token, when the one held has stopped working.
+    //
+    // Suspending and returning nothing: the controller holds whatever it needs
+    // and transformUrl reads it afterwards. Handing a token back through here
+    // would put it in a caller's hands for no reason, and the reason there is no
+    // getter for one at all is the same.
+    //
+    // Succeeds by default. A consumer whose media needs no authorisation has no
+    // token to refresh, and making them implement a method to say so would be a
+    // requirement invented by the library.
+    public open suspend fun refresh(): Boolean = true
 }

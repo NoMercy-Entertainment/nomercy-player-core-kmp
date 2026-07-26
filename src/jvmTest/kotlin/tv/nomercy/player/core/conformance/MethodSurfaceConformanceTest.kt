@@ -32,6 +32,12 @@ private val WEB_ONLY_METHODS = setOf(
     "createElement",
     "createSVG",
     "audioContext",
+    // A runtime method-override table. The web needs one because a
+    // mixin-composed player cannot be subclassed; Kotlin's answer is that every
+    // member here is already open, so a consumer replacing one behaviour
+    // overrides one method. Reproducing this would mean reflection in a shipped
+    // artifact to offer a worse version of what the language does.
+    "experimental",
 )
 
 // Subsystems this port has not reached. The list shrinking is the measure of the
@@ -39,13 +45,13 @@ private val WEB_ONLY_METHODS = setOf(
 // that quietly got smaller for the wrong reason would look like progress.
 private val NOT_YET_PORTED_METHODS = setOf(
     "audioOutput", "audioOutputs",
-    "audioTrackMode", "auth", "backend", 
-    "bufferedRanges", "canPlay", 
-    "experimental",
+    "audioTrackMode", 
+    "bufferedRanges", 
     
-    "load", 
     
-    "refreshAuth", 
+    
+    
+    
     "registerTitleTokens", 
     "seekable",
     "selectAudioOutput", 
