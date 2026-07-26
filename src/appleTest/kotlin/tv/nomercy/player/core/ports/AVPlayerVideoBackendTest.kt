@@ -9,6 +9,9 @@
 package tv.nomercy.player.core.ports
 
 import kotlinx.cinterop.BetaInteropApi
+import platform.AVFAudio.AVAudioSession
+import platform.AVFAudio.AVAudioSessionCategoryPlayback
+import platform.AVFAudio.setActive
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
@@ -44,7 +47,17 @@ private const val PLAY_SECONDS = 1.5
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class AVPlayerVideoBackendTest {
 
+    // What an app does before it plays anything, and what the library
+    // deliberately does not: the audio session is a global the app owns, and a
+    // library that claimed it would fight whatever else the app is playing.
+    // Without one, AVPlayer on iOS reports ready and then never advances.
+    private fun activateAudioSession() {
+        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, null)
+        AVAudioSession.sharedInstance().setActive(true, null)
+    }
+
     private fun withBackend(body: (AVPlayerVideoBackend, BackendEventRecorder, String) -> Unit) {
+        activateAudioSession()
         val path = "${NSTemporaryDirectory()}nomercy-gate.wav"
         assertTrue(writeSilentWav(path, SECONDS), "could not write the gate media to $path")
 
