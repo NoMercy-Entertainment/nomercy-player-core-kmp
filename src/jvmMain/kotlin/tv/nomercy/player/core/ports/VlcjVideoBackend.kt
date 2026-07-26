@@ -10,6 +10,7 @@ package tv.nomercy.player.core.ports
 
 import java.io.File
 import java.net.URI
+import tv.nomercy.player.core.media.QualityDescriptor
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
@@ -68,6 +69,11 @@ public class VlcjVideoBackend private constructor(
     // VLC reports position in milliseconds and this contract is in seconds. One
     // conversion, here, rather than at every call site.
     private var lastKnownDuration: Double = 0.0
+
+    // The rungs this engine may adapt into. Empty means every rung, which is
+    // libVLC's own default and the right one for a caller that has not probed
+    // the device.
+    public var playableLadder: Collection<QualityDescriptor> = emptyList()
 
     // What the caller asked for, and authoritative once it has.
     //
@@ -146,7 +152,17 @@ public class VlcjVideoBackend private constructor(
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.
-        player.media().prepare(playableLocation(url))
+        // The ladder constraint travels with the media rather than being applied
+        // afterwards: libVLC decides which rung to open while it reads the
+        // manifest, so a limit set after prepare is a limit set too late.
+        // The array is built once per load and vlcj's signature is a vararg, so
+        // the copy detekt warns about is the call convention rather than a cost
+        // worth avoiding — a load happens per item, not per frame.
+        @Suppress("SpreadOperator")
+        player.media().prepare(
+            playableLocation(url),
+            *VlcAdaptiveOptions.optionsFor(playableLadder).toTypedArray(),
+        )
     }
 
     // libVLC will not open file:/C:/x, which is exactly what File.toURI()
