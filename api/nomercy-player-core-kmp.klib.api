@@ -2865,6 +2865,29 @@ final class tv.nomercy.player.core.plugin/Requirement { // tv.nomercy.player.cor
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/Requirement.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.core.ports/AVPlayerVideoBackend|null[0]
+    constructor <init>() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.<init>|<init>(){}[0]
+
+    final fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.buffered|buffered(){}[0]
+    final fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.currentTime|currentTime(){}[0]
+    final fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.currentTime|currentTime(kotlin.Double){}[0]
+    final fun duration(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.duration|duration(){}[0]
+    final fun mute() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.mute|mute(){}[0]
+    final fun off(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.off|off(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun pause() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.pause|pause(){}[0]
+    final fun playbackRate(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.playbackRate|playbackRate(){}[0]
+    final fun playbackRate(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.playbackRate|playbackRate(kotlin.Double){}[0]
+    final fun release() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.release|release(){}[0]
+    final fun state(): tv.nomercy.player.core.ports/BackendState // tv.nomercy.player.core.ports/AVPlayerVideoBackend.state|state(){}[0]
+    final fun stop() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.stop|stop(){}[0]
+    final fun unmute() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.unmute|unmute(){}[0]
+    final fun volume(): kotlin/Float // tv.nomercy.player.core.ports/AVPlayerVideoBackend.volume|volume(){}[0]
+    final fun volume(kotlin/Float) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.volume|volume(kotlin.Float){}[0]
+    final suspend fun load(kotlin/String, tv.nomercy.player.core.ports/LoadOptions) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.load|load(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
+    final suspend fun play() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.play|play(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/AudioTrack { // tv.nomercy.player.core.ports/AudioTrack|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/Int = ..., kotlin/String? = ...) // tv.nomercy.player.core.ports/AudioTrack.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.Int;kotlin.String?){}[0]
 
