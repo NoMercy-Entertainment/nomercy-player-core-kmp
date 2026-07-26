@@ -15,7 +15,10 @@ import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
+import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.PluginDisabledPayload
+import tv.nomercy.player.core.events.PluginEnabledPayload
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
@@ -94,6 +97,45 @@ public abstract class Plugin<O : Any> {
     // Wire up here rather than in a constructor: at construction time the
     // plugin has no host yet.
     public open fun use() {}
+
+    // Whether this plugin's behaviour is active.
+    //
+    // Disabling is not unloading. The plugin keeps its listeners, its storage
+    // and its state; its handlers short-circuit. That is what a settings toggle
+    // needs — turning a chrome plugin off and on again should not lose what it
+    // remembered, and unregistering to re-register would.
+    public fun enabled(): Boolean = active
+
+    public fun enable() {
+        if (active) return
+        active = true
+        announceState(CoreEvents.PluginEnabled, PluginEnabledPayload(id), "enabled", PluginEnabledPayload(id))
+    }
+
+    // The reason travels with the event because the interesting disables are
+    // not the user's. A plugin that turned itself off after failing to reach a
+    // service should say so, or a consumer sees a feature vanish with no cause.
+    public fun disable(reason: String? = null) {
+        if (!active) return
+        active = false
+        announceState(
+            CoreEvents.PluginDisabled,
+            PluginDisabledPayload(id, reason),
+            "disabled",
+            PluginDisabledPayload(id, reason),
+        )
+    }
+
+    private var active: Boolean = true
+
+    // Both the generic event and the plugin-scoped one, because a consumer
+    // watching every plugin and one watching this plugin are different
+    // listeners and neither should have to filter the other's stream.
+    private fun <T> announceState(key: EventKey<T>, payload: T, scoped: String, scopedPayload: T) {
+        val host: PluginHost = wiring?.host ?: return
+        host.emit(key, payload)
+        host.emit(pluginEventKey<T>(manifest, scoped), scopedPayload)
+    }
 
     // Anything the helpers below cannot clean up on their own. The registry
     // calls this, then disposes the lifecycle.

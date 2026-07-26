@@ -51,6 +51,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun dispose$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun duration ()D
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public fun enabledPlugins ()Ljava/util/List;
 	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun forward (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun forward$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -59,6 +60,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public final fun getContext ()Ltv/nomercy/player/core/controllers/PlayerContext;
 	public final fun getLifecycle ()Ltv/nomercy/player/core/controllers/LifecycleController;
 	public fun getPlugin (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
+	public fun getPluginById (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
 	public final fun getPlugins ()Ltv/nomercy/player/core/plugin/PluginRegistry;
 	public final fun getQueue ()Ltv/nomercy/player/core/controllers/QueueController;
 	public fun getRootLogger ()Ltv/nomercy/player/core/ports/Logger;
@@ -2589,9 +2591,13 @@ public class tv/nomercy/player/core/plugin/LifecycleRegistry {
 
 public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public fun <init> ()V
+	public final fun disable (Ljava/lang/String;)V
+	public static synthetic fun disable$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;ILjava/lang/Object;)V
 	protected final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun dispose ()V
 	protected final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public final fun enable ()V
+	public final fun enabled ()Z
 	protected final fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun fetch$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	protected final fun frame (Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
@@ -2675,6 +2681,7 @@ public final class tv/nomercy/player/core/plugin/PluginRegistry {
 	public fun <init> (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Lkotlinx/coroutines/CoroutineScope;)V
 	public final fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
 	public final fun dispose ()V
+	public final fun enabledPlugins ()Ljava/util/List;
 	public final fun getById (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
 	public final fun isDisposed ()Z
 	public final fun plugins ()Ljava/util/List;

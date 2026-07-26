@@ -443,6 +443,14 @@ public open class ComposedPlayer(
 
     public open fun pluginList(): List<Plugin<*>> = plugins.plugins()
 
+    // Same lookup as getPlugin, under the contract's name for it. Both exist
+    // because both are in every consumer's muscle memory from the web player,
+    // and a native port that answered only to one would be a gotcha rather than
+    // a port.
+    public open fun getPluginById(id: String): Plugin<*>? = plugins.getById(id)
+
+    public open fun enabledPlugins(): List<Plugin<*>> = plugins.enabledPlugins()
+
     public open fun contributions(slot: ChromeSlot): List<ContributionBinding> = plugins.contributions(slot)
 
     // ── PluginHost ───────────────────────────────────────────────────────────

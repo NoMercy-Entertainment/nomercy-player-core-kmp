@@ -46,6 +46,20 @@ public class PluginRegistry(
 
     public fun getById(id: String): Plugin<*>? = registrations.firstOrNull { it.plugin.id == id }?.plugin
 
+    // The enabled plugins, highest priority first, registration order breaking
+    // ties.
+    //
+    // The order is the point. A before-dispatch chain runs these in sequence,
+    // and a plugin that must see an event before another one says so with its
+    // priority rather than by being registered earlier — which is the consumer's
+    // choice, not the author's.
+    public fun enabledPlugins(): List<Plugin<*>> =
+        registrations.withIndex()
+            .filter { it.value.plugin.enabled() }
+            .sortedWith(compareByDescending<IndexedValue<Registration>> { it.value.plugin.manifest.priority }
+                .thenBy { it.index })
+            .map { it.value.plugin }
+
     public fun isDisposed(): Boolean = disposed
 
     // What a chrome should render in one region, already ordered.
