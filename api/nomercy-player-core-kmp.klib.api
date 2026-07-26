@@ -2762,22 +2762,41 @@ final class tv.nomercy.player.core.events/VolumeChange { // tv.nomercy.player.co
 }
 
 final class tv.nomercy.player.core.media/Chapter { // tv.nomercy.player.core.media/Chapter|null[0]
-    constructor <init>(kotlin/Double, kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.media/Chapter.<init>|<init>(kotlin.Double;kotlin.String;kotlin.String?){}[0]
+    constructor <init>(kotlin/Double, kotlin/String, kotlin/String? = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.media/Chapter.<init>|<init>(kotlin.Double;kotlin.String;kotlin.String?;kotlin.Boolean){}[0]
 
     final val imageUrl // tv.nomercy.player.core.media/Chapter.imageUrl|{}imageUrl[0]
         final fun <get-imageUrl>(): kotlin/String? // tv.nomercy.player.core.media/Chapter.imageUrl.<get-imageUrl>|<get-imageUrl>(){}[0]
     final val startTime // tv.nomercy.player.core.media/Chapter.startTime|{}startTime[0]
         final fun <get-startTime>(): kotlin/Double // tv.nomercy.player.core.media/Chapter.startTime.<get-startTime>|<get-startTime>(){}[0]
+    final val synthetic // tv.nomercy.player.core.media/Chapter.synthetic|{}synthetic[0]
+        final fun <get-synthetic>(): kotlin/Boolean // tv.nomercy.player.core.media/Chapter.synthetic.<get-synthetic>|<get-synthetic>(){}[0]
     final val title // tv.nomercy.player.core.media/Chapter.title|{}title[0]
         final fun <get-title>(): kotlin/String // tv.nomercy.player.core.media/Chapter.title.<get-title>|<get-title>(){}[0]
 
     final fun component1(): kotlin/Double // tv.nomercy.player.core.media/Chapter.component1|component1(){}[0]
     final fun component2(): kotlin/String // tv.nomercy.player.core.media/Chapter.component2|component2(){}[0]
     final fun component3(): kotlin/String? // tv.nomercy.player.core.media/Chapter.component3|component3(){}[0]
-    final fun copy(kotlin/Double = ..., kotlin/String = ..., kotlin/String? = ...): tv.nomercy.player.core.media/Chapter // tv.nomercy.player.core.media/Chapter.copy|copy(kotlin.Double;kotlin.String;kotlin.String?){}[0]
+    final fun component4(): kotlin/Boolean // tv.nomercy.player.core.media/Chapter.component4|component4(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/Boolean = ...): tv.nomercy.player.core.media/Chapter // tv.nomercy.player.core.media/Chapter.copy|copy(kotlin.Double;kotlin.String;kotlin.String?;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/Chapter.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/Chapter.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.media/Chapter.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/ChapterGapFill { // tv.nomercy.player.core.media/ChapterGapFill|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>, kotlin/Boolean) // tv.nomercy.player.core.media/ChapterGapFill.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>;kotlin.Boolean){}[0]
+
+    final val changed // tv.nomercy.player.core.media/ChapterGapFill.changed|{}changed[0]
+        final fun <get-changed>(): kotlin/Boolean // tv.nomercy.player.core.media/ChapterGapFill.changed.<get-changed>|<get-changed>(){}[0]
+    final val chapters // tv.nomercy.player.core.media/ChapterGapFill.chapters|{}chapters[0]
+        final fun <get-chapters>(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.media/ChapterGapFill.chapters.<get-chapters>|<get-chapters>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.media/ChapterGapFill.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // tv.nomercy.player.core.media/ChapterGapFill.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.media/Chapter> = ..., kotlin/Boolean = ...): tv.nomercy.player.core.media/ChapterGapFill // tv.nomercy.player.core.media/ChapterGapFill.copy|copy(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/ChapterGapFill.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/ChapterGapFill.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/ChapterGapFill.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.media/ChapterTrack { // tv.nomercy.player.core.media/ChapterTrack|null[0]
@@ -4731,6 +4750,8 @@ final object tv.nomercy.player.core.stream/ServerCodecNames { // tv.nomercy.play
         final fun <get-VP9>(): kotlin/String // tv.nomercy.player.core.stream/ServerCodecNames.VP9.<get-VP9>|<get-VP9>(){}[0]
 }
 
+final const val tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS|{}CHAPTER_GAP_EPSILON_SECONDS[0]
+    final fun <get-CHAPTER_GAP_EPSILON_SECONDS>(): kotlin/Double // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS.<get-CHAPTER_GAP_EPSILON_SECONDS>|<get-CHAPTER_GAP_EPSILON_SECONDS>(){}[0]
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
     final fun <get-CONTRACT_VERSION>(): kotlin/String // tv.nomercy.player.core/CONTRACT_VERSION.<get-CONTRACT_VERSION>|<get-CONTRACT_VERSION>(){}[0]
 final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]
@@ -4749,6 +4770,7 @@ final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/S
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/resourceError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/ResourceError // tv.nomercy.player.core.errors/resourceError|resourceError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/stateError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/StateError // tv.nomercy.player.core.errors/stateError|stateError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+final fun tv.nomercy.player.core.media/fillChapterGaps(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>, kotlin/Double, kotlin/Function0<kotlin/String>): tv.nomercy.player.core.media/ChapterGapFill // tv.nomercy.player.core.media/fillChapterGaps|fillChapterGaps(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>;kotlin.Double;kotlin.Function0<kotlin.String>){}[0]
 final fun tv.nomercy.player.core.ports/currentDevice(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/currentDevice|currentDevice(){}[0]
 final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.ports/Clock // tv.nomercy.player.core.ports/defaultClock|defaultClock(){}[0]
 final fun tv.nomercy.player.core.ports/defaultIdGenerator(): tv.nomercy.player.core.ports/IdGenerator // tv.nomercy.player.core.ports/defaultIdGenerator|defaultIdGenerator(){}[0]

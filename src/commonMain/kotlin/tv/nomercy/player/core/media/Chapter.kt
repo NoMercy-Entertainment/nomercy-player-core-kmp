@@ -19,6 +19,11 @@ public data class Chapter(
     val startTime: Double,
     val title: String,
     val imageUrl: String? = null,
+    // True when the player invented this one to cover a stretch the source left
+    // unlabelled. Carried so a chrome can style it differently, and so filling
+    // again re-derives from what the source actually gave rather than stacking
+    // fillers on fillers.
+    val synthetic: Boolean = false,
 )
 
 // The chapters of one item, in order, with a cheap answer to "which one is
