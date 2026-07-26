@@ -52,6 +52,8 @@ public class PlayerContext(
         data: T,
     ): BeforeDispatchResult<T> = emitter.dispatchBefore(key, data)
 
+    public fun dispatching(): List<String> = emitter.dispatching()
+
     // The single writer of phase. Everything that changes it goes through
     // transitionPhase, so the phase event cannot be missed by a caller who
     // assigned the field directly.

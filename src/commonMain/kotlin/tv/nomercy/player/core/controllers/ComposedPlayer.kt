@@ -137,6 +137,13 @@ public open class ComposedPlayer(
 
     public open fun phase(): PlayerPhase = context.phase
 
+    // Which events are being dispatched around this call, outermost first.
+    //
+    // A before-listener uses it to tell "refuse a seek" from "refuse a seek
+    // that came from the queue advancing", which are different rules and
+    // indistinguishable from the payload alone.
+    public open fun dispatching(): List<String> = context.dispatching()
+
     // ── Transport ────────────────────────────────────────────────────────────
 
     public open suspend fun play(opts: ActionOptions = ActionOptions()): Unit = transport.play(opts)

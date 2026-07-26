@@ -45,6 +45,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun chapters (Ljava/util/List;)V
 	public fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
 	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun dispatching ()Ljava/util/List;
 	public fun dispose (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun dispose$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun duration ()D
@@ -193,6 +194,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public synthetic fun <init> (Ltv/nomercy/player/core/events/EventEmitter;Ltv/nomercy/player/core/ports/MediaBackend;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun assertReady ()V
 	public final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun dispatching ()Ljava/util/List;
 	public final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public final fun getAuth ()Ltv/nomercy/player/core/controllers/AuthController;
 	public final fun getBackend ()Ltv/nomercy/player/core/ports/MediaBackend;
@@ -1016,6 +1018,7 @@ public final class tv/nomercy/player/core/events/EventEmitter {
 	public fun <init> ()V
 	public final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun dispatchBefore$default (Ltv/nomercy/player/core/events/EventEmitter;Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;JLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun dispatching ()Ljava/util/List;
 	public final fun emit (Ljava/lang/String;Ljava/lang/Object;)V
 	public final fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public final fun getOnListenerError ()Lkotlin/jvm/functions/Function2;

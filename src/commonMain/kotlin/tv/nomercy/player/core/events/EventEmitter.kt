@@ -15,12 +15,25 @@ package tv.nomercy.player.core.events
 // the next emit, not the one already in progress. E is a phantom marker
 // echoing the web EventEmitter<E> brand — real payload typing comes from
 // EventKey, never from E.
+@Suppress("TooManyFunctions")
 public class EventEmitter<E> {
 
     private class Listener(val userFn: Any, val invoke: (Any?) -> Unit)
 
     private val listeners: MutableMap<String, MutableList<Listener>> = mutableMapOf()
     private val firehose: MutableList<(String, Any?) -> Unit> = mutableListOf()
+
+    // The events being dispatched right now, outermost first, because a
+    // listener that emits is inside two of them.
+    //
+    // What it is for: a before-listener deciding whether to allow an action
+    // needs to know which chain it is inside. "Refuse a seek" and "refuse a
+    // seek that came from the queue advancing to the next item" are different
+    // rules, and without this the listener cannot tell them apart.
+    //
+    // A plain list, not a synchronised one. The player dispatches on one thread
+    // by contract; a lock here would suggest it does not.
+    private val dispatchStack: MutableList<String> = mutableListOf()
 
     // Called with (eventName, error) when a listener throws. Default is
     // swallow-and-continue, mirroring the web path's console.error; a host
@@ -77,12 +90,29 @@ public class EventEmitter<E> {
         timeoutMs: Long = DEFAULT_BEFORE_TIMEOUT_MS,
     ): BeforeDispatchResult<T> {
         val event: BeforeEvent<T> = BeforeEvent(data)
-        for (listener in listenersOf(key.name)) {
+        dispatchStack += key.name
+        try {
+            return runBefore(key.name, event, timeoutMs)
+        } finally {
+            dispatchStack.removeLast()
+        }
+    }
+
+    // The body of dispatchBefore, so the stack push above wraps every exit —
+    // including the two early returns, which is where a hand-placed pop gets
+    // forgotten and leaves the stack claiming a dispatch that finished.
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun <T> runBefore(
+        name: String,
+        event: BeforeEvent<T>,
+        timeoutMs: Long,
+    ): BeforeDispatchResult<T> {
+        for (listener in listenersOf(name)) {
             if (event.isPropagationStopped()) break
             try {
                 listener(event)
             } catch (err: Throwable) {
-                onListenerError?.invoke(key.name, err)
+                onListenerError?.invoke(name, err)
             }
         }
 
@@ -141,7 +171,19 @@ public class EventEmitter<E> {
     // registered handler, however it fails, must not stop the remaining ones.
     // Broad Throwable is intentional, not an oversight.
     @Suppress("TooGenericExceptionCaught")
+    public fun dispatching(): List<String> = dispatchStack.toList()
+
     private fun dispatch(name: String, data: Any?) {
+        dispatchStack += name
+        try {
+            deliver(name, data)
+        } finally {
+            dispatchStack.removeLast()
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    private fun deliver(name: String, data: Any?) {
         for (listener in listenersOf(name)) {
             try {
                 listener(data)

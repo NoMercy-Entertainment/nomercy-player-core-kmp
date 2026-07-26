@@ -41,7 +41,7 @@ private val NOT_YET_PORTED_METHODS = setOf(
     "activityTracking", "announce", "audioOutput", "audioOutputs",
     "audioTrackMode", "auth", "backend", 
     "baseUrl", "bufferState", "bufferedRanges", "bumpActivity", "canPlay", "castState",
-    "device", "dispatching", "enabledPlugins", "experimental",
+    "device", "enabledPlugins", "experimental",
     "getPluginById", "getStreamFactory", "isDesktop", "isMobile", "isTv",
     "load", "loadQueue", "metrics", "networkState", "now",
     "options", "platform", "playNow", "playerId",
