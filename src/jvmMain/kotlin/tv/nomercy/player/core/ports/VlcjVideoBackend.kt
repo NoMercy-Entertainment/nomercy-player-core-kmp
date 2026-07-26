@@ -49,14 +49,25 @@ public class VlcjVideoBackend(
     // conversion, here, rather than at every call site.
     private var lastKnownDuration: Double = 0.0
 
+    // Announced once per item, from whichever of the two callbacks arrives
+    // first. Twice would make a listener counting canplay think two items
+    // loaded.
+    private var announcedReadable: Boolean = false
+
     init {
         player.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
             override fun mediaPlayerReady(mediaPlayer: MediaPlayer) {
-                bus.emit(CanonicalBackendEvent.LOADED_METADATA)
-                bus.emit(CanonicalBackendEvent.CAN_PLAY)
+                announceReadable()
             }
 
+            // Readiness is announced here too, and this is not belt-and-braces.
+            // libVLC does not fire mediaPlayerReady for every item — a short one
+            // can play to completion without it — so a controller waiting for
+            // canplay before it enables anything would wait forever on exactly
+            // the items that arrive fastest. An engine that is playing can
+            // certainly play, so saying so here is not a guess.
             override fun playing(mediaPlayer: MediaPlayer) {
+                announceReadable()
                 bus.emit(CanonicalBackendEvent.PLAYING)
             }
 
@@ -74,7 +85,10 @@ public class VlcjVideoBackend(
 
             override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
                 lastKnownDuration = newLength / MILLIS_PER_SECOND
-                bus.emit(CanonicalBackendEvent.LOADED_METADATA)
+                // Through the same guard, because knowing the length is knowing
+                // the metadata. Emitting it separately announced one item twice,
+                // and anything counting loads would have counted two.
+                announceReadable()
             }
 
             // VLC calls this "buffering" and reports a percentage. Zero means it
@@ -90,7 +104,15 @@ public class VlcjVideoBackend(
         })
     }
 
+    private fun announceReadable() {
+        if (announcedReadable) return
+        announcedReadable = true
+        bus.emit(CanonicalBackendEvent.LOADED_METADATA)
+        bus.emit(CanonicalBackendEvent.CAN_PLAY)
+    }
+
     override suspend fun load(url: String, opts: LoadOptions) {
+        announcedReadable = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused

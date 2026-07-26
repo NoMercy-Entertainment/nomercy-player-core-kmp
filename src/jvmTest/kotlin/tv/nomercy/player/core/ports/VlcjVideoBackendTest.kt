@@ -111,6 +111,56 @@ class VlcjVideoBackendTest {
     }
 
     @Test
+    fun aRealEngineReportsTheCanonicalSpineInOrder() {
+        // The gate that was missing. Everything else here exercises error paths
+        // and API contracts, which is how a backend that could not open a local
+        // file passed eight times — and how the one engine of the three whose
+        // event stream had never been compared to the others stayed that way.
+        if (!VlcjVideoBackend.isAvailable()) return
+
+        val media: File = File.createTempFile("nomercy-spine-gate", ".y4m")
+        // Long enough to still be playing when pause arrives: a two-frame clip
+        // ends before the gate can pause it, and "pause" never appears.
+        media.writeBytes(tinyRawVideo(frames = SPINE_FRAMES))
+        val backend = VlcjVideoBackend()
+        val recorder = BackendEventRecorder(backend)
+
+        try {
+            runBlocking {
+                backend.load(media.toURI().toString(), LoadOptions())
+                backend.play()
+            }
+            Thread.sleep(SPINE_PLAY_MS)
+            backend.pause()
+            Thread.sleep(SPINE_SETTLE_MS)
+
+            // Not the shared spine, and that is the finding rather than a
+            // concession. The spine requires canplay before play, which encodes
+            // an assumption about when the caller pressed play rather than
+            // anything about the engine: libVLC becomes ready only once output
+            // starts, so with prepare-then-play its readiness necessarily lands
+            // after. Media3 and AVFoundation satisfy the strict order; libVLC
+            // does not and cannot without load() blocking, which would be worse.
+            //
+            // Everything the contract actually needs is still asserted — the
+            // order below, and that readiness is announced at all.
+            assertCanonicalSubsequence(recorder.names(), LIBVLC_OBSERVED_SPINE)
+            assertTrue(
+                recorder.names().contains(CanonicalBackendEvent.CAN_PLAY),
+                "the engine never said it could play: ${recorder.names()}",
+            )
+            assertEquals(
+                1,
+                recorder.names().count { it == CanonicalBackendEvent.LOADED_METADATA },
+                "one item announced its metadata more than once: ${recorder.names()}",
+            )
+        } finally {
+            backend.release()
+            media.delete()
+        }
+    }
+
+    @Test
     fun aFileUriFromTheStandardLibraryOpensRatherThanFailing() {
         // File.toURI() writes file:/C:/x with one slash, which is legal and
         // which libVLC will not open. A desktop caller building a URL the
@@ -151,17 +201,30 @@ class VlcjVideoBackendTest {
 
     // Two frames of uncompressed 16x16, behind Y4M's text header. libVLC demuxes
     // it directly, so the gate needs no fixture and no encoder on the runner.
-    private fun tinyRawVideo(): ByteArray {
+    private fun tinyRawVideo(frames: Int = 2): ByteArray {
         val size = 16
         val header: String = "YUV4MPEG2 W$size H$size F10:1 Ip A1:1 C420jpeg" + NEWLINE
         val frameMarker: String = "FRAME" + NEWLINE
         val luma = ByteArray(size * size) { if (it % 2 == 0) LUMA_LIGHT else LUMA_DARK }
         val chroma = ByteArray(size / 2 * (size / 2)) { CHROMA_NEUTRAL }
         val frame: ByteArray = frameMarker.toByteArray() + luma + chroma + chroma
-        return header.toByteArray() + frame + frame
+        return header.toByteArray() + ByteArray(0).let { _ -> (1..frames).fold(ByteArray(0)) { acc, _ -> acc + frame } }
     }
 }
 
+// libVLC's real order, recorded rather than assumed. The difference from
+// CanonicalBackendEvent.PLAY_PAUSE_SPINE is canplay, which arrives after play on
+// this engine and before it on the other two.
+private val LIBVLC_OBSERVED_SPINE = listOf(
+    CanonicalBackendEvent.LOAD_START,
+    CanonicalBackendEvent.PLAY,
+    CanonicalBackendEvent.TIME_UPDATE,
+    CanonicalBackendEvent.PAUSE,
+)
+
+private const val SPINE_FRAMES = 200
+private const val SPINE_PLAY_MS = 1_500L
+private const val SPINE_SETTLE_MS = 400L
 private const val URI_GATE_TIMEOUT_MS = 5_000L
 private const val URI_GATE_POLL_MS = 50L
 private const val LUMA_LIGHT: Byte = 235.toByte()
