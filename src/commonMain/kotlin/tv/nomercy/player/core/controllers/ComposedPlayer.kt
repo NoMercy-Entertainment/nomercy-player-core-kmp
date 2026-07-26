@@ -35,6 +35,9 @@ import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.Fetcher
+import tv.nomercy.player.core.ports.QualityLevel
+import tv.nomercy.player.core.ports.QualityMode
+import tv.nomercy.player.core.ports.VideoBackend
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.MediaBackend
@@ -63,6 +66,13 @@ public open class ComposedPlayer(
     // one. A player that opened its own connections would be a second HTTP
     // stack beside the app's, with its own idea of auth and retries.
     private val fetcher: Fetcher? = null,
+    // The same backend again when it can report a ladder and tracks.
+    //
+    // Passed rather than tested for: asking a MediaBackend whether it is really
+    // a VideoBackend is a cast, and a caller saying what it has beats the
+    // library guessing. A player built on an audio-only engine still works; it
+    // just has no quality menu.
+    private val video: VideoBackend? = null,
     // Nullable rather than defaulted, so a caller that cannot see Kotlin default
     // arguments can still leave it out. From Swift the default is invisible and
     // the type was non-optional, which meant building a player required
@@ -172,6 +182,25 @@ public open class ComposedPlayer(
     // Bits per second, from whatever the host injected. Zero until something
     // does: the library cannot measure a connection and a guessed number would
     // make adaptation decide on a measurement that never happened.
+    // Descriptors, never indices. Empty when the engine cannot report a ladder,
+    // which is the honest answer for an audio-only backend rather than a menu
+    // with nothing in it.
+    public open fun qualityLevels(): List<QualityLevel> = video?.qualityLevels().orEmpty()
+
+    public open fun quality(): QualityLevel? = video?.quality()
+
+    // Null is automatic. A descriptor pins one rung, and what that means differs
+    // per engine — an exact track on two of them and a ceiling on the third —
+    // which is recorded in the divergence gate rather than smoothed over here.
+    public open fun quality(level: QualityLevel?) {
+        video?.quality(level)
+    }
+
+    // Whether a rung was chosen or the engine is adapting. A menu showing a
+    // committed selection the viewer never made is worse than showing none.
+    public open fun qualityMode(): QualityMode =
+        if (video?.quality() == null) QualityMode.AUTO else QualityMode.MANUAL
+
     public open fun bandwidth(): Int = bandwidth.bandwidth()
 
     public open fun bandwidthEstimator(): (() -> Int)? = bandwidth.bandwidthEstimator()

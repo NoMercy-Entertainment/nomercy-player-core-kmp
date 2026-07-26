@@ -420,6 +420,19 @@ final enum class tv.nomercy.player.core.ports/NetworkType : kotlin/Enum<tv.nomer
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/NetworkType> // tv.nomercy.player.core.ports/NetworkType.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.ports/QualityMode : kotlin/Enum<tv.nomercy.player.core.ports/QualityMode> { // tv.nomercy.player.core.ports/QualityMode|null[0]
+    enum entry AUTO // tv.nomercy.player.core.ports/QualityMode.AUTO|null[0]
+    enum entry MANUAL // tv.nomercy.player.core.ports/QualityMode.MANUAL|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/QualityMode.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/QualityMode> // tv.nomercy.player.core.ports/QualityMode.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val wire // tv.nomercy.player.core.ports/QualityMode.wire|{}wire[0]
+        final fun <get-wire>(): kotlin/String // tv.nomercy.player.core.ports/QualityMode.wire.<get-wire>|<get-wire>(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/QualityMode // tv.nomercy.player.core.ports/QualityMode.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/QualityMode> // tv.nomercy.player.core.ports/QualityMode.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.ports/RealtimeEvent : kotlin/Enum<tv.nomercy.player.core.ports/RealtimeEvent> { // tv.nomercy.player.core.ports/RealtimeEvent|null[0]
     enum entry CLOSE // tv.nomercy.player.core.ports/RealtimeEvent.CLOSE|null[0]
     enum entry ERROR // tv.nomercy.player.core.ports/RealtimeEvent.ERROR|null[0]
@@ -3487,7 +3500,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Fetcher? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Fetcher?;kotlinx.coroutines.CoroutineScope?){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?){}[0]
 
     final val bandwidth // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|{}bandwidth[0]
         final fun <get-bandwidth>(): tv.nomercy.player.core.controllers/BandwidthController // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
@@ -3531,6 +3544,10 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun playState(): tv.nomercy.player.core.player/PlayState // tv.nomercy.player.core.controllers/ComposedPlayer.playState|playState(){}[0]
     open fun playbackRate(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.playbackRate|playbackRate(){}[0]
     open fun pluginList(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.controllers/ComposedPlayer.pluginList|pluginList(){}[0]
+    open fun quality(): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.controllers/ComposedPlayer.quality|quality(){}[0]
+    open fun quality(tv.nomercy.player.core.ports/QualityLevel?) // tv.nomercy.player.core.controllers/ComposedPlayer.quality|quality(tv.nomercy.player.core.ports.QualityLevel?){}[0]
+    open fun qualityLevels(): kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel> // tv.nomercy.player.core.controllers/ComposedPlayer.qualityLevels|qualityLevels(){}[0]
+    open fun qualityMode(): tv.nomercy.player.core.ports/QualityMode // tv.nomercy.player.core.controllers/ComposedPlayer.qualityMode|qualityMode(){}[0]
     open fun queue(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.controllers/ComposedPlayer.queue|queue(){}[0]
     open fun queue(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/ComposedPlayer.queue|queue(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>){}[0]
     open fun ready(): kotlinx.coroutines/Deferred<kotlin/Unit> // tv.nomercy.player.core.controllers/ComposedPlayer.ready|ready(){}[0]

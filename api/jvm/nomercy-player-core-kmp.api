@@ -23,8 +23,8 @@ public final class tv/nomercy/player/core/controllers/BandwidthController {
 
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
-	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Lkotlinx/coroutines/CoroutineScope;)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun addPlugin$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun bandwidth ()I
@@ -74,6 +74,10 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun pluginList ()Ljava/util/List;
 	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
+	public fun qualityLevels ()Ljava/util/List;
+	public fun qualityMode ()Ltv/nomercy/player/core/ports/QualityMode;
 	public fun queue ()Ljava/util/List;
 	public fun queue (Ljava/util/List;)V
 	public fun ready ()Lkotlinx/coroutines/Deferred;
@@ -3137,6 +3141,15 @@ public final class tv/nomercy/player/core/ports/QualityLevel {
 public final class tv/nomercy/player/core/ports/QualityMatcher {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/QualityMatcher;
 	public final fun match (Ltv/nomercy/player/core/ports/QualityLevel;Ljava/util/List;)Ljava/lang/Integer;
+}
+
+public final class tv/nomercy/player/core/ports/QualityMode : java/lang/Enum {
+	public static final field AUTO Ltv/nomercy/player/core/ports/QualityMode;
+	public static final field MANUAL Ltv/nomercy/player/core/ports/QualityMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getWire ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/QualityMode;
+	public static fun values ()[Ltv/nomercy/player/core/ports/QualityMode;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/RealtimeChannel {

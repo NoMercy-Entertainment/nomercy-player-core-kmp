@@ -24,7 +24,7 @@ data class TestItem(
 // Records what the controller asked the engine to do, so a test asserts the
 // outcome of a real controller rather than that a mock of the controller was
 // called. Only the engine below is fake.
-class FakeMediaBackend : MediaBackend {
+open class FakeMediaBackend : MediaBackend {
     var playCount: Int = 0
     var pauseCount: Int = 0
     var stopCount: Int = 0
