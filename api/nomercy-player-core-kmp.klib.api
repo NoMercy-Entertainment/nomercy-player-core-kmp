@@ -3399,7 +3399,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., kotlinx.coroutines/CoroutineScope = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;kotlinx.coroutines.CoroutineScope){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;kotlinx.coroutines.CoroutineScope?){}[0]
 
     final val bridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge|{}bridge[0]
         final fun <get-bridge>(): tv.nomercy.player.core.controllers/BackendBridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge.<get-bridge>|<get-bridge>(){}[0]

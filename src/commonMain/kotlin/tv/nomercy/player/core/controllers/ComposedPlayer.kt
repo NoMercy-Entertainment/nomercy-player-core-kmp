@@ -57,7 +57,12 @@ public open class ComposedPlayer(
     private val logger: Logger = SilentLogger,
     private val storage: Storage = InMemoryStorage(),
     private val translator: Translator? = null,
-    scope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    // Nullable rather than defaulted, so a caller that cannot see Kotlin default
+    // arguments can still leave it out. From Swift the default is invisible and
+    // the type was non-optional, which meant building a player required
+    // constructing a Kotlin CoroutineScope first — a front door no iOS engineer
+    // should have to find.
+    scope: CoroutineScope? = null,
 ) : PluginHost {
 
     public val context: PlayerContext = PlayerContext(backend = backend)
@@ -67,7 +72,7 @@ public open class ComposedPlayer(
     public val volume: VolumeController = VolumeController(context)
     public val time: TimeController = TimeController(context, queue, transport)
     public val state: StateController = StateController(context, queue, time)
-    public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, scope)
+    public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, scope ?: CoroutineScope(SupervisorJob()))
     public val lifecycle: LifecycleController = LifecycleController(context, plugins)
 
     // What the engine reports, turned into what the player says. Without it
