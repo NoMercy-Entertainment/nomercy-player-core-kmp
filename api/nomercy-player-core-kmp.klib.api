@@ -404,6 +404,18 @@ final enum class tv.nomercy.player.core.ports/DynamicRange : kotlin/Enum<tv.nome
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/DynamicRange> // tv.nomercy.player.core.ports/DynamicRange.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.ports/FormFactor : kotlin/Enum<tv.nomercy.player.core.ports/FormFactor> { // tv.nomercy.player.core.ports/FormFactor|null[0]
+    enum entry DESKTOP // tv.nomercy.player.core.ports/FormFactor.DESKTOP|null[0]
+    enum entry MOBILE // tv.nomercy.player.core.ports/FormFactor.MOBILE|null[0]
+    enum entry TV // tv.nomercy.player.core.ports/FormFactor.TV|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/FormFactor.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/FormFactor> // tv.nomercy.player.core.ports/FormFactor.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/FormFactor // tv.nomercy.player.core.ports/FormFactor.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/FormFactor> // tv.nomercy.player.core.ports/FormFactor.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.ports/NetworkType : kotlin/Enum<tv.nomercy.player.core.ports/NetworkType> { // tv.nomercy.player.core.ports/NetworkType|null[0]
     enum entry CELLULAR // tv.nomercy.player.core.ports/NetworkType.CELLULAR|null[0]
     enum entry ETHERNET // tv.nomercy.player.core.ports/NetworkType.ETHERNET|null[0]
@@ -418,6 +430,22 @@ final enum class tv.nomercy.player.core.ports/NetworkType : kotlin/Enum<tv.nomer
 
     final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/NetworkType // tv.nomercy.player.core.ports/NetworkType.valueOf|valueOf#static(kotlin.String){}[0]
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/NetworkType> // tv.nomercy.player.core.ports/NetworkType.values|values#static(){}[0]
+}
+
+final enum class tv.nomercy.player.core.ports/OperatingSystem : kotlin/Enum<tv.nomercy.player.core.ports/OperatingSystem> { // tv.nomercy.player.core.ports/OperatingSystem|null[0]
+    enum entry ANDROID // tv.nomercy.player.core.ports/OperatingSystem.ANDROID|null[0]
+    enum entry IOS // tv.nomercy.player.core.ports/OperatingSystem.IOS|null[0]
+    enum entry LINUX // tv.nomercy.player.core.ports/OperatingSystem.LINUX|null[0]
+    enum entry MACOS // tv.nomercy.player.core.ports/OperatingSystem.MACOS|null[0]
+    enum entry TVOS // tv.nomercy.player.core.ports/OperatingSystem.TVOS|null[0]
+    enum entry UNKNOWN // tv.nomercy.player.core.ports/OperatingSystem.UNKNOWN|null[0]
+    enum entry WINDOWS // tv.nomercy.player.core.ports/OperatingSystem.WINDOWS|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/OperatingSystem.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/OperatingSystem> // tv.nomercy.player.core.ports/OperatingSystem.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/OperatingSystem // tv.nomercy.player.core.ports/OperatingSystem.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/OperatingSystem> // tv.nomercy.player.core.ports/OperatingSystem.values|values#static(){}[0]
 }
 
 final enum class tv.nomercy.player.core.ports/QualityMode : kotlin/Enum<tv.nomercy.player.core.ports/QualityMode> { // tv.nomercy.player.core.ports/QualityMode|null[0]
@@ -3062,6 +3090,30 @@ final class tv.nomercy.player.core.ports/DefaultPreloadStrategy : tv.nomercy.pla
     final fun shouldPreload(tv.nomercy.player.core.ports/PreloadContext): kotlin/Boolean // tv.nomercy.player.core.ports/DefaultPreloadStrategy.shouldPreload|shouldPreload(tv.nomercy.player.core.ports.PreloadContext){}[0]
 }
 
+final class tv.nomercy.player.core.ports/Device { // tv.nomercy.player.core.ports/Device|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/FormFactor, tv.nomercy.player.core.ports/OperatingSystem) // tv.nomercy.player.core.ports/Device.<init>|<init>(tv.nomercy.player.core.ports.FormFactor;tv.nomercy.player.core.ports.OperatingSystem){}[0]
+
+    final val formFactor // tv.nomercy.player.core.ports/Device.formFactor|{}formFactor[0]
+        final fun <get-formFactor>(): tv.nomercy.player.core.ports/FormFactor // tv.nomercy.player.core.ports/Device.formFactor.<get-formFactor>|<get-formFactor>(){}[0]
+    final val isDesktop // tv.nomercy.player.core.ports/Device.isDesktop|{}isDesktop[0]
+        final fun <get-isDesktop>(): kotlin/Boolean // tv.nomercy.player.core.ports/Device.isDesktop.<get-isDesktop>|<get-isDesktop>(){}[0]
+    final val isMobile // tv.nomercy.player.core.ports/Device.isMobile|{}isMobile[0]
+        final fun <get-isMobile>(): kotlin/Boolean // tv.nomercy.player.core.ports/Device.isMobile.<get-isMobile>|<get-isMobile>(){}[0]
+    final val isTv // tv.nomercy.player.core.ports/Device.isTv|{}isTv[0]
+        final fun <get-isTv>(): kotlin/Boolean // tv.nomercy.player.core.ports/Device.isTv.<get-isTv>|<get-isTv>(){}[0]
+    final val os // tv.nomercy.player.core.ports/Device.os|{}os[0]
+        final fun <get-os>(): tv.nomercy.player.core.ports/OperatingSystem // tv.nomercy.player.core.ports/Device.os.<get-os>|<get-os>(){}[0]
+    final val prefersPowerEfficiency // tv.nomercy.player.core.ports/Device.prefersPowerEfficiency|{}prefersPowerEfficiency[0]
+        final fun <get-prefersPowerEfficiency>(): kotlin/Boolean // tv.nomercy.player.core.ports/Device.prefersPowerEfficiency.<get-prefersPowerEfficiency>|<get-prefersPowerEfficiency>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.ports/FormFactor // tv.nomercy.player.core.ports/Device.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.ports/OperatingSystem // tv.nomercy.player.core.ports/Device.component2|component2(){}[0]
+    final fun copy(tv.nomercy.player.core.ports/FormFactor = ..., tv.nomercy.player.core.ports/OperatingSystem = ...): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/Device.copy|copy(tv.nomercy.player.core.ports.FormFactor;tv.nomercy.player.core.ports.OperatingSystem){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/Device.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/Device.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/Device.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/EqualPowerCrossfader { // tv.nomercy.player.core.ports/EqualPowerCrossfader|null[0]
     constructor <init>(kotlin/Long = ...) // tv.nomercy.player.core.ports/EqualPowerCrossfader.<init>|<init>(kotlin.Long){}[0]
 
@@ -3552,10 +3604,14 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun chapters(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.controllers/ComposedPlayer.chapters|chapters(){}[0]
     open fun chapters(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>) // tv.nomercy.player.core.controllers/ComposedPlayer.chapters|chapters(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>){}[0]
     open fun contributions(tv.nomercy.player.core.plugin/ChromeSlot): kotlin.collections/List<tv.nomercy.player.core.plugin/ContributionBinding> // tv.nomercy.player.core.controllers/ComposedPlayer.contributions|contributions(tv.nomercy.player.core.plugin.ChromeSlot){}[0]
+    open fun device(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.controllers/ComposedPlayer.device|device(){}[0]
     open fun dispatching(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.controllers/ComposedPlayer.dispatching|dispatching(){}[0]
     open fun duration(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.duration|duration(){}[0]
     open fun getPlugin(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.core.controllers/ComposedPlayer.getPlugin|getPlugin(kotlin.String){}[0]
     open fun index(): kotlin/Int // tv.nomercy.player.core.controllers/ComposedPlayer.index|index(){}[0]
+    open fun isDesktop(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.isDesktop|isDesktop(){}[0]
+    open fun isMobile(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.isMobile|isMobile(){}[0]
+    open fun isTv(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.isTv|isTv(){}[0]
     open fun item(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.item|item(){}[0]
     open fun language(): kotlin/String // tv.nomercy.player.core.controllers/ComposedPlayer.language|language(){}[0]
     open fun peekNext(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.peekNext|peekNext(){}[0]
@@ -4321,6 +4377,7 @@ final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/S
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/resourceError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/ResourceError // tv.nomercy.player.core.errors/resourceError|resourceError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/stateError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/StateError // tv.nomercy.player.core.errors/stateError|stateError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+final fun tv.nomercy.player.core.ports/currentDevice(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/currentDevice|currentDevice(){}[0]
 final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.ports/Clock // tv.nomercy.player.core.ports/defaultClock|defaultClock(){}[0]
 final fun tv.nomercy.player.core.ports/defaultIdGenerator(): tv.nomercy.player.core.ports/IdGenerator // tv.nomercy.player.core.ports/defaultIdGenerator|defaultIdGenerator(){}[0]
 final fun tv.nomercy.player.core.ports/defaultPlatform(): tv.nomercy.player.core.ports/Platform // tv.nomercy.player.core.ports/defaultPlatform|defaultPlatform(){}[0]

@@ -44,6 +44,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun chapters ()Ljava/util/List;
 	public fun chapters (Ljava/util/List;)V
 	public fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
+	public fun device ()Ltv/nomercy/player/core/ports/Device;
 	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun dispatching ()Ljava/util/List;
 	public fun dispose (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -68,6 +69,9 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public final fun getTransport ()Ltv/nomercy/player/core/controllers/TransportController;
 	public final fun getVolume ()Ltv/nomercy/player/core/controllers/VolumeController;
 	public fun index ()I
+	public fun isDesktop ()Z
+	public fun isMobile ()Z
+	public fun isTv ()Z
 	public fun item ()Ltv/nomercy/player/core/media/PlaylistItem;
 	public fun item (Ljava/lang/String;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun item$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -2893,6 +2897,27 @@ public final class tv/nomercy/player/core/ports/DefaultPreloadStrategy : tv/nome
 	public fun shouldPreload (Ltv/nomercy/player/core/ports/PreloadContext;)Z
 }
 
+public final class tv/nomercy/player/core/ports/Device {
+	public fun <init> (Ltv/nomercy/player/core/ports/FormFactor;Ltv/nomercy/player/core/ports/OperatingSystem;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/FormFactor;
+	public final fun component2 ()Ltv/nomercy/player/core/ports/OperatingSystem;
+	public final fun copy (Ltv/nomercy/player/core/ports/FormFactor;Ltv/nomercy/player/core/ports/OperatingSystem;)Ltv/nomercy/player/core/ports/Device;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/Device;Ltv/nomercy/player/core/ports/FormFactor;Ltv/nomercy/player/core/ports/OperatingSystem;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/Device;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFormFactor ()Ltv/nomercy/player/core/ports/FormFactor;
+	public final fun getOs ()Ltv/nomercy/player/core/ports/OperatingSystem;
+	public final fun getPrefersPowerEfficiency ()Z
+	public fun hashCode ()I
+	public final fun isDesktop ()Z
+	public final fun isMobile ()Z
+	public final fun isTv ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/Device_jvmKt {
+	public static final fun currentDevice ()Ltv/nomercy/player/core/ports/Device;
+}
+
 public final class tv/nomercy/player/core/ports/DynamicRange : java/lang/Enum {
 	public static final field DOLBY_VISION Ltv/nomercy/player/core/ports/DynamicRange;
 	public static final field HDR10 Ltv/nomercy/player/core/ports/DynamicRange;
@@ -2967,6 +2992,15 @@ public final class tv/nomercy/player/core/ports/FisherYatesShuffle : tv/nomercy/
 	public fun <init> (Lkotlin/random/Random;)V
 	public synthetic fun <init> (Lkotlin/random/Random;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun order (Ljava/util/List;I)Ljava/util/List;
+}
+
+public final class tv/nomercy/player/core/ports/FormFactor : java/lang/Enum {
+	public static final field DESKTOP Ltv/nomercy/player/core/ports/FormFactor;
+	public static final field MOBILE Ltv/nomercy/player/core/ports/FormFactor;
+	public static final field TV Ltv/nomercy/player/core/ports/FormFactor;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/FormFactor;
+	public static fun values ()[Ltv/nomercy/player/core/ports/FormFactor;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/FullscreenController {
@@ -3096,6 +3130,19 @@ public final class tv/nomercy/player/core/ports/NoopWakeLock : tv/nomercy/player
 	public fun isHeld ()Z
 	public fun isSupported ()Z
 	public fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/OperatingSystem : java/lang/Enum {
+	public static final field ANDROID Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static final field IOS Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static final field LINUX Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static final field MACOS Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static final field TVOS Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static final field UNKNOWN Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static final field WINDOWS Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/OperatingSystem;
+	public static fun values ()[Ltv/nomercy/player/core/ports/OperatingSystem;
 }
 
 public final class tv/nomercy/player/core/ports/PermissiveCapabilitiesProbe : tv/nomercy/player/core/ports/CapabilitiesProbe {

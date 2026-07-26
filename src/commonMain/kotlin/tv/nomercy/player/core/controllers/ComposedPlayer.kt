@@ -37,6 +37,8 @@ import tv.nomercy.player.core.plugin.ContributionBinding
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
+import tv.nomercy.player.core.ports.Device
+import tv.nomercy.player.core.ports.currentDevice
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.Fetcher
 import tv.nomercy.player.core.ports.AudioTrack
@@ -143,6 +145,22 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Device ───────────────────────────────────────────────────────────────
+
+    // What the player is running on, asked of the platform rather than guessed.
+    //
+    // On the player because that is where a chrome, a plugin and a quality
+    // heuristic all reach for it, and because a consumer should not have to
+    // know which of the three ways to ask its platform is the one that works
+    // without a Context.
+    public open fun device(): Device = currentDevice()
+
+    public open fun isTv(): Boolean = device().isTv
+
+    public open fun isMobile(): Boolean = device().isMobile
+
+    public open fun isDesktop(): Boolean = device().isDesktop
 
     // ── Transport ────────────────────────────────────────────────────────────
 
