@@ -1,9 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <application>
+        <!-- Merged into androidx.startup's own provider rather than declaring a
+             second one with its own authority. Two providers naming the same
+             class collide the moment anything else pulls startup-runtime in,
+             which is what the device-test APK does. -->
         <provider
             android:name="androidx.startup.InitializationProvider"
-            android:authorities="${applicationId}.playercore-init"
+            android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
             tools:node="merge">
             <meta-data

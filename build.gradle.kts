@@ -81,6 +81,14 @@ kotlin {
         // thing that genuinely needs a device.
         withHostTestBuilder {}.configure {}
 
+        // The engine gate runs on a device, because an ExoPlayer that
+        // decodes on a JVM stub proves nothing about the one shipping.
+        withDeviceTestBuilder {
+            sourceSetTreeName = "test"
+        }.configure {
+            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        }
+
         compilations.configureEach {
             compileTaskProvider.configure {
                 compilerOptions { jvmTarget.set(JvmTarget.JVM_21) }
@@ -132,11 +140,21 @@ kotlin {
         // it never has to appear in a common signature.
         androidMain.dependencies {
             implementation(libs.androidx.startup)
+            // The Android engine. Media3 is what every Android client
+            // already uses, and reimplementing its buffering would be
+            // worse than anything gained.
+            implementation(libs.androidx.media3.exoplayer)
+            implementation(libs.androidx.media3.common)
+            implementation(libs.kotlinx.coroutines.android)
         }
         // The desktop engine. libVLC decodes practically everything, which is
         // what a desktop client needs when the file came off a disc rip.
         jvmMain.dependencies {
             implementation(libs.vlcj)
+        }
+        getByName("androidDeviceTest").dependencies {
+            implementation(libs.androidx.test.runner)
+            implementation(libs.androidx.test.core)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
