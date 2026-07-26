@@ -107,6 +107,9 @@ class AVPlayerVideoBackendTest {
         kotlinx.coroutines.runBlocking { backend.play() }
         settle(PLAY_SECONDS)
         val whilePlaying: Double = backend.currentTime()
+        // Read while it is playing. After pause the rate is zero, which is
+        // correct and was the first thing this assertion caught — in itself.
+        val rateWhilePlaying: Double = backend.playbackRate()
 
         backend.pause()
         settle(SETTLE_SECONDS)
@@ -120,7 +123,7 @@ class AVPlayerVideoBackendTest {
         // and on this one it needs a device with an audio route.
         assertCanonicalSubsequence(recorder.names(), SIMULATOR_OBSERVABLE_SPINE)
         assertTrue(backend.duration() > 0.0, "duration was ${backend.duration()}")
-        assertEquals(1.0, backend.playbackRate(), absoluteTolerance = 0.01)
+        assertEquals(1.0, rateWhilePlaying, absoluteTolerance = 0.01)
         assertTrue(whilePlaying >= 0.0)
     }
 
