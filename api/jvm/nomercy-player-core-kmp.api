@@ -3052,6 +3052,11 @@ public final class tv/nomercy/player/core/ports/QualityLevel {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/ports/QualityMatcher {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/QualityMatcher;
+	public final fun match (Ltv/nomercy/player/core/ports/QualityLevel;Ljava/util/List;)Ljava/lang/Integer;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/RealtimeChannel {
 	public abstract fun close (Ljava/lang/Integer;Ljava/lang/String;)V
 	public static synthetic fun close$default (Ltv/nomercy/player/core/ports/RealtimeChannel;Ljava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)V

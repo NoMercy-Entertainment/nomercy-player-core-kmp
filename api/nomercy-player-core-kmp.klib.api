@@ -742,7 +742,7 @@ abstract interface tv.nomercy.player.core.ports/VideoBackend : tv.nomercy.player
     abstract fun audioTrack(tv.nomercy.player.core.ports/AudioTrack) // tv.nomercy.player.core.ports/VideoBackend.audioTrack|audioTrack(tv.nomercy.player.core.ports.AudioTrack){}[0]
     abstract fun audioTracks(): kotlin.collections/List<tv.nomercy.player.core.ports/AudioTrack> // tv.nomercy.player.core.ports/VideoBackend.audioTracks|audioTracks(){}[0]
     abstract fun quality(): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/VideoBackend.quality|quality(){}[0]
-    abstract fun quality(tv.nomercy.player.core.ports/QualityLevel) // tv.nomercy.player.core.ports/VideoBackend.quality|quality(tv.nomercy.player.core.ports.QualityLevel){}[0]
+    abstract fun quality(tv.nomercy.player.core.ports/QualityLevel?) // tv.nomercy.player.core.ports/VideoBackend.quality|quality(tv.nomercy.player.core.ports.QualityLevel?){}[0]
     abstract fun qualityLevels(): kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel> // tv.nomercy.player.core.ports/VideoBackend.qualityLevels|qualityLevels(){}[0]
     abstract fun subtitleTrack(): tv.nomercy.player.core.ports/SubtitleTrack? // tv.nomercy.player.core.ports/VideoBackend.subtitleTrack|subtitleTrack(){}[0]
     abstract fun subtitleTrack(tv.nomercy.player.core.ports/SubtitleTrack?) // tv.nomercy.player.core.ports/VideoBackend.subtitleTrack|subtitleTrack(tv.nomercy.player.core.ports.SubtitleTrack?){}[0]
@@ -4059,6 +4059,10 @@ final object tv.nomercy.player.core.ports/PlatformEnvironment { // tv.nomercy.pl
 final object tv.nomercy.player.core.ports/PlayerJson { // tv.nomercy.player.core.ports/PlayerJson|null[0]
     final val instance // tv.nomercy.player.core.ports/PlayerJson.instance|{}instance[0]
         final fun <get-instance>(): kotlinx.serialization.json/Json // tv.nomercy.player.core.ports/PlayerJson.instance.<get-instance>|<get-instance>(){}[0]
+}
+
+final object tv.nomercy.player.core.ports/QualityMatcher { // tv.nomercy.player.core.ports/QualityMatcher|null[0]
+    final fun match(tv.nomercy.player.core.ports/QualityLevel, kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>): kotlin/Int? // tv.nomercy.player.core.ports/QualityMatcher.match|match(tv.nomercy.player.core.ports.QualityLevel;kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>){}[0]
 }
 
 final object tv.nomercy.player.core.stream/MasterPlaylistRewriter { // tv.nomercy.player.core.stream/MasterPlaylistRewriter|null[0]

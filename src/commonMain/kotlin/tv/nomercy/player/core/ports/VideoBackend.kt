@@ -27,7 +27,12 @@ public interface VideoBackend : MediaBackend {
 
     public fun qualityLevels(): List<QualityLevel>
     public fun quality(): QualityLevel?
-    public fun quality(level: QualityLevel)
+
+    // Null is automatic, which is a selection rather than a missing one: it
+    // hands the rung choice back to the engine's own adaptation. A descriptor
+    // pins one variant, and QualityMatcher is the only thing that turns it into
+    // whatever number this engine calls it.
+    public fun quality(level: QualityLevel?)
 }
 
 // An audio engine is a media engine that can also play two things at once,
