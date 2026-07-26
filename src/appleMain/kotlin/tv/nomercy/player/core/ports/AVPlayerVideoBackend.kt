@@ -133,17 +133,7 @@ public class AVPlayerVideoBackend : MediaBackend {
             return
         }
 
-        asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) {
-            val playable: Boolean =
-                asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded && asset.playable
-            if (!playable) {
-                bus.emit(CanonicalBackendEvent.ERROR)
-                return@loadValuesAsynchronouslyForKeys
-            }
-            player.replaceCurrentItemWithPlayerItem(AVPlayerItem(asset = asset))
-            refreshCache()
-            announceReadyOnce()
-        }
+        asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) { onAssetLoaded(asset) }
         if (opts.startPositionMs > 0L) {
             player.seekToTime(
                 CMTimeMakeWithSeconds(opts.startPositionMs / MILLIS_PER_SECOND, NANOS_PER_SECOND),
@@ -216,6 +206,17 @@ public class AVPlayerVideoBackend : MediaBackend {
         timeObserver?.let { player.removeTimeObserver(it) }
         timeObserver = null
         player.replaceCurrentItemWithPlayerItem(null)
+    }
+
+    private fun onAssetLoaded(asset: AVURLAsset) {
+        val loaded: Boolean = asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded
+        if (!loaded || !asset.playable) {
+            bus.emit(CanonicalBackendEvent.ERROR)
+            return
+        }
+        player.replaceCurrentItemWithPlayerItem(AVPlayerItem(asset = asset))
+        refreshCache()
+        announceReadyOnce()
     }
 
     // AVFoundation has no "can play" callback: the item's status becomes
