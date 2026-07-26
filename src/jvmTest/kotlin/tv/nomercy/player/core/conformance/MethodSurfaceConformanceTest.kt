@@ -49,10 +49,10 @@ private val NOT_YET_PORTED_METHODS = setOf(
     "preloadStrategy", "recordMetric", "refreshAuth", "registerCueParser", "registerStream",
     "registerTitleTokens", "removeTranslations", "resolveCueParser", "resolveUrl",
     "seekable",
-    "selectAudioOutput", "setPreloadStrategy", "setTransitionStrategy", "setupState",
-    "streamState", "streams", "timeData", "transferTo", "transitionStrategy",
+    "selectAudioOutput", "setPreloadStrategy", "setTransitionStrategy", "streamState",
+    "streams", "timeData", "transferTo", "transitionStrategy",
     "translation", "unregisterCueParser", "unregisterStream", "urlResolver",
-    "visibilityState", "volumeDown", "volumeState", "volumeUp",
+    "visibilityState", "volumeDown", "volumeUp",
 )
 
 // The player's own method names against the contract's.

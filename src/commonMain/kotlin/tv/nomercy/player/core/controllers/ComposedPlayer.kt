@@ -24,6 +24,8 @@ import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.PlayState
+import tv.nomercy.player.core.player.SetupState
+import tv.nomercy.player.core.player.VolumeState
 import tv.nomercy.player.core.player.PlayerConfig
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.PlayerState
@@ -335,6 +337,14 @@ public open class ComposedPlayer(
     public open fun playState(): PlayState = state.state().playState
 
     public open val stateFlow: StateFlow<PlayerState> get() = state.stateFlow
+
+    // The state fields a chrome binds individually rather than through the
+    // whole snapshot. Each is the same value state() carries; having both is the
+    // contract's shape, and a chrome that only wants the volume icon should not
+    // have to take a snapshot to get it.
+    public open fun volumeState(): VolumeState = state.volumeState()
+
+    public open fun setupState(): SetupState = state.state().setupState
 
     public open fun repeatState(): RepeatState = state.repeatState()
 
