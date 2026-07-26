@@ -3832,6 +3832,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun dispatching(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.controllers/ComposedPlayer.dispatching|dispatching(){}[0]
     open fun duration(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.duration|duration(){}[0]
     open fun enabledPlugins(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.controllers/ComposedPlayer.enabledPlugins|enabledPlugins(){}[0]
+    open fun formatTitle(kotlin/String): kotlin/String // tv.nomercy.player.core.controllers/ComposedPlayer.formatTitle|formatTitle(kotlin.String){}[0]
     open fun getPlugin(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.core.controllers/ComposedPlayer.getPlugin|getPlugin(kotlin.String){}[0]
     open fun getPluginById(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.core.controllers/ComposedPlayer.getPluginById|getPluginById(kotlin.String){}[0]
     open fun getStreamFactory(kotlin/String): tv.nomercy.player.core.ports/StreamFactory? // tv.nomercy.player.core.controllers/ComposedPlayer.getStreamFactory|getStreamFactory(kotlin.String){}[0]
@@ -3876,6 +3877,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun recordMetric(tv.nomercy.player.core.controllers/Metric, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(tv.nomercy.player.core.controllers.Metric;kotlin.Double){}[0]
     open fun registerCueParser(tv.nomercy.player.core.ports/CueParser, kotlin/Boolean = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.registerCueParser|registerCueParser(tv.nomercy.player.core.ports.CueParser;kotlin.Boolean){}[0]
     open fun registerStream(tv.nomercy.player.core.ports/StreamFactory, kotlin/Boolean = ...): tv.nomercy.player.core.controllers/ComposedPlayer // tv.nomercy.player.core.controllers/ComposedPlayer.registerStream|registerStream(tv.nomercy.player.core.ports.StreamFactory;kotlin.Boolean){}[0]
+    open fun registerTitleTokens(kotlin.collections/Map<kotlin/String, kotlin/String>) // tv.nomercy.player.core.controllers/ComposedPlayer.registerTitleTokens|registerTitleTokens(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
     open fun removePlugin(tv.nomercy.player.core.plugin/Plugin<*>) // tv.nomercy.player.core.controllers/ComposedPlayer.removePlugin|removePlugin(tv.nomercy.player.core.plugin.Plugin<*>){}[0]
     open fun removePluginById(kotlin/String) // tv.nomercy.player.core.controllers/ComposedPlayer.removePluginById|removePluginById(kotlin.String){}[0]
     open fun removeTranslations(kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.removeTranslations|removeTranslations(kotlin.String;kotlin.String?){}[0]
@@ -4412,6 +4414,10 @@ final object tv.nomercy.player.core.events/PreventReason { // tv.nomercy.player.
         final fun <get-DelayTimeout>(): kotlin/String // tv.nomercy.player.core.events/PreventReason.DelayTimeout.<get-DelayTimeout>|<get-DelayTimeout>(){}[0]
     final const val ListenerPrevented // tv.nomercy.player.core.events/PreventReason.ListenerPrevented|{}ListenerPrevented[0]
         final fun <get-ListenerPrevented>(): kotlin/String // tv.nomercy.player.core.events/PreventReason.ListenerPrevented.<get-ListenerPrevented>|<get-ListenerPrevented>(){}[0]
+}
+
+final object tv.nomercy.player.core.media/TitleTokens { // tv.nomercy.player.core.media/TitleTokens|null[0]
+    final fun interpolate(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/Function2<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/String>): kotlin/String // tv.nomercy.player.core.media/TitleTokens.interpolate|interpolate(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.Function2<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>,kotlin.String>){}[0]
 }
 
 final object tv.nomercy.player.core.player/ActionSource { // tv.nomercy.player.core.player/ActionSource|null[0]

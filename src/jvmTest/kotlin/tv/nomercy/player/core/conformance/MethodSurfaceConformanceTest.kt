@@ -52,7 +52,7 @@ private val NOT_YET_PORTED_METHODS = setOf(
     
     
     
-    "registerTitleTokens", 
+    
     "seekable",
     "selectAudioOutput", 
     "transferTo", 
@@ -182,7 +182,7 @@ class MethodSurfaceConformanceTest {
             "activity", "cueParsers", "streamFactories",
             "stateFlow", "rootLogger", "rootStorage", "emit", "on", "once", "off",
             "dispatchBefore", "fetch", "websocket", "report", "aspectRatio",
-            "pluginList", "contributions", "coreVersion",
+            "pluginList", "contributions", "coreVersion", "formatTitle",
         )
     }
 }

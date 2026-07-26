@@ -35,6 +35,7 @@ import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.Chapter
 import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.media.TitleTokens
 import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.CastState
@@ -894,6 +895,28 @@ public open class ComposedPlayer(
     // and a native port that answered only to one would be a gotcha rather than
     // a port.
     public open fun getPluginById(id: String): Plugin<*>? = plugins.getById(id)
+
+    // ── Title tokens ─────────────────────────────────────────────────────────
+
+    // Which letters in a title mean something, and what.
+    //
+    // A per-library call, not a consumer one: the video player registers S and
+    // E in its constructor, the music player its own. Merged rather than
+    // replaced, so a plugin adding one letter does not silently drop the
+    // library's.
+    public open fun registerTitleTokens(tokens: Map<String, String>) {
+        titleTokens = titleTokens + tokens
+    }
+
+    // A title with its tokens filled in, in the viewer's language.
+    //
+    // A server that sent "Season 2" would be sending English to a Dutch viewer.
+    // It sends the shape and this fills it in, which is the only way one stored
+    // title works for everybody.
+    public open fun formatTitle(text: String): String =
+        TitleTokens.interpolate(text, titleTokens) { key, vars -> t(key, vars) }
+
+    private var titleTokens: Map<String, String> = emptyMap()
 
     // ── Cue parsers ──────────────────────────────────────────────────────────
 

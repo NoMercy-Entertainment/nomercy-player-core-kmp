@@ -77,6 +77,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public fun enabledPlugins ()Ljava/util/List;
 	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun formatTitle (Ljava/lang/String;)Ljava/lang/String;
 	public fun forward (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun forward$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun getActivity ()Ltv/nomercy/player/core/controllers/ActivityController;
@@ -170,6 +171,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun registerCueParser$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/ports/CueParser;ZILjava/lang/Object;)V
 	public fun registerStream (Ltv/nomercy/player/core/ports/StreamFactory;Z)Ltv/nomercy/player/core/controllers/ComposedPlayer;
 	public static synthetic fun registerStream$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/ports/StreamFactory;ZILjava/lang/Object;)Ltv/nomercy/player/core/controllers/ComposedPlayer;
+	public fun registerTitleTokens (Ljava/util/Map;)V
 	public fun removePlugin (Ltv/nomercy/player/core/plugin/Plugin;)V
 	public fun removePluginById (Ljava/lang/String;)V
 	public fun removeTranslations (Ljava/lang/String;Ljava/lang/String;)V
@@ -2254,6 +2256,11 @@ public final class tv/nomercy/player/core/media/QualityLadder {
 	public final fun size ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun usable (Ltv/nomercy/player/core/ports/CapabilitiesProbe;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/media/TitleTokens {
+	public static final field INSTANCE Ltv/nomercy/player/core/media/TitleTokens;
+	public final fun interpolate (Ljava/lang/String;Ljava/util/Map;Lkotlin/jvm/functions/Function2;)Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/media/UsableRung {
