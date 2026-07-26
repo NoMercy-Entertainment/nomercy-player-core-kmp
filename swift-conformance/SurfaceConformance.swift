@@ -86,6 +86,32 @@ enum SurfaceConformance {
         precondition(PluginErrorCodes.shared.DUPLICATE_ID == "core:plugin/duplicate-id")
     }
 
+    // The question an app actually asks: can I build one and drive it.
+    //
+    // This is where interop either works or does not. A suspend function has to
+    // arrive as Swift async or every transport call becomes a callback; a
+    // StateFlow has to arrive as something a SwiftUI view can observe; and the
+    // constructor has to be reachable without handing it a CoroutineScope.
+    static func player() async throws {
+        let player = ComposedPlayer(
+            backend: nil,
+            logger: SilentLogger.shared,
+            storage: InMemoryStorage(),
+            translator: nil,
+            scope: nil
+        )
+
+        try await player.setup(config: PlayerConfig())
+        try await player.play(opts: ActionOptions())
+
+        let snapshot = player.state()
+        precondition(snapshot.playState == PlayState.playing)
+
+        // What a SwiftUI view observes.
+        let flow = player.stateFlow
+        precondition(flow.value.volume == 100)
+    }
+
     // The quality ladder a quality menu draws. Descriptor-keyed, so a menu can
     // name a rung without holding an index that goes stale.
     static func quality() {
