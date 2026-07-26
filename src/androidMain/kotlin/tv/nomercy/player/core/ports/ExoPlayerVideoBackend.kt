@@ -123,11 +123,20 @@ public class ExoPlayerVideoBackend(
             // Media3 reports "is playing" rather than a play event, and it is
             // false while buffering even though playback was requested. That is
             // exactly the play/playing distinction, so it maps to playing.
-            // Without this the track cache never moves. Every other callback
-            // here reports playback, and a selection change reports nothing —
-            // so a chrome reading back what it just chose got the previous
-            // answer, and two selections in a row read as inverted.
-            override fun onTracksChanged(tracks: Tracks) {
+            // Every event, rather than a list of the ones someone remembered.
+            //
+            // This cache exists because Media3's getters are main-thread-only,
+            // and it was refreshed from three playback callbacks — so a track
+            // selection did not move it (two selections in a row read as
+            // inverted) and neither did a volume change (a gain set and read
+            // back came out as the previous value). Enumerating callbacks means
+            // missing one, and the one missed is a stale answer nobody can
+            // explain.
+            //
+            // onEvents fires after every batch of changes with the player
+            // already settled, which is the one place that cannot be
+            // incomplete.
+            override fun onEvents(player: Player, events: Player.Events) {
                 refreshCache()
             }
 
@@ -180,17 +189,47 @@ public class ExoPlayerVideoBackend(
 
     override fun volume(): Float = cachedVolume
 
-    override fun volume(value: Float): Unit = fireAndForget { player.volume = value }
+    // The cache is updated here, not only when Media3 confirms.
+    //
+    // Setting anything on this engine means posting to the main thread, so a
+    // caller that sets a value and reads it back on the next line gets the
+    // previous one. On a volume slider that is the thumb jumping back under the
+    // finger; on a crossfade it is a gain that reads as never having been set.
+    //
+    // Optimistic rather than wrong: onEvents still refreshes from the player
+    // afterwards, so if the engine clamps or refuses a value the cache converges
+    // on what actually happened.
+    override fun volume(value: Float): Unit = setVolume(value)
 
-    override fun mute(): Unit = fireAndForget { player.volume = 0f }
+    override fun mute(): Unit = setVolume(0f)
 
-    override fun unmute(): Unit = fireAndForget { player.volume = 1f }
+    override fun unmute(): Unit = setVolume(1f)
+
+    private fun setVolume(value: Float) {
+        val clamped: Float = value.coerceIn(0f, 1f)
+        pendingVolume = clamped
+        cachedVolume = clamped
+        fireAndForget {
+            player.volume = clamped
+            // Cleared only once the engine has it, so a refresh that lands in
+            // between cannot report the old value back at the caller. Without
+            // this the optimism above is undone by the next callback from an
+            // unrelated change — a load finishing, a state moving — and the
+            // gain reads as never having been set.
+            if (pendingVolume == clamped) pendingVolume = null
+        }
+    }
+
+    @Volatile private var pendingVolume: Float? = null
 
     override fun buffered(): Double = cachedBuffered
 
     override fun playbackRate(): Double = cachedRate
 
-    override fun playbackRate(rate: Double): Unit = fireAndForget { player.setPlaybackSpeed(rate.toFloat()) }
+    override fun playbackRate(rate: Double): Unit {
+        cachedRate = rate
+        fireAndForget { player.setPlaybackSpeed(rate.toFloat()) }
+    }
 
     override fun state(): BackendState = cachedState
 
@@ -205,7 +244,7 @@ public class ExoPlayerVideoBackend(
         val reportedDuration: Long = player.duration
         cachedDuration = if (reportedDuration > 0) reportedDuration / MILLIS_PER_SECOND else 0.0
         cachedBuffered = player.bufferedPosition.coerceAtLeast(0) / MILLIS_PER_SECOND
-        cachedVolume = player.volume
+        cachedVolume = pendingVolume ?: player.volume
         cachedRate = player.playbackParameters.speed.toDouble()
         val tracks: Tracks = player.currentTracks
         cachedQualityLevels = ExoTrackMapper.qualityLevels(tracks)
