@@ -278,14 +278,17 @@ public class AVPlayerVideoBackend : VideoBackend {
         }
 
         item.preferredPeakBitRate = ladder.maxOf { it.bitrate }.toDouble()
-        // Width comes from the descriptor when it has one and from the height
-        // otherwise: AVFoundation compares against both dimensions, and a zero
-        // width would read as no limit at all.
-        val tallest: QualityDescriptor = ladder.maxBy { it.height }
+
+        // A descriptor carries height and not width, so the width is derived —
+        // and deliberately over-estimated. AVFoundation compares against both
+        // dimensions, so a width guessed too narrow would cap a scope print out
+        // of the ladder entirely, while one guessed too wide only ever admits a
+        // rung the height already allowed.
+        val tallest: Int = ladder.maxOf { it.height }
         item.setPreferredMaximumResolution(
             CGSizeMake(
-                (tallest.width ?: (tallest.height * WIDEST_RATIO_NUMERATOR / WIDEST_RATIO_DENOMINATOR)).toDouble(),
-                tallest.height.toDouble(),
+                (tallest * WIDEST_RATIO_NUMERATOR / WIDEST_RATIO_DENOMINATOR).toDouble(),
+                tallest.toDouble(),
             ),
         )
     }
