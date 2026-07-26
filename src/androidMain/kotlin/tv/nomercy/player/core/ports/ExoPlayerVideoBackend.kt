@@ -56,7 +56,16 @@ public class ExoPlayerVideoBackend(
         Handler(Looper.getMainLooper()).asCoroutineDispatcher()
 
     private val main: CoroutineScope = scope ?: CoroutineScope(SupervisorJob() + mainDispatcher)
-    private val player: ExoPlayer = ExoPlayer.Builder(context).build()
+    // Public because video has to be drawn somewhere and only the caller knows
+    // where. A PlayerView is handed the engine, not a frame buffer, so a backend
+    // that kept this private could decode a film and show no one. Nothing above
+    // the UI layer touches it: every playback call goes through MediaBackend,
+    // and this is the render target alone.
+    //
+    // Main thread, like everything else Media3 owns.
+    public val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
+
+    private val player: ExoPlayer = exoPlayer
 
     // Media3 has no periodic time callback: it expects the UI to poll on its own
     // frame loop. A backend has no frame loop, so it polls at the rate a

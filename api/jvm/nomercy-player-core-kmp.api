@@ -3362,6 +3362,7 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
+	public final fun getEmbeddedPlayer ()Luk/co/caprica/vlcj/player/embedded/EmbeddedMediaPlayer;
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V

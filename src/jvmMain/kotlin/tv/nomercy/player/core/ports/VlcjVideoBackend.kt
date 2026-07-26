@@ -10,6 +10,7 @@ package tv.nomercy.player.core.ports
 
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
+import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
 
 private const val MILLIS_PER_SECOND = 1000.0
@@ -24,15 +25,23 @@ private const val FULL_VOLUME_PERCENT = 100
 // canonical one every controller above is written against.
 //
 // Headless by default: no video surface is attached, so it decodes and reports
-// without needing a window. A desktop client attaches its own surface through
-// the embedded player; the conformance gate does not, which is what lets the
-// gate run anywhere libVLC is installed.
+// without needing a window. A desktop client attaches its own surface to
+// [embeddedPlayer]; the conformance gate does not, which is what lets the gate
+// run anywhere libVLC is installed.
 public class VlcjVideoBackend(
     private val factory: MediaPlayerFactory = MediaPlayerFactory(),
 ) : MediaBackend {
 
     private val bus = StringEventBus()
-    private val player: MediaPlayer = factory.mediaPlayers().newMediaPlayer()
+
+    // Public because video has to be drawn somewhere and only the caller knows
+    // where. libVLC renders into a native window handle the UI layer owns, so a
+    // backend that kept this private could decode a film and show no one.
+    // Nothing above the UI layer touches it: every playback call goes through
+    // MediaBackend, and this is the render target alone.
+    public val embeddedPlayer: EmbeddedMediaPlayer = factory.mediaPlayers().newEmbeddedMediaPlayer()
+
+    private val player: MediaPlayer = embeddedPlayer
 
     // VLC reports position in milliseconds and this contract is in seconds. One
     // conversion, here, rather than at every call site.
