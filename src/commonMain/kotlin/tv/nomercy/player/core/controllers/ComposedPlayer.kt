@@ -14,12 +14,17 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import tv.nomercy.player.core.KIT_VERSION
+import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.NotImplementedError
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.events.PlaylistReadyPayload
+import tv.nomercy.player.core.events.PlaylistResolvingPayload
 import tv.nomercy.player.core.events.TimeState
 import tv.nomercy.player.core.events.PlaybackMetrics
 import tv.nomercy.player.core.events.Subscription
@@ -84,6 +89,10 @@ import tv.nomercy.player.core.ports.Translator
 // Ten seconds, which is what every player's skip button does and what a viewer
 // expects without being told.
 private const val SKIP_SECONDS = 10.0
+
+// Every 2xx. A playlist behind a redirect the fetcher already followed arrives
+// as a 200; anything else did not arrive.
+private val OK_STATUS = 200..299
 
 // Enough randomness to tell two players in one log apart, and no more.
 //
@@ -502,6 +511,92 @@ public open class ComposedPlayer(
     public open suspend fun item(id: String, autoplay: Boolean = false): Unit = queue.item(id, autoplay)
 
     public open suspend fun playItem(id: String): Unit = queue.playItem(id)
+
+    // Replace the queue and start playing, in one call.
+    //
+    // What a "play this album" button does. Empty is a no-op rather than an
+    // error: a caller handing over a filtered list that came back empty has
+    // nothing to play, and clearing the queue would be a worse answer than
+    // doing nothing.
+    //
+    // Does not stop what is playing first. The load interrupts it, and a caller
+    // that needs a clean teardown calls stop() itself — which is the rarer case
+    // and the one worth being explicit about.
+    public open suspend fun playNow(items: List<PlaylistItem>, startId: String? = null) {
+        if (items.isEmpty()) return
+        queue.queue(items)
+        queue.playItem(startId ?: items.first().id)
+    }
+
+    // Fetch a playlist and make it the queue.
+    //
+    // The parser is required, which the web's is not: it defaults to JSON.parse
+    // there because a JavaScript object needs no type. Here PlaylistItem is an
+    // interface and core cannot deserialize into one — only the host knows what
+    // its items are. Asking for the parser is honest about that; a default that
+    // could not work would be a method that throws at runtime for everyone.
+    public open suspend fun loadQueue(url: String, parser: (String) -> List<PlaylistItem>) {
+        context.emit(CoreEvents.PlaylistResolving, PlaylistResolvingPayload(url))
+
+        val body: String = try {
+            fetchPlaylist(url)
+        } catch (failure: PlayerError) {
+            reportPlaylistFailure(failure)
+            throw failure
+        }
+
+        val items: List<PlaylistItem> = try {
+            parser(body)
+        } catch (@Suppress("TooGenericExceptionCaught") failure: Throwable) {
+            // A playlist that arrived and could not be read is a different
+            // problem to one that never arrived: retrying will not help, and a
+            // consumer showing "check your connection" would be wrong.
+            val error = PlayerError(
+                code = CoreErrorCodes.PLAYLIST_PARSE_ERROR,
+                scope = ErrorScope.core(),
+                message = "The playlist at $url could not be read: ${failure.message}",
+                cause = failure,
+            )
+            reportPlaylistFailure(error)
+            throw error
+        }
+
+        queue.queue(items)
+        context.emit(CoreEvents.PlaylistReady, PlaylistReadyPayload(items.size.toDouble()))
+    }
+
+    private suspend fun fetchPlaylist(url: String): String {
+        val response: FetchResponse = fetch(url, FetchOptions())
+        if (response.status !in OK_STATUS) {
+            throw PlayerError(
+                code = CoreErrorCodes.PLAYLIST_FETCH_ERROR,
+                scope = ErrorScope.core(),
+                message = "The playlist at $url returned ${response.status}.",
+                // The status goes in the bag so a caller can ask isHttp(5)
+                // without parsing this sentence back apart.
+                context = mapOf("httpStatus" to response.status),
+            )
+        }
+        return response.body
+    }
+
+    // Both events, because they answer different questions. playlistResolveError
+    // is what a caller awaiting this playlist is listening for; error is what a
+    // consumer's single failure surface is listening for, and it should not have
+    // to subscribe to every specific failure to know something went wrong.
+    private fun reportPlaylistFailure(error: PlayerError) {
+        val payload = PlayerErrorEvent(
+            code = error.code,
+            message = error.message.orEmpty(),
+            severity = error.severity,
+            scope = error.scope,
+            suggestion = error.suggestion,
+            context = error.context,
+        )
+        context.emit(CoreEvents.PlaylistResolveError, payload)
+        context.emit(CoreEvents.Error, payload)
+        report(error)
+    }
 
     // ── Modes and state ──────────────────────────────────────────────────────
 

@@ -100,6 +100,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun item$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;ZLkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun language ()Ljava/lang/String;
 	public fun language (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun loadQueue (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun metrics ()Ltv/nomercy/player/core/events/PlaybackMetrics;
 	public fun mute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun mute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -118,6 +119,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun play (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun play$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun playItem (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playNow (Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun playNow$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/util/List;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun playState ()Ltv/nomercy/player/core/player/PlayState;
 	public fun playbackRate ()D
 	public fun playbackRate (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -456,6 +459,8 @@ public final class tv/nomercy/player/core/errors/CoreErrorCodes {
 	public static final field INSTANCE Ltv/nomercy/player/core/errors/CoreErrorCodes;
 	public static final field NETWORK_TIMEOUT Ljava/lang/String;
 	public static final field NOT_READY Ljava/lang/String;
+	public static final field PLAYLIST_FETCH_ERROR Ljava/lang/String;
+	public static final field PLAYLIST_PARSE_ERROR Ljava/lang/String;
 	public static final field QUEUE_EMPTY Ljava/lang/String;
 	public static final field SERVER_ERROR Ljava/lang/String;
 	public static final field UNAUTHENTICATED Ljava/lang/String;

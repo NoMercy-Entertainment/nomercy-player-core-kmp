@@ -72,8 +72,6 @@ private val NOT_YET_PORTED = setOf(
     "core:player/backend-missing",
     "core:player/crossfade-unsupported",
     "core:player/not-found",
-    "core:playlist/fetch-error",
-    "core:playlist/parse-error",
     "core:resource/playlist-fetch-failed",
     "core:stream/no-factory-match",
 )

@@ -33,6 +33,12 @@ public object CoreErrorCodes {
     public const val CODEC_UNSUPPORTED: String = "core:media/codec-unsupported"
     public const val QUEUE_EMPTY: String = "core:state/queue-empty"
 
+    // A playlist that did not arrive, and one that arrived unreadable. Two
+    // codes because they need different answers: the first is worth retrying
+    // and the second never will be.
+    public const val PLAYLIST_FETCH_ERROR: String = "core:playlist/fetch-error"
+    public const val PLAYLIST_PARSE_ERROR: String = "core:playlist/parse-error"
+
     // What the conformance gate measures against the contract, and what a
     // consumer can ask to know whether a code came from core or from a plugin.
     public val all: Set<String> = setOf(
@@ -47,5 +53,7 @@ public object CoreErrorCodes {
         FORBIDDEN,
         CODEC_UNSUPPORTED,
         QUEUE_EMPTY,
+        PLAYLIST_FETCH_ERROR,
+        PLAYLIST_PARSE_ERROR,
     )
 }
