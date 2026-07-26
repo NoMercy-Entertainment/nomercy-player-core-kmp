@@ -96,4 +96,36 @@ class QualityMatcherTest {
         // can easily ask during.
         assertNull(QualityMatcher.match(LADDER.first(), emptyList()))
     }
+
+    @Test
+    fun rangeDecidesWhenTheCodecCannot() {
+        // The case the first version of this file could not see: every rung in
+        // LADDER carries a different codec per range, so codec alone
+        // disambiguated and dropping the range check broke nothing. A real
+        // ladder often encodes both SDR and HDR in HEVC, and then the range is
+        // the only thing separating a stream a device can play from one it
+        // cannot.
+        val sameCodecBothRanges = listOf(
+            QualityLevel(height = 2160, bitrate = 15_000_000, codec = "hvc1", dynamicRange = DynamicRange.SDR),
+            QualityLevel(height = 2160, bitrate = 15_000_000, codec = "hvc1", dynamicRange = DynamicRange.HDR10),
+        )
+
+        assertEquals(0, QualityMatcher.match(sameCodecBothRanges[0], sameCodecBothRanges))
+        assertEquals(1, QualityMatcher.match(sameCodecBothRanges[1], sameCodecBothRanges))
+    }
+
+    @Test
+    fun aRangeTheLadderDoesNotCarryIsNoMatch() {
+        val onlySdr = listOf(
+            QualityLevel(height = 2160, bitrate = 15_000_000, codec = "hvc1", dynamicRange = DynamicRange.SDR),
+        )
+        val dolby = QualityLevel(
+            height = 2160,
+            bitrate = 15_000_000,
+            codec = "hvc1",
+            dynamicRange = DynamicRange.DOLBY_VISION,
+        )
+
+        assertNull(QualityMatcher.match(dolby, onlySdr))
+    }
 }
