@@ -3575,6 +3575,17 @@ final class tv.nomercy.player.core.ports/StreamLevel { // tv.nomercy.player.core
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/StreamLevel.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/StreamRegistry { // tv.nomercy.player.core.ports/StreamRegistry|null[0]
+    constructor <init>() // tv.nomercy.player.core.ports/StreamRegistry.<init>|<init>(){}[0]
+
+    final fun dispose() // tv.nomercy.player.core.ports/StreamRegistry.dispose|dispose(){}[0]
+    final fun findById(kotlin/String): tv.nomercy.player.core.ports/StreamFactory? // tv.nomercy.player.core.ports/StreamRegistry.findById|findById(kotlin.String){}[0]
+    final fun list(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/StreamRegistry.list|list(){}[0]
+    final fun register(tv.nomercy.player.core.ports/StreamFactory, kotlin/Boolean = ...) // tv.nomercy.player.core.ports/StreamRegistry.register|register(tv.nomercy.player.core.ports.StreamFactory;kotlin.Boolean){}[0]
+    final fun resolve(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/StreamFactory? // tv.nomercy.player.core.ports/StreamRegistry.resolve|resolve(kotlin.String;kotlin.String?){}[0]
+    final fun unregister(kotlin/String) // tv.nomercy.player.core.ports/StreamRegistry.unregister|unregister(kotlin.String){}[0]
+}
+
 final class tv.nomercy.player.core.ports/StringEventBus { // tv.nomercy.player.core.ports/StringEventBus|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/StringEventBus.<init>|<init>(){}[0]
 
@@ -3767,6 +3778,8 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
         final fun <get-queue>(): tv.nomercy.player.core.controllers/QueueController // tv.nomercy.player.core.controllers/ComposedPlayer.queue.<get-queue>|<get-queue>(){}[0]
     final val state // tv.nomercy.player.core.controllers/ComposedPlayer.state|{}state[0]
         final fun <get-state>(): tv.nomercy.player.core.controllers/StateController // tv.nomercy.player.core.controllers/ComposedPlayer.state.<get-state>|<get-state>(){}[0]
+    final val streamFactories // tv.nomercy.player.core.controllers/ComposedPlayer.streamFactories|{}streamFactories[0]
+        final fun <get-streamFactories>(): tv.nomercy.player.core.ports/StreamRegistry // tv.nomercy.player.core.controllers/ComposedPlayer.streamFactories.<get-streamFactories>|<get-streamFactories>(){}[0]
     final val time // tv.nomercy.player.core.controllers/ComposedPlayer.time|{}time[0]
         final fun <get-time>(): tv.nomercy.player.core.controllers/TimeController // tv.nomercy.player.core.controllers/ComposedPlayer.time.<get-time>|<get-time>(){}[0]
     final val transport // tv.nomercy.player.core.controllers/ComposedPlayer.transport|{}transport[0]
@@ -3817,6 +3830,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun enabledPlugins(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.controllers/ComposedPlayer.enabledPlugins|enabledPlugins(){}[0]
     open fun getPlugin(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.core.controllers/ComposedPlayer.getPlugin|getPlugin(kotlin.String){}[0]
     open fun getPluginById(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.core.controllers/ComposedPlayer.getPluginById|getPluginById(kotlin.String){}[0]
+    open fun getStreamFactory(kotlin/String): tv.nomercy.player.core.ports/StreamFactory? // tv.nomercy.player.core.controllers/ComposedPlayer.getStreamFactory|getStreamFactory(kotlin.String){}[0]
     open fun index(): kotlin/Int // tv.nomercy.player.core.controllers/ComposedPlayer.index|index(){}[0]
     open fun isDesktop(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.isDesktop|isDesktop(){}[0]
     open fun isMobile(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.isMobile|isMobile(){}[0]
@@ -3857,6 +3871,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun recordMetric(kotlin/String, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(kotlin.String;kotlin.Double){}[0]
     open fun recordMetric(tv.nomercy.player.core.controllers/Metric, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(tv.nomercy.player.core.controllers.Metric;kotlin.Double){}[0]
     open fun registerCueParser(tv.nomercy.player.core.ports/CueParser, kotlin/Boolean = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.registerCueParser|registerCueParser(tv.nomercy.player.core.ports.CueParser;kotlin.Boolean){}[0]
+    open fun registerStream(tv.nomercy.player.core.ports/StreamFactory, kotlin/Boolean = ...): tv.nomercy.player.core.controllers/ComposedPlayer // tv.nomercy.player.core.controllers/ComposedPlayer.registerStream|registerStream(tv.nomercy.player.core.ports.StreamFactory;kotlin.Boolean){}[0]
     open fun removePlugin(tv.nomercy.player.core.plugin/Plugin<*>) // tv.nomercy.player.core.controllers/ComposedPlayer.removePlugin|removePlugin(tv.nomercy.player.core.plugin.Plugin<*>){}[0]
     open fun removePluginById(kotlin/String) // tv.nomercy.player.core.controllers/ComposedPlayer.removePluginById|removePluginById(kotlin.String){}[0]
     open fun removeTranslations(kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.removeTranslations|removeTranslations(kotlin.String;kotlin.String?){}[0]
@@ -3870,6 +3885,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun shuffleState(): tv.nomercy.player.core.player/ShuffleState // tv.nomercy.player.core.controllers/ComposedPlayer.shuffleState|shuffleState(){}[0]
     open fun state(): tv.nomercy.player.core.player/PlayerState // tv.nomercy.player.core.controllers/ComposedPlayer.state|state(){}[0]
     open fun streamState(): tv.nomercy.player.core.ports/BackendState // tv.nomercy.player.core.controllers/ComposedPlayer.streamState|streamState(){}[0]
+    open fun streams(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.controllers/ComposedPlayer.streams|streams(){}[0]
     open fun subtitle(): tv.nomercy.player.core.ports/SubtitleTrack? // tv.nomercy.player.core.controllers/ComposedPlayer.subtitle|subtitle(){}[0]
     open fun subtitle(tv.nomercy.player.core.ports/SubtitleTrack?) // tv.nomercy.player.core.controllers/ComposedPlayer.subtitle|subtitle(tv.nomercy.player.core.ports.SubtitleTrack?){}[0]
     open fun subtitles(): kotlin.collections/List<tv.nomercy.player.core.ports/SubtitleTrack> // tv.nomercy.player.core.controllers/ComposedPlayer.subtitles|subtitles(){}[0]
@@ -3880,6 +3896,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun translation(kotlin/String, kotlin/String): kotlin/String? // tv.nomercy.player.core.controllers/ComposedPlayer.translation|translation(kotlin.String;kotlin.String){}[0]
     open fun translation(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.controllers/ComposedPlayer.translation|translation(kotlin.String;kotlin.String;kotlin.String){}[0]
     open fun unregisterCueParser(kotlin/String) // tv.nomercy.player.core.controllers/ComposedPlayer.unregisterCueParser|unregisterCueParser(kotlin.String){}[0]
+    open fun unregisterStream(kotlin/String): tv.nomercy.player.core.controllers/ComposedPlayer // tv.nomercy.player.core.controllers/ComposedPlayer.unregisterStream|unregisterStream(kotlin.String){}[0]
     open fun urlResolver(): tv.nomercy.player.core.ports/UrlResolver? // tv.nomercy.player.core.controllers/ComposedPlayer.urlResolver|urlResolver(){}[0]
     open fun urlResolver(tv.nomercy.player.core.ports/UrlResolver?) // tv.nomercy.player.core.controllers/ComposedPlayer.urlResolver|urlResolver(tv.nomercy.player.core.ports.UrlResolver?){}[0]
     open fun visibilityState(): tv.nomercy.player.core.player/VisibilityState // tv.nomercy.player.core.controllers/ComposedPlayer.visibilityState|visibilityState(){}[0]

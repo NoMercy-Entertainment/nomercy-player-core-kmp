@@ -81,6 +81,8 @@ import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.ResolvedUrl
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.StreamFactory
+import tv.nomercy.player.core.ports.StreamRegistry
 import tv.nomercy.player.core.ports.UrlCategory
 import tv.nomercy.player.core.ports.UrlResolution
 import tv.nomercy.player.core.ports.UrlResolver
@@ -848,6 +850,32 @@ public open class ComposedPlayer(
         cueParsers.resolve(url, contentType)
 
     public val cueParsers: CueParserRegistry = CueParserRegistry()
+
+    // ── Stream factories ─────────────────────────────────────────────────────
+
+    // Teaching the player a protocol it does not know.
+    //
+    // Not the adaptive-bitrate path — the backend owns that. This is for the
+    // ones a consumer has and this library does not: a DRM pipeline, a
+    // peer-to-peer transport, an in-house segment format.
+    //
+    // Returns the player so registration chains, which is how a host wires
+    // several at construction without naming the variable four times.
+    public open fun registerStream(factory: StreamFactory, atLowestPriority: Boolean = false): ComposedPlayer {
+        streamFactories.register(factory, atLowestPriority)
+        return this
+    }
+
+    public open fun unregisterStream(id: String): ComposedPlayer {
+        streamFactories.unregister(id)
+        return this
+    }
+
+    public open fun streams(): List<String> = streamFactories.list()
+
+    public open fun getStreamFactory(id: String): StreamFactory? = streamFactories.findById(id)
+
+    public val streamFactories: StreamRegistry = StreamRegistry()
 
     public open fun enabledPlugins(): List<Plugin<*>> = plugins.enabledPlugins()
 

@@ -90,6 +90,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun getRootStorage ()Ltv/nomercy/player/core/ports/Storage;
 	public final fun getState ()Ltv/nomercy/player/core/controllers/StateController;
 	public fun getStateFlow ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getStreamFactories ()Ltv/nomercy/player/core/ports/StreamRegistry;
+	public fun getStreamFactory (Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamFactory;
 	public final fun getTime ()Ltv/nomercy/player/core/controllers/TimeController;
 	public final fun getTransport ()Ltv/nomercy/player/core/controllers/TransportController;
 	public final fun getVolume ()Ltv/nomercy/player/core/controllers/VolumeController;
@@ -158,6 +160,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun recordMetric (Ltv/nomercy/player/core/controllers/Metric;D)V
 	public fun registerCueParser (Ltv/nomercy/player/core/ports/CueParser;Z)V
 	public static synthetic fun registerCueParser$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/ports/CueParser;ZILjava/lang/Object;)V
+	public fun registerStream (Ltv/nomercy/player/core/ports/StreamFactory;Z)Ltv/nomercy/player/core/controllers/ComposedPlayer;
+	public static synthetic fun registerStream$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/ports/StreamFactory;ZILjava/lang/Object;)Ltv/nomercy/player/core/controllers/ComposedPlayer;
 	public fun removePlugin (Ltv/nomercy/player/core/plugin/Plugin;)V
 	public fun removePluginById (Ljava/lang/String;)V
 	public fun removeTranslations (Ljava/lang/String;Ljava/lang/String;)V
@@ -191,6 +195,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun stop$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun streamState ()Ltv/nomercy/player/core/ports/BackendState;
+	public fun streams ()Ljava/util/List;
 	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public fun subtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public fun subtitles ()Ljava/util/List;
@@ -209,6 +214,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun unmute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun unmute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun unregisterCueParser (Ljava/lang/String;)V
+	public fun unregisterStream (Ljava/lang/String;)Ltv/nomercy/player/core/controllers/ComposedPlayer;
 	public fun urlResolver ()Ltv/nomercy/player/core/ports/UrlResolver;
 	public fun urlResolver (Ltv/nomercy/player/core/ports/UrlResolver;)V
 	public fun visibilityState ()Ltv/nomercy/player/core/player/VisibilityState;
@@ -3620,6 +3626,18 @@ public final class tv/nomercy/player/core/ports/StreamLevel {
 	public final fun getWidth ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamRegistry {
+	public fun <init> ()V
+	public final fun dispose ()V
+	public final fun findById (Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamFactory;
+	public final fun list ()Ljava/util/List;
+	public final fun register (Ltv/nomercy/player/core/ports/StreamFactory;Z)V
+	public static synthetic fun register$default (Ltv/nomercy/player/core/ports/StreamRegistry;Ltv/nomercy/player/core/ports/StreamFactory;ZILjava/lang/Object;)V
+	public final fun resolve (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamFactory;
+	public static synthetic fun resolve$default (Ltv/nomercy/player/core/ports/StreamRegistry;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamFactory;
+	public final fun unregister (Ljava/lang/String;)V
 }
 
 public abstract interface class tv/nomercy/player/core/ports/StreamSource {

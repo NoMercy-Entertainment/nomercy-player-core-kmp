@@ -42,15 +42,15 @@ private val NOT_YET_PORTED_METHODS = setOf(
     "audioTrackMode", "auth", "backend", 
     "bufferedRanges", "canPlay", 
     "experimental",
-    "getStreamFactory", 
+    
     "load", 
     
-    "refreshAuth", "registerStream",
+    "refreshAuth", 
     "registerTitleTokens", 
     "seekable",
     "selectAudioOutput", 
-    "streams", "transferTo", 
-    "unregisterStream", 
+    "transferTo", 
+    
     
 )
 
@@ -172,7 +172,8 @@ class MethodSurfaceConformanceTest {
         // Things the native port has that the web does not need a name for: the
         // controllers it is composed of, and the Kotlin-shaped state surface.
         val NATIVE_ONLY = setOf(
-            "context", "transport", "volume", "time", "state", "lifecycle", "bridge", "activity", "cueParsers",
+            "context", "transport", "volume", "time", "state", "lifecycle", "bridge",
+            "activity", "cueParsers", "streamFactories",
             "stateFlow", "rootLogger", "rootStorage", "emit", "on", "once", "off",
             "dispatchBefore", "fetch", "websocket", "report", "aspectRatio",
             "pluginList", "contributions", "coreVersion",

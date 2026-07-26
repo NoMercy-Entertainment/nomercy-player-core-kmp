@@ -44,3 +44,44 @@ public interface StreamFactory {
     public fun canPlay(url: String, contentType: String? = null): Boolean
     public fun create(opts: StreamFactoryOptions): StreamSource
 }
+
+// Which factory claims a url.
+//
+// Same shape and same ordering rule as the cue parsers, deliberately: a
+// consumer who has learned one registry has learned both, and two extension
+// points that behaved differently would be two things to remember.
+//
+// Most-recently-registered wins, so overriding a built-in is registering one
+// that does the same job. A built-in seeds itself at the lowest priority
+// instead, because registration order is the wrong lever for something
+// registered first by construction.
+public class StreamRegistry {
+
+    private val factories: MutableList<StreamFactory> = mutableListOf()
+
+    public fun register(factory: StreamFactory, atLowestPriority: Boolean = false) {
+        factories.removeAll { it.id == factory.id }
+        if (atLowestPriority) factories.add(0, factory) else factories.add(factory)
+    }
+
+    public fun unregister(id: String) {
+        factories.removeAll { it.id == id }
+    }
+
+    // Null when nothing claims it, which is the ordinary answer: most urls are
+    // played by the backend directly and never want a factory at all. Treating
+    // absence as an error would make every plain mp4 a failure.
+    public fun resolve(url: String, contentType: String? = null): StreamFactory? =
+        factories.lastOrNull { it.canPlay(url, contentType) }
+
+    public fun findById(id: String): StreamFactory? = factories.firstOrNull { it.id == id }
+
+    // Highest priority first, which is the reverse of the order they are held
+    // in. A consumer reading this to decide what to override should see what
+    // resolve() would pick at the top.
+    public fun list(): List<String> = factories.asReversed().map { it.id }
+
+    public fun dispose() {
+        factories.clear()
+    }
+}
