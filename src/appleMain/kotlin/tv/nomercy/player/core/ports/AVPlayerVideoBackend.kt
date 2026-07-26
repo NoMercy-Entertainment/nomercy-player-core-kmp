@@ -11,6 +11,7 @@ package tv.nomercy.player.core.ports
 import kotlinx.cinterop.ExperimentalForeignApi
 import platform.AVFoundation.AVPlayer
 import platform.AVFoundation.AVPlayerItem
+import platform.AVFoundation.AVURLAsset
 import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
 import platform.AVFoundation.AVPlayerItemStatusFailed
 import platform.AVFoundation.AVPlayerItemStatusReadyToPlay
@@ -35,11 +36,16 @@ import platform.CoreMedia.CMTimeMakeWithSeconds
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSURL
+import platform.AVFoundation.loadValuesAsynchronouslyForKeys
+import platform.AVFoundation.playable
+import platform.AVFoundation.statusOfValueForKey
+import platform.AVFoundation.AVKeyValueStatusLoaded
 import platform.darwin.dispatch_queue_create
 
 private const val TIME_OBSERVER_HZ = 4.0
 private const val NANOS_PER_SECOND = 1_000_000_000
 private const val MILLIS_PER_SECOND = 1000.0
+private const val PLAYABLE_KEY = "playable"
 
 // The Apple engine, over AVFoundation.
 //
@@ -106,8 +112,25 @@ public class AVPlayerVideoBackend : MediaBackend {
     override suspend fun load(url: String, opts: LoadOptions) {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
-        val item: AVPlayerItem? = NSURL.URLWithString(url)?.let { AVPlayerItem(uRL = it) }
+
+        val asset: AVURLAsset? = NSURL.URLWithString(url)?.let { AVURLAsset(uRL = it, options = null) }
+        val item: AVPlayerItem? = asset?.let { AVPlayerItem(asset = it) }
         player.replaceCurrentItemWithPlayerItem(item)
+
+        // Readiness comes from the asset, not from playback having started.
+        //
+        // The first version waited for the periodic time observer to notice the
+        // item was ready — but that observer only fires once time is moving, and
+        // time does not move until the item is ready. Nothing ever reported, and
+        // the gate read loadstart, play, pause with silence in between.
+        asset?.loadValuesAsynchronouslyForKeys(listOf(PLAYABLE_KEY)) {
+            if (asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded && asset.playable) {
+                refreshCache()
+                announceReadyOnce()
+            } else {
+                bus.emit(CanonicalBackendEvent.ERROR)
+            }
+        }
         if (opts.startPositionMs > 0L) {
             player.seekToTime(
                 CMTimeMakeWithSeconds(opts.startPositionMs / MILLIS_PER_SECOND, NANOS_PER_SECOND),
@@ -198,6 +221,7 @@ public class AVPlayerVideoBackend : MediaBackend {
     private fun announceReadyOnce() {
         if (announcedCanPlay) return
         announcedCanPlay = true
+        if (cachedState == BackendState.IDLE) cachedState = BackendState.READY
         bus.emit(CanonicalBackendEvent.LOADED_METADATA)
         bus.emit(CanonicalBackendEvent.CAN_PLAY)
     }
