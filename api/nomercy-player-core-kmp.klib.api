@@ -484,6 +484,10 @@ abstract fun interface tv.nomercy.player.core.events/Subscription { // tv.nomerc
     abstract fun dispose() // tv.nomercy.player.core.events/Subscription.dispose|dispose(){}[0]
 }
 
+abstract fun interface tv.nomercy.player.core.ports/Fetcher { // tv.nomercy.player.core.ports/Fetcher|null[0]
+    abstract suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.ports/Fetcher.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+}
+
 abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.player/Player { // tv.nomercy.player.core.player/Player|null[0]
     abstract val stateFlow // tv.nomercy.player.core.player/Player.stateFlow|{}stateFlow[0]
         abstract fun <get-stateFlow>(): kotlinx.coroutines.flow/StateFlow<tv.nomercy.player.core.player/PlayerState> // tv.nomercy.player.core.player/Player.stateFlow.<get-stateFlow>|<get-stateFlow>(){}[0]
@@ -3003,19 +3007,17 @@ final class tv.nomercy.player.core.ports/FetchOptions { // tv.nomercy.player.cor
 }
 
 final class tv.nomercy.player.core.ports/FetchResponse { // tv.nomercy.player.core.ports/FetchResponse|null[0]
-    constructor <init>(kotlin/Int, kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...) // tv.nomercy.player.core.ports/FetchResponse.<init>|<init>(kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
+    constructor <init>(kotlin/Int, kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ..., kotlin/ByteArray? = ...) // tv.nomercy.player.core.ports/FetchResponse.<init>|<init>(kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String;kotlin.ByteArray?){}[0]
 
     final val body // tv.nomercy.player.core.ports/FetchResponse.body|{}body[0]
         final fun <get-body>(): kotlin/String // tv.nomercy.player.core.ports/FetchResponse.body.<get-body>|<get-body>(){}[0]
+    final val bytes // tv.nomercy.player.core.ports/FetchResponse.bytes|{}bytes[0]
+        final fun <get-bytes>(): kotlin/ByteArray? // tv.nomercy.player.core.ports/FetchResponse.bytes.<get-bytes>|<get-bytes>(){}[0]
     final val headers // tv.nomercy.player.core.ports/FetchResponse.headers|{}headers[0]
         final fun <get-headers>(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.ports/FetchResponse.headers.<get-headers>|<get-headers>(){}[0]
     final val status // tv.nomercy.player.core.ports/FetchResponse.status|{}status[0]
         final fun <get-status>(): kotlin/Int // tv.nomercy.player.core.ports/FetchResponse.status.<get-status>|<get-status>(){}[0]
 
-    final fun component1(): kotlin/Int // tv.nomercy.player.core.ports/FetchResponse.component1|component1(){}[0]
-    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.ports/FetchResponse.component2|component2(){}[0]
-    final fun component3(): kotlin/String // tv.nomercy.player.core.ports/FetchResponse.component3|component3(){}[0]
-    final fun copy(kotlin/Int = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String = ...): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.ports/FetchResponse.copy|copy(kotlin.Int;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/FetchResponse.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/FetchResponse.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/FetchResponse.toString|toString(){}[0]
@@ -3402,7 +3404,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;kotlinx.coroutines.CoroutineScope?){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Fetcher? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Fetcher?;kotlinx.coroutines.CoroutineScope?){}[0]
 
     final val bridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge|{}bridge[0]
         final fun <get-bridge>(): tv.nomercy.player.core.controllers/BackendBridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge.<get-bridge>|<get-bridge>(){}[0]

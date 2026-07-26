@@ -33,6 +33,7 @@ import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.FetchOptions
+import tv.nomercy.player.core.ports.Fetcher
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.MediaBackend
@@ -57,6 +58,10 @@ public open class ComposedPlayer(
     private val logger: Logger = SilentLogger,
     private val storage: Storage = InMemoryStorage(),
     private val translator: Translator? = null,
+    // Null by default, and the failure when a plugin asks anyway is a named
+    // one. A player that opened its own connections would be a second HTTP
+    // stack beside the app's, with its own idea of auth and retries.
+    private val fetcher: Fetcher? = null,
     // Nullable rather than defaulted, so a caller that cannot see Kotlin default
     // arguments can still leave it out. From Swift the default is invisible and
     // the type was non-optional, which meant building a player required
@@ -209,7 +214,8 @@ public open class ComposedPlayer(
     // that names the feature is better than a stub returning an empty 200, which
     // a plugin cannot tell from a server that answered.
     override suspend fun fetch(url: String, opts: FetchOptions): FetchResponse =
-        throw NotImplementedError("This player was built without an HTTP transport.", "fetch")
+        fetcher?.fetch(url, opts)
+            ?: throw NotImplementedError("This player was built without an HTTP transport.", "fetch")
 
     override fun websocket(url: String, opts: RealtimeFactoryOptions): RealtimeChannel =
         throw NotImplementedError("This player was built without a realtime transport.", "websocket")
