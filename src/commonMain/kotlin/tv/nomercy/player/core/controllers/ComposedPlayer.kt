@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
@@ -39,6 +40,8 @@ import tv.nomercy.player.core.plugin.ContributionBinding
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
+import tv.nomercy.player.core.ports.AnnouncementLevel
+import tv.nomercy.player.core.ports.Announcer
 import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.Device
 import tv.nomercy.player.core.ports.defaultClock
@@ -78,6 +81,17 @@ import tv.nomercy.player.core.ports.Translator
 // expects without being told.
 private const val SKIP_SECONDS = 10.0
 
+// Enough randomness to tell two players in one log apart, and no more.
+//
+// Not a UUID: this identifies an instance inside a process, and the id that has
+// to be unique across devices is the device's, which Connect already carries.
+// A sixteen-bit suffix reads at a glance, which a UUID does not.
+private const val ID_ALPHABET_SIZE = 0x10000
+
+private fun generatePlayerId(): String = "nmplayer-" + Random.nextInt(ID_ALPHABET_SIZE).toString(HEX)
+
+private const val HEX = 16
+
 // Five points per nudge, which is fine enough to tune by and coarse enough that
 // a held-down remote key reaches the end in about the time a viewer expects.
 private const val VOLUME_STEP = 5
@@ -93,6 +107,9 @@ public open class ComposedPlayer(
     private val logger: Logger = SilentLogger,
     private val storage: Storage = InMemoryStorage(),
     private val translator: Translator? = null,
+    // Supplied by the chrome, which is the only layer that can reach a platform
+    // accessibility API. Absent means the player says nothing.
+    private val announcer: Announcer? = null,
     // Injectable so a test decides what time it is, and so a fleet in a Connect
     // session can share one: two devices comparing timestamps have to agree
     // about now.
@@ -114,6 +131,12 @@ public open class ComposedPlayer(
     // constructing a Kotlin CoroutineScope first — a front door no iOS engineer
     // should have to find.
     scope: CoroutineScope? = null,
+    // Names this instance in logs, in a Connect message and in a registry of
+    // more than one player. Generated when the host does not care, because a
+    // required id would be a construction argument every caller has to invent;
+    // named when it does, because "video" and "music" read better in a log than
+    // two hex strings.
+    public val playerId: String = generatePlayerId(),
 ) : PluginHost {
 
     public val context: PlayerContext = PlayerContext(backend = backend)
@@ -167,6 +190,7 @@ public open class ComposedPlayer(
         // baseUrl(url) is not silently overruled by the value setup was given.
         configuredBaseUrl = config.baseUrl
         configuredImageBaseUrl = config.baseImageUrl
+        configuration = config
         activity = ActivityController(context, playerScope, config.inactivityMs)
         lifecycle.setup(config)
 
@@ -183,6 +207,14 @@ public open class ComposedPlayer(
 
     public open fun phase(): PlayerPhase = context.phase
 
+    // The configuration this player was set up with.
+    //
+    // The defaults until setup runs, rather than null. A chrome asking how long
+    // the autohide window is before setup gets the answer it will have, and a
+    // caller reading a field does not have to handle "not configured yet" on
+    // every one of them.
+    public open fun options(): PlayerConfig = configuration
+
     // Which events are being dispatched around this call, outermost first.
     //
     // A before-listener uses it to tell "refuse a seek" from "refuse a seek
@@ -191,6 +223,16 @@ public open class ComposedPlayer(
     public open fun dispatching(): List<String> = context.dispatching()
 
     // ── Activity ─────────────────────────────────────────────────────────────
+
+    // Say something to a screen reader.
+    //
+    // Blank text is dropped: a screen reader interrupting itself to say nothing
+    // is worse than silence, and a formatted string that came out empty is the
+    // usual way that happens.
+    public open fun announce(text: String, level: AnnouncementLevel = AnnouncementLevel.POLITE) {
+        if (text.isBlank()) return
+        announcer?.announce(text, level)
+    }
 
     public open fun bumpActivity(): Unit = activity.bumpActivity()
 
@@ -252,6 +294,7 @@ public open class ComposedPlayer(
         return resolved
     }
 
+    private var configuration: PlayerConfig = PlayerConfig()
     private var configuredBaseUrl: String? = null
     private var configuredImageBaseUrl: String? = null
     private var resolver: UrlResolver? = null
