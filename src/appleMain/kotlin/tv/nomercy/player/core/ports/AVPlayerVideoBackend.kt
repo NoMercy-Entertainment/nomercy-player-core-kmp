@@ -25,9 +25,12 @@ import platform.AVFoundation.preferredPeakBitRate
 import platform.AVFoundation.presentationSize
 import platform.AVFoundation.selectMediaOption
 import kotlin.concurrent.Volatile
+import tv.nomercy.player.core.media.QualityDescriptor
 import platform.AVFoundation.AVAsset
 import platform.AVFoundation.hasMediaCharacteristic
+import platform.AVFoundation.setPreferredMaximumResolution
 import platform.CoreGraphics.CGSize
+import platform.CoreGraphics.CGSizeMake
 import platform.AVFoundation.AVPlayerItem
 import platform.AVFoundation.AVKeyValueStatusLoaded
 import platform.AVFoundation.AVURLAsset
@@ -249,6 +252,44 @@ public class AVPlayerVideoBackend : VideoBackend {
         item.preferredPeakBitRate = level?.bitrate?.toDouble() ?: 0.0
     }
 
+    // The rungs this engine may adapt into.
+    //
+    // Apple needs no manifest rewriting for this and no resource-loader
+    // delegate: AVFoundation expresses both limits directly, the same way
+    // libVLC's demuxer options do. A delegate is for things the framework cannot
+    // express — custom auth, offline packages — and reaching for one to cap a
+    // ladder would mean re-implementing HLS to say something the API already
+    // takes as two numbers.
+    public var playableLadder: Collection<QualityDescriptor> = emptyList()
+        set(value) {
+            field = value
+            applyLadder(value)
+        }
+
+    private fun applyLadder(ladder: Collection<QualityDescriptor>) {
+        val item: AVPlayerItem = player.currentItem ?: return
+        if (ladder.isEmpty()) {
+            // Zero is AVFoundation's "no limit" on both, and a resolution of
+            // zero by zero means the same. Leaving a stale cap behind would keep
+            // a device pinned to a ladder it is no longer playing.
+            item.preferredPeakBitRate = 0.0
+            item.setPreferredMaximumResolution(CGSizeMake(0.0, 0.0))
+            return
+        }
+
+        item.preferredPeakBitRate = ladder.maxOf { it.bitrate }.toDouble()
+        // Width comes from the descriptor when it has one and from the height
+        // otherwise: AVFoundation compares against both dimensions, and a zero
+        // width would read as no limit at all.
+        val tallest: QualityDescriptor = ladder.maxBy { it.height }
+        item.setPreferredMaximumResolution(
+            CGSizeMake(
+                (tallest.width ?: (tallest.height * WIDEST_RATIO_NUMERATOR / WIDEST_RATIO_DENOMINATOR)).toDouble(),
+                tallest.height.toDouble(),
+            ),
+        )
+    }
+
     private fun currentRendition(): QualityLevel? {
         val item: AVPlayerItem = player.currentItem ?: return null
         val size: CValue<CGSize> = item.presentationSize
@@ -407,3 +448,10 @@ public class AVPlayerVideoBackend : VideoBackend {
 private val AUDIBLE: String = AVMediaCharacteristicAudible ?: "public.audible"
 private val LEGIBLE: String = AVMediaCharacteristicLegible ?: "public.legible"
 private val FORCED_SUBTITLES: String? = AVMediaCharacteristicContainsOnlyForcedSubtitles
+
+// 21:9, the widest aspect a rung is likely to be. Used only when a descriptor
+// carries no width: guessing narrow would cap a scope print out of the ladder,
+// and guessing wide only ever lets a rung through that the height already
+// allowed.
+private const val WIDEST_RATIO_NUMERATOR = 21
+private const val WIDEST_RATIO_DENOMINATOR = 9
