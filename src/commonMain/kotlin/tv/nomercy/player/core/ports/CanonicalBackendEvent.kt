@@ -33,6 +33,18 @@ public object CanonicalBackendEvent {
     public const val ERROR: String = "error"
     public const val STREAM_ERROR: String = "stream:error"
 
+    // What an adaptive pipeline reports about itself.
+    //
+    // Only the engines that own their own manifest parsing emit these — Media3
+    // through its analytics listener, hls.js on the web. AVFoundation and libVLC
+    // adapt behind a closed door and say nothing, which is why a consumer must
+    // treat these as telemetry rather than as the way to learn the current
+    // quality. quality() is that; these are how it got there.
+    public const val MANIFEST_LOADED: String = "stream:manifest-loaded"
+    public const val FRAGMENT_LOADED: String = "stream:fragment-loaded"
+    public const val LEVEL_CONSIDERED: String = "stream:level-considered"
+    public const val LEVEL_SWITCHED: String = "stream:level-switched"
+
     // The relative order every engine must produce. Not everything an engine
     // emits — just the five points that have to happen in this sequence for the
     // controllers above to make sense. An engine that reports play before

@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
@@ -79,6 +80,28 @@ public class BackendBridge(private val ctx: PlayerContext) {
         }
 
         attachPositionUpdates(backend)
+        attachAdaptationTelemetry(backend)
+    }
+
+    // What the adaptive pipeline did, forwarded rather than interpreted.
+    //
+    // The payloads cross unchanged: an engine that knows a fragment's url and
+    // duration knows them better than anything here could reconstruct, and a
+    // bridge that rebuilt them would be a second, worse source of the same fact.
+    // A malformed payload is dropped rather than guessed at — a fragment event
+    // with no fragment tells a consumer nothing, and inventing an empty url
+    // would put a lie in a support log.
+    private fun attachAdaptationTelemetry(backend: MediaBackend) {
+        forward(backend, CanonicalBackendEvent.MANIFEST_LOADED, CoreEvents.StreamManifestLoaded)
+        forward(backend, CanonicalBackendEvent.FRAGMENT_LOADED, CoreEvents.StreamFragmentLoaded)
+        forward(backend, CanonicalBackendEvent.LEVEL_CONSIDERED, CoreEvents.StreamLevelConsidered)
+        forward(backend, CanonicalBackendEvent.LEVEL_SWITCHED, CoreEvents.StreamLevelSwitched)
+    }
+
+    private inline fun <reified T : Any> forward(backend: MediaBackend, event: String, key: EventKey<T>) {
+        listen(backend, event) { payload ->
+            (payload as? T)?.let { ctx.emit(key, it) }
+        }
     }
 
     private fun attachPositionUpdates(backend: MediaBackend) {
@@ -106,15 +129,6 @@ public class BackendBridge(private val ctx: PlayerContext) {
         handlers.clear()
     }
 
-    // The engine's stream failures, in the stream vocabulary rather than as a
-    // generic error. A chrome that wants to say "the connection dropped" rather
-    // than "playback failed" needs the distinction, and it is the engine that
-    // knows which one happened.
-    //
-    // Fatal by default: an engine that reports a stream error and keeps playing
-    // is reporting a recovered one, and it does not report at all when nothing
-    // went wrong. Treating them as recoverable would have a chrome swallow the
-    // case where playback actually stopped.
     // Hungry, and why.
     //
     // The same engine event means two different things to a viewer depending on
@@ -135,6 +149,15 @@ public class BackendBridge(private val ctx: PlayerContext) {
         }
     }
 
+    // The engine's stream failures, in the stream vocabulary rather than as a
+    // generic error. A chrome that wants to say "the connection dropped" rather
+    // than "playback failed" needs the distinction, and it is the engine that
+    // knows which one happened.
+    //
+    // Fatal by default: an engine that reports a stream error and keeps playing
+    // is reporting a recovered one, and it does not report at all when nothing
+    // went wrong. Treating them as recoverable would have a chrome swallow the
+    // case where playback actually stopped.
     private fun attachStreamFailures(backend: MediaBackend) {
         attachBufferState(backend)
 

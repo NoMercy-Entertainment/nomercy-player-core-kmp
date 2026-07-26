@@ -3000,9 +3000,13 @@ public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
 	public static final field CAN_PLAY Ljava/lang/String;
 	public static final field ENDED Ljava/lang/String;
 	public static final field ERROR Ljava/lang/String;
+	public static final field FRAGMENT_LOADED Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/CanonicalBackendEvent;
+	public static final field LEVEL_CONSIDERED Ljava/lang/String;
+	public static final field LEVEL_SWITCHED Ljava/lang/String;
 	public static final field LOADED_METADATA Ljava/lang/String;
 	public static final field LOAD_START Ljava/lang/String;
+	public static final field MANIFEST_LOADED Ljava/lang/String;
 	public static final field PAUSE Ljava/lang/String;
 	public static final field PLAY Ljava/lang/String;
 	public static final field PLAYING Ljava/lang/String;
