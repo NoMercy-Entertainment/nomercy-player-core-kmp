@@ -33,8 +33,8 @@ public final class tv/nomercy/player/core/controllers/BandwidthController {
 
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
-	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun activityTracking ()Z
 	public fun activityTracking (Z)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -224,6 +224,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun toggleMute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun togglePlayback (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun togglePlayback$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun transferTo (Ltv/nomercy/player/core/events/CastTarget;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun transitionStrategy ()Ltv/nomercy/player/core/ports/TransitionStrategy;
 	public fun translation (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public fun translation (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -3017,6 +3018,11 @@ public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
 public abstract interface class tv/nomercy/player/core/ports/CapabilitiesProbe {
 	public abstract fun canDecode (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun supportedCodecs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/CastSender {
+	public abstract fun reclaim (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun transfer (Ltv/nomercy/player/core/events/CastTarget;Ltv/nomercy/player/core/media/PlaylistItem;DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/Clock {

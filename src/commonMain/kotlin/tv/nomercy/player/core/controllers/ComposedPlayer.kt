@@ -23,6 +23,9 @@ import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.AudioTrackStatePayload
+import tv.nomercy.player.core.events.BeforeTransferPayload
+import tv.nomercy.player.core.events.CastTarget
+import tv.nomercy.player.core.events.TransferPreventedPayload
 import tv.nomercy.player.core.events.AuthFailedPayload
 import tv.nomercy.player.core.events.AuthRefreshedPayload
 import tv.nomercy.player.core.events.CastStatePayload
@@ -59,6 +62,7 @@ import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.AnnouncementLevel
 import tv.nomercy.player.core.ports.Announcer
+import tv.nomercy.player.core.ports.CastSender
 import tv.nomercy.player.core.ports.AudioOutput
 import tv.nomercy.player.core.ports.BackendState
 import tv.nomercy.player.core.ports.Clock
@@ -121,6 +125,12 @@ private val OK_STATUS = 200..299
 // The reason a transition ends when a consumer swaps the strategy under it.
 private const val STRATEGY_REPLACED = "strategy-replaced"
 
+// The target a reclaim announces, so a before-listener sees one shape whichever
+// direction the handoff goes.
+private val LOCAL_TARGET = CastTarget(id = "local", name = "This device")
+
+private const val NO_CAST_SENDER = "no-cast-sender"
+
 // Under this and a 1080p rung is not going to hold. The number is the web
 // player's, kept so a consumer moving between them sees the same badge at the
 // same moment rather than discovering that native calls it slow later.
@@ -151,7 +161,14 @@ private const val VOLUME_STEP = 5
 // and number formatting from a default that means "unconfigured".
 private const val UNTRANSLATED = ""
 
-@Suppress("TooManyFunctions")
+// Large, and it has to be. The contract is a hundred and thirty methods and this
+// is the one object that has them: a consumer holds a player, and a facade split
+// into four would mean looking in four places for a method the docs name once.
+//
+// The size is forwarding, not logic. Every method here hands off to a controller
+// that owns the behaviour, and those are the small single-purpose pieces — this
+// is the door they are behind.
+@Suppress("TooManyFunctions", "LargeClass")
 public open class ComposedPlayer(
     backend: MediaBackend? = null,
     private val logger: Logger = SilentLogger,
@@ -160,6 +177,10 @@ public open class ComposedPlayer(
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
     private val announcer: Announcer? = null,
+    // Whatever owns a remote session, when something does. Core cannot cast: the
+    // protocols are a Google SDK, an AirPlay route and NoMercy's own Connect
+    // session, and none belong in a library whose job is deciding what plays.
+    private val castSender: CastSender? = null,
     // Wake lock, connectivity, visibility and codec probing, from the app's own
     // observers. A library that registered its own would be a second set beside
     // them, disagreeing about state and outliving the screen.
@@ -337,6 +358,56 @@ public open class ComposedPlayer(
     // filtered on supported alone puts a phone on a rung that drains it.
     public open suspend fun canPlay(profile: DecodeProfile): DecodeCapability =
         platform.capabilities.canDecode(profile)
+
+    // ── Casting ──────────────────────────────────────────────────────────────
+
+    // Hand playback to something else in the room, or take it back.
+    //
+    // A null target reclaims: whatever the remote had got to becomes the local
+    // position, so the viewer who walked out of the living room picks up where
+    // the television was rather than where they left this device.
+    //
+    // Refusable. A listener that vetoes a transfer is the seam a chrome uses to
+    // ask "you have unsaved edits, still cast?" and mean it.
+    public open suspend fun transferTo(target: CastTarget?): Boolean {
+        val outcome: BeforeDispatchResult<BeforeTransferPayload> =
+            context.dispatchBefore(CoreEvents.BeforeTransfer, BeforeTransferPayload(target ?: LOCAL_TARGET))
+        if (outcome.prevented) {
+            context.emit(CoreEvents.TransferPrevented, TransferPreventedPayload(outcome.reason.orEmpty()))
+            return false
+        }
+
+        val sender: CastSender = castSender ?: run {
+            // Nothing owns a session, so nothing can be handed anywhere. False
+            // rather than a throw: a chrome offering a cast button on a build
+            // without the plugin should find out by asking, not by crashing.
+            context.emit(CoreEvents.TransferPrevented, TransferPreventedPayload(NO_CAST_SENDER))
+            return false
+        }
+
+        return if (target == null) reclaimFrom(sender) else handOff(sender, outcome.data.target)
+    }
+
+    // Pause before handing over, not after. Two devices playing the same thing
+    // a second apart is the audible failure of getting this order wrong.
+    private suspend fun handOff(sender: CastSender, target: CastTarget): Boolean {
+        castState(CastState.CONNECTING)
+        transport.pause()
+
+        val accepted: Boolean = sender.transfer(target, item(), time())
+        castState(if (accepted) CastState.CONNECTED else CastState.AVAILABLE)
+        return accepted
+    }
+
+    private suspend fun reclaimFrom(sender: CastSender): Boolean {
+        val remotePosition: Double? = sender.reclaim()
+        castState(CastState.DISCONNECTED)
+
+        // Only when the remote knew. A null position means it could not say, and
+        // seeking to zero would restart the item on the way home.
+        remotePosition?.let { time.time(it) }
+        return true
+    }
 
     // ── Audio output ─────────────────────────────────────────────────────────
 

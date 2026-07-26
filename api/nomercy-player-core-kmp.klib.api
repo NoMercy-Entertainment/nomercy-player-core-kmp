@@ -701,6 +701,11 @@ abstract interface tv.nomercy.player.core.ports/CapabilitiesProbe { // tv.nomerc
     abstract suspend fun supportedCodecs(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CapabilitiesProbe.supportedCodecs|supportedCodecs(){}[0]
 }
 
+abstract interface tv.nomercy.player.core.ports/CastSender { // tv.nomercy.player.core.ports/CastSender|null[0]
+    abstract suspend fun reclaim(): kotlin/Double? // tv.nomercy.player.core.ports/CastSender.reclaim|reclaim(){}[0]
+    abstract suspend fun transfer(tv.nomercy.player.core.events/CastTarget, tv.nomercy.player.core.media/PlaylistItem?, kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.ports/CastSender.transfer|transfer(tv.nomercy.player.core.events.CastTarget;tv.nomercy.player.core.media.PlaylistItem?;kotlin.Double){}[0]
+}
+
 abstract interface tv.nomercy.player.core.ports/Clock { // tv.nomercy.player.core.ports/Clock|null[0]
     abstract fun now(): kotlin/Long // tv.nomercy.player.core.ports/Clock.now|now(){}[0]
 }
@@ -3828,7 +3833,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Announcer? = ..., tv.nomercy.player.core.ports/Platform = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ..., kotlin/String = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Announcer?;tv.nomercy.player.core.ports.Platform;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?;kotlin.String){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Announcer? = ..., tv.nomercy.player.core.ports/CastSender? = ..., tv.nomercy.player.core.ports/Platform = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ..., kotlin/String = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Announcer?;tv.nomercy.player.core.ports.CastSender?;tv.nomercy.player.core.ports.Platform;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?;kotlin.String){}[0]
 
     final val bandwidth // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|{}bandwidth[0]
         final fun <get-bandwidth>(): tv.nomercy.player.core.controllers/BandwidthController // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
@@ -4019,6 +4024,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open suspend fun time(kotlin/Double, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.time|time(kotlin.Double;tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun toggleMute(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.toggleMute|toggleMute(tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun togglePlayback(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.togglePlayback|togglePlayback(tv.nomercy.player.core.player.ActionOptions){}[0]
+    open suspend fun transferTo(tv.nomercy.player.core.events/CastTarget?): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.transferTo|transferTo(tv.nomercy.player.core.events.CastTarget?){}[0]
     open suspend fun unmute(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.unmute|unmute(tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun volume(kotlin/Int, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.volume|volume(kotlin.Int;tv.nomercy.player.core.player.ActionOptions){}[0]
     open suspend fun volumeDown(kotlin/Int = ..., tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.volumeDown|volumeDown(kotlin.Int;tv.nomercy.player.core.player.ActionOptions){}[0]

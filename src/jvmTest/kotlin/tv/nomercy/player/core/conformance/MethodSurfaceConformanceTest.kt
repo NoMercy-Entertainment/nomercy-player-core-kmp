@@ -40,25 +40,17 @@ private val WEB_ONLY_METHODS = setOf(
     "experimental",
 )
 
-// Subsystems this port has not reached. The list shrinking is the measure of the
-// port, which is why it is written out rather than derived — a set difference
-// that quietly got smaller for the wrong reason would look like progress.
-private val NOT_YET_PORTED_METHODS = setOf(
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    "transferTo", 
-    
-    
-)
+// Subsystems this port has not reached.
+//
+// Empty, and that is the whole point of it having been written out rather than
+// derived: a set difference that quietly got smaller for the wrong reason would
+// have looked like progress the entire way down from ninety.
+//
+// It stays here rather than being deleted with its last entry. The next method
+// the contract gains lands in the missing set with nowhere to go, and a gate
+// that fails with "this needs a reason, not a blank" is more use than one that
+// has to be re-invented first.
+private val NOT_YET_PORTED_METHODS: Set<String> = emptySet()
 
 // The player's own method names against the contract's.
 //
