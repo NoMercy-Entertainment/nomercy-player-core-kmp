@@ -12,6 +12,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.useContents
 import platform.AVFoundation.AVMediaCharacteristicAudible
+import platform.AVFoundation.AVMediaCharacteristicContainsOnlyForcedSubtitles
 import platform.AVFoundation.AVMediaCharacteristicLegible
 import platform.AVFoundation.AVMediaSelectionGroup
 import platform.AVFoundation.AVMediaSelectionOption
@@ -23,6 +24,8 @@ import platform.AVFoundation.mediaSelectionGroupForMediaCharacteristic
 import platform.AVFoundation.preferredPeakBitRate
 import platform.AVFoundation.presentationSize
 import platform.AVFoundation.selectMediaOption
+import platform.AVFoundation.AVAsset
+import platform.AVFoundation.hasMediaCharacteristic
 import platform.CoreGraphics.CGSize
 import platform.AVFoundation.AVPlayerItem
 import platform.AVFoundation.AVKeyValueStatusLoaded
@@ -262,7 +265,7 @@ public class AVPlayerVideoBackend : VideoBackend {
     }
 
     override fun audioTracks(): List<AudioTrack> =
-        optionsIn(AVMediaCharacteristicAudible).mapIndexed { index, option ->
+        optionsIn(AUDIBLE).mapIndexed { index, option ->
             AudioTrack(
                 id = "audio:$index",
                 language = AVTrackMapper.languageOf(option.extendedLanguageTag),
@@ -271,37 +274,40 @@ public class AVPlayerVideoBackend : VideoBackend {
         }
 
     override fun audioTrack(): AudioTrack? =
-        selectedIndexIn(AVMediaCharacteristicAudible)?.let { audioTracks().getOrNull(it) }
+        selectedIndexIn(AUDIBLE)?.let { audioTracks().getOrNull(it) }
 
-    override fun audioTrack(track: AudioTrack): Unit = select(AVMediaCharacteristicAudible, track.id)
+    override fun audioTrack(track: AudioTrack): Unit = select(AUDIBLE, track.id)
 
     override fun subtitleTracks(): List<SubtitleTrack> =
-        optionsIn(AVMediaCharacteristicLegible).mapIndexed { index, option ->
+        optionsIn(LEGIBLE).mapIndexed { index, option ->
             SubtitleTrack(
                 id = "text:$index",
                 language = AVTrackMapper.languageOf(option.extendedLanguageTag),
                 label = AVTrackMapper.labelOf(option.displayName, option.extendedLanguageTag),
-                forced = AVTrackMapper.isForced(
-                    option.mediaCharacteristics.mapNotNull { it as? String },
-                ),
+                // Asked of the option rather than read off a list, because
+                // AVFoundation exposes the characteristics as a predicate and
+                // the list form is not in the generated interop.
+                forced = FORCED_SUBTITLES?.let(option::hasMediaCharacteristic) ?: false,
             )
         }
 
     override fun subtitleTrack(): SubtitleTrack? =
-        selectedIndexIn(AVMediaCharacteristicLegible)?.let { subtitleTracks().getOrNull(it) }
+        selectedIndexIn(LEGIBLE)?.let { subtitleTracks().getOrNull(it) }
 
     // Null selects nothing in the group, which is AVFoundation's way of saying
     // captions off — a selection rather than an error.
     override fun subtitleTrack(track: SubtitleTrack?) {
         val item: AVPlayerItem = player.currentItem ?: return
-        val group: AVMediaSelectionGroup = groupFor(AVMediaCharacteristicLegible) ?: return
+        val group: AVMediaSelectionGroup = groupFor(LEGIBLE) ?: return
         val option = track?.id?.substringAfter(':')?.toIntOrNull()
             ?.let { group.options.getOrNull(it) as? AVMediaSelectionOption }
         item.selectMediaOption(option, group)
     }
 
     private fun groupFor(characteristic: String): AVMediaSelectionGroup? =
-        player.currentItem?.asset?.mediaSelectionGroupForMediaCharacteristic(characteristic)
+        currentAsset()?.mediaSelectionGroupForMediaCharacteristic(characteristic)
+
+    private fun currentAsset(): AVAsset? = player.currentItem?.asset
 
     private fun optionsIn(characteristic: String): List<AVMediaSelectionOption> =
         groupFor(characteristic)?.options.orEmpty().mapNotNull { it as? AVMediaSelectionOption }
@@ -383,3 +389,12 @@ public class AVPlayerVideoBackend : VideoBackend {
         cachedRate = player.rate.toDouble()
     }
 }
+
+// Non-null copies of AVFoundation's characteristic constants.
+//
+// Kotlin/Native types every ObjC string constant as nullable, and threading a
+// null check through six call sites for values the framework always defines
+// reads as uncertainty that does not exist.
+private val AUDIBLE: String = AVMediaCharacteristicAudible ?: "public.audible"
+private val LEGIBLE: String = AVMediaCharacteristicLegible ?: "public.legible"
+private val FORCED_SUBTITLES: String? = AVMediaCharacteristicContainsOnlyForcedSubtitles
