@@ -42,6 +42,22 @@ public interface MediaBackend {
     // scrubber draws its buffered bar from.
     public fun buffered(): Double
 
+    // Where data actually is, and where the playhead may go.
+    //
+    // Both default to empty, which means "this engine cannot say" rather than
+    // "there is nothing". Only some can: AVFoundation reports both directly,
+    // Media3 and libVLC report a single frontier and no holes. The player fills
+    // in what it can from what it does know rather than making every engine
+    // implement a shape it has no data for.
+    //
+    // Ranges rather than one number because a seek backwards into evicted
+    // buffer is the case a single frontier cannot describe: it says data
+    // reaches to 400s while the first 200 have been dropped, and a scrubber
+    // drawn from it promises a jump that will stall.
+    public fun bufferedRanges(): List<TimeRange> = emptyList()
+
+    public fun seekableRanges(): List<TimeRange> = emptyList()
+
     public fun playbackRate(): Double
     public fun playbackRate(rate: Double)
 

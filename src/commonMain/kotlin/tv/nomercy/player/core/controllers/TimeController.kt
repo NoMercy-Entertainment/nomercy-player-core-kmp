@@ -10,6 +10,7 @@ package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.TimeState
+import tv.nomercy.player.core.ports.TimeRange
 import tv.nomercy.player.core.events.ItemEndingSoon
 import tv.nomercy.player.core.events.PreventedAction
 import tv.nomercy.player.core.events.RateChange
@@ -48,6 +49,36 @@ public class TimeController(
     public fun duration(): Double = ctx.internalDuration
 
     public fun buffered(): Double = ctx.backend?.buffered() ?: 0.0
+
+    // Where data actually is.
+    //
+    // The engine's own ranges when it has them. When it does not, one range from
+    // the start to the frontier it does report — which is what a single number
+    // means, stated as a range so a caller has one shape to read rather than two
+    // depending on which engine it got.
+    public fun bufferedRanges(): List<TimeRange> {
+        val reported: List<TimeRange> = ctx.backend?.bufferedRanges().orEmpty()
+        if (reported.isNotEmpty()) return reported
+
+        val frontier: Double = buffered()
+        return if (frontier > 0.0) listOf(TimeRange(0.0, frontier)) else emptyList()
+    }
+
+    // Where the playhead may go.
+    //
+    // A complete file of known duration is seekable end to end, so an engine
+    // that reports nothing gets that answer rather than an empty list a chrome
+    // would read as "seeking is impossible" and disable its scrubber over.
+    //
+    // Empty stays empty when the duration is unknown, which is a live stream —
+    // and there, empty is the truth: nobody knows where the window starts.
+    public fun seekable(): List<TimeRange> {
+        val reported: List<TimeRange> = ctx.backend?.seekableRanges().orEmpty()
+        if (reported.isNotEmpty()) return reported
+
+        val total: Double = duration()
+        return if (total > 0.0) listOf(TimeRange(0.0, total)) else emptyList()
+    }
 
     // How far through, as a number a progress bar can bind to directly. Zero
     // rather than a division by zero before the duration is known.

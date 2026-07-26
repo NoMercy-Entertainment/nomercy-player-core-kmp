@@ -60,6 +60,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun baseUrl (Ljava/lang/String;)V
 	public fun bufferState ()Ltv/nomercy/player/core/player/BufferState;
 	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
 	public fun bumpActivity ()V
 	public fun canPlay (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun castState ()Ltv/nomercy/player/core/player/CastState;
@@ -193,6 +194,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun seekToChapter (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun seekToChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun seekToIndex (I)V
+	public fun seekable ()Ljava/util/List;
 	public fun setPreloadStrategy (Ltv/nomercy/player/core/ports/PreloadStrategy;)V
 	public fun setTransitionStrategy (Ltv/nomercy/player/core/ports/TransitionStrategy;)V
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -398,6 +400,7 @@ public final class tv/nomercy/player/core/controllers/StateController {
 public final class tv/nomercy/player/core/controllers/TimeController {
 	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;Ltv/nomercy/player/core/controllers/TransportController;)V
 	public final fun buffered ()D
+	public final fun bufferedRanges ()Ljava/util/List;
 	public final fun checkItemEndingSoon (DDD)V
 	public static synthetic fun checkItemEndingSoon$default (Ltv/nomercy/player/core/controllers/TimeController;DDDILjava/lang/Object;)V
 	public final fun duration ()D
@@ -413,6 +416,7 @@ public final class tv/nomercy/player/core/controllers/TimeController {
 	public static synthetic fun rewind$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun seekByPercentage (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun seekByPercentage$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun seekable ()Ljava/util/List;
 	public final fun time ()D
 	public final fun time (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun time$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -2855,6 +2859,11 @@ public abstract interface class tv/nomercy/player/core/ports/Announcer {
 public abstract interface class tv/nomercy/player/core/ports/AudioBackend : tv/nomercy/player/core/ports/MediaBackend, tv/nomercy/player/core/ports/TransitionBackend {
 }
 
+public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
+	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
+	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
+}
+
 public final class tv/nomercy/player/core/ports/AudioTrack {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3240,6 +3249,7 @@ public abstract interface class tv/nomercy/player/core/ports/Logger {
 
 public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
 	public abstract fun currentTime ()D
 	public abstract fun currentTime (D)V
 	public abstract fun duration ()D
@@ -3252,6 +3262,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun playbackRate ()D
 	public abstract fun playbackRate (D)V
+	public fun seekableRanges ()Ljava/util/List;
 	public abstract fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public abstract fun stop ()V
 	public abstract fun unmute ()V
@@ -3260,7 +3271,9 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 }
 
 public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
+	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/NetworkMonitor {
@@ -3707,6 +3720,25 @@ public final class tv/nomercy/player/core/ports/SubtitleTrack {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/ports/TimeRange {
+	public fun <init> (DD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun contains (D)Z
+	public final fun copy (DD)Ltv/nomercy/player/core/ports/TimeRange;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TimeRange;DDILjava/lang/Object;)Ltv/nomercy/player/core/ports/TimeRange;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDuration ()D
+	public final fun getEnd ()D
+	public final fun getStart ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/TimeRangeKt {
+	public static final fun covers (Ljava/util/List;D)Z
+}
+
 public abstract interface class tv/nomercy/player/core/ports/TransitionBackend {
 	public abstract fun crossfade (JLtv/nomercy/player/core/ports/CrossfadeCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun disposeSecondary ()V
@@ -3821,6 +3853,11 @@ public abstract interface class tv/nomercy/player/core/ports/VideoBackend : tv/n
 	public abstract fun subtitleTracks ()Ljava/util/List;
 }
 
+public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
+	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
+	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
 	public abstract fun isVisible ()Z
 	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
@@ -3846,6 +3883,7 @@ public final class tv/nomercy/player/core/ports/VlcjAudioBackend : tv/nomercy/pl
 	public fun <init> (Luk/co/caprica/vlcj/factory/MediaPlayerFactory;)V
 	public synthetic fun <init> (Luk/co/caprica/vlcj/factory/MediaPlayerFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
 	public fun crossfade (JLtv/nomercy/player/core/ports/CrossfadeCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun currentTime ()D
 	public fun currentTime (D)V
@@ -3864,6 +3902,7 @@ public final class tv/nomercy/player/core/ports/VlcjAudioBackend : tv/nomercy/pl
 	public final fun release ()V
 	public fun secondaryGain ()F
 	public fun secondaryGain (F)V
+	public fun seekableRanges ()Ljava/util/List;
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun stop ()V
 	public fun supportsCrossfade ()Z
@@ -3880,6 +3919,7 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
 	public fun audioTracks ()Ljava/util/List;
 	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
@@ -3897,6 +3937,7 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
 	public final fun release ()V
+	public fun seekableRanges ()Ljava/util/List;
 	public final fun setPlayableLadder (Ljava/util/Collection;)V
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun stop ()V

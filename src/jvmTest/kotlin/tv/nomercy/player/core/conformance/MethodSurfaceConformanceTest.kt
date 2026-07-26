@@ -46,14 +46,14 @@ private val WEB_ONLY_METHODS = setOf(
 private val NOT_YET_PORTED_METHODS = setOf(
     "audioOutput", "audioOutputs",
     "audioTrackMode", 
-    "bufferedRanges", 
     
     
     
     
     
     
-    "seekable",
+    
+    
     "selectAudioOutput", 
     "transferTo", 
     

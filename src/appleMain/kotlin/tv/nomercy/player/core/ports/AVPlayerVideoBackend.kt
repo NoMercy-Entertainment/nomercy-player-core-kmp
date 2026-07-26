@@ -10,6 +10,7 @@ package tv.nomercy.player.core.ports
 
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.CValue
+import kotlinx.cinterop.readValue
 import kotlinx.cinterop.useContents
 import platform.AVFoundation.AVMediaCharacteristicAudible
 import platform.AVFoundation.AVMediaCharacteristicContainsOnlyForcedSubtitles
@@ -56,7 +57,14 @@ import platform.AVFoundation.replaceCurrentItemWithPlayerItem
 import platform.AVFoundation.seekToTime
 import platform.AVFoundation.timeControlStatus
 import platform.AVFoundation.volume
+import kotlinx.cinterop.readValue
+import kotlinx.cinterop.useContents
+import platform.AVFoundation.loadedTimeRanges
+import platform.AVFoundation.seekableTimeRanges
 import platform.CoreMedia.CMTimeGetSeconds
+import platform.CoreMedia.CMTimeRange
+import platform.AVFoundation.CMTimeRangeValue
+import platform.Foundation.NSValue
 import platform.CoreMedia.CMTimeMakeWithSeconds
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSOperationQueue
@@ -82,6 +90,7 @@ private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks")
 // interface, and its numbers are CMTime rather than seconds. Both conversions
 // happen here, once.
 @OptIn(ExperimentalForeignApi::class)
+@Suppress("TooManyFunctions")
 public class AVPlayerVideoBackend : VideoBackend {
 
     private val bus = StringEventBus()
@@ -212,10 +221,34 @@ public class AVPlayerVideoBackend : VideoBackend {
         player.muted = false
     }
 
+    // The furthest point data reaches, out of the ranges below.
+    //
     // AVPlayer exposes loaded ranges on the item rather than the player, and
-    // before an item exists there is nothing loaded. The position is the honest
-    // floor rather than a guess at how far ahead it has read.
-    override fun buffered(): Double = cachedTime
+    // before an item exists there is nothing loaded. Falls back to the position,
+    // which is the honest floor rather than a guess at how far ahead it read.
+    override fun buffered(): Double = bufferedRanges().maxOfOrNull { it.end } ?: cachedTime
+
+    // AVFoundation is the one engine that reports both of these directly, so
+    // these are the real thing rather than a frontier restated as a range.
+    // Media3 and libVLC report a single number and the player fills in the rest.
+    override fun bufferedRanges(): List<TimeRange> = rangesOf(player.currentItem?.loadedTimeRanges)
+
+    override fun seekableRanges(): List<TimeRange> = rangesOf(player.currentItem?.seekableTimeRanges)
+
+    // NSValue-boxed CMTimeRanges, unwrapped.
+    // An indefinite CMTime reads back as NaN, and a scrubber comparing against
+    // NaN answers false to every question — so one bad entry would make the
+    // whole timeline look unbuffered. Dropped rather than clamped.
+    private fun isRealRange(from: Double, length: Double): Boolean =
+        from.isFinite() && length.isFinite() && length > 0.0
+
+    private fun rangesOf(values: List<*>?): List<TimeRange> = values.orEmpty().mapNotNull { boxed ->
+        (boxed as? NSValue)?.CMTimeRangeValue?.useContents {
+            val from: Double = CMTimeGetSeconds(start.readValue())
+            val length: Double = CMTimeGetSeconds(duration.readValue())
+            if (isRealRange(from, length)) TimeRange(from, from + length) else null
+        }
+    }
 
     override fun playbackRate(): Double = cachedRate
 

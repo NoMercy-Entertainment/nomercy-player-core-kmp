@@ -87,6 +87,7 @@ import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.ResolvedUrl
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.TimeRange
 import tv.nomercy.player.core.ports.StreamFactory
 import tv.nomercy.player.core.ports.StreamRegistry
 import tv.nomercy.player.core.ports.UrlCategory
@@ -542,6 +543,16 @@ public open class ComposedPlayer(
     public open fun duration(): Double = time.duration()
 
     public open fun timeData(): TimeState = time.timeData()
+
+    // Where data actually is, and where the playhead may go.
+    //
+    // Ranges rather than a frontier, because a seek backwards into evicted
+    // buffer is the case one number cannot describe: it says data reaches to
+    // 400s while the first 200 have been dropped, and a scrubber drawn from it
+    // promises a jump that stalls.
+    public open fun bufferedRanges(): List<TimeRange> = time.bufferedRanges()
+
+    public open fun seekable(): List<TimeRange> = time.seekable()
 
     // Why the picture is not moving, when it is not moving.
     //
