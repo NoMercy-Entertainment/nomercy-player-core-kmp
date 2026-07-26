@@ -101,10 +101,35 @@ enum SurfaceConformance {
             scope: nil
         )
 
-        try await player.setup(config: PlayerConfig())
-        try await player.play(opts: ActionOptions())
+        // Every field of both, because Kotlin defaults do not cross. This is
+        // what `player.play()` costs an iOS engineer today, written out so the
+        // cost is visible rather than described. The fix is an Apple-side facade
+        // and it belongs with the SwiftUI chrome, not bolted onto core.
+        try await player.setup(config: PlayerConfig(
+            baseUrl: nil,
+            baseImageUrl: nil,
+            language: nil,
+            defaultVolume: 100,
+            metricsIntervalMs: 10_000,
+            progressIntervalMs: 5_000,
+            inactivityMs: 4_000,
+            beforeEventTimeoutMs: 10_000,
+            pluginInitTimeoutMs: 30_000,
+            itemEndingSoonThreshold: 10,
+            preloadLeadSeconds: 10,
+            crossfadeLeadSeconds: 3,
+            crossfadeTailSeconds: 3,
+            crossfadeEnabled: false,
+            pauseWhenHidden: false,
+            controls: false,
+            wakeLock: WakeLockPolicy.auto,
+            onOffline: OfflinePolicy.continueBuffered
+        ))
+        try await player.play(opts: ActionOptions(source: nil, silent: false, autoplay: false))
 
-        let snapshot = player.state()
+        // state_(), not state(). Kotlin/Native renamed it around the stateFlow
+        // property, and an iOS engineer reading the header will wonder why.
+        let snapshot = player.state_()
         precondition(snapshot.playState == PlayState.playing)
 
         // What a SwiftUI view observes.
