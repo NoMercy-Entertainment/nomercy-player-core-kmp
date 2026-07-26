@@ -123,7 +123,9 @@ public open class ComposedPlayer(
     public val volume: VolumeController = VolumeController(context)
     public val time: TimeController = TimeController(context, queue, transport)
     public val state: StateController = StateController(context, queue, time)
-    public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, scope ?: CoroutineScope(SupervisorJob()))
+    private val playerScope: CoroutineScope = scope ?: CoroutineScope(SupervisorJob())
+
+    public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, playerScope)
     public val lifecycle: LifecycleController = LifecycleController(context, plugins, ::report)
 
     // What the engine reports, turned into what the player says. Without it
@@ -133,6 +135,11 @@ public open class ComposedPlayer(
     public val bandwidth: BandwidthController = BandwidthController()
 
     public val metrics: MetricsController = MetricsController(clock)
+
+    // Built at setup, when the configured inactivity window is known. Until
+    // then there is nothing to count down from.
+    public var activity: ActivityController = ActivityController(context, playerScope, PlayerConfig().inactivityMs)
+        private set
 
     init {
         queue.transport = transport
@@ -144,6 +151,13 @@ public open class ComposedPlayer(
         // queue would answer "how long has this been playing" with how long the
         // app has been open.
         context.on(CoreEvents.Item) { metrics.startSession() }
+
+        // Resuming re-arms the countdown even when the resume came from
+        // somewhere no UI saw it — a headphone button, a car head unit.
+        // Otherwise controls shown during a pause stay up for the rest of the
+        // film: the countdown expired harmlessly while paused, and nothing
+        // would arm it again.
+        context.on(CoreEvents.Play) { activity.onPlaybackResumed() }
     }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
@@ -153,7 +167,12 @@ public open class ComposedPlayer(
         // baseUrl(url) is not silently overruled by the value setup was given.
         configuredBaseUrl = config.baseUrl
         configuredImageBaseUrl = config.baseImageUrl
+        activity = ActivityController(context, playerScope, config.inactivityMs)
         lifecycle.setup(config)
+
+        // Controls start visible: the viewer just started a player, which is
+        // activity. This arms the countdown that fades them once playback runs.
+        activity.bumpActivity()
     }
 
     public open fun ready(): Deferred<Unit> = lifecycle.ready()
@@ -170,6 +189,14 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Activity ─────────────────────────────────────────────────────────────
+
+    public open fun bumpActivity(): Unit = activity.bumpActivity()
+
+    public open fun activityTracking(): Boolean = activity.activityTracking()
+
+    public open fun activityTracking(enabled: Boolean): Unit = activity.activityTracking(enabled)
 
     // ── Instrumentation ──────────────────────────────────────────────────────
 

@@ -38,9 +38,9 @@ private val WEB_ONLY_METHODS = setOf(
 // port, which is why it is written out rather than derived — a set difference
 // that quietly got smaller for the wrong reason would look like progress.
 private val NOT_YET_PORTED_METHODS = setOf(
-    "activityTracking", "announce", "audioOutput", "audioOutputs",
+    "announce", "audioOutput", "audioOutputs",
     "audioTrackMode", "auth", "backend", 
-    "bufferState", "bufferedRanges", "bumpActivity", "canPlay", "castState",
+    "bufferState", "bufferedRanges", "canPlay", "castState",
     "experimental",
     "getStreamFactory", 
     "load", "loadQueue", "networkState", 
@@ -172,7 +172,7 @@ class MethodSurfaceConformanceTest {
         // Things the native port has that the web does not need a name for: the
         // controllers it is composed of, and the Kotlin-shaped state surface.
         val NATIVE_ONLY = setOf(
-            "context", "transport", "volume", "time", "state", "lifecycle", "bridge",
+            "context", "transport", "volume", "time", "state", "lifecycle", "bridge", "activity",
             "stateFlow", "rootLogger", "rootStorage", "emit", "on", "once", "off",
             "dispatchBefore", "fetch", "websocket", "report", "aspectRatio",
             "pluginList", "contributions", "coreVersion",

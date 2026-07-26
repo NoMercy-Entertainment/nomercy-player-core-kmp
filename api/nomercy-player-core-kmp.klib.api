@@ -1087,6 +1087,16 @@ final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.co
     final fun sort(kotlin/Comparator<#A>) // tv.nomercy.player.core.media/MediaList.sort|sort(kotlin.Comparator<1:0>){}[0]
 }
 
+final class tv.nomercy.player.core.controllers/ActivityController { // tv.nomercy.player.core.controllers/ActivityController|null[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext, kotlinx.coroutines/CoroutineScope, kotlin/Long) // tv.nomercy.player.core.controllers/ActivityController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext;kotlinx.coroutines.CoroutineScope;kotlin.Long){}[0]
+
+    final fun activityTracking(): kotlin/Boolean // tv.nomercy.player.core.controllers/ActivityController.activityTracking|activityTracking(){}[0]
+    final fun activityTracking(kotlin/Boolean) // tv.nomercy.player.core.controllers/ActivityController.activityTracking|activityTracking(kotlin.Boolean){}[0]
+    final fun bumpActivity() // tv.nomercy.player.core.controllers/ActivityController.bumpActivity|bumpActivity(){}[0]
+    final fun dispose() // tv.nomercy.player.core.controllers/ActivityController.dispose|dispose(){}[0]
+    final fun onPlaybackResumed() // tv.nomercy.player.core.controllers/ActivityController.onPlaybackResumed|onPlaybackResumed(){}[0]
+}
+
 final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.player.core.controllers/BackendBridge|null[0]
     constructor <init>(tv.nomercy.player.core.controllers/PlayerContext) // tv.nomercy.player.core.controllers/BackendBridge.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext){}[0]
 
@@ -3703,8 +3713,13 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open val stateFlow // tv.nomercy.player.core.controllers/ComposedPlayer.stateFlow|{}stateFlow[0]
         open fun <get-stateFlow>(): kotlinx.coroutines.flow/StateFlow<tv.nomercy.player.core.player/PlayerState> // tv.nomercy.player.core.controllers/ComposedPlayer.stateFlow.<get-stateFlow>|<get-stateFlow>(){}[0]
 
+    final var activity // tv.nomercy.player.core.controllers/ComposedPlayer.activity|{}activity[0]
+        final fun <get-activity>(): tv.nomercy.player.core.controllers/ActivityController // tv.nomercy.player.core.controllers/ComposedPlayer.activity.<get-activity>|<get-activity>(){}[0]
+
     open fun <#A1: kotlin/Any?> emit(tv.nomercy.player.core.events/EventKey<#A1>, #A1) // tv.nomercy.player.core.controllers/ComposedPlayer.emit|emit(tv.nomercy.player.core.events.EventKey<0:0>;0:0){0§<kotlin.Any?>}[0]
     open fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.controllers/ComposedPlayer.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    open fun activityTracking(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.activityTracking|activityTracking(){}[0]
+    open fun activityTracking(kotlin/Boolean) // tv.nomercy.player.core.controllers/ComposedPlayer.activityTracking|activityTracking(kotlin.Boolean){}[0]
     open fun addTranslations(kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>>) // tv.nomercy.player.core.controllers/ComposedPlayer.addTranslations|addTranslations(kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>>){}[0]
     open fun audioTrack(): tv.nomercy.player.core.ports/AudioTrack? // tv.nomercy.player.core.controllers/ComposedPlayer.audioTrack|audioTrack(){}[0]
     open fun audioTrack(tv.nomercy.player.core.ports/AudioTrack) // tv.nomercy.player.core.controllers/ComposedPlayer.audioTrack|audioTrack(tv.nomercy.player.core.ports.AudioTrack){}[0]
@@ -3720,6 +3735,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun baseUrl(): kotlin/String? // tv.nomercy.player.core.controllers/ComposedPlayer.baseUrl|baseUrl(){}[0]
     open fun baseUrl(kotlin/String?) // tv.nomercy.player.core.controllers/ComposedPlayer.baseUrl|baseUrl(kotlin.String?){}[0]
     open fun buffered(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.buffered|buffered(){}[0]
+    open fun bumpActivity() // tv.nomercy.player.core.controllers/ComposedPlayer.bumpActivity|bumpActivity(){}[0]
     open fun chapter(): tv.nomercy.player.core.media/Chapter? // tv.nomercy.player.core.controllers/ComposedPlayer.chapter|chapter(){}[0]
     open fun chapters(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.controllers/ComposedPlayer.chapters|chapters(){}[0]
     open fun chapters(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>) // tv.nomercy.player.core.controllers/ComposedPlayer.chapters|chapters(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>){}[0]
