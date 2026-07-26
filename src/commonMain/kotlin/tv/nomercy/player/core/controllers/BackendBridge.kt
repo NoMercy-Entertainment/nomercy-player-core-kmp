@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
 import tv.nomercy.player.core.player.PlayState
@@ -62,6 +63,8 @@ public class BackendBridge(private val ctx: PlayerContext) {
             ctx.playState = PlayState.PAUSED
         }
 
+        attachStreamFailures(backend)
+
         listen(backend, CanonicalBackendEvent.LOAD_START) {
             // A new item has its own first frame.
             announcedFirstFrame = false
@@ -94,6 +97,21 @@ public class BackendBridge(private val ctx: PlayerContext) {
     public fun detach(backend: MediaBackend) {
         for ((event, handler) in handlers) backend.off(event, handler)
         handlers.clear()
+    }
+
+    // The engine's stream failures, in the stream vocabulary rather than as a
+    // generic error. A chrome that wants to say "the connection dropped" rather
+    // than "playback failed" needs the distinction, and it is the engine that
+    // knows which one happened.
+    //
+    // Fatal by default: an engine that reports a stream error and keeps playing
+    // is reporting a recovered one, and it does not report at all when nothing
+    // went wrong. Treating them as recoverable would have a chrome swallow the
+    // case where playback actually stopped.
+    private fun attachStreamFailures(backend: MediaBackend) {
+        listen(backend, CanonicalBackendEvent.STREAM_ERROR) {
+            ctx.emit(CoreEvents.StreamError, StreamError(details = it?.toString() ?: "", fatal = true))
+        }
     }
 
     private fun listen(backend: MediaBackend, event: String, handler: (Any?) -> Unit) {
