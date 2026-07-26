@@ -1374,6 +1374,41 @@ final class tv.nomercy.player.core.cues/VttCue { // tv.nomercy.player.core.cues/
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttCue.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.dsp/BiquadCoefficients { // tv.nomercy.player.core.dsp/BiquadCoefficients|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Double) // tv.nomercy.player.core.dsp/BiquadCoefficients.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+
+    final val a0 // tv.nomercy.player.core.dsp/BiquadCoefficients.a0|{}a0[0]
+        final fun <get-a0>(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.a0.<get-a0>|<get-a0>(){}[0]
+    final val a1 // tv.nomercy.player.core.dsp/BiquadCoefficients.a1|{}a1[0]
+        final fun <get-a1>(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.a1.<get-a1>|<get-a1>(){}[0]
+    final val a2 // tv.nomercy.player.core.dsp/BiquadCoefficients.a2|{}a2[0]
+        final fun <get-a2>(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.a2.<get-a2>|<get-a2>(){}[0]
+    final val b0 // tv.nomercy.player.core.dsp/BiquadCoefficients.b0|{}b0[0]
+        final fun <get-b0>(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.b0.<get-b0>|<get-b0>(){}[0]
+    final val b1 // tv.nomercy.player.core.dsp/BiquadCoefficients.b1|{}b1[0]
+        final fun <get-b1>(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.b1.<get-b1>|<get-b1>(){}[0]
+    final val b2 // tv.nomercy.player.core.dsp/BiquadCoefficients.b2|{}b2[0]
+        final fun <get-b2>(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.b2.<get-b2>|<get-b2>(){}[0]
+
+    final fun component1(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.component3|component3(){}[0]
+    final fun component4(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.component4|component4(){}[0]
+    final fun component5(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.component5|component5(){}[0]
+    final fun component6(): kotlin/Double // tv.nomercy.player.core.dsp/BiquadCoefficients.component6|component6(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): tv.nomercy.player.core.dsp/BiquadCoefficients // tv.nomercy.player.core.dsp/BiquadCoefficients.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.dsp/BiquadCoefficients.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.dsp/BiquadCoefficients.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.dsp/BiquadCoefficients.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.dsp/BiquadState { // tv.nomercy.player.core.dsp/BiquadState|null[0]
+    constructor <init>() // tv.nomercy.player.core.dsp/BiquadState.<init>|<init>(){}[0]
+
+    final fun reset() // tv.nomercy.player.core.dsp/BiquadState.reset|reset(){}[0]
+    final fun step(tv.nomercy.player.core.dsp/BiquadCoefficients, kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/BiquadState.step|step(tv.nomercy.player.core.dsp.BiquadCoefficients;kotlin.Double){}[0]
+}
+
 final class tv.nomercy.player.core.errors/ErrorCode { // tv.nomercy.player.core.errors/ErrorCode|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.errors/ErrorCode.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
 
@@ -4216,6 +4251,20 @@ final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player
     final fun error(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.error|error(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
     final fun info(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.info|info(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
     final fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+}
+
+final object tv.nomercy.player.core.dsp/BiquadPeaking { // tv.nomercy.player.core.dsp/BiquadPeaking|null[0]
+    final fun coefficients(kotlin/Double, kotlin/Double, kotlin/Double, kotlin/Int): tv.nomercy.player.core.dsp/BiquadCoefficients // tv.nomercy.player.core.dsp/BiquadPeaking.coefficients|coefficients(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Int){}[0]
+    final fun magnitudeAt(tv.nomercy.player.core.dsp/BiquadCoefficients, kotlin/Double, kotlin/Int): kotlin/Double // tv.nomercy.player.core.dsp/BiquadPeaking.magnitudeAt|magnitudeAt(tv.nomercy.player.core.dsp.BiquadCoefficients;kotlin.Double;kotlin.Int){}[0]
+    final fun process(tv.nomercy.player.core.dsp/BiquadCoefficients, kotlin/DoubleArray): kotlin/DoubleArray // tv.nomercy.player.core.dsp/BiquadPeaking.process|process(tv.nomercy.player.core.dsp.BiquadCoefficients;kotlin.DoubleArray){}[0]
+}
+
+final object tv.nomercy.player.core.dsp/Fft { // tv.nomercy.player.core.dsp/Fft|null[0]
+    final fun magnitudes(kotlin/DoubleArray): kotlin/DoubleArray // tv.nomercy.player.core.dsp/Fft.magnitudes|magnitudes(kotlin.DoubleArray){}[0]
+}
+
+final object tv.nomercy.player.core.dsp/HannWindow { // tv.nomercy.player.core.dsp/HannWindow|null[0]
+    final fun apply(kotlin/DoubleArray): kotlin/DoubleArray // tv.nomercy.player.core.dsp/HannWindow.apply|apply(kotlin.DoubleArray){}[0]
 }
 
 final object tv.nomercy.player.core.errors/CoreErrorCodes { // tv.nomercy.player.core.errors/CoreErrorCodes|null[0]

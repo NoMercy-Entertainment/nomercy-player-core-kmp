@@ -514,6 +514,50 @@ public final class tv/nomercy/player/core/cues/VttParserKt {
 	public static final fun parseVttTimestamp (Ljava/lang/String;)Ljava/lang/Double;
 }
 
+public final class tv/nomercy/player/core/dsp/BiquadCoefficients {
+	public fun <init> (DDDDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun component6 ()D
+	public final fun copy (DDDDDD)Ltv/nomercy/player/core/dsp/BiquadCoefficients;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/dsp/BiquadCoefficients;DDDDDDILjava/lang/Object;)Ltv/nomercy/player/core/dsp/BiquadCoefficients;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getA0 ()D
+	public final fun getA1 ()D
+	public final fun getA2 ()D
+	public final fun getB0 ()D
+	public final fun getB1 ()D
+	public final fun getB2 ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/dsp/BiquadPeaking {
+	public static final field INSTANCE Ltv/nomercy/player/core/dsp/BiquadPeaking;
+	public final fun coefficients (DDDI)Ltv/nomercy/player/core/dsp/BiquadCoefficients;
+	public final fun magnitudeAt (Ltv/nomercy/player/core/dsp/BiquadCoefficients;DI)D
+	public final fun process (Ltv/nomercy/player/core/dsp/BiquadCoefficients;[D)[D
+}
+
+public final class tv/nomercy/player/core/dsp/BiquadState {
+	public fun <init> ()V
+	public final fun reset ()V
+	public final fun step (Ltv/nomercy/player/core/dsp/BiquadCoefficients;D)D
+}
+
+public final class tv/nomercy/player/core/dsp/Fft {
+	public static final field INSTANCE Ltv/nomercy/player/core/dsp/Fft;
+	public final fun magnitudes ([D)[D
+}
+
+public final class tv/nomercy/player/core/dsp/HannWindow {
+	public static final field INSTANCE Ltv/nomercy/player/core/dsp/HannWindow;
+	public final fun apply ([D)[D
+}
+
 public class tv/nomercy/player/core/errors/AuthError : tv/nomercy/player/core/errors/NetworkError {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
