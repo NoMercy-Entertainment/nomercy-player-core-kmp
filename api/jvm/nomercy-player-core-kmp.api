@@ -83,6 +83,17 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun qualityMode ()Ltv/nomercy/player/core/ports/QualityMode;
 	public fun queue ()Ljava/util/List;
 	public fun queue (Ljava/util/List;)V
+	public fun queueAppend (Ljava/util/List;)V
+	public fun queueClear ()V
+	public fun queueIndexOf (Ljava/lang/String;)I
+	public fun queueInsert (Ljava/util/List;I)V
+	public fun queueLength ()I
+	public fun queueMove (II)V
+	public fun queuePrepend (Ljava/util/List;)V
+	public fun queueRemove (Ljava/lang/String;)V
+	public fun queueRemoveAt (I)V
+	public fun queueShuffle ()V
+	public fun queueSort (Ljava/util/Comparator;)V
 	public fun ready ()Lkotlinx/coroutines/Deferred;
 	public fun removePlugin (Ltv/nomercy/player/core/plugin/Plugin;)V
 	public fun removePluginById (Ljava/lang/String;)V

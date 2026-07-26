@@ -175,6 +175,34 @@ public open class ComposedPlayer(
 
     public open fun index(): Int = queue.index()
 
+    // The queue's own operations, reachable from the player.
+    //
+    // They have existed on the controller since it was written and stopped
+    // there, which meant a consumer holding a player could read the queue and
+    // not change it — and the only workaround is reaching for `queue` the
+    // property, which is an internal name that happens to be public.
+    public open fun queueLength(): Int = queue.queueLength()
+
+    public open fun queueIndexOf(id: String): Int = queue.queueIndexOf(id)
+
+    public open fun queueAppend(items: List<PlaylistItem>): Unit = queue.queueAppend(items)
+
+    public open fun queuePrepend(items: List<PlaylistItem>): Unit = queue.queuePrepend(items)
+
+    public open fun queueInsert(items: List<PlaylistItem>, index: Int): Unit = queue.queueInsert(items, index)
+
+    public open fun queueRemove(id: String): Unit = queue.queueRemove(id)
+
+    public open fun queueRemoveAt(index: Int): Unit = queue.queueRemoveAt(index)
+
+    public open fun queueMove(from: Int, to: Int): Unit = queue.queueMove(from, to)
+
+    public open fun queueClear(): Unit = queue.queueClear()
+
+    public open fun queueShuffle(): Unit = queue.queueShuffle()
+
+    public open fun queueSort(comparator: Comparator<PlaylistItem>): Unit = queue.queueSort(comparator)
+
     public open suspend fun item(id: String, autoplay: Boolean = false): Unit = queue.item(id, autoplay)
 
     public open suspend fun playItem(id: String): Unit = queue.playItem(id)
