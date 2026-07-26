@@ -31,6 +31,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public final fun getBridge ()Ltv/nomercy/player/core/controllers/BackendBridge;
 	public final fun getContext ()Ltv/nomercy/player/core/controllers/PlayerContext;
 	public final fun getLifecycle ()Ltv/nomercy/player/core/controllers/LifecycleController;
+	public fun getPlugin (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
 	public final fun getPlugins ()Ltv/nomercy/player/core/plugin/PluginRegistry;
 	public final fun getQueue ()Ltv/nomercy/player/core/controllers/QueueController;
 	public fun getRootLogger ()Ltv/nomercy/player/core/ports/Logger;
@@ -55,6 +56,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun play (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun play$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun playItem (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playState ()Ltv/nomercy/player/core/player/PlayState;
 	public fun playbackRate ()D
 	public fun playbackRate (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun playbackRate$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -64,6 +66,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun queue ()Ljava/util/List;
 	public fun queue (Ljava/util/List;)V
 	public fun ready ()Lkotlinx/coroutines/Deferred;
+	public fun removePlugin (Ltv/nomercy/player/core/plugin/Plugin;)V
 	public fun removePluginById (Ljava/lang/String;)V
 	public fun repeatState ()Ltv/nomercy/player/core/player/RepeatState;
 	public fun repeatState (Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

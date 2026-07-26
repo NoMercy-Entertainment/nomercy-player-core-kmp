@@ -160,6 +160,13 @@ kotlin {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+        jvmTest.dependencies {
+            // Test-only, deliberately. The method-surface gate asks the player
+            // class what it exposes, and a reflection library in the shipped
+            // artifact would be a megabyte every consumer carries so that a
+            // build-time question could be answered.
+            implementation(kotlin("reflect"))
+        }
     }
 }
 

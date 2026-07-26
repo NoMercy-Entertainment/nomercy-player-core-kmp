@@ -21,6 +21,7 @@ import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerConfig
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.PlayerState
@@ -168,6 +169,10 @@ public open class ComposedPlayer(
 
     public open fun state(): PlayerState = state.state()
 
+    // The single field a chrome asks for most, without unpacking the snapshot.
+    // The web has it for the same reason.
+    public open fun playState(): PlayState = state.state().playState
+
     public open val stateFlow: StateFlow<PlayerState> get() = state.stateFlow
 
     public open fun repeatState(): RepeatState = state.repeatState()
@@ -190,6 +195,17 @@ public open class ComposedPlayer(
     }
 
     public open fun removePluginById(id: String): Unit = plugins.remove(id)
+
+    // By instance, because that is what a caller holds after adding one. The id
+    // is on the plugin, so asking for it back would be asking the caller to
+    // unpack something it already handed over.
+    public open fun removePlugin(plugin: Plugin<*>): Unit = plugins.remove(plugin.id)
+
+    // A plugin author's first question after adding one is how to get it back,
+    // and the registry could always answer — the player just never asked. By id
+    // rather than by type: a type lookup cannot tell two instances of the same
+    // plugin apart, and an id is what the manifest already guarantees is unique.
+    public open fun getPlugin(id: String): Plugin<*>? = plugins.getById(id)
 
     public open fun pluginList(): List<Plugin<*>> = plugins.plugins()
 
