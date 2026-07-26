@@ -4083,6 +4083,47 @@ final object tv.nomercy.player.core.ports/BackendEvents { // tv.nomercy.player.c
         final fun <get-WAITING>(): kotlin/String // tv.nomercy.player.core.ports/BackendEvents.WAITING.<get-WAITING>|<get-WAITING>(){}[0]
 }
 
+final object tv.nomercy.player.core.ports/BandwidthSanitizer { // tv.nomercy.player.core.ports/BandwidthSanitizer|null[0]
+    final const val DEFAULT_FLOOR // tv.nomercy.player.core.ports/BandwidthSanitizer.DEFAULT_FLOOR|{}DEFAULT_FLOOR[0]
+        final fun <get-DEFAULT_FLOOR>(): kotlin/Long // tv.nomercy.player.core.ports/BandwidthSanitizer.DEFAULT_FLOOR.<get-DEFAULT_FLOOR>|<get-DEFAULT_FLOOR>(){}[0]
+
+    final fun sanitize(kotlin/String, kotlin/Long, kotlin/Long = ...): tv.nomercy.player.core.ports/BandwidthSanitizer.Result // tv.nomercy.player.core.ports/BandwidthSanitizer.sanitize|sanitize(kotlin.String;kotlin.Long;kotlin.Long){}[0]
+
+    final class Adjustment { // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment|null[0]
+        constructor <init>(kotlin/Long, kotlin/Long) // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.<init>|<init>(kotlin.Long;kotlin.Long){}[0]
+
+        final val from // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.from|{}from[0]
+            final fun <get-from>(): kotlin/Long // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.from.<get-from>|<get-from>(){}[0]
+        final val to // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.to|{}to[0]
+            final fun <get-to>(): kotlin/Long // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.to.<get-to>|<get-to>(){}[0]
+
+        final fun component1(): kotlin/Long // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.component1|component1(){}[0]
+        final fun component2(): kotlin/Long // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.component2|component2(){}[0]
+        final fun copy(kotlin/Long = ..., kotlin/Long = ...): tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.copy|copy(kotlin.Long;kotlin.Long){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment.toString|toString(){}[0]
+    }
+
+    final class Result { // tv.nomercy.player.core.ports/BandwidthSanitizer.Result|null[0]
+        constructor <init>(kotlin/String, kotlin.collections/List<tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment>) // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.<init>|<init>(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.ports.BandwidthSanitizer.Adjustment>){}[0]
+
+        final val adjustments // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.adjustments|{}adjustments[0]
+            final fun <get-adjustments>(): kotlin.collections/List<tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment> // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.adjustments.<get-adjustments>|<get-adjustments>(){}[0]
+        final val changed // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.changed|{}changed[0]
+            final fun <get-changed>(): kotlin/Boolean // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.changed.<get-changed>|<get-changed>(){}[0]
+        final val playlist // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.playlist|{}playlist[0]
+            final fun <get-playlist>(): kotlin/String // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.playlist.<get-playlist>|<get-playlist>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.component1|component1(){}[0]
+        final fun component2(): kotlin.collections/List<tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment> // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.component2|component2(){}[0]
+        final fun copy(kotlin/String = ..., kotlin.collections/List<tv.nomercy.player.core.ports/BandwidthSanitizer.Adjustment> = ...): tv.nomercy.player.core.ports/BandwidthSanitizer.Result // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.copy|copy(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.ports.BandwidthSanitizer.Adjustment>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/BandwidthSanitizer.Result.toString|toString(){}[0]
+    }
+}
+
 final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.player.core.ports/CanonicalBackendEvent|null[0]
     final const val CAN_PLAY // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY|{}CAN_PLAY[0]
         final fun <get-CAN_PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY.<get-CAN_PLAY>|<get-CAN_PLAY>(){}[0]
