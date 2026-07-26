@@ -12,7 +12,7 @@ import io.gitlab.arturbosch.detekt.api.Config
 import io.gitlab.arturbosch.detekt.api.RuleSet
 import io.gitlab.arturbosch.detekt.api.RuleSetProvider
 
-// Six pieces of advice, all advisory and all @Suppress-able.
+// Seven pieces of advice, all advisory and all @Suppress-able.
 //
 // Nothing here prevents anything at runtime. The library never seals a class or
 // makes a member final to stop a consumer doing something; the enforcement is
@@ -31,6 +31,7 @@ class PlayerRuleSetProvider : RuleSetProvider {
             PluginManifestRequired(config),
             NoUncheckedCast(config),
             NoSingleLetterIdent(config),
+            NoSequencedCollectionApi(config),
         ),
     )
 }

@@ -26,6 +26,7 @@ class PlayerRulesTest {
     private fun manifest(code: String) = PluginManifestRequired(Config.empty).lint(code)
     private fun casts(code: String) = NoUncheckedCast(Config.empty).lint(code)
     private fun idents(code: String) = NoSingleLetterIdent(Config.empty).lint(code)
+    private fun sequenced(code: String) = NoSequencedCollectionApi(Config.empty).lint(code)
 
     @Test
     fun theRawBusIsFlaggedInsideAPlugin() {
@@ -279,6 +280,72 @@ class PlayerRulesTest {
     }
 
     @Test
+    fun removingTheLastElementByItsJavaNameIsFlagged() {
+        val findings = sequenced(
+            """
+            class Emitter {
+                fun unwind() {
+                    stack.removeLast()
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(1, findings.size)
+        assertTrue(findings.single().message.contains("removeAt(lastIndex)"))
+    }
+
+    @Test
+    fun removingTheFirstElementIsFlaggedWithItsOwnReplacement() {
+        val findings = sequenced(
+            """
+            class Queue {
+                fun take() {
+                    pending.removeFirst()
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(1, findings.size)
+        assertTrue(findings.single().message.contains("removeAt(0)"))
+    }
+
+    @Test
+    fun theIndexedFormIsWhatTheRuleIsAskingFor() {
+        val findings = sequenced(
+            """
+            class Emitter {
+                fun unwind() {
+                    stack.removeAt(stack.lastIndex)
+                    pending.removeAt(0)
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertTrue(findings.isEmpty())
+    }
+
+    @Test
+    fun aRemoveThatTakesAnArgumentIsADifferentFunction() {
+        // Only the no-argument forms collide with java.util.List. Flagging
+        // anything named removeFirst would catch functions that were never at
+        // risk, and a rule that cries wolf gets switched off.
+        val findings = sequenced(
+            """
+            class Buffer {
+                fun drop() {
+                    frames.removeFirst(count)
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertTrue(findings.isEmpty())
+    }
+
+    @Test
     fun theProviderExposesEveryRuleUnderOneId() {
         val ruleSet = PlayerRuleSetProvider().instance(Config.empty)
 
@@ -291,6 +358,7 @@ class PlayerRulesTest {
                 "PluginManifestRequired",
                 "NoUncheckedCast",
                 "NoSingleLetterIdent",
+                "NoSequencedCollectionApi",
             ),
             ruleSet.rules.map { it.ruleId },
         )

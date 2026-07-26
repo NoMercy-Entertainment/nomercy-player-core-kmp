@@ -94,7 +94,7 @@ public class EventEmitter<E> {
         try {
             return runBefore(key.name, event, timeoutMs)
         } finally {
-            dispatchStack.removeLast()
+            dispatchStack.removeAt(dispatchStack.lastIndex)
         }
     }
 
@@ -173,12 +173,23 @@ public class EventEmitter<E> {
     @Suppress("TooGenericExceptionCaught")
     public fun dispatching(): List<String> = dispatchStack.toList()
 
+    // removeAt(lastIndex) rather than removeLast(), and this is not a style
+    // preference. On JVM target 21 Kotlin resolves MutableList.removeLast() to
+    // java.util.List.removeLast() from SequencedCollection rather than to its
+    // own extension, and that interface method does not exist on every Android
+    // device the library supports.
+    //
+    // It cannot be gated on an API level either. Two phones both reporting API
+    // 34 disagreed: the one with an updated ART mainline module had the method
+    // and the Android TV box that has never taken a mainline update did not, so
+    // every dispatch on it died with NoSuchMethodError. That is 271 of 697
+    // tests, and in a shipped build it would be the whole event system.
     private fun dispatch(name: String, data: Any?) {
         dispatchStack += name
         try {
             deliver(name, data)
         } finally {
-            dispatchStack.removeLast()
+            dispatchStack.removeAt(dispatchStack.lastIndex)
         }
     }
 

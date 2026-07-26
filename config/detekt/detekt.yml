@@ -190,3 +190,5 @@ player:
   NoSingleLetterIdent:
     active: true
     excludes: ['**/commonTest/**', '**/androidHostTest/**']
+  NoSequencedCollectionApi:
+    active: true
