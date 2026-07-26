@@ -35,7 +35,7 @@ public object ExoTrackMapper {
                 // an empty title is a row a viewer cannot choose.
                 label = format.label ?: format.language ?: UNKNOWN_LANGUAGE,
                 channels = format.channelCount.takeIf { it != Format.NO_VALUE } ?: DEFAULT_CHANNELS,
-                codec = codecFamilyOf(format),
+                codec = codecFamily(format.codecs, format.sampleMimeType),
             )
         }
 
@@ -102,17 +102,25 @@ public object ExoTrackMapper {
             bitrate = format.peakBitrate.takeIf { it != Format.NO_VALUE }
                 ?: format.averageBitrate.takeIf { it != Format.NO_VALUE }
                 ?: 0,
-            codec = codecFamilyOf(format),
-            dynamicRange = dynamicRangeOf(format),
+            codec = codecFamily(format.codecs, format.sampleMimeType),
+            dynamicRange = dynamicRange(format.colorInfo?.colorTransfer),
             width = format.width.takeIf { it != Format.NO_VALUE },
             label = format.label,
         )
     }
 
+    // The three decisions below take values rather than a Format on purpose.
+    //
+    // They are where this mapper is actually wrong or right, and a Format cannot
+    // be built without an Android runtime — so testing them through one means
+    // either a device or an emulated framework, for logic that is a string and
+    // an integer. Taking the values directly is what makes them provable
+    // anywhere, and the Format-shaped wrappers above are the thin part.
+
     // The transfer function, not the mime type. HDR10 and SDR are both HEVC and
     // differ only in how the samples are interpreted, so reading the codec to
     // decide the range gets it wrong on exactly the streams where it matters.
-    private fun dynamicRangeOf(format: Format): DynamicRange = when (format.colorInfo?.colorTransfer) {
+    internal fun dynamicRange(colorTransfer: Int?): DynamicRange = when (colorTransfer) {
         C.COLOR_TRANSFER_ST2084 -> DynamicRange.HDR10
         C.COLOR_TRANSFER_HLG -> DynamicRange.HDR10
         else -> DynamicRange.SDR
@@ -121,12 +129,12 @@ public object ExoTrackMapper {
     // "hvc1.2.4.L153.B0" is what a manifest carries and "hvc1" is what a
     // selection compares on. Keeping the profile would make the same rung
     // unmatchable across two manifests of the same film.
-    private fun codecFamilyOf(format: Format): String {
-        val declared: String? = format.codecs?.substringBefore('.')?.takeIf { it.isNotBlank() }
-        return declared ?: mimeFamilyOf(format.sampleMimeType)
+    internal fun codecFamily(codecs: String?, mimeType: String?): String {
+        val declared: String? = codecs?.substringBefore('.')?.takeIf { it.isNotBlank() }
+        return declared ?: mimeFamilyOf(mimeType)
     }
 
-    private fun mimeFamilyOf(mimeType: String?): String = when (mimeType) {
+    internal fun mimeFamilyOf(mimeType: String?): String = when (mimeType) {
         MimeTypes.VIDEO_H264 -> "avc1"
         MimeTypes.VIDEO_H265 -> "hvc1"
         MimeTypes.VIDEO_AV1 -> "av01"
@@ -137,7 +145,7 @@ public object ExoTrackMapper {
         else -> mimeType?.substringAfter('/') ?: UNKNOWN_CODEC
     }
 
-    private fun subtitleFormatOf(mimeType: String?): String = when (mimeType) {
+    internal fun subtitleFormatOf(mimeType: String?): String = when (mimeType) {
         MimeTypes.TEXT_VTT -> "vtt"
         MimeTypes.APPLICATION_SUBRIP -> "srt"
         MimeTypes.TEXT_SSA -> "ass"

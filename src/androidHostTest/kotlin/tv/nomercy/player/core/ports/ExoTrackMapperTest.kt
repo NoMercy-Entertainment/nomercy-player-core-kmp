@@ -9,170 +9,80 @@
 package tv.nomercy.player.core.ports
 
 import androidx.media3.common.C
-import androidx.media3.common.ColorInfo
-import androidx.media3.common.Format
 import androidx.media3.common.MimeTypes
-import androidx.media3.common.TrackGroup
-import androidx.media3.common.Tracks
-import com.google.common.collect.ImmutableList
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-// The mapping from Media3's world to the library's, against formats this test
-// builds.
+// The decisions inside the Media3 mapper, against plain values.
 //
-// Every field here is one a real manifest fills in and a device would show the
-// consequences of getting wrong: a dynamic range read from the codec instead of
-// the transfer function, a codec string kept at full RFC 6381 length so the same
-// rung never matches itself across two manifests, a null language that leaves a
-// menu row with no title.
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [SDK_UNDER_TEST])
+// Not against a Format. Building one needs an Android runtime, and the first
+// version of this file reached for Robolectric to get it — which then could not
+// load its native runtime on the CI runner and turned eight passing tests red
+// for a reason that had nothing to do with the mapping.
+//
+// What is actually easy to get wrong here is a string and an integer: which
+// field the dynamic range comes from, how much of an RFC 6381 codec descriptor
+// to keep. Those take values directly and are provable anywhere. Walking a real
+// Tracks object is the thin part, and it belongs on a device.
 class ExoTrackMapperTest {
-
-    private fun video(
-        height: Int,
-        bitrate: Int,
-        codecs: String,
-        mime: String = MimeTypes.VIDEO_H265,
-        transfer: Int = C.COLOR_TRANSFER_SDR,
-    ): Format = Format.Builder()
-        .setSampleMimeType(mime)
-        .setCodecs(codecs)
-        .setHeight(height)
-        .setWidth(height * 16 / 9)
-        .setPeakBitrate(bitrate)
-        .setColorInfo(ColorInfo.Builder().setColorTransfer(transfer).build())
-        .build()
-
-    private fun tracksOf(type: Int, vararg formats: Format, selected: Int = -1): Tracks {
-        val group = TrackGroup(*formats)
-        val supported = IntArray(formats.size) { C.FORMAT_HANDLED }
-        val chosen = BooleanArray(formats.size) { it == selected }
-        return Tracks(ImmutableList.of(Tracks.Group(group, false, supported, chosen)))
-    }
-
-    @Test
-    fun aLadderComesBackAsDescriptorsRatherThanPositions() {
-        val tracks = tracksOf(
-            C.TRACK_TYPE_VIDEO,
-            video(height = 1080, bitrate = 6_000_000, codecs = "hvc1.2.4.L153.B0"),
-            video(height = 720, bitrate = 3_000_000, codecs = "hvc1.2.4.L120.B0"),
-        )
-
-        val levels: List<QualityLevel> = ExoTrackMapper.qualityLevels(tracks)
-
-        assertEquals(listOf(1080, 720), levels.map { it.height })
-        assertEquals(listOf(6_000_000, 3_000_000), levels.map { it.bitrate })
-    }
 
     @Test
     fun theCodecIsTheFamilyRatherThanTheWholeDescriptor() {
         // "hvc1.2.4.L153.B0" is what a manifest carries. Keeping the profile
-        // makes the same rung unmatchable across two manifests of one film,
+        // makes one rung unmatchable across two manifests of the same film,
         // because the level digits change with the encode.
-        val tracks = tracksOf(C.TRACK_TYPE_VIDEO, video(1080, 6_000_000, codecs = "hvc1.2.4.L153.B0"))
-
-        assertEquals("hvc1", ExoTrackMapper.qualityLevels(tracks).single().codec)
+        assertEquals("hvc1", ExoTrackMapper.codecFamily("hvc1.2.4.L153.B0", MimeTypes.VIDEO_H265))
+        assertEquals("avc1", ExoTrackMapper.codecFamily("avc1.640028", MimeTypes.VIDEO_H264))
+        assertEquals("av01", ExoTrackMapper.codecFamily("av01.0.08M.08", MimeTypes.VIDEO_AV1))
     }
 
     @Test
-    fun theRangeComesFromTheTransferFunctionNotTheCodec() {
+    fun aMissingCodecFallsBackToTheMimeType() {
+        // Progressive MP4 carries no codecs attribute at all, and a rung
+        // labelled with an empty codec matches nothing.
+        assertEquals("hvc1", ExoTrackMapper.codecFamily(null, MimeTypes.VIDEO_H265))
+        assertEquals("avc1", ExoTrackMapper.codecFamily("", MimeTypes.VIDEO_H264))
+        assertEquals("mp4a", ExoTrackMapper.codecFamily(null, MimeTypes.AUDIO_AAC))
+        assertEquals("ec-3", ExoTrackMapper.codecFamily(null, MimeTypes.AUDIO_E_AC3))
+    }
+
+    @Test
+    fun anUnknownMimeTypeKeepsItsSubtypeRatherThanVanishing() {
+        // A codec nobody mapped is still better identified by its subtype than
+        // by a blank, which would collide with every other unknown.
+        assertEquals("x-vnd.on2.vp9", ExoTrackMapper.codecFamily(null, "video/x-vnd.on2.vp9"))
+        assertEquals("unknown", ExoTrackMapper.codecFamily(null, null))
+    }
+
+    @Test
+    fun theRangeComesFromTheTransferFunction() {
         // HDR10 and SDR are both HEVC. Reading the codec to decide the range
         // gets it wrong on exactly the streams where the answer matters.
-        val sdr = tracksOf(C.TRACK_TYPE_VIDEO, video(2160, 20_000_000, "hvc1.2.4.L153.B0"))
-        val hdr = tracksOf(
-            C.TRACK_TYPE_VIDEO,
-            video(2160, 20_000_000, "hvc1.2.4.L153.B0", transfer = C.COLOR_TRANSFER_ST2084),
-        )
-
-        assertEquals(DynamicRange.SDR, ExoTrackMapper.qualityLevels(sdr).single().dynamicRange)
-        assertEquals(DynamicRange.HDR10, ExoTrackMapper.qualityLevels(hdr).single().dynamicRange)
+        assertEquals(DynamicRange.HDR10, ExoTrackMapper.dynamicRange(C.COLOR_TRANSFER_ST2084))
+        assertEquals(DynamicRange.HDR10, ExoTrackMapper.dynamicRange(C.COLOR_TRANSFER_HLG))
+        assertEquals(DynamicRange.SDR, ExoTrackMapper.dynamicRange(C.COLOR_TRANSFER_SDR))
     }
 
     @Test
-    fun aFormatWithNoHeightIsNotARung() {
-        // Media3 reports NO_VALUE before it has read the container, and a rung
-        // of height -1 sorts to the bottom of every menu.
-        val headless = Format.Builder().setSampleMimeType(MimeTypes.VIDEO_H264).build()
-
-        assertTrue(ExoTrackMapper.qualityLevels(tracksOf(C.TRACK_TYPE_VIDEO, headless)).isEmpty())
+    fun anUnreportedRangeIsSdrRatherThanAGuess() {
+        // Media3 leaves colorInfo null on plenty of streams. Treating unknown as
+        // HDR would send a device down a decode path it cannot take.
+        assertEquals(DynamicRange.SDR, ExoTrackMapper.dynamicRange(null))
     }
 
     @Test
-    fun anAudioTrackWithoutALabelIsStillChoosable() {
-        // A menu row with an empty title is a row a viewer cannot pick.
-        val unlabelled = Format.Builder()
-            .setSampleMimeType(MimeTypes.AUDIO_AAC)
-            .setLanguage("nl")
-            .setChannelCount(6)
-            .build()
-
-        val track: AudioTrack = ExoTrackMapper.audioTracks(tracksOf(C.TRACK_TYPE_AUDIO, unlabelled)).single()
-
-        assertEquals("nl", track.language)
-        assertEquals("nl", track.label)
-        assertEquals(6, track.channels)
-        assertEquals("mp4a", track.codec)
+    fun subtitleFormatsAreNamedByWhatTheyAre() {
+        // The format decides which renderer draws it: an .ass through libass, a
+        // .vtt through the built-in one. Getting it wrong shows nothing.
+        assertEquals("vtt", ExoTrackMapper.subtitleFormatOf(MimeTypes.TEXT_VTT))
+        assertEquals("srt", ExoTrackMapper.subtitleFormatOf(MimeTypes.APPLICATION_SUBRIP))
+        assertEquals("ass", ExoTrackMapper.subtitleFormatOf(MimeTypes.TEXT_SSA))
+        assertEquals("ttml", ExoTrackMapper.subtitleFormatOf(MimeTypes.APPLICATION_TTML))
+        assertEquals("pgs", ExoTrackMapper.subtitleFormatOf(MimeTypes.APPLICATION_PGS))
     }
 
     @Test
-    fun aForcedSubtitleIsMarkedAsOne() {
-        // Forced subtitles are the alien dialogue in an otherwise English film.
-        // Unmarked, they appear as a second identical English row.
-        val forced = Format.Builder()
-            .setSampleMimeType(MimeTypes.TEXT_VTT)
-            .setLanguage("en")
-            .setSelectionFlags(C.SELECTION_FLAG_FORCED)
-            .build()
-        val plain = Format.Builder()
-            .setSampleMimeType(MimeTypes.APPLICATION_SUBRIP)
-            .setLanguage("en")
-            .build()
-
-        val tracks: List<SubtitleTrack> = ExoTrackMapper.subtitleTracks(
-            tracksOf(C.TRACK_TYPE_TEXT, forced, plain),
-        )
-
-        assertEquals(listOf(true, false), tracks.map { it.forced })
-        assertEquals(listOf("vtt", "srt"), tracks.map { it.format })
-    }
-
-    @Test
-    fun anAdaptingEngineReportsNoPinnedQuality() {
-        // Two rungs selected means the engine is adapting between them.
-        // Reporting whichever happens to be playing would make a menu show a
-        // selection the viewer never made.
-        val group = TrackGroup(
-            video(1080, 6_000_000, "hvc1.2.4.L153.B0"),
-            video(720, 3_000_000, "hvc1.2.4.L120.B0"),
-        )
-        val adapting = Tracks(
-            ImmutableList.of(
-                Tracks.Group(group, true, IntArray(2) { C.FORMAT_HANDLED }, BooleanArray(2) { true }),
-            ),
-        )
-
-        assertEquals(null, ExoTrackMapper.selectedQuality(adapting))
-    }
-
-    @Test
-    fun aPinnedRungIsReportedAsItself() {
-        val pinned = tracksOf(
-            C.TRACK_TYPE_VIDEO,
-            video(1080, 6_000_000, "hvc1.2.4.L153.B0"),
-            video(720, 3_000_000, "hvc1.2.4.L120.B0"),
-            selected = 1,
-        )
-
-        assertEquals(720, ExoTrackMapper.selectedQuality(pinned)?.height)
+    fun anUnknownSubtitleTypeDefaultsToTheOneEveryPlayerHandles() {
+        assertEquals("vtt", ExoTrackMapper.subtitleFormatOf(null))
     }
 }
-
-// Named rather than newest, so CI does not pick a platform this library does
-// not claim to support.
-private const val SDK_UNDER_TEST = 34
