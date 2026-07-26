@@ -2912,6 +2912,10 @@ final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.playe
     final val avPlayer // tv.nomercy.player.core.ports/AVPlayerVideoBackend.avPlayer|{}avPlayer[0]
         final fun <get-avPlayer>(): platform.AVFoundation/AVPlayer // tv.nomercy.player.core.ports/AVPlayerVideoBackend.avPlayer.<get-avPlayer>|<get-avPlayer>(){}[0]
 
+    final var playableLadder // tv.nomercy.player.core.ports/AVPlayerVideoBackend.playableLadder|{}playableLadder[0]
+        final fun <get-playableLadder>(): kotlin.collections/Collection<tv.nomercy.player.core.media/QualityDescriptor> // tv.nomercy.player.core.ports/AVPlayerVideoBackend.playableLadder.<get-playableLadder>|<get-playableLadder>(){}[0]
+        final fun <set-playableLadder>(kotlin.collections/Collection<tv.nomercy.player.core.media/QualityDescriptor>) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.playableLadder.<set-playableLadder>|<set-playableLadder>(kotlin.collections.Collection<tv.nomercy.player.core.media.QualityDescriptor>){}[0]
+
     final fun audioTrack(): tv.nomercy.player.core.ports/AudioTrack? // tv.nomercy.player.core.ports/AVPlayerVideoBackend.audioTrack|audioTrack(){}[0]
     final fun audioTrack(tv.nomercy.player.core.ports/AudioTrack) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.audioTrack|audioTrack(tv.nomercy.player.core.ports.AudioTrack){}[0]
     final fun audioTracks(): kotlin.collections/List<tv.nomercy.player.core.ports/AudioTrack> // tv.nomercy.player.core.ports/AVPlayerVideoBackend.audioTracks|audioTracks(){}[0]
