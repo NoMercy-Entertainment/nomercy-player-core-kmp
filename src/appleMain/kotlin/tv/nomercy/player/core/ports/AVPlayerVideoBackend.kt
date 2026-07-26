@@ -64,7 +64,14 @@ private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks")
 public class AVPlayerVideoBackend : MediaBackend {
 
     private val bus = StringEventBus()
-    private val player: AVPlayer = AVPlayer()
+    // Public because video has to be drawn somewhere and only the caller knows
+    // where. AVPlayerLayer is handed the player itself, so a backend that kept
+    // this private could decode a film and show no one. Nothing above the UI
+    // layer touches it: every playback call goes through MediaBackend, and this
+    // is the render target alone.
+    public val avPlayer: AVPlayer = AVPlayer()
+
+    private val player: AVPlayer = avPlayer
 
     // AVPlayer reports position through a periodic observer rather than a
     // property change, at whatever rate is asked for. Four times a second is

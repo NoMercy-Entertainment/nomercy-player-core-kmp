@@ -2868,6 +2868,9 @@ final class tv.nomercy.player.core.plugin/Requirement { // tv.nomercy.player.cor
 final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.core.ports/AVPlayerVideoBackend|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.<init>|<init>(){}[0]
 
+    final val avPlayer // tv.nomercy.player.core.ports/AVPlayerVideoBackend.avPlayer|{}avPlayer[0]
+        final fun <get-avPlayer>(): platform.AVFoundation/AVPlayer // tv.nomercy.player.core.ports/AVPlayerVideoBackend.avPlayer.<get-avPlayer>|<get-avPlayer>(){}[0]
+
     final fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.buffered|buffered(){}[0]
     final fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.currentTime|currentTime(){}[0]
     final fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.currentTime|currentTime(kotlin.Double){}[0]
