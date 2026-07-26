@@ -190,6 +190,17 @@ public open class ComposedPlayer(
 
     public open fun index(): Int = queue.index()
 
+    // What plays next and what played before, without moving to either. A
+    // chrome showing "up next" needs the answer and must not change the queue
+    // to get it.
+    public open fun peekNext(): PlaylistItem? = queue.peekNext()
+
+    public open fun peekPrevious(): PlaylistItem? = queue.peekPrevious()
+
+    // One-based, matching the contract. Zero would be an off-by-one that only
+    // shows up on the first item.
+    public open fun seekToIndex(position: Int): Unit = queue.seekToIndex(position)
+
     // The queue's own operations, reachable from the player.
     //
     // They have existed on the controller since it was written and stopped
