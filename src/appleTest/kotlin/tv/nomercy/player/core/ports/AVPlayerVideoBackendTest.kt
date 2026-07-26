@@ -15,8 +15,6 @@ import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
 import platform.Foundation.NSDate
 import platform.Foundation.NSFileManager
-import platform.Foundation.defaultManager
-import platform.Foundation.fileExistsAtPath
 import platform.Foundation.NSRunLoop
 import platform.Foundation.NSTemporaryDirectory
 import platform.Foundation.NSURL
@@ -84,7 +82,7 @@ class AVPlayerVideoBackendTest {
     @Test
     fun diagnoseWhatTheEngineActuallyDoes() = withBackend { backend, recorder, url ->
         println("DIAG url=$url")
-        println("DIAG file exists=" + NSFileManager.defaultManager.fileExistsAtPath(url.removePrefix("file://")))
+        println("DIAG file exists=" + NSFileManager.defaultManager().fileExistsAtPath(url.removePrefix("file://")))
         kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
         settle(SETTLE_SECONDS)
         println("DIAG after load: state=" + backend.state() + " duration=" + backend.duration() + " seen=" + recorder.names())
