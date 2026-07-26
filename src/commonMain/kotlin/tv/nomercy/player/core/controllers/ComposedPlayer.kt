@@ -51,7 +51,12 @@ import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.MediaBackend
 import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
+import tv.nomercy.player.core.ports.ResolvedUrl
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.UrlCategory
+import tv.nomercy.player.core.ports.UrlResolution
+import tv.nomercy.player.core.ports.UrlResolver
+import tv.nomercy.player.core.ports.UrlResolverContext
 import tv.nomercy.player.core.ports.Translations
 import tv.nomercy.player.core.ports.Translator
 
@@ -128,6 +133,10 @@ public open class ComposedPlayer(
     // ── Lifecycle ────────────────────────────────────────────────────────────
 
     public open suspend fun setup(config: PlayerConfig = PlayerConfig()) {
+        // Taken here rather than read from the config on every call, so a later
+        // baseUrl(url) is not silently overruled by the value setup was given.
+        configuredBaseUrl = config.baseUrl
+        configuredImageBaseUrl = config.baseImageUrl
         lifecycle.setup(config)
     }
 
@@ -145,6 +154,57 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Urls ─────────────────────────────────────────────────────────────────
+
+    // The prefix relative paths are joined to.
+    //
+    // Writable at runtime rather than setup-only: a self-hosted server that
+    // moves — a tunnel coming up, a LAN address replacing a public one — should
+    // not need the player torn down and rebuilt to follow it.
+    public open fun baseUrl(): String? = configuredBaseUrl
+
+    public open fun baseUrl(url: String?) {
+        configuredBaseUrl = url
+    }
+
+    public open fun urlResolver(): UrlResolver? = resolver
+
+    public open fun urlResolver(fn: UrlResolver?) {
+        resolver = fn
+    }
+
+    // A url, absolute and parsed.
+    //
+    // Artwork joins to the image base and everything else to the media base,
+    // because they are usually different hosts: posters come from a CDN and
+    // media from the server the viewer is signed in to.
+    public open suspend fun resolveUrl(url: String, category: UrlCategory = UrlCategory.MEDIA): ResolvedUrl {
+        val base: String? = baseFor(category)
+        val fallback: suspend (String) -> ResolvedUrl = { UrlResolution.resolve(it, base) }
+
+        val resolved: ResolvedUrl = resolver
+            ?.resolve(url, UrlResolverContext(base, category, fallback))
+            ?: fallback(url)
+
+        // A relative poster reaches the OS media session or a Cast receiver as a
+        // path with nothing to resolve it against, and fails in a process that
+        // cannot report back. Saying so here is the only place it is visible.
+        if (resolved.relative && category.needsAbsolute) {
+            logger.warn(
+                "resolveUrl: a ${category.token} url stayed relative and will not load off-process. " +
+                    "Set baseImageUrl, or supply a urlResolver. Raw: \"$url\"",
+            )
+        }
+        return resolved
+    }
+
+    private var configuredBaseUrl: String? = null
+    private var configuredImageBaseUrl: String? = null
+    private var resolver: UrlResolver? = null
+
+    private fun baseFor(category: UrlCategory): String? =
+        if (category.needsAbsolute) configuredImageBaseUrl ?: configuredBaseUrl else configuredBaseUrl
 
     // ── Device ───────────────────────────────────────────────────────────────
 
