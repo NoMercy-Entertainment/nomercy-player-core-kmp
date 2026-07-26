@@ -63,6 +63,25 @@ public object ExoTrackMapper {
             .singleOrNull()
             ?.let(::qualityOf)
 
+    // The selected audio and text tracks, by the same rule as video: one
+    // selection means a pinned choice, none means the engine's default.
+    public fun selectedAudioTrack(tracks: Tracks): AudioTrack? =
+        selectedIdOf(tracks, C.TRACK_TYPE_AUDIO)?.let { id ->
+            audioTracks(tracks).firstOrNull { it.id == id }
+        }
+
+    public fun selectedSubtitleTrack(tracks: Tracks): SubtitleTrack? =
+        selectedIdOf(tracks, C.TRACK_TYPE_TEXT)?.let { id ->
+            subtitleTracks(tracks).firstOrNull { it.id == id }
+        }
+
+    private fun selectedIdOf(tracks: Tracks, type: Int): String? =
+        tracks.groups
+            .filter { it.type == type }
+            .flatMap(::selectedFormatsIn)
+            .singleOrNull()
+            ?.id
+
     private fun selectedFormatsIn(group: Tracks.Group): List<Format> =
         (0 until group.length)
             .filter(group::isTrackSelected)

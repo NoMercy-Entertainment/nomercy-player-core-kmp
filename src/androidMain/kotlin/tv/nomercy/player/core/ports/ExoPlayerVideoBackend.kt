@@ -14,6 +14,9 @@ import android.os.Looper
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.C
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -41,7 +44,7 @@ private const val TIME_UPDATE_INTERVAL_MS = 250L
 public class ExoPlayerVideoBackend(
     context: Context,
     scope: CoroutineScope? = null,
-) : MediaBackend {
+) : VideoBackend {
 
     private val bus = StringEventBus()
 
@@ -89,6 +92,15 @@ public class ExoPlayerVideoBackend(
     @Volatile private var cachedVolume: Float = 1.0f
     @Volatile private var cachedRate: Double = 1.0
     @Volatile private var cachedState: BackendState = BackendState.IDLE
+
+    // Tracks are read on the main thread like everything else Media3 owns, and
+    // cached because a chrome asks for them from wherever it happens to be.
+    @Volatile private var cachedQualityLevels: List<QualityLevel> = emptyList()
+    @Volatile private var cachedQuality: QualityLevel? = null
+    @Volatile private var cachedAudioTracks: List<AudioTrack> = emptyList()
+    @Volatile private var cachedSubtitleTracks: List<SubtitleTrack> = emptyList()
+    @Volatile private var cachedSubtitleTrack: SubtitleTrack? = null
+    @Volatile private var cachedAudioTrack: AudioTrack? = null
 
     init {
         player.addListener(object : Player.Listener {
@@ -187,12 +199,101 @@ public class ExoPlayerVideoBackend(
         cachedBuffered = player.bufferedPosition.coerceAtLeast(0) / MILLIS_PER_SECOND
         cachedVolume = player.volume
         cachedRate = player.playbackParameters.speed.toDouble()
+        val tracks: Tracks = player.currentTracks
+        cachedQualityLevels = ExoTrackMapper.qualityLevels(tracks)
+        cachedQuality = ExoTrackMapper.selectedQuality(tracks)
+        cachedAudioTracks = ExoTrackMapper.audioTracks(tracks)
+        cachedSubtitleTracks = ExoTrackMapper.subtitleTracks(tracks)
+        cachedAudioTrack = ExoTrackMapper.selectedAudioTrack(tracks)
+        cachedSubtitleTrack = ExoTrackMapper.selectedSubtitleTrack(tracks)
         cachedState = when (player.playbackState) {
             Player.STATE_READY -> if (player.isPlaying) BackendState.PLAYING else BackendState.PAUSED
             Player.STATE_BUFFERING -> BackendState.LOADING
             Player.STATE_ENDED -> BackendState.READY
             else -> BackendState.IDLE
         }
+    }
+
+    override fun qualityLevels(): List<QualityLevel> = cachedQualityLevels
+
+    override fun quality(): QualityLevel? = cachedQuality
+
+    // Null hands the choice back to Media3's own adaptation, which is what a
+    // viewer means by "auto". A descriptor pins one rung, and QualityMatcher is
+    // the only thing that turns it into a number this engine understands.
+    override fun quality(level: QualityLevel?): Unit = fireAndForget {
+        val override: TrackSelectionOverride? = level?.let(::overrideFor)
+        player.trackSelectionParameters = player.trackSelectionParameters
+            .buildUpon()
+            .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+            .apply { override?.let(::addOverride) }
+            .build()
+        refreshCache()
+    }
+
+    // The descriptor is matched against the engine's own list, in the engine's
+    // own order, which is the one place the two numbering schemes meet. A rung
+    // the engine no longer has clears the override rather than picking a
+    // neighbour: silently playing something else is worse than playing auto.
+    private fun overrideFor(level: QualityLevel): TrackSelectionOverride? {
+        val groups: List<Tracks.Group> = player.currentTracks.groups
+            .filter { it.type == C.TRACK_TYPE_VIDEO }
+        val flattened: List<Pair<Tracks.Group, Int>> = groups
+            .flatMap { group -> (0 until group.length).map { group to it } }
+        val levels: List<QualityLevel> = ExoTrackMapper.qualityLevels(player.currentTracks)
+
+        val index: Int = QualityMatcher.match(level, levels) ?: return null
+        val (group, track) = flattened.getOrNull(index) ?: return null
+        return TrackSelectionOverride(group.mediaTrackGroup, track)
+    }
+
+    override fun audioTracks(): List<AudioTrack> = cachedAudioTracks
+
+    override fun audioTrack(): AudioTrack? = cachedAudioTrack
+
+    override fun audioTrack(track: AudioTrack): Unit = selectByType(C.TRACK_TYPE_AUDIO, track.id)
+
+    override fun subtitleTracks(): List<SubtitleTrack> = cachedSubtitleTracks
+
+    override fun subtitleTrack(): SubtitleTrack? = cachedSubtitleTrack
+
+    // Null is captions off, which is a selection a viewer makes rather than an
+    // error. Media3 needs both an empty override and the type disabled, because
+    // clearing the override alone lets its default selection pick one back up.
+    override fun subtitleTrack(track: SubtitleTrack?): Unit = fireAndForget {
+        if (track == null) {
+            player.trackSelectionParameters = player.trackSelectionParameters
+                .buildUpon()
+                .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                .build()
+        } else {
+            selectByTypeOnMain(C.TRACK_TYPE_TEXT, track.id)
+        }
+        refreshCache()
+    }
+
+    private fun selectByType(type: Int, id: String): Unit = fireAndForget {
+        selectByTypeOnMain(type, id)
+        refreshCache()
+    }
+
+    // By id, because that is what the track the caller was handed carries. An
+    // index would be this engine's numbering, which is exactly what the rest of
+    // the library refuses to pass around.
+    private fun selectByTypeOnMain(type: Int, id: String) {
+        val located: Pair<Tracks.Group, Int> = player.currentTracks.groups
+            .filter { it.type == type }
+            .flatMap { group -> (0 until group.length).map { group to it } }
+            .firstOrNull { (group, track) -> group.getTrackFormat(track).id == id }
+            ?: return
+
+        player.trackSelectionParameters = player.trackSelectionParameters
+            .buildUpon()
+            .setTrackTypeDisabled(type, false)
+            .clearOverridesOfType(type)
+            .addOverride(TrackSelectionOverride(located.first.mediaTrackGroup, located.second))
+            .build()
     }
 
     override fun on(event: String, fn: (Any?) -> Unit): Unit = bus.on(event, fn)
