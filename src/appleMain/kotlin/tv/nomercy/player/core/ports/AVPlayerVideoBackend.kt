@@ -318,19 +318,20 @@ public class AVPlayerVideoBackend : VideoBackend {
         groupFor(characteristic)?.options.orEmpty().mapNotNull { it as? AVMediaSelectionOption }
 
     private fun selectedIndexIn(characteristic: String): Int? {
-        val item: AVPlayerItem = player.currentItem ?: return null
         val group: AVMediaSelectionGroup = groupFor(characteristic) ?: return null
-        val selected = item.currentMediaSelection.selectedMediaOptionInMediaSelectionGroup(group)
-            ?: return null
-        return optionsIn(characteristic).indexOfFirst { it == selected }.takeIf { it >= 0 }
+        val selected = player.currentItem
+            ?.currentMediaSelection
+            ?.selectedMediaOptionInMediaSelectionGroup(group)
+        return selected?.let { chosen ->
+            optionsIn(characteristic).indexOfFirst { it == chosen }.takeIf { it >= 0 }
+        }
     }
 
     private fun select(characteristic: String, id: String) {
-        val item: AVPlayerItem = player.currentItem ?: return
         val group: AVMediaSelectionGroup = groupFor(characteristic) ?: return
-        val index: Int = id.substringAfter(':').toIntOrNull() ?: return
-        val option = group.options.getOrNull(index) as? AVMediaSelectionOption ?: return
-        item.selectMediaOption(option, group)
+        val option: AVMediaSelectionOption? = id.substringAfter(':').toIntOrNull()
+            ?.let { group.options.getOrNull(it) as? AVMediaSelectionOption }
+        option?.let { player.currentItem?.selectMediaOption(it, group) }
     }
 
     @Volatile private var loadedAsset: AVAsset? = null
