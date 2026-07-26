@@ -3362,11 +3362,23 @@ public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
 	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 }
 
-public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/player/core/ports/MediaBackend {
+public final class tv/nomercy/player/core/ports/VlcTrackMapper {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/VlcTrackMapper;
+	public final fun bitrateOf (I)I
+	public final fun codecFamily (Ljava/lang/String;)Ljava/lang/String;
+	public final fun dynamicRange ()Ltv/nomercy/player/core/ports/DynamicRange;
+	public final fun labelOf (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public final fun languageOf (Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
 	public static final field Companion Ltv/nomercy/player/core/ports/VlcjVideoBackend$Companion;
 	public fun <init> ()V
 	public fun <init> (Luk/co/caprica/vlcj/factory/MediaPlayerFactory;)V
 	public synthetic fun <init> (Luk/co/caprica/vlcj/factory/MediaPlayerFactory;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
+	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public fun audioTracks ()Ljava/util/List;
 	public fun buffered ()D
 	public fun currentTime ()D
 	public fun currentTime (D)V
@@ -3380,9 +3392,15 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
+	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
+	public fun qualityLevels ()Ljava/util/List;
 	public final fun release ()V
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun stop ()V
+	public fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
+	public fun subtitleTrack (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
+	public fun subtitleTracks ()Ljava/util/List;
 	public fun unmute ()V
 	public fun volume ()F
 	public fun volume (F)V

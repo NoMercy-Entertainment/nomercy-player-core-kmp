@@ -18,6 +18,9 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
 private const val MILLIS_PER_SECOND = 1000.0
 private const val FULL_VOLUME_PERCENT = 100
 
+// libVLC turns captions off with track -1.
+private const val SUBTITLES_DISABLED = -1
+
 // The desktop engine, over libVLC.
 //
 // libVLC decodes practically everything, which is what a desktop client needs
@@ -32,7 +35,7 @@ private const val FULL_VOLUME_PERCENT = 100
 // run anywhere libVLC is installed.
 public class VlcjVideoBackend(
     private val factory: MediaPlayerFactory = MediaPlayerFactory(),
-) : MediaBackend {
+) : VideoBackend {
 
     private val bus = StringEventBus()
 
@@ -193,6 +196,83 @@ public class VlcjVideoBackend(
         player.status().isPlaying -> BackendState.PLAYING
         player.status().isPlayable -> BackendState.READY
         else -> BackendState.IDLE
+    }
+
+    // The container's video tracks. libVLC does not expose an adaptive ladder
+    // for a local file — what it has is what the file has — so this is the
+    // honest answer rather than an empty list pretending there is nothing.
+    override fun qualityLevels(): List<QualityLevel> =
+        player.media().info()?.videoTracks().orEmpty().map { track ->
+            QualityLevel(
+                height = track.height(),
+                bitrate = VlcTrackMapper.bitrateOf(track.bitRate()),
+                codec = VlcTrackMapper.codecFamily(track.codecName()),
+                dynamicRange = VlcTrackMapper.dynamicRange(),
+                width = track.width().takeIf { it > 0 },
+                label = VlcTrackMapper.labelOf(track.description(), track.language()),
+            )
+        }
+
+    override fun quality(): QualityLevel? {
+        val selected: Int = player.video().track()
+        if (selected < 0) return null
+
+        val tracks = player.media().info()?.videoTracks().orEmpty()
+        val index: Int = tracks.indexOfFirst { it.id() == selected }
+        return qualityLevels().getOrNull(index)
+    }
+
+    // Null is libVLC's own choice, which for a container means its default
+    // track. A descriptor is matched against the engine's own list, and a rung
+    // it no longer has leaves the selection alone rather than picking a
+    // neighbour.
+    override fun quality(level: QualityLevel?) {
+        val tracks = player.media().info()?.videoTracks().orEmpty()
+        if (level == null) {
+            tracks.firstOrNull()?.let { player.video().setTrack(it.id()) }
+            return
+        }
+
+        val index: Int = QualityMatcher.match(level, qualityLevels()) ?: return
+        tracks.getOrNull(index)?.let { player.video().setTrack(it.id()) }
+    }
+
+    override fun audioTracks(): List<AudioTrack> =
+        player.media().info()?.audioTracks().orEmpty().map { track ->
+            AudioTrack(
+                id = track.id().toString(),
+                language = VlcTrackMapper.languageOf(track.language()),
+                label = VlcTrackMapper.labelOf(track.description(), track.language()),
+                channels = track.channels().coerceAtLeast(1),
+                codec = VlcTrackMapper.codecFamily(track.codecName()),
+            )
+        }
+
+    override fun audioTrack(): AudioTrack? =
+        audioTracks().firstOrNull { it.id == player.audio().track().toString() }
+
+    override fun audioTrack(track: AudioTrack) {
+        track.id.toIntOrNull()?.let { player.audio().setTrack(it) }
+    }
+
+    override fun subtitleTracks(): List<SubtitleTrack> =
+        player.media().info()?.textTracks().orEmpty().map { track ->
+            SubtitleTrack(
+                id = track.id().toString(),
+                language = VlcTrackMapper.languageOf(track.language()),
+                label = VlcTrackMapper.labelOf(track.description(), track.language()),
+                format = VlcTrackMapper.codecFamily(track.codecName()),
+            )
+        }
+
+    override fun subtitleTrack(): SubtitleTrack? =
+        subtitleTracks().firstOrNull { it.id == player.subpictures().track().toString() }
+
+    // libVLC turns captions off with track -1, which is a selection rather than
+    // an error — the same thing a null descriptor means everywhere else.
+    override fun subtitleTrack(track: SubtitleTrack?) {
+        val id: Int = track?.id?.toIntOrNull() ?: SUBTITLES_DISABLED
+        player.subpictures().setTrack(id)
     }
 
     override fun on(event: String, fn: (Any?) -> Unit): Unit = bus.on(event, fn)
