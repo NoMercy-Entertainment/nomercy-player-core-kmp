@@ -12,6 +12,7 @@ import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
+import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
@@ -46,6 +47,7 @@ public class BackendBridge(private val ctx: PlayerContext) {
 
         listen(backend, CanonicalBackendEvent.PLAYING) {
             ctx.playState = PlayState.PLAYING
+            ctx.bufferState = BufferState.IDLE
             if (ctx.phase == PlayerPhase.STARTING) ctx.transitionPhase(PlayerPhase.PLAYING)
             ctx.emit(CoreEvents.Playing, Unit)
 
@@ -66,6 +68,7 @@ public class BackendBridge(private val ctx: PlayerContext) {
         attachStreamFailures(backend)
 
         listen(backend, CanonicalBackendEvent.LOAD_START) {
+            ctx.bufferState = BufferState.LOADING
             // A new item has its own first frame.
             announcedFirstFrame = false
         }
@@ -75,6 +78,10 @@ public class BackendBridge(private val ctx: PlayerContext) {
             ctx.emit(CoreEvents.Ended, Unit)
         }
 
+        attachPositionUpdates(backend)
+    }
+
+    private fun attachPositionUpdates(backend: MediaBackend) {
         listen(backend, CanonicalBackendEvent.TIME_UPDATE) {
             val time: Double = backend.currentTime()
             val duration: Double = backend.duration()
@@ -108,7 +115,29 @@ public class BackendBridge(private val ctx: PlayerContext) {
     // is reporting a recovered one, and it does not report at all when nothing
     // went wrong. Treating them as recoverable would have a chrome swallow the
     // case where playback actually stopped.
+    // Hungry, and why.
+    //
+    // The same engine event means two different things to a viewer depending on
+    // when it arrives. Before the first frame the source is still loading and a
+    // spinner is expected; after playback started the buffer ran dry, and that
+    // is worth saying out loud rather than showing the same spinner and hoping.
+    private fun attachBufferState(backend: MediaBackend) {
+        listen(backend, CanonicalBackendEvent.WAITING) {
+            ctx.bufferState = if (announcedFirstFrame) BufferState.STALLED else BufferState.LOADING
+        }
+
+        listen(backend, CanonicalBackendEvent.STALLED) {
+            ctx.bufferState = BufferState.STALLED
+        }
+
+        listen(backend, CanonicalBackendEvent.CAN_PLAY) {
+            ctx.bufferState = BufferState.IDLE
+        }
+    }
+
     private fun attachStreamFailures(backend: MediaBackend) {
+        attachBufferState(backend)
+
         listen(backend, CanonicalBackendEvent.STREAM_ERROR) {
             ctx.emit(CoreEvents.StreamError, StreamError(details = it?.toString() ?: "", fatal = true))
         }

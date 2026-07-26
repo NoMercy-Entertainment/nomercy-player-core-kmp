@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.TimeState
 import tv.nomercy.player.core.events.ItemEndingSoon
 import tv.nomercy.player.core.events.PreventedAction
 import tv.nomercy.player.core.events.RateChange
@@ -31,6 +32,7 @@ private const val DEFAULT_SKIP = 10.0
 // seek from a scrubber and a seek from `time(seconds)` are the same action and
 // must produce the same events in the same order. Two copies of that cycle is
 // two places for it to drift.
+@Suppress("TooManyFunctions")
 public class TimeController(
     private val ctx: PlayerContext,
     private val queue: QueueController,
@@ -84,6 +86,30 @@ public class TimeController(
     // The rates a UI should offer. Not a limit on what can be set — a consumer
     // driving 1.85 from a slider is fine — just the ones worth a menu item.
     public fun playbackRates(): List<Double> = OFFERED_RATES
+
+    // One consistent snapshot rather than four calls a chrome has to make in
+    // the right order.
+    //
+    // Taken together at one instant: reading time() and duration() separately
+    // means a progress bar can render a position from after a seek against a
+    // duration from before one, which shows up as a bar that jumps backwards.
+    public fun timeData(): TimeState {
+        val position: Double = time()
+        val total: Double = duration()
+        return TimeState(
+            time = position,
+            duration = total,
+            buffered = buffered(),
+            // Never negative. A backend reporting a position past a duration it
+            // has not refreshed yet is ordinary at the end of an item, and a
+            // chrome rendering "-3s remaining" looks broken.
+            remaining = (total - position).coerceAtLeast(0.0),
+            // Zero rather than a division by zero, which is the whole of a live
+            // stream: the duration is unknown and a progress bar has nothing to
+            // fill against.
+            percentage = if (total > 0.0) (position / total) * PERCENT else 0.0,
+        )
+    }
 
     public suspend fun playbackRate(rate: Double, opts: ActionOptions = ActionOptions()) {
         val target: Double = rate.coerceIn(MIN_RATE, MAX_RATE)

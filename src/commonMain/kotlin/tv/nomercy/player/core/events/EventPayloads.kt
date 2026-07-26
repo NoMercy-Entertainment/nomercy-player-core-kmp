@@ -31,6 +31,20 @@ public data class TimeUpdate(
     val percentage: Double,
 )
 
+// Everything a progress bar needs, from one call at one instant.
+//
+// The derived fields are computed here rather than left to each chrome, because
+// the two of them that look trivial are not: remaining goes negative when a
+// backend reports a position past a stale duration, and percentage divides by a
+// duration that is zero for the whole of a live stream.
+public data class TimeState(
+    val time: Double,
+    val duration: Double,
+    val buffered: Double,
+    val remaining: Double,
+    val percentage: Double,
+)
+
 // Payload for item. The item is nullable because the cursor legitimately points
 // past the end of an exhausted queue.
 public data class ItemChange(

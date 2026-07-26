@@ -40,7 +40,7 @@ private val WEB_ONLY_METHODS = setOf(
 private val NOT_YET_PORTED_METHODS = setOf(
     "audioOutput", "audioOutputs",
     "audioTrackMode", "auth", "backend", 
-    "bufferState", "bufferedRanges", "canPlay", "castState",
+    "bufferedRanges", "canPlay", "castState",
     "experimental",
     "getStreamFactory", 
     "load", "loadQueue", "networkState", 
@@ -49,7 +49,7 @@ private val NOT_YET_PORTED_METHODS = setOf(
     "registerTitleTokens", "resolveCueParser", 
     "seekable",
     "selectAudioOutput", "setPreloadStrategy", "setTransitionStrategy", "streamState",
-    "streams", "timeData", "transferTo", "transitionStrategy",
+    "streams", "transferTo", "transitionStrategy",
     "unregisterCueParser", "unregisterStream", 
     "visibilityState", 
 )

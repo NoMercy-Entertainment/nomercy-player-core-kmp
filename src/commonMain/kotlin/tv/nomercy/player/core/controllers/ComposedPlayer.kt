@@ -20,12 +20,14 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.TimeState
 import tv.nomercy.player.core.events.PlaybackMetrics
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.Chapter
 import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.SetupState
 import tv.nomercy.player.core.player.VolumeState
@@ -343,6 +345,14 @@ public open class ComposedPlayer(
         time.time(seconds, opts)
 
     public open fun duration(): Double = time.duration()
+
+    public open fun timeData(): TimeState = time.timeData()
+
+    // Why the picture is not moving, when it is not moving.
+    //
+    // Separate from playState because "paused" and "waiting for data" are the
+    // same stillness on screen and completely different things to say about it.
+    public open fun bufferState(): BufferState = context.bufferState
 
     // The chapters of the item being played, and where the playhead sits in
     // them.

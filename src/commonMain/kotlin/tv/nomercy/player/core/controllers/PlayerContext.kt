@@ -19,6 +19,7 @@ import tv.nomercy.player.core.events.PhaseChange
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.MediaList
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.RepeatState
@@ -78,6 +79,15 @@ public class PlayerContext(
             throw stateError(CoreErrorCodes.DISPOSED, "The player has been disposed.")
         }
     }
+
+    // Why the picture is not moving, when it is not moving.
+    //
+    // A chrome shows different things for these: a spinner over a black frame
+    // while a source loads, a spinner over the last frame while a seek lands,
+    // and — the one that matters — a stall badge when the buffer ran dry
+    // mid-playback, which is the difference between "wait a moment" and "your
+    // connection is not keeping up".
+    public var bufferState: BufferState = BufferState.IDLE
 
     public var playState: PlayState = PlayState.IDLE
 

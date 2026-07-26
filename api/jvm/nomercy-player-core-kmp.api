@@ -54,6 +54,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
 	public fun baseUrl ()Ljava/lang/String;
 	public fun baseUrl (Ljava/lang/String;)V
+	public fun bufferState ()Ltv/nomercy/player/core/player/BufferState;
 	public fun buffered ()D
 	public fun bumpActivity ()V
 	public fun chapter ()Ltv/nomercy/player/core/media/Chapter;
@@ -181,6 +182,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun time ()D
 	public fun time (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun time$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun timeData ()Ltv/nomercy/player/core/events/TimeState;
 	public fun toggleMute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun toggleMute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun togglePlayback (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -263,6 +265,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun getAuth ()Ltv/nomercy/player/core/controllers/AuthController;
 	public final fun getBackend ()Ltv/nomercy/player/core/ports/MediaBackend;
 	public final fun getBacklog ()Ltv/nomercy/player/core/media/MediaList;
+	public final fun getBufferState ()Ltv/nomercy/player/core/player/BufferState;
 	public final fun getEmitter ()Ltv/nomercy/player/core/events/EventEmitter;
 	public final fun getInternalCurrentTime ()D
 	public final fun getInternalDuration ()D
@@ -283,6 +286,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public final fun setAuth (Ltv/nomercy/player/core/controllers/AuthController;)V
 	public final fun setBackend (Ltv/nomercy/player/core/ports/MediaBackend;)V
+	public final fun setBufferState (Ltv/nomercy/player/core/player/BufferState;)V
 	public final fun setInternalCurrentTime (D)V
 	public final fun setInternalDuration (D)V
 	public final fun setInternalVolume (I)V
@@ -377,6 +381,7 @@ public final class tv/nomercy/player/core/controllers/TimeController {
 	public final fun time ()D
 	public final fun time (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun time$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public final fun timeData ()Ltv/nomercy/player/core/events/TimeState;
 }
 
 public final class tv/nomercy/player/core/controllers/TransportController {
@@ -1873,6 +1878,25 @@ public final class tv/nomercy/player/core/events/SubtitlesPayload {
 	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/SubtitlesPayload;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/events/SubtitlesPayload;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getTracks ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/TimeState {
+	public fun <init> (DDDDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun component4 ()D
+	public final fun component5 ()D
+	public final fun copy (DDDDD)Ltv/nomercy/player/core/events/TimeState;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/TimeState;DDDDDILjava/lang/Object;)Ltv/nomercy/player/core/events/TimeState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuffered ()D
+	public final fun getDuration ()D
+	public final fun getPercentage ()D
+	public final fun getRemaining ()D
+	public final fun getTime ()D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
