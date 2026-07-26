@@ -2911,6 +2911,12 @@ public final class tv/nomercy/player/core/ports/GaplessTransitionStrategy : tv/n
 	public fun tick (Ltv/nomercy/player/core/ports/TransitionContext;Ltv/nomercy/player/core/ports/TransitionBackend;)V
 }
 
+public final class tv/nomercy/player/core/ports/HdrAbrConstraint {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/HdrAbrConstraint;
+	public final fun abrCeiling (Ljava/util/List;Z)Ltv/nomercy/player/core/ports/QualityLevel;
+	public final fun isUnplayable (Ljava/util/List;Z)Z
+}
+
 public abstract interface class tv/nomercy/player/core/ports/IdGenerator {
 	public abstract fun next ()Ljava/lang/String;
 }

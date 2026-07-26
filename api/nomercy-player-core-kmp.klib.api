@@ -4158,6 +4158,11 @@ final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.
         final fun <get-PLAY_PAUSE_SPINE>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CanonicalBackendEvent.PLAY_PAUSE_SPINE.<get-PLAY_PAUSE_SPINE>|<get-PLAY_PAUSE_SPINE>(){}[0]
 }
 
+final object tv.nomercy.player.core.ports/HdrAbrConstraint { // tv.nomercy.player.core.ports/HdrAbrConstraint|null[0]
+    final fun abrCeiling(kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>, kotlin/Boolean): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/HdrAbrConstraint.abrCeiling|abrCeiling(kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>;kotlin.Boolean){}[0]
+    final fun isUnplayable(kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>, kotlin/Boolean): kotlin/Boolean // tv.nomercy.player.core.ports/HdrAbrConstraint.isUnplayable|isUnplayable(kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>;kotlin.Boolean){}[0]
+}
+
 final object tv.nomercy.player.core.ports/NoopWakeLock : tv.nomercy.player.core.ports/WakeLock { // tv.nomercy.player.core.ports/NoopWakeLock|null[0]
     final fun isHeld(): kotlin/Boolean // tv.nomercy.player.core.ports/NoopWakeLock.isHeld|isHeld(){}[0]
     final fun isSupported(): kotlin/Boolean // tv.nomercy.player.core.ports/NoopWakeLock.isSupported|isSupported(){}[0]
