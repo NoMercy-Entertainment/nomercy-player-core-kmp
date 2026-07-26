@@ -3006,7 +3006,26 @@ final class tv.nomercy.player.core.ports/DefaultPreloadStrategy : tv.nomercy.pla
 final class tv.nomercy.player.core.ports/EqualPowerCrossfader { // tv.nomercy.player.core.ports/EqualPowerCrossfader|null[0]
     constructor <init>(kotlin/Long = ...) // tv.nomercy.player.core.ports/EqualPowerCrossfader.<init>|<init>(kotlin.Long){}[0]
 
-    final suspend fun run(tv.nomercy.player.core.ports/GainSink, tv.nomercy.player.core.ports/GainSink, kotlin/Float, kotlin/Long, tv.nomercy.player.core.ports/CrossfadeCurve) // tv.nomercy.player.core.ports/EqualPowerCrossfader.run|run(tv.nomercy.player.core.ports.GainSink;tv.nomercy.player.core.ports.GainSink;kotlin.Float;kotlin.Long;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
+    final suspend fun run(tv.nomercy.player.core.ports/GainSink, tv.nomercy.player.core.ports/GainSink, tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade) // tv.nomercy.player.core.ports/EqualPowerCrossfader.run|run(tv.nomercy.player.core.ports.GainSink;tv.nomercy.player.core.ports.GainSink;tv.nomercy.player.core.ports.EqualPowerCrossfader.Fade){}[0]
+
+    final class Fade { // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade|null[0]
+        constructor <init>(kotlin/Float, kotlin/Long, tv.nomercy.player.core.ports/CrossfadeCurve = ...) // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.<init>|<init>(kotlin.Float;kotlin.Long;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
+
+        final val curve // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.curve|{}curve[0]
+            final fun <get-curve>(): tv.nomercy.player.core.ports/CrossfadeCurve // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.curve.<get-curve>|<get-curve>(){}[0]
+        final val durationMs // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.durationMs|{}durationMs[0]
+            final fun <get-durationMs>(): kotlin/Long // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.durationMs.<get-durationMs>|<get-durationMs>(){}[0]
+        final val startVolume // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.startVolume|{}startVolume[0]
+            final fun <get-startVolume>(): kotlin/Float // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.startVolume.<get-startVolume>|<get-startVolume>(){}[0]
+
+        final fun component1(): kotlin/Float // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.component1|component1(){}[0]
+        final fun component2(): kotlin/Long // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.component2|component2(){}[0]
+        final fun component3(): tv.nomercy.player.core.ports/CrossfadeCurve // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.component3|component3(){}[0]
+        final fun copy(kotlin/Float = ..., kotlin/Long = ..., tv.nomercy.player.core.ports/CrossfadeCurve = ...): tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.copy|copy(kotlin.Float;kotlin.Long;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/EqualPowerCrossfader.Fade.toString|toString(){}[0]
+    }
 }
 
 final class tv.nomercy.player.core.ports/FetchOptions { // tv.nomercy.player.core.ports/FetchOptions|null[0]

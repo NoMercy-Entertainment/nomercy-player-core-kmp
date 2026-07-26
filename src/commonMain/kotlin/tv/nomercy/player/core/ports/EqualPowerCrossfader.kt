@@ -22,19 +22,26 @@ import kotlinx.coroutines.delay
 // same ramp the device does.
 public class EqualPowerCrossfader(private val stepMs: Long = DEFAULT_STEP_MS) {
 
+    // The three things that vary per transition, together. Separately they were
+    // five positional arguments at the call site, two of which are numbers —
+    // which is how a duration ends up in the volume.
+    public data class Fade(
+        val startVolume: Float,
+        val durationMs: Long,
+        val curve: CrossfadeCurve = CrossfadeCurve.EQUAL_POWER,
+    )
+
     // Ramps [outgoing] down and [incoming] up over [durationMs], then releases
     // the outgoing handle.
     //
     // Both gains are computed from the same progress rather than one from the
     // other, so the curve's own guarantee — in² + out² = 1 for equal power —
     // holds at every step instead of accumulating rounding across the fade.
-    public suspend fun run(
-        outgoing: GainSink,
-        incoming: GainSink,
-        startVolume: Float,
-        durationMs: Long,
-        curve: CrossfadeCurve,
-    ) {
+    public suspend fun run(outgoing: GainSink, incoming: GainSink, fade: Fade) {
+        val startVolume: Float = fade.startVolume
+        val durationMs: Long = fade.durationMs
+        val curve: CrossfadeCurve = fade.curve
+
         // Silence first, so the incoming track cannot be heard at full volume
         // for the instant between starting it and the first ramp step.
         incoming.gain(0f)

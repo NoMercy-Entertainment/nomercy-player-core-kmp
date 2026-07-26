@@ -63,7 +63,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(FULL)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, FULL, FADE_MS, CrossfadeCurve.EQUAL_POWER)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, FADE_MS))
 
         // Paired step by step, because the guarantee is about the two together
         // — and aligned by hand, because the two lists do not start level. Each
@@ -86,7 +86,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(FULL)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, FULL, FADE_MS, CrossfadeCurve.LINEAR)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, FADE_MS, CrossfadeCurve.LINEAR))
 
         val middle: Int = outgoing.gains.size / 2
         val out: Float = outgoing.gains[middle]
@@ -104,7 +104,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(FULL)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, FULL, FADE_MS, CrossfadeCurve.EQUAL_POWER)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, FADE_MS))
 
         assertTrue(incoming.played, "the incoming track was never started")
         assertEquals(0f, incoming.gains[1], "the incoming track was audible before the fade began")
@@ -118,7 +118,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(FULL)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, FULL, RAGGED_FADE_MS, CrossfadeCurve.EQUAL_POWER)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, RAGGED_FADE_MS))
 
         assertEquals(0f, outgoing.gains.last())
         assertEquals(FULL, incoming.gains.last())
@@ -131,7 +131,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(FULL)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, FULL, FADE_MS, CrossfadeCurve.EQUAL_POWER)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, FADE_MS))
 
         assertTrue(outgoing.released, "the faded-out handle was left holding its decoder")
         assertTrue(!incoming.released, "the track that just started was released")
@@ -144,7 +144,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(FULL)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, FULL, 0L, CrossfadeCurve.EQUAL_POWER)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, 0L))
 
         assertEquals(0f, outgoing.gains.last())
         assertEquals(FULL, incoming.gains.last())
@@ -158,7 +158,7 @@ class EqualPowerCrossfaderTest {
         val outgoing = RecordingSink(QUIET)
         val incoming = RecordingSink(0f)
 
-        fader().run(outgoing, incoming, QUIET, FADE_MS, CrossfadeCurve.EQUAL_POWER)
+        fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(QUIET, FADE_MS))
 
         assertEquals(QUIET, incoming.gains.last())
         assertTrue(incoming.gains.none { it > QUIET }, "the fade went louder than the listener asked for")
