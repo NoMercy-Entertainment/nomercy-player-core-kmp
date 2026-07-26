@@ -22,6 +22,7 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.CastStatePayload
 import tv.nomercy.player.core.events.PlayerErrorEvent
 import tv.nomercy.player.core.events.TransitionCancelledPayload
 import tv.nomercy.player.core.events.PlaylistReadyPayload
@@ -34,6 +35,9 @@ import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.BufferState
+import tv.nomercy.player.core.player.CastState
+import tv.nomercy.player.core.player.NetworkState
+import tv.nomercy.player.core.player.VisibilityState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.SetupState
 import tv.nomercy.player.core.player.VolumeState
@@ -50,7 +54,9 @@ import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.AnnouncementLevel
 import tv.nomercy.player.core.ports.Announcer
+import tv.nomercy.player.core.ports.BackendState
 import tv.nomercy.player.core.ports.Clock
+import tv.nomercy.player.core.ports.EnvironmentMonitor
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.CueParserRegistry
 import tv.nomercy.player.core.ports.DefaultPreloadStrategy
@@ -131,6 +137,10 @@ public open class ComposedPlayer(
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
     private val announcer: Announcer? = null,
+    // Connectivity and visibility, from the app's own observers. A library that
+    // registered its own would be a second set beside them, disagreeing about
+    // state and outliving the screen.
+    private val environment: EnvironmentMonitor? = null,
     // Injectable so a test decides what time it is, and so a fleet in a Connect
     // session can share one: two devices comparing timestamps have to agree
     // about now.
@@ -242,6 +252,44 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Environment ──────────────────────────────────────────────────────────
+
+    // Whether anything can be fetched, and roughly how well.
+    //
+    // ONLINE without a monitor, which is the only safe default: a player that
+    // assumed offline would refuse to start on every host that has not wired
+    // one up, and being wrong about offline costs a failed request the error
+    // path already handles.
+    public open fun networkState(): NetworkState = environment?.network() ?: NetworkState.ONLINE
+
+    // VISIBLE without a monitor, for the same reason in the other direction: a
+    // player that assumed hidden would pause itself on a host that never told
+    // it otherwise.
+    public open fun visibilityState(): VisibilityState = environment?.visibility() ?: VisibilityState.VISIBLE
+
+    // What the engine is doing with the stream, as the engine sees it.
+    //
+    // Distinct from playState and bufferState: those are the player's account
+    // of what a viewer sees, this is the engine's own. A support log wants both
+    // — a player that says PLAYING while its engine says IDLE is a bug the two
+    // together name and neither does alone.
+    public open fun streamState(): BackendState = context.backend?.state() ?: BackendState.IDLE
+
+    // Whether there is anywhere to cast to, and whether playback is there now.
+    //
+    // Written by whatever owns the discovery — a cast plugin, a Connect
+    // session — because core has no business scanning a network. UNAVAILABLE
+    // until something says otherwise, which is honest: no discovery has run.
+    public open fun castState(): CastState = castTarget
+
+    public open fun castState(state: CastState) {
+        if (castTarget == state) return
+        castTarget = state
+        context.emit(CoreEvents.CastState, CastStatePayload(state.token))
+    }
+
+    private var castTarget: CastState = CastState.UNAVAILABLE
 
     // ── Strategies ───────────────────────────────────────────────────────────
 

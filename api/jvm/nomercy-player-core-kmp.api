@@ -32,8 +32,8 @@ public final class tv/nomercy/player/core/controllers/BandwidthController {
 
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
-	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/EnvironmentMonitor;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/EnvironmentMonitor;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun activityTracking ()Z
 	public fun activityTracking (Z)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -57,6 +57,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun bufferState ()Ltv/nomercy/player/core/player/BufferState;
 	public fun buffered ()D
 	public fun bumpActivity ()V
+	public fun castState ()Ltv/nomercy/player/core/player/CastState;
+	public fun castState (Ltv/nomercy/player/core/player/CastState;)V
 	public fun chapter ()Ltv/nomercy/player/core/media/Chapter;
 	public fun chapters ()Ljava/util/List;
 	public fun chapters (Ljava/util/List;)V
@@ -104,6 +106,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun metrics ()Ltv/nomercy/player/core/events/PlaybackMetrics;
 	public fun mute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun mute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun networkState ()Ltv/nomercy/player/core/player/NetworkState;
 	public fun next (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun next$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun nextChapter (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -186,6 +189,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
 	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun stop$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun streamState ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public fun subtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public fun subtitles ()Ljava/util/List;
@@ -206,6 +210,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun unregisterCueParser (Ljava/lang/String;)V
 	public fun urlResolver ()Ltv/nomercy/player/core/ports/UrlResolver;
 	public fun urlResolver (Ltv/nomercy/player/core/ports/UrlResolver;)V
+	public fun visibilityState ()Ltv/nomercy/player/core/player/VisibilityState;
 	public fun volume ()I
 	public fun volume (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun volume$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -3072,6 +3077,11 @@ public final class tv/nomercy/player/core/ports/DynamicRange : java/lang/Enum {
 	public final fun getWire ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/DynamicRange;
 	public static fun values ()[Ltv/nomercy/player/core/ports/DynamicRange;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/EnvironmentMonitor {
+	public abstract fun network ()Ltv/nomercy/player/core/player/NetworkState;
+	public abstract fun visibility ()Ltv/nomercy/player/core/player/VisibilityState;
 }
 
 public final class tv/nomercy/player/core/ports/EqualPowerCrossfader {

@@ -691,6 +691,11 @@ abstract interface tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player
     abstract fun parse(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.ports/CueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
+abstract interface tv.nomercy.player.core.ports/EnvironmentMonitor { // tv.nomercy.player.core.ports/EnvironmentMonitor|null[0]
+    abstract fun network(): tv.nomercy.player.core.player/NetworkState // tv.nomercy.player.core.ports/EnvironmentMonitor.network|network(){}[0]
+    abstract fun visibility(): tv.nomercy.player.core.player/VisibilityState // tv.nomercy.player.core.ports/EnvironmentMonitor.visibility|visibility(){}[0]
+}
+
 abstract interface tv.nomercy.player.core.ports/FullscreenController { // tv.nomercy.player.core.ports/FullscreenController|null[0]
     abstract fun isActive(): kotlin/Boolean // tv.nomercy.player.core.ports/FullscreenController.isActive|isActive(){}[0]
     abstract fun isSupported(): kotlin/Boolean // tv.nomercy.player.core.ports/FullscreenController.isSupported|isSupported(){}[0]
@@ -3745,7 +3750,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Announcer? = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ..., kotlin/String = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Announcer?;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?;kotlin.String){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Announcer? = ..., tv.nomercy.player.core.ports/EnvironmentMonitor? = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ..., kotlin/String = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Announcer?;tv.nomercy.player.core.ports.EnvironmentMonitor?;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?;kotlin.String){}[0]
 
     final val bandwidth // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|{}bandwidth[0]
         final fun <get-bandwidth>(): tv.nomercy.player.core.controllers/BandwidthController // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
@@ -3805,6 +3810,8 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun bufferState(): tv.nomercy.player.core.player/BufferState // tv.nomercy.player.core.controllers/ComposedPlayer.bufferState|bufferState(){}[0]
     open fun buffered(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.buffered|buffered(){}[0]
     open fun bumpActivity() // tv.nomercy.player.core.controllers/ComposedPlayer.bumpActivity|bumpActivity(){}[0]
+    open fun castState(): tv.nomercy.player.core.player/CastState // tv.nomercy.player.core.controllers/ComposedPlayer.castState|castState(){}[0]
+    open fun castState(tv.nomercy.player.core.player/CastState) // tv.nomercy.player.core.controllers/ComposedPlayer.castState|castState(tv.nomercy.player.core.player.CastState){}[0]
     open fun chapter(): tv.nomercy.player.core.media/Chapter? // tv.nomercy.player.core.controllers/ComposedPlayer.chapter|chapter(){}[0]
     open fun chapters(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.controllers/ComposedPlayer.chapters|chapters(){}[0]
     open fun chapters(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>) // tv.nomercy.player.core.controllers/ComposedPlayer.chapters|chapters(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>){}[0]
@@ -3822,6 +3829,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun item(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.item|item(){}[0]
     open fun language(): kotlin/String // tv.nomercy.player.core.controllers/ComposedPlayer.language|language(){}[0]
     open fun metrics(): tv.nomercy.player.core.events/PlaybackMetrics // tv.nomercy.player.core.controllers/ComposedPlayer.metrics|metrics(){}[0]
+    open fun networkState(): tv.nomercy.player.core.player/NetworkState // tv.nomercy.player.core.controllers/ComposedPlayer.networkState|networkState(){}[0]
     open fun now(): kotlin/Long // tv.nomercy.player.core.controllers/ComposedPlayer.now|now(){}[0]
     open fun options(): tv.nomercy.player.core.player/PlayerConfig // tv.nomercy.player.core.controllers/ComposedPlayer.options|options(){}[0]
     open fun peekNext(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.peekNext|peekNext(){}[0]
@@ -3865,6 +3873,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun setupState(): tv.nomercy.player.core.player/SetupState // tv.nomercy.player.core.controllers/ComposedPlayer.setupState|setupState(){}[0]
     open fun shuffleState(): tv.nomercy.player.core.player/ShuffleState // tv.nomercy.player.core.controllers/ComposedPlayer.shuffleState|shuffleState(){}[0]
     open fun state(): tv.nomercy.player.core.player/PlayerState // tv.nomercy.player.core.controllers/ComposedPlayer.state|state(){}[0]
+    open fun streamState(): tv.nomercy.player.core.ports/BackendState // tv.nomercy.player.core.controllers/ComposedPlayer.streamState|streamState(){}[0]
     open fun subtitle(): tv.nomercy.player.core.ports/SubtitleTrack? // tv.nomercy.player.core.controllers/ComposedPlayer.subtitle|subtitle(){}[0]
     open fun subtitle(tv.nomercy.player.core.ports/SubtitleTrack?) // tv.nomercy.player.core.controllers/ComposedPlayer.subtitle|subtitle(tv.nomercy.player.core.ports.SubtitleTrack?){}[0]
     open fun subtitles(): kotlin.collections/List<tv.nomercy.player.core.ports/SubtitleTrack> // tv.nomercy.player.core.controllers/ComposedPlayer.subtitles|subtitles(){}[0]
@@ -3877,6 +3886,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun unregisterCueParser(kotlin/String) // tv.nomercy.player.core.controllers/ComposedPlayer.unregisterCueParser|unregisterCueParser(kotlin.String){}[0]
     open fun urlResolver(): tv.nomercy.player.core.ports/UrlResolver? // tv.nomercy.player.core.controllers/ComposedPlayer.urlResolver|urlResolver(){}[0]
     open fun urlResolver(tv.nomercy.player.core.ports/UrlResolver?) // tv.nomercy.player.core.controllers/ComposedPlayer.urlResolver|urlResolver(tv.nomercy.player.core.ports.UrlResolver?){}[0]
+    open fun visibilityState(): tv.nomercy.player.core.player/VisibilityState // tv.nomercy.player.core.controllers/ComposedPlayer.visibilityState|visibilityState(){}[0]
     open fun volume(): kotlin/Int // tv.nomercy.player.core.controllers/ComposedPlayer.volume|volume(){}[0]
     open fun volumeState(): tv.nomercy.player.core.player/VolumeState // tv.nomercy.player.core.controllers/ComposedPlayer.volumeState|volumeState(){}[0]
     open fun websocket(kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions): tv.nomercy.player.core.ports/RealtimeChannel // tv.nomercy.player.core.controllers/ComposedPlayer.websocket|websocket(kotlin.String;tv.nomercy.player.core.ports.RealtimeFactoryOptions){}[0]

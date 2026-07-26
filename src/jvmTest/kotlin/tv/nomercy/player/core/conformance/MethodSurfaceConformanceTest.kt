@@ -40,18 +40,18 @@ private val WEB_ONLY_METHODS = setOf(
 private val NOT_YET_PORTED_METHODS = setOf(
     "audioOutput", "audioOutputs",
     "audioTrackMode", "auth", "backend", 
-    "bufferedRanges", "canPlay", "castState",
+    "bufferedRanges", "canPlay", 
     "experimental",
     "getStreamFactory", 
-    "load", "networkState", 
+    "load", 
     "platform", 
     "refreshAuth", "registerStream",
     "registerTitleTokens", 
     "seekable",
-    "selectAudioOutput", "streamState",
+    "selectAudioOutput", 
     "streams", "transferTo", 
     "unregisterStream", 
-    "visibilityState", 
+    
 )
 
 // The player's own method names against the contract's.
