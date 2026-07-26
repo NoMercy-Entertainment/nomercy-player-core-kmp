@@ -76,6 +76,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public final fun getBandwidth ()Ltv/nomercy/player/core/controllers/BandwidthController;
 	public final fun getBridge ()Ltv/nomercy/player/core/controllers/BackendBridge;
 	public final fun getContext ()Ltv/nomercy/player/core/controllers/PlayerContext;
+	public final fun getCueParsers ()Ltv/nomercy/player/core/ports/CueParserRegistry;
 	public final fun getLifecycle ()Ltv/nomercy/player/core/controllers/LifecycleController;
 	public final fun getMetrics ()Ltv/nomercy/player/core/controllers/MetricsController;
 	public final fun getPlayerId ()Ljava/lang/String;
@@ -147,6 +148,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun ready ()Lkotlinx/coroutines/Deferred;
 	public fun recordMetric (Ljava/lang/String;D)V
 	public fun recordMetric (Ltv/nomercy/player/core/controllers/Metric;D)V
+	public fun registerCueParser (Ltv/nomercy/player/core/ports/CueParser;Z)V
+	public static synthetic fun registerCueParser$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/ports/CueParser;ZILjava/lang/Object;)V
 	public fun removePlugin (Ltv/nomercy/player/core/plugin/Plugin;)V
 	public fun removePluginById (Ljava/lang/String;)V
 	public fun removeTranslations (Ljava/lang/String;Ljava/lang/String;)V
@@ -155,6 +158,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun repeatState (Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun repeatState$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/RepeatState;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun report (Ltv/nomercy/player/core/errors/PlayerError;)V
+	public fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
+	public static synthetic fun resolveCueParser$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CueParser;
 	public fun resolveUrl (Ljava/lang/String;Ltv/nomercy/player/core/ports/UrlCategory;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun resolveUrl$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;Ltv/nomercy/player/core/ports/UrlCategory;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun restart (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -191,6 +196,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun translation (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun unmute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun unmute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun unregisterCueParser (Ljava/lang/String;)V
 	public fun urlResolver ()Ltv/nomercy/player/core/ports/UrlResolver;
 	public fun urlResolver (Ltv/nomercy/player/core/ports/UrlResolver;)V
 	public fun volume ()I
@@ -2956,6 +2962,31 @@ public final class tv/nomercy/player/core/ports/CrossfadeTransitionStrategy : tv
 	public fun shouldTransition (Ltv/nomercy/player/core/ports/PreloadContext;)Z
 	public fun start (Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/TransitionBackend;)V
 	public fun tick (Ltv/nomercy/player/core/ports/TransitionContext;Ltv/nomercy/player/core/ports/TransitionBackend;)V
+}
+
+public abstract interface class tv/nomercy/player/core/ports/CueParser {
+	public abstract fun canParse (Ljava/lang/String;Ljava/lang/String;)Z
+	public static synthetic fun canParse$default (Ltv/nomercy/player/core/ports/CueParser;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun parse (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun parse$default (Ltv/nomercy/player/core/ports/CueParser;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class tv/nomercy/player/core/ports/CueParser$DefaultImpls {
+	public static synthetic fun canParse$default (Ltv/nomercy/player/core/ports/CueParser;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Z
+	public static synthetic fun parse$default (Ltv/nomercy/player/core/ports/CueParser;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class tv/nomercy/player/core/ports/CueParserRegistry {
+	public fun <init> ()V
+	public final fun dispose ()V
+	public final fun findById (Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
+	public final fun list ()Ljava/util/List;
+	public final fun register (Ltv/nomercy/player/core/ports/CueParser;Z)V
+	public static synthetic fun register$default (Ltv/nomercy/player/core/ports/CueParserRegistry;Ltv/nomercy/player/core/ports/CueParser;ZILjava/lang/Object;)V
+	public final fun resolve (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
+	public static synthetic fun resolve$default (Ltv/nomercy/player/core/ports/CueParserRegistry;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CueParser;
+	public final fun unregister (Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/ports/DecodeCapability {

@@ -45,6 +45,8 @@ import tv.nomercy.player.core.plugin.PluginRegistry
 import tv.nomercy.player.core.ports.AnnouncementLevel
 import tv.nomercy.player.core.ports.Announcer
 import tv.nomercy.player.core.ports.Clock
+import tv.nomercy.player.core.ports.CueParser
+import tv.nomercy.player.core.ports.CueParserRegistry
 import tv.nomercy.player.core.ports.Device
 import tv.nomercy.player.core.ports.defaultClock
 import tv.nomercy.player.core.ports.currentDevice
@@ -614,6 +616,24 @@ public open class ComposedPlayer(
     // and a native port that answered only to one would be a gotcha rather than
     // a port.
     public open fun getPluginById(id: String): Plugin<*>? = plugins.getById(id)
+
+    // ── Cue parsers ──────────────────────────────────────────────────────────
+
+    // Adding a subtitle, lyric or sprite format without forking the player.
+    //
+    // Most-recently-registered wins, so overriding a built-in is just
+    // registering one with the same job. atLowestPriority is how a built-in
+    // seeds itself: anything a consumer adds later beats it without them
+    // needing to know what was already there.
+    public open fun registerCueParser(parser: CueParser, atLowestPriority: Boolean = false): Unit =
+        cueParsers.register(parser, atLowestPriority)
+
+    public open fun unregisterCueParser(id: String): Unit = cueParsers.unregister(id)
+
+    public open fun resolveCueParser(url: String, contentType: String? = null): CueParser? =
+        cueParsers.resolve(url, contentType)
+
+    public val cueParsers: CueParserRegistry = CueParserRegistry()
 
     public open fun enabledPlugins(): List<Plugin<*>> = plugins.enabledPlugins()
 
