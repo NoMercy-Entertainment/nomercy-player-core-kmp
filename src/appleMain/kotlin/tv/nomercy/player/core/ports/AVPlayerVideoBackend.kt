@@ -9,7 +9,21 @@
 package tv.nomercy.player.core.ports
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.CValue
+import kotlinx.cinterop.useContents
+import platform.AVFoundation.AVMediaCharacteristicAudible
+import platform.AVFoundation.AVMediaCharacteristicLegible
+import platform.AVFoundation.AVMediaSelectionGroup
+import platform.AVFoundation.AVMediaSelectionOption
 import platform.AVFoundation.AVPlayer
+import platform.AVFoundation.AVPlayerItemAccessLogEvent
+import platform.AVFoundation.accessLog
+import platform.AVFoundation.currentMediaSelection
+import platform.AVFoundation.mediaSelectionGroupForMediaCharacteristic
+import platform.AVFoundation.preferredPeakBitRate
+import platform.AVFoundation.presentationSize
+import platform.AVFoundation.selectMediaOption
+import platform.CoreGraphics.CGSize
 import platform.AVFoundation.AVPlayerItem
 import platform.AVFoundation.AVKeyValueStatusLoaded
 import platform.AVFoundation.AVURLAsset
@@ -61,7 +75,7 @@ private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks")
 // interface, and its numbers are CMTime rather than seconds. Both conversions
 // happen here, once.
 @OptIn(ExperimentalForeignApi::class)
-public class AVPlayerVideoBackend : MediaBackend {
+public class AVPlayerVideoBackend : VideoBackend {
 
     private val bus = StringEventBus()
     // Public because video has to be drawn somewhere and only the caller knows
@@ -213,6 +227,99 @@ public class AVPlayerVideoBackend : MediaBackend {
         timeObserver?.let { player.removeTimeObserver(it) }
         timeObserver = null
         player.replaceCurrentItemWithPlayerItem(null)
+    }
+
+    // AVFoundation does not publish an HLS variant list. The public API gives
+    // the rendition currently being played and a ceiling to cap adaptation with,
+    // which is genuinely all it knows — so the ladder here is one rung, not an
+    // invented list, and pinning is a bitrate ceiling rather than a variant.
+    override fun qualityLevels(): List<QualityLevel> = listOfNotNull(currentRendition())
+
+    override fun quality(): QualityLevel? = currentRendition()
+
+    // A ceiling, not a selection, and the difference is worth stating: AVPlayer
+    // will still adapt below the number. Null lifts the ceiling, which is what
+    // automatic means everywhere else in this library.
+    override fun quality(level: QualityLevel?) {
+        val item: AVPlayerItem = player.currentItem ?: return
+        item.preferredPeakBitRate = level?.bitrate?.toDouble() ?: 0.0
+    }
+
+    private fun currentRendition(): QualityLevel? {
+        val item: AVPlayerItem = player.currentItem ?: return null
+        val size: CValue<CGSize> = item.presentationSize
+        val height: Int = size.useContents { height }.toInt()
+        if (height <= 0) return null
+
+        return QualityLevel(
+            height = height,
+            bitrate = AVTrackMapper.bitrateOf(item.accessLog()?.events?.lastOrNull()
+                ?.let { (it as? AVPlayerItemAccessLogEvent)?.indicatedBitrate?.toFloat() } ?: 0f),
+            codec = "unknown",
+            dynamicRange = DynamicRange.SDR,
+            width = size.useContents { width }.toInt().takeIf { it > 0 },
+        )
+    }
+
+    override fun audioTracks(): List<AudioTrack> =
+        optionsIn(AVMediaCharacteristicAudible).mapIndexed { index, option ->
+            AudioTrack(
+                id = "audio:$index",
+                language = AVTrackMapper.languageOf(option.extendedLanguageTag),
+                label = AVTrackMapper.labelOf(option.displayName, option.extendedLanguageTag),
+            )
+        }
+
+    override fun audioTrack(): AudioTrack? =
+        selectedIndexIn(AVMediaCharacteristicAudible)?.let { audioTracks().getOrNull(it) }
+
+    override fun audioTrack(track: AudioTrack): Unit = select(AVMediaCharacteristicAudible, track.id)
+
+    override fun subtitleTracks(): List<SubtitleTrack> =
+        optionsIn(AVMediaCharacteristicLegible).mapIndexed { index, option ->
+            SubtitleTrack(
+                id = "text:$index",
+                language = AVTrackMapper.languageOf(option.extendedLanguageTag),
+                label = AVTrackMapper.labelOf(option.displayName, option.extendedLanguageTag),
+                forced = AVTrackMapper.isForced(
+                    option.mediaCharacteristics.mapNotNull { it as? String },
+                ),
+            )
+        }
+
+    override fun subtitleTrack(): SubtitleTrack? =
+        selectedIndexIn(AVMediaCharacteristicLegible)?.let { subtitleTracks().getOrNull(it) }
+
+    // Null selects nothing in the group, which is AVFoundation's way of saying
+    // captions off — a selection rather than an error.
+    override fun subtitleTrack(track: SubtitleTrack?) {
+        val item: AVPlayerItem = player.currentItem ?: return
+        val group: AVMediaSelectionGroup = groupFor(AVMediaCharacteristicLegible) ?: return
+        val option = track?.id?.substringAfter(':')?.toIntOrNull()
+            ?.let { group.options.getOrNull(it) as? AVMediaSelectionOption }
+        item.selectMediaOption(option, group)
+    }
+
+    private fun groupFor(characteristic: String): AVMediaSelectionGroup? =
+        player.currentItem?.asset?.mediaSelectionGroupForMediaCharacteristic(characteristic)
+
+    private fun optionsIn(characteristic: String): List<AVMediaSelectionOption> =
+        groupFor(characteristic)?.options.orEmpty().mapNotNull { it as? AVMediaSelectionOption }
+
+    private fun selectedIndexIn(characteristic: String): Int? {
+        val item: AVPlayerItem = player.currentItem ?: return null
+        val group: AVMediaSelectionGroup = groupFor(characteristic) ?: return null
+        val selected = item.currentMediaSelection.selectedMediaOptionInMediaSelectionGroup(group)
+            ?: return null
+        return optionsIn(characteristic).indexOfFirst { it == selected }.takeIf { it >= 0 }
+    }
+
+    private fun select(characteristic: String, id: String) {
+        val item: AVPlayerItem = player.currentItem ?: return
+        val group: AVMediaSelectionGroup = groupFor(characteristic) ?: return
+        val index: Int = id.substringAfter(':').toIntOrNull() ?: return
+        val option = group.options.getOrNull(index) as? AVMediaSelectionOption ?: return
+        item.selectMediaOption(option, group)
     }
 
     private fun onAssetLoaded(asset: AVURLAsset) {
