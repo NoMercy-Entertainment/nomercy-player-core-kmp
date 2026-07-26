@@ -34,6 +34,9 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun bandwidthEstimator ()Lkotlin/jvm/functions/Function0;
 	public fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
 	public fun buffered ()D
+	public fun chapter ()Ltv/nomercy/player/core/media/Chapter;
+	public fun chapters ()Ljava/util/List;
+	public fun chapters (Ljava/util/List;)V
 	public fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
 	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun dispose (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -65,6 +68,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun mute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun next (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun next$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun nextChapter (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun nextChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public fun pause (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun pause$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -81,6 +86,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun pluginList ()Ljava/util/List;
 	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun previousChapter (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun previousChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
@@ -111,6 +118,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun rewind$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun seekByPercentage (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun seekByPercentage$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun seekToChapter (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun seekToChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun seekToIndex (I)V
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun setup$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;

@@ -19,6 +19,8 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.media.Chapter
+import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.PlayState
@@ -148,6 +150,41 @@ public open class ComposedPlayer(
         time.time(seconds, opts)
 
     public open fun duration(): Double = time.duration()
+
+    // The chapters of the item being played, and where the playhead sits in
+    // them.
+    //
+    // Held on the player rather than parsed from the item, because chapters
+    // arrive from wherever the host got them — a scan, a sidecar, an API — and a
+    // player that insisted on parsing would be a second parser disagreeing with
+    // the first.
+    public open fun chapters(): List<Chapter> = chapterTrack.chapters
+
+    public open fun chapters(list: List<Chapter>) {
+        chapterTrack = ChapterTrack(list)
+    }
+
+    public open fun chapter(): Chapter? = chapterTrack.at(time())
+
+    // Null at the last chapter is the caller's cue to skip to the end of the
+    // item; jumping to zero there would restart the film.
+    public open suspend fun nextChapter(opts: ActionOptions = ActionOptions()) {
+        chapterTrack.nextStart(time())?.let { time.time(it, opts) }
+    }
+
+    // Within a few seconds of a chapter's start this goes to the one before, and
+    // after that it restarts the current one — what every music player does,
+    // because pressing previous mid-chapter almost always means "start this
+    // again".
+    public open suspend fun previousChapter(opts: ActionOptions = ActionOptions()) {
+        chapterTrack.previousStart(time())?.let { time.time(it, opts) }
+    }
+
+    public open suspend fun seekToChapter(index: Int, opts: ActionOptions = ActionOptions()) {
+        chapterTrack.chapters.getOrNull(index)?.let { time.time(it.startTime, opts) }
+    }
+
+    private var chapterTrack: ChapterTrack = ChapterTrack(emptyList())
 
     // Skip, clamped at both ends. A rewind landing at a negative position makes
     // one engine seek to the start and another refuse.
