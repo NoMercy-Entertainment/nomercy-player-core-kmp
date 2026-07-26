@@ -103,7 +103,9 @@ class AVPlayerVideoBackendTest {
         println("DIAG after load: state=" + backend.state() + " duration=" + backend.duration() + " seen=" + recorder.names())
         kotlinx.coroutines.runBlocking { backend.play() }
         settle(PLAY_SECONDS)
-        println("DIAG after play: state=" + backend.state() + " time=" + backend.currentTime() + " seen=" + recorder.names())
+        println("DIAG after play: state=" + backend.state() + " time=" + backend.currentTime() + " rate=" + backend.playbackRate() + " seen=" + recorder.names())
+        settle(PLAY_SECONDS)
+        println("DIAG later: time=" + backend.currentTime() + " rate=" + backend.playbackRate() + " seen=" + recorder.names())
     }
 
     @Test
