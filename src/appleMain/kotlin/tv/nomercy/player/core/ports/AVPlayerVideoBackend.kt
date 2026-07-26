@@ -24,6 +24,7 @@ import platform.AVFoundation.mediaSelectionGroupForMediaCharacteristic
 import platform.AVFoundation.preferredPeakBitRate
 import platform.AVFoundation.presentationSize
 import platform.AVFoundation.selectMediaOption
+import kotlin.concurrent.Volatile
 import platform.AVFoundation.AVAsset
 import platform.AVFoundation.hasMediaCharacteristic
 import platform.CoreGraphics.CGSize
@@ -307,7 +308,11 @@ public class AVPlayerVideoBackend : VideoBackend {
     private fun groupFor(characteristic: String): AVMediaSelectionGroup? =
         currentAsset()?.mediaSelectionGroupForMediaCharacteristic(characteristic)
 
-    private fun currentAsset(): AVAsset? = player.currentItem?.asset
+    // Kept from the load rather than read back off the item. The interop does
+    // not surface AVPlayerItem's asset, and the backend already had it —
+    // holding the one it loaded is both simpler and unambiguous about which
+    // asset the selection groups belong to.
+    private fun currentAsset(): AVAsset? = loadedAsset
 
     private fun optionsIn(characteristic: String): List<AVMediaSelectionOption> =
         groupFor(characteristic)?.options.orEmpty().mapNotNull { it as? AVMediaSelectionOption }
@@ -328,12 +333,15 @@ public class AVPlayerVideoBackend : VideoBackend {
         item.selectMediaOption(option, group)
     }
 
+    @Volatile private var loadedAsset: AVAsset? = null
+
     private fun onAssetLoaded(asset: AVURLAsset) {
         val loaded: Boolean = asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded
         if (!loaded || !asset.playable) {
             bus.emit(CanonicalBackendEvent.ERROR)
             return
         }
+        loadedAsset = asset
         player.replaceCurrentItemWithPlayerItem(AVPlayerItem(asset = asset))
         refreshCache()
         announceReadyOnce()
