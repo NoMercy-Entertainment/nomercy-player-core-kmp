@@ -23,6 +23,7 @@ import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.events.TransitionCancelledPayload
 import tv.nomercy.player.core.events.PlaylistReadyPayload
 import tv.nomercy.player.core.events.PlaylistResolvingPayload
 import tv.nomercy.player.core.events.TimeState
@@ -52,7 +53,11 @@ import tv.nomercy.player.core.ports.Announcer
 import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.CueParserRegistry
+import tv.nomercy.player.core.ports.DefaultPreloadStrategy
 import tv.nomercy.player.core.ports.Device
+import tv.nomercy.player.core.ports.GaplessTransitionStrategy
+import tv.nomercy.player.core.ports.PreloadStrategy
+import tv.nomercy.player.core.ports.TransitionStrategy
 import tv.nomercy.player.core.ports.defaultClock
 import tv.nomercy.player.core.ports.currentDevice
 import tv.nomercy.player.core.ports.FetchOptions
@@ -93,6 +98,9 @@ private const val SKIP_SECONDS = 10.0
 // Every 2xx. A playlist behind a redirect the fetcher already followed arrives
 // as a 200; anything else did not arrive.
 private val OK_STATUS = 200..299
+
+// The reason a transition ends when a consumer swaps the strategy under it.
+private const val STRATEGY_REPLACED = "strategy-replaced"
 
 // Enough randomness to tell two players in one log apart, and no more.
 //
@@ -234,6 +242,43 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Strategies ───────────────────────────────────────────────────────────
+
+    // What to fetch ahead of the next item, and what the change to it looks and
+    // sounds like.
+    //
+    // Two strategies rather than one because they answer different questions: a
+    // consumer that wants a gapless join has no opinion about which assets get
+    // warmed, and one that prefetches artwork has none about crossfades.
+    public open fun preloadStrategy(): PreloadStrategy = preload
+
+    public open fun setPreloadStrategy(strategy: PreloadStrategy) {
+        // The outgoing strategy may have work in flight against an item this
+        // player is about to stop caring about.
+        preload.cancel()
+        preload = strategy
+    }
+
+    public open fun transitionStrategy(): TransitionStrategy = transition
+
+    // Cancels a transition already under way, and says so.
+    //
+    // Swapping mid-fade would otherwise leave the outgoing item at whatever gain
+    // the old strategy last set — audible as a track that never comes back up.
+    // The cancel event is what tells a chrome to stop drawing a crossfade that
+    // is no longer happening.
+    public open fun setTransitionStrategy(strategy: TransitionStrategy) {
+        transition.cancel(STRATEGY_REPLACED)
+        context.emit(CoreEvents.TransitionCancelled, TransitionCancelledPayload(STRATEGY_REPLACED))
+        transition = strategy
+    }
+
+    private var preload: PreloadStrategy = DefaultPreloadStrategy()
+    // Cutting at the natural end is the right core default: two streams
+    // overlapping is a dissolve nobody asked for, and the music library swaps in
+    // a crossfade where one is wanted.
+    private var transition: TransitionStrategy = GaplessTransitionStrategy()
 
     // ── Activity ─────────────────────────────────────────────────────────────
 

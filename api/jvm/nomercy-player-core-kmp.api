@@ -127,6 +127,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun playbackRate$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun playbackRates ()Ljava/util/List;
 	public fun pluginList ()Ljava/util/List;
+	public fun preloadStrategy ()Ltv/nomercy/player/core/ports/PreloadStrategy;
 	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun previousChapter (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -174,6 +175,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun seekToChapter (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun seekToChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun seekToIndex (I)V
+	public fun setPreloadStrategy (Ltv/nomercy/player/core/ports/PreloadStrategy;)V
+	public fun setTransitionStrategy (Ltv/nomercy/player/core/ports/TransitionStrategy;)V
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun setup$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun setupState ()Ltv/nomercy/player/core/player/SetupState;
@@ -195,6 +198,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun toggleMute$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun togglePlayback (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun togglePlayback$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun transitionStrategy ()Ltv/nomercy/player/core/ports/TransitionStrategy;
 	public fun translation (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public fun translation (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public fun unmute (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
