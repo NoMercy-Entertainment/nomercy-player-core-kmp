@@ -25,6 +25,9 @@ private const val SUBTITLES_DISABLED = -1
 // caller waiting on it has not given up.
 private const val PROBE_TIMEOUT_MS = 5_000L
 
+// What an engine nobody has set a volume on is playing at.
+private const val DEFAULT_VOLUME = 1.0f
+
 // The desktop engine, over libVLC.
 //
 // libVLC decodes practically everything, which is what a desktop client needs
@@ -37,9 +40,19 @@ private const val PROBE_TIMEOUT_MS = 5_000L
 // without needing a window. A desktop client attaches its own surface to
 // [embeddedPlayer]; the conformance gate does not, which is what lets the gate
 // run anywhere libVLC is installed.
-public class VlcjVideoBackend(
-    private val factory: MediaPlayerFactory = MediaPlayerFactory(),
+public class VlcjVideoBackend private constructor(
+    private val factory: MediaPlayerFactory,
+    private val ownsFactory: Boolean,
 ) : VideoBackend {
+
+    // Made its own factory, and will release it.
+    public constructor() : this(MediaPlayerFactory(), ownsFactory = true)
+
+    // Given someone else's, and will not. A factory owns libVLC's plugin cache
+    // and every player made from it, so an engine that released one it was
+    // handed would pull the ground out from under its sibling — which is what
+    // two players sharing a factory for a crossfade are.
+    public constructor(factory: MediaPlayerFactory) : this(factory, ownsFactory = false)
 
     private val bus = StringEventBus()
 
@@ -55,6 +68,15 @@ public class VlcjVideoBackend(
     // VLC reports position in milliseconds and this contract is in seconds. One
     // conversion, here, rather than at every call site.
     private var lastKnownDuration: Double = 0.0
+
+    // What the caller asked for, and authoritative once it has.
+    //
+    // libVLC answers -1 for "I do not know yet" — it has no audio output until
+    // playback starts — and after that it answers from an output that is not
+    // strictly per-player: two engines in one process influence each other's
+    // reading. This backend's volume is the gain it was told to apply, which is
+    // also the only answer a crossfade can rely on while both engines are live.
+    private var requestedVolume: Float? = null
 
     // Announced once per item, from whichever of the two callbacks arrives
     // first. Twice would make a listener counting canplay think two items
@@ -171,10 +193,24 @@ public class VlcjVideoBackend(
         return if (reported > 0) reported / MILLIS_PER_SECOND else lastKnownDuration
     }
 
-    override fun volume(): Float = player.audio().volume() / FULL_VOLUME_PERCENT.toFloat()
+    // libVLC answers -1 for "I do not know yet" on volume, the same way it does
+    // on time and length — and it does not know until an audio output exists,
+    // which is after the first play rather than after the first load. A negative
+    // gain reaching a mixer is a slider at the wrong end and a fade that reads
+    // as never having happened.
+    //
+    // The last value set is remembered so a caller reads back what it asked for
+    // in that window, and the engine's own answer takes over once it has one.
+    override fun volume(): Float {
+        requestedVolume?.let { return it }
+        val reported: Int = player.audio().volume()
+        return if (reported < 0) DEFAULT_VOLUME else reported / FULL_VOLUME_PERCENT.toFloat()
+    }
 
     override fun volume(value: Float) {
-        player.audio().setVolume((value * FULL_VOLUME_PERCENT).toInt())
+        val clamped: Float = value.coerceIn(0f, 1f)
+        requestedVolume = clamped
+        player.audio().setVolume((clamped * FULL_VOLUME_PERCENT).toInt())
     }
 
     override fun mute() {
@@ -287,7 +323,7 @@ public class VlcjVideoBackend(
     // is dropped without this leaks a decoder thread per item.
     public fun release() {
         player.release()
-        factory.release()
+        if (ownsFactory) factory.release()
     }
 
     public companion object {
