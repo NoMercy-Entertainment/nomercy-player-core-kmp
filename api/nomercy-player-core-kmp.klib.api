@@ -2876,6 +2876,36 @@ final class tv.nomercy.player.core.plugin/Requirement { // tv.nomercy.player.cor
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/Requirement.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/AVPlayerAudioBackend : tv.nomercy.player.core.ports/AudioBackend { // tv.nomercy.player.core.ports/AVPlayerAudioBackend|null[0]
+    constructor <init>() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.<init>|<init>(){}[0]
+
+    final fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerAudioBackend.buffered|buffered(){}[0]
+    final fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerAudioBackend.currentTime|currentTime(){}[0]
+    final fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.currentTime|currentTime(kotlin.Double){}[0]
+    final fun disposeSecondary() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.disposeSecondary|disposeSecondary(){}[0]
+    final fun duration(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerAudioBackend.duration|duration(){}[0]
+    final fun mute() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.mute|mute(){}[0]
+    final fun off(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.off|off(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun pause() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.pause|pause(){}[0]
+    final fun playbackRate(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerAudioBackend.playbackRate|playbackRate(){}[0]
+    final fun playbackRate(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.playbackRate|playbackRate(kotlin.Double){}[0]
+    final fun release() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.release|release(){}[0]
+    final fun secondaryGain(): kotlin/Float // tv.nomercy.player.core.ports/AVPlayerAudioBackend.secondaryGain|secondaryGain(){}[0]
+    final fun secondaryGain(kotlin/Float) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.secondaryGain|secondaryGain(kotlin.Float){}[0]
+    final fun state(): tv.nomercy.player.core.ports/BackendState // tv.nomercy.player.core.ports/AVPlayerAudioBackend.state|state(){}[0]
+    final fun stop() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.stop|stop(){}[0]
+    final fun supportsCrossfade(): kotlin/Boolean // tv.nomercy.player.core.ports/AVPlayerAudioBackend.supportsCrossfade|supportsCrossfade(){}[0]
+    final fun unmute() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.unmute|unmute(){}[0]
+    final fun volume(): kotlin/Float // tv.nomercy.player.core.ports/AVPlayerAudioBackend.volume|volume(){}[0]
+    final fun volume(kotlin/Float) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.volume|volume(kotlin.Float){}[0]
+    final suspend fun crossfade(kotlin/Long, tv.nomercy.player.core.ports/CrossfadeCurve) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.crossfade|crossfade(kotlin.Long;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
+    final suspend fun load(kotlin/String, tv.nomercy.player.core.ports/LoadOptions) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.load|load(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
+    final suspend fun loadSecondary(kotlin/String) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.loadSecondary|loadSecondary(kotlin.String){}[0]
+    final suspend fun play() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.play|play(){}[0]
+    final suspend fun primeSecondary(kotlin/Long) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.primeSecondary|primeSecondary(kotlin.Long){}[0]
+}
+
 final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.player.core.ports/VideoBackend { // tv.nomercy.player.core.ports/AVPlayerVideoBackend|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.<init>|<init>(){}[0]
 
