@@ -85,6 +85,11 @@ public open class QueueController(private val ctx: PlayerContext) {
 
     public fun backlog(): List<PlaylistItem> = ctx.backlog.get()
 
+    // Replacing the backlog wholesale is how a host restores one: a session
+    // resumes and hands back the history it persisted, in one call rather than
+    // an append per item that would emit a change event each time.
+    public fun backlog(items: List<PlaylistItem>): Unit = ctx.backlog.set(items)
+
     public fun backlogAppend(items: List<PlaylistItem>): Unit = ctx.backlog.append(items)
 
     public fun backlogRemove(id: String): Unit = ctx.backlog.remove(id)

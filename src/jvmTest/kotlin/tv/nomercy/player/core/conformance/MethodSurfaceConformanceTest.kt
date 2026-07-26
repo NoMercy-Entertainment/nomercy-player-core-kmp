@@ -39,8 +39,7 @@ private val WEB_ONLY_METHODS = setOf(
 // that quietly got smaller for the wrong reason would look like progress.
 private val NOT_YET_PORTED_METHODS = setOf(
     "activityTracking", "addTranslations", "announce", "audioOutput", "audioOutputs",
-    "audioTrackMode", "auth", "backend", "backlog",
-    "backlogAppend", "backlogClear", "backlogRemove",
+    "audioTrackMode", "auth", "backend", 
     "baseUrl", "bufferState", "bufferedRanges", "bumpActivity", "canPlay", "castState",
     "device", "dispatching", "enabledPlugins", "experimental",
     "getPluginById", "getStreamFactory", "isDesktop", "isMobile", "isTv",

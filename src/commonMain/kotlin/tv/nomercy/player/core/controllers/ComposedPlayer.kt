@@ -268,6 +268,21 @@ public open class ComposedPlayer(
 
     public open fun queueSort(comparator: Comparator<PlaylistItem>): Unit = queue.queueSort(comparator)
 
+    // What has already played. It is a history store the host fills, not a
+    // second queue: nothing here moves the cursor, and the player never writes
+    // to it on its own. A player that auto-appended would be deciding what
+    // "already played" means — skipped past, watched to the end, abandoned
+    // halfway — and that is the host's question, not the library's.
+    public open fun backlog(): List<PlaylistItem> = queue.backlog()
+
+    public open fun backlog(items: List<PlaylistItem>): Unit = queue.backlog(items)
+
+    public open fun backlogAppend(items: List<PlaylistItem>): Unit = queue.backlogAppend(items)
+
+    public open fun backlogRemove(id: String): Unit = queue.backlogRemove(id)
+
+    public open fun backlogClear(): Unit = queue.backlogClear()
+
     public open suspend fun item(id: String, autoplay: Boolean = false): Unit = queue.item(id, autoplay)
 
     public open suspend fun playItem(id: String): Unit = queue.playItem(id)

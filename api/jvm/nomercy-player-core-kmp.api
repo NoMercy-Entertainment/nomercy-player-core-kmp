@@ -30,6 +30,11 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
 	public fun audioTracks ()Ljava/util/List;
+	public fun backlog ()Ljava/util/List;
+	public fun backlog (Ljava/util/List;)V
+	public fun backlogAppend (Ljava/util/List;)V
+	public fun backlogClear ()V
+	public fun backlogRemove (Ljava/lang/String;)V
 	public fun bandwidth ()I
 	public fun bandwidthEstimator ()Lkotlin/jvm/functions/Function0;
 	public fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
@@ -217,6 +222,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 public class tv/nomercy/player/core/controllers/QueueController {
 	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;)V
 	public final fun backlog ()Ljava/util/List;
+	public final fun backlog (Ljava/util/List;)V
 	public final fun backlogAppend (Ljava/util/List;)V
 	public final fun backlogClear ()V
 	public final fun backlogRemove (Ljava/lang/String;)V
