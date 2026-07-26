@@ -95,7 +95,9 @@ class AVPlayerVideoBackendTest {
     @Test
     fun diagnoseWhatTheEngineActuallyDoes() = withBackend { backend, recorder, url ->
         println("DIAG url=$url")
-        println("DIAG file exists=" + NSFileManager.defaultManager().fileExistsAtPath(url.removePrefix("file://")))
+        val diagPath = url.removePrefix("file://")
+        println("DIAG file exists=" + NSFileManager.defaultManager().fileExistsAtPath(diagPath))
+        println("DIAG file bytes=" + (NSFileManager.defaultManager().attributesOfItemAtPath(diagPath, null)?.get("NSFileSize")))
         kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
         settle(SETTLE_SECONDS)
         println("DIAG after load: state=" + backend.state() + " duration=" + backend.duration() + " seen=" + recorder.names())
