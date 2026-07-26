@@ -73,7 +73,7 @@ public open class ComposedPlayer(
     public val time: TimeController = TimeController(context, queue, transport)
     public val state: StateController = StateController(context, queue, time)
     public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, scope ?: CoroutineScope(SupervisorJob()))
-    public val lifecycle: LifecycleController = LifecycleController(context, plugins)
+    public val lifecycle: LifecycleController = LifecycleController(context, plugins, ::report)
 
     // What the engine reports, turned into what the player says. Without it
     // the controllers drive the engine and nothing listens to it come back.

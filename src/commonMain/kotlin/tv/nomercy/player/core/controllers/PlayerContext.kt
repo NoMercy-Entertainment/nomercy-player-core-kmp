@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.controllers
 
+import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
@@ -69,10 +70,10 @@ public class PlayerContext(
     // different bugs in the calling code.
     public fun assertReady() {
         if (phase == PlayerPhase.IDLE) {
-            throw stateError("core:player/not-ready", "The player has not been set up yet.")
+            throw stateError(CoreErrorCodes.NOT_READY, "The player has not been set up yet.")
         }
         if (phase == PlayerPhase.DISPOSING || phase == PlayerPhase.DISPOSED) {
-            throw stateError("core:player/disposed", "The player has been disposed.")
+            throw stateError(CoreErrorCodes.DISPOSED, "The player has been disposed.")
         }
     }
 

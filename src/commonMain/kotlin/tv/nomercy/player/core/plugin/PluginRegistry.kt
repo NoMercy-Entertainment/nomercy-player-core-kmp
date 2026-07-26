@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.plugin
 
 import kotlinx.coroutines.CoroutineScope
+import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.errors.Severity
@@ -179,6 +180,8 @@ public class PluginRegistry(
 
     // The plugin's own dispose() may throw; the lifecycle teardown after it
     // must happen regardless, or the plugin's listeners and timers outlive it.
+    // And the teardown itself may throw, which must not stop the plugins behind
+    // this one in the loop from being torn down at all.
     @Suppress("TooGenericExceptionCaught")
     private fun teardown(registration: Registration) {
         if (registration.lifecycle.isDisposed()) return
@@ -195,7 +198,19 @@ public class PluginRegistry(
                 ),
             )
         }
-        registration.lifecycle.dispose()
+        try {
+            registration.lifecycle.dispose()
+        } catch (cause: Throwable) {
+            host.report(
+                registryError(
+                    CoreErrorCodes.CLEANUP_FAILED,
+                    "Tearing down \"${registration.plugin.id}\" threw; the remaining plugins were still disposed.",
+                    mapOf("id" to registration.plugin.id),
+                    Severity.WARNING,
+                    cause,
+                ),
+            )
+        }
     }
 }
 

@@ -105,8 +105,8 @@ public final class tv/nomercy/player/core/controllers/InMemoryStorage : tv/nomer
 }
 
 public final class tv/nomercy/player/core/controllers/LifecycleController {
-	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/plugin/PluginRegistry;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun config ()Ltv/nomercy/player/core/player/PlayerConfig;
 	public final fun dispose (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun dispose$default (Ltv/nomercy/player/core/controllers/LifecycleController;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -290,6 +290,22 @@ public class tv/nomercy/player/core/errors/BrowserPolicyError : tv/nomercy/playe
 public final class tv/nomercy/player/core/errors/BrowserPolicyErrorKt {
 	public static final fun browserPolicyError (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Ltv/nomercy/player/core/errors/BrowserPolicyError;
 	public static synthetic fun browserPolicyError$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ltv/nomercy/player/core/errors/BrowserPolicyError;
+}
+
+public final class tv/nomercy/player/core/errors/CoreErrorCodes {
+	public static final field ALREADY_SETUP Ljava/lang/String;
+	public static final field CLEANUP_FAILED Ljava/lang/String;
+	public static final field CODEC_UNSUPPORTED Ljava/lang/String;
+	public static final field DISPOSED Ljava/lang/String;
+	public static final field FORBIDDEN Ljava/lang/String;
+	public static final field FRAGMENT_FAILED Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/errors/CoreErrorCodes;
+	public static final field NETWORK_TIMEOUT Ljava/lang/String;
+	public static final field NOT_READY Ljava/lang/String;
+	public static final field QUEUE_EMPTY Ljava/lang/String;
+	public static final field SERVER_ERROR Ljava/lang/String;
+	public static final field UNAUTHENTICATED Ljava/lang/String;
+	public final fun getAll ()Ljava/util/Set;
 }
 
 public class tv/nomercy/player/core/errors/DrmError : tv/nomercy/player/core/errors/PlayerError {
@@ -2527,6 +2543,7 @@ public final class tv/nomercy/player/core/plugin/PluginErrorCodes {
 	public static final field STATE_UNINITIALIZED Ljava/lang/String;
 	public static final field USE_AFTER_DISPOSE Ljava/lang/String;
 	public static final field VERSION_MISMATCH Ljava/lang/String;
+	public final fun getAll ()Ljava/util/Set;
 }
 
 public abstract interface class tv/nomercy/player/core/plugin/PluginHost {

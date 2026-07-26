@@ -139,4 +139,54 @@ class LifecycleControllerTest {
         val failure = assertFailsWith<PlayerError> { lifecycle.ready().await() }
         assertEquals("core:player/disposed", failure.code)
     }
+
+    @Test
+    fun aBackendThatThrowsFromStopStillLeavesThePlayerDisposed() = runTest {
+        // Left unguarded this stranded the player in DISPOSING: no dispose
+        // event, and anything awaiting ready() waiting forever on a player that
+        // is already gone. The host cannot fix that — the throwing code is the
+        // engine's.
+        val ctx = PlayerContext(backend = ThrowsOnStopBackend())
+        val reported = mutableListOf<PlayerError>()
+        val lifecycle = LifecycleController(ctx, null) { reported += it }
+        val seen = mutableListOf<String>()
+        ctx.on(CoreEvents.Dispose) { seen += "dispose" }
+        lifecycle.setup()
+
+        lifecycle.dispose()
+
+        assertEquals(PlayerPhase.DISPOSED, ctx.phase)
+        assertEquals(listOf("dispose"), seen)
+        assertEquals(listOf("core:lifecycle/cleanup-failed"), reported.map { it.code })
+        assertEquals("backend", reported.single().context["step"])
+    }
+
+    @Test
+    fun aFailedTeardownStepDoesNotSkipTheStepsBehindIt() = runTest {
+        // Plugins are torn down before the backend. A throwing registry that
+        // took the backend down with it would leave the engine holding the
+        // media file after the player said it was disposed.
+        val ctx = PlayerContext(backend = ThrowsOnStopBackend())
+        val reported = mutableListOf<PlayerError>()
+        val lifecycle = LifecycleController(ctx, null) { reported += it }
+        lifecycle.setup()
+
+        lifecycle.dispose()
+
+        assertEquals(PlayerPhase.DISPOSED, ctx.phase)
+        assertTrue((ctx.backend as ThrowsOnStopBackend).stopWasAttempted)
+    }
+
+    @Test
+    fun aDisposeThatThrowsNothingReportsNothing() = runTest {
+        val (_, lifecycle) = rig()
+        val reported = mutableListOf<PlayerError>()
+        val quiet = LifecycleController(newContext(), null) { reported += it }
+        lifecycle.setup()
+        quiet.setup()
+
+        quiet.dispose()
+
+        assertEquals(emptyList(), reported)
+    }
 }

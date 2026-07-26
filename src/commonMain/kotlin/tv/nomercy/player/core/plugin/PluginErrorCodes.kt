@@ -25,4 +25,16 @@ public object PluginErrorCodes {
     public const val STATE_UNINITIALIZED: String = "core:plugin/state-uninitialized"
 
     public const val USE_AFTER_DISPOSE: String = "core:lifecycle/use-plugin-after-dispose"
+
+    public val all: Set<String> = setOf(
+        MISSING_DEP,
+        DUPLICATE_ID,
+        VERSION_MISMATCH,
+        INCOMPATIBLE_CORE_VERSION,
+        DISPOSE_FAILED,
+        HAS_DEPENDENTS,
+        INIT_TIMEOUT,
+        STATE_UNINITIALIZED,
+        USE_AFTER_DISPOSE,
+    )
 }

@@ -194,6 +194,32 @@ detekt {
     // are allowed to stay, and this repo has no history to grandfather in.
 }
 
+// The GO/NO-GO gate, on its own so it can be read as a verdict.
+//
+// These tests already run inside jvmTest, so a red gate blocks `build` whether
+// or not this task exists. What it adds is time and a name: it answers "has the
+// native port drifted from the ecosystem contract" in seconds, before the
+// multiplatform build spends ten minutes arriving at the same answer under a
+// heading that says nothing.
+tasks.register<Test>("skeletonConformance") {
+    group = "verification"
+    description = "Checks the port against the vendored contract: events, error codes and behaviour."
+
+    val jvmTest: Test = tasks.named<Test>("jvmTest").get()
+    testClassesDirs = jvmTest.testClassesDirs
+    classpath = jvmTest.classpath
+
+    filter {
+        includeTestsMatching("tv.nomercy.player.core.conformance.*")
+        includeTestsMatching("tv.nomercy.player.core.events.CoreEventsRegistryTest")
+    }
+
+    testLogging {
+        events("failed")
+        showStandardStreams = false
+    }
+}
+
 @OptIn(kotlinx.validation.ExperimentalBCVApi::class)
 apiValidation {
     // The rule pack is a build-tool jar detekt loads through a service file, not

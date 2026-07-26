@@ -112,6 +112,19 @@ class FakeMediaBackend : MediaBackend {
     }
 }
 
+// An engine that fails on the way out. Real ones do: libVLC can throw from
+// release() when the native handle is already gone, and Media3 throws if stop()
+// lands off the main thread.
+class ThrowsOnStopBackend : MediaBackend by FakeMediaBackend() {
+    var stopWasAttempted: Boolean = false
+        private set
+
+    override fun stop() {
+        stopWasAttempted = true
+        error("the engine was already gone")
+    }
+}
+
 fun newContext(): PlayerContext = PlayerContext(backend = FakeMediaBackend())
 
 fun PlayerContext.fakeBackend(): FakeMediaBackend = backend as FakeMediaBackend

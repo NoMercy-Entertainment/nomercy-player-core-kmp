@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.ports
 
+import tv.nomercy.player.core.errors.CoreErrorCodes
+
 // Doubling past this would overflow a Long and wrap to a negative delay. Thirty
 // doublings of a one-second base is already twelve days.
 private const val MAX_DOUBLINGS = 30
@@ -78,21 +80,21 @@ private fun rangeKey(code: String): String? = when {
 // anything that will fail the same way twice does not. An expired token is the
 // one case where retrying helps only after doing something first.
 public val DEFAULT_RETRY_POLICY: RetryPolicy = mapOf(
-    "core:network/timeout" to
+    CoreErrorCodes.NETWORK_TIMEOUT to
         RetryConfig(attempts = 5, backoff = Backoff.EXPONENTIAL, baseMs = 500, maxMs = 30_000),
-    "core:network/server-error" to
+    CoreErrorCodes.SERVER_ERROR to
         RetryConfig(attempts = 3, backoff = Backoff.EXPONENTIAL, baseMs = 500, maxMs = 10_000),
-    "core:stream/fragment-failed" to
+    CoreErrorCodes.FRAGMENT_FAILED to
         RetryConfig(attempts = 5, backoff = Backoff.LINEAR, baseMs = 200, maxMs = 5_000),
-    "core:auth/unauthenticated" to RetryConfig(attempts = 1, refreshFirst = true),
-    "core:auth/forbidden" to RetryConfig(attempts = 0),
-    "core:media/codec-unsupported" to RetryConfig(attempts = 0),
+    CoreErrorCodes.UNAUTHENTICATED to RetryConfig(attempts = 1, refreshFirst = true),
+    CoreErrorCodes.FORBIDDEN to RetryConfig(attempts = 0),
+    CoreErrorCodes.CODEC_UNSUPPORTED to RetryConfig(attempts = 0),
     "media/aborted" to RetryConfig(attempts = 0),
     "media/network" to
         RetryConfig(attempts = 3, backoff = Backoff.EXPONENTIAL, baseMs = 1_000, maxMs = 8_000),
     "media/decode-fatal-variant" to RetryConfig(attempts = 0),
     "media/decode-fatal-all" to RetryConfig(attempts = 0),
-    "core:state/queue-empty" to RetryConfig(attempts = 0),
+    CoreErrorCodes.QUEUE_EMPTY to RetryConfig(attempts = 0),
     "4xx" to RetryConfig(attempts = 0),
     "5xx" to RetryConfig(attempts = 3, backoff = Backoff.EXPONENTIAL, baseMs = 500, maxMs = 10_000),
     "*" to RetryConfig(attempts = 0),

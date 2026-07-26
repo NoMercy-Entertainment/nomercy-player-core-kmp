@@ -10,7 +10,10 @@ package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
+import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.PlayerError
+import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.PreventedAction
@@ -31,6 +34,7 @@ import tv.nomercy.player.core.plugin.PluginRegistry
 public class LifecycleController(
     private val ctx: PlayerContext,
     private val plugins: PluginRegistry? = null,
+    private val report: (PlayerError) -> Unit = {},
 ) {
     private val readySignal: CompletableDeferred<Unit> = CompletableDeferred()
 
@@ -44,7 +48,7 @@ public class LifecycleController(
 
     public suspend fun setup(config: PlayerConfig = PlayerConfig()) {
         if (ctx.phase == PlayerPhase.DISPOSING || ctx.phase == PlayerPhase.DISPOSED) {
-            throw stateError("core:player/disposed", "The player has been disposed.")
+            throw stateError(CoreErrorCodes.DISPOSED, "The player has been disposed.")
         }
         if (configured != null) {
             throw alreadySetUp()
@@ -74,20 +78,44 @@ public class LifecycleController(
         }
 
         ctx.transitionPhase(PlayerPhase.DISPOSING)
-        plugins?.dispose()
-        ctx.backend?.stop()
+        cleanUp("plugins") { plugins?.dispose() }
+        cleanUp("backend") { ctx.backend?.stop() }
         ctx.transitionPhase(PlayerPhase.DISPOSED)
         ctx.emit(CoreEvents.Dispose, Unit)
 
         // A caller still awaiting ready() would otherwise wait forever on a
         // player that is never going to be ready.
         if (!readySignal.isCompleted) {
-            readySignal.completeExceptionally(stateError("core:player/disposed", "Disposed before setup finished."))
+            readySignal.completeExceptionally(stateError(CoreErrorCodes.DISPOSED, "Disposed before setup finished."))
+        }
+    }
+
+    // A teardown step that throws must not strand the player half-disposed.
+    // Left unguarded, the phase stays DISPOSING, the dispose event never fires,
+    // and anything awaiting ready() waits forever on a player that is already
+    // gone — a leak whose cause is a plugin the host may not have written.
+    // Every step runs, every failure is reported, and the player always arrives
+    // at DISPOSED.
+    @Suppress("TooGenericExceptionCaught")
+    private inline fun cleanUp(step: String, body: () -> Unit) {
+        try {
+            body()
+        } catch (cause: Throwable) {
+            report(
+                PlayerError(
+                    code = CoreErrorCodes.CLEANUP_FAILED,
+                    scope = ErrorScope.core(),
+                    severity = Severity.WARNING,
+                    message = "${CoreErrorCodes.CLEANUP_FAILED}: tearing down $step threw; dispose continued.",
+                    cause = cause,
+                    context = mapOf("step" to step),
+                ),
+            )
         }
     }
 
     private fun alreadySetUp(): PlayerError = stateError(
-        "core:lifecycle/already-setup",
+        CoreErrorCodes.ALREADY_SETUP,
         "The player is already set up. Dispose it before setting it up again.",
     )
 }

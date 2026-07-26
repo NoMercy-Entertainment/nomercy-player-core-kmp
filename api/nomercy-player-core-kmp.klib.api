@@ -1001,7 +1001,7 @@ final class tv.nomercy.player.core.controllers/InMemoryStorage : tv.nomercy.play
 }
 
 final class tv.nomercy.player.core.controllers/LifecycleController { // tv.nomercy.player.core.controllers/LifecycleController|null[0]
-    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext, tv.nomercy.player.core.plugin/PluginRegistry? = ...) // tv.nomercy.player.core.controllers/LifecycleController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext;tv.nomercy.player.core.plugin.PluginRegistry?){}[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext, tv.nomercy.player.core.plugin/PluginRegistry? = ..., kotlin/Function1<tv.nomercy.player.core.errors/PlayerError, kotlin/Unit> = ...) // tv.nomercy.player.core.controllers/LifecycleController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext;tv.nomercy.player.core.plugin.PluginRegistry?;kotlin.Function1<tv.nomercy.player.core.errors.PlayerError,kotlin.Unit>){}[0]
 
     final fun config(): tv.nomercy.player.core.player/PlayerConfig? // tv.nomercy.player.core.controllers/LifecycleController.config|config(){}[0]
     final fun ready(): kotlinx.coroutines/Deferred<kotlin/Unit> // tv.nomercy.player.core.controllers/LifecycleController.ready|ready(){}[0]
@@ -3589,6 +3589,34 @@ final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player
     final fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
 }
 
+final object tv.nomercy.player.core.errors/CoreErrorCodes { // tv.nomercy.player.core.errors/CoreErrorCodes|null[0]
+    final const val ALREADY_SETUP // tv.nomercy.player.core.errors/CoreErrorCodes.ALREADY_SETUP|{}ALREADY_SETUP[0]
+        final fun <get-ALREADY_SETUP>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.ALREADY_SETUP.<get-ALREADY_SETUP>|<get-ALREADY_SETUP>(){}[0]
+    final const val CLEANUP_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.CLEANUP_FAILED|{}CLEANUP_FAILED[0]
+        final fun <get-CLEANUP_FAILED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.CLEANUP_FAILED.<get-CLEANUP_FAILED>|<get-CLEANUP_FAILED>(){}[0]
+    final const val CODEC_UNSUPPORTED // tv.nomercy.player.core.errors/CoreErrorCodes.CODEC_UNSUPPORTED|{}CODEC_UNSUPPORTED[0]
+        final fun <get-CODEC_UNSUPPORTED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.CODEC_UNSUPPORTED.<get-CODEC_UNSUPPORTED>|<get-CODEC_UNSUPPORTED>(){}[0]
+    final const val DISPOSED // tv.nomercy.player.core.errors/CoreErrorCodes.DISPOSED|{}DISPOSED[0]
+        final fun <get-DISPOSED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.DISPOSED.<get-DISPOSED>|<get-DISPOSED>(){}[0]
+    final const val FORBIDDEN // tv.nomercy.player.core.errors/CoreErrorCodes.FORBIDDEN|{}FORBIDDEN[0]
+        final fun <get-FORBIDDEN>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.FORBIDDEN.<get-FORBIDDEN>|<get-FORBIDDEN>(){}[0]
+    final const val FRAGMENT_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.FRAGMENT_FAILED|{}FRAGMENT_FAILED[0]
+        final fun <get-FRAGMENT_FAILED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.FRAGMENT_FAILED.<get-FRAGMENT_FAILED>|<get-FRAGMENT_FAILED>(){}[0]
+    final const val NETWORK_TIMEOUT // tv.nomercy.player.core.errors/CoreErrorCodes.NETWORK_TIMEOUT|{}NETWORK_TIMEOUT[0]
+        final fun <get-NETWORK_TIMEOUT>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NETWORK_TIMEOUT.<get-NETWORK_TIMEOUT>|<get-NETWORK_TIMEOUT>(){}[0]
+    final const val NOT_READY // tv.nomercy.player.core.errors/CoreErrorCodes.NOT_READY|{}NOT_READY[0]
+        final fun <get-NOT_READY>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NOT_READY.<get-NOT_READY>|<get-NOT_READY>(){}[0]
+    final const val QUEUE_EMPTY // tv.nomercy.player.core.errors/CoreErrorCodes.QUEUE_EMPTY|{}QUEUE_EMPTY[0]
+        final fun <get-QUEUE_EMPTY>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.QUEUE_EMPTY.<get-QUEUE_EMPTY>|<get-QUEUE_EMPTY>(){}[0]
+    final const val SERVER_ERROR // tv.nomercy.player.core.errors/CoreErrorCodes.SERVER_ERROR|{}SERVER_ERROR[0]
+        final fun <get-SERVER_ERROR>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.SERVER_ERROR.<get-SERVER_ERROR>|<get-SERVER_ERROR>(){}[0]
+    final const val UNAUTHENTICATED // tv.nomercy.player.core.errors/CoreErrorCodes.UNAUTHENTICATED|{}UNAUTHENTICATED[0]
+        final fun <get-UNAUTHENTICATED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.UNAUTHENTICATED.<get-UNAUTHENTICATED>|<get-UNAUTHENTICATED>(){}[0]
+
+    final val all // tv.nomercy.player.core.errors/CoreErrorCodes.all|{}all[0]
+        final fun <get-all>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.errors/CoreErrorCodes.all.<get-all>|<get-all>(){}[0]
+}
+
 final object tv.nomercy.player.core.events/CoreEvents { // tv.nomercy.player.core.events/CoreEvents|null[0]
     final val Activity // tv.nomercy.player.core.events/CoreEvents.Activity|{}Activity[0]
         final fun <get-Activity>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/ActivityPayload> // tv.nomercy.player.core.events/CoreEvents.Activity.<get-Activity>|<get-Activity>(){}[0]
@@ -3935,6 +3963,9 @@ final object tv.nomercy.player.core.plugin/PluginErrorCodes { // tv.nomercy.play
         final fun <get-USE_AFTER_DISPOSE>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.USE_AFTER_DISPOSE.<get-USE_AFTER_DISPOSE>|<get-USE_AFTER_DISPOSE>(){}[0]
     final const val VERSION_MISMATCH // tv.nomercy.player.core.plugin/PluginErrorCodes.VERSION_MISMATCH|{}VERSION_MISMATCH[0]
         final fun <get-VERSION_MISMATCH>(): kotlin/String // tv.nomercy.player.core.plugin/PluginErrorCodes.VERSION_MISMATCH.<get-VERSION_MISMATCH>|<get-VERSION_MISMATCH>(){}[0]
+
+    final val all // tv.nomercy.player.core.plugin/PluginErrorCodes.all|{}all[0]
+        final fun <get-all>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.plugin/PluginErrorCodes.all.<get-all>|<get-all>(){}[0]
 }
 
 final object tv.nomercy.player.core.ports/AlwaysVisible : tv.nomercy.player.core.ports/VisibilityMonitor { // tv.nomercy.player.core.ports/AlwaysVisible|null[0]
