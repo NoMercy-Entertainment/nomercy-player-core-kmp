@@ -133,6 +133,11 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.startup)
         }
+        // The desktop engine. libVLC decodes practically everything, which is
+        // what a desktop client needs when the file came off a disc rip.
+        jvmMain.dependencies {
+            implementation(libs.vlcj)
+        }
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
