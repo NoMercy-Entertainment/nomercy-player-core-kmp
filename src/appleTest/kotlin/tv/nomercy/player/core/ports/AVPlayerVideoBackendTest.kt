@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.ports
 
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
@@ -21,6 +22,8 @@ import kotlin.test.assertTrue
 
 private const val SAMPLE_RATE = 44_100
 private const val SECONDS = 3
+private const val SETTLE_SECONDS = 0.5
+private const val PLAY_SECONDS = 1.5
 
 // The Apple engine gate, against real AVFoundation.
 //
@@ -32,7 +35,7 @@ private const val SECONDS = 3
 // The media is a silent WAV written to the temp directory: forty-four bytes of
 // header and the rest zeroes. AVFoundation plays WAV, so the gate needs no
 // network and no bundled asset.
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 class AVPlayerVideoBackendTest {
 
     private fun withBackend(body: (AVPlayerVideoBackend, BackendEventRecorder, String) -> Unit) {
@@ -62,6 +65,34 @@ class AVPlayerVideoBackendTest {
         kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
 
         assertEquals(CanonicalBackendEvent.LOAD_START, recorder.names().first())
+    }
+
+    @Test
+    fun aRealEngineReportsTheCanonicalSpineInOrder() = withBackend { backend, recorder, url ->
+        kotlinx.coroutines.runBlocking {
+            backend.load(url, LoadOptions())
+            settle(SETTLE_SECONDS)
+
+            backend.play()
+            settle(PLAY_SECONDS)
+            val whilePlaying: Double = backend.currentTime()
+
+            backend.pause()
+            settle(SETTLE_SECONDS)
+
+            // The same assertion the desktop and Android gates make, against the
+            // same ruler. That is the whole point of the spike: one vocabulary,
+            // three engines that agree on it.
+            assertCanonicalSubsequence(recorder.names(), CanonicalBackendEvent.PLAY_PAUSE_SPINE)
+            assertTrue(whilePlaying > 0.0, "the playhead did not move: $whilePlaying")
+        }
+    }
+
+    // AVPlayer reports through a periodic observer on the main run loop, so the
+    // test has to let that loop turn rather than blocking it. A sleep here would
+    // stop the very thing being measured.
+    private suspend fun settle(seconds: Double) {
+        kotlinx.coroutines.delay((seconds * 1000).toLong())
     }
 
     @Test
