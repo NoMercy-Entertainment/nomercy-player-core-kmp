@@ -66,7 +66,7 @@ public class ExoPlayerVideoBackend(
     // and this is the render target alone.
     //
     // Main thread, like everything else Media3 owns.
-    public val exoPlayer: ExoPlayer = ExoPlayer.Builder(context).build()
+    public val exoPlayer: ExoPlayer = buildEngine(context)
 
     private val player: ExoPlayer = exoPlayer
 

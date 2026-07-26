@@ -3348,6 +3348,40 @@ final class tv.nomercy.player.core.ports/AudioTrack { // tv.nomercy.player.core.
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/AudioTrack.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/BufferConfig { // tv.nomercy.player.core.ports/BufferConfig|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Int = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.ports/BufferConfig.<init>|<init>(kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Boolean;kotlin.Int;kotlin.Boolean){}[0]
+
+    final val backBufferMs // tv.nomercy.player.core.ports/BufferConfig.backBufferMs|{}backBufferMs[0]
+        final fun <get-backBufferMs>(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.backBufferMs.<get-backBufferMs>|<get-backBufferMs>(){}[0]
+    final val bufferForPlaybackAfterRebufferMs // tv.nomercy.player.core.ports/BufferConfig.bufferForPlaybackAfterRebufferMs|{}bufferForPlaybackAfterRebufferMs[0]
+        final fun <get-bufferForPlaybackAfterRebufferMs>(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.bufferForPlaybackAfterRebufferMs.<get-bufferForPlaybackAfterRebufferMs>|<get-bufferForPlaybackAfterRebufferMs>(){}[0]
+    final val bufferForPlaybackMs // tv.nomercy.player.core.ports/BufferConfig.bufferForPlaybackMs|{}bufferForPlaybackMs[0]
+        final fun <get-bufferForPlaybackMs>(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.bufferForPlaybackMs.<get-bufferForPlaybackMs>|<get-bufferForPlaybackMs>(){}[0]
+    final val isTvDevice // tv.nomercy.player.core.ports/BufferConfig.isTvDevice|{}isTvDevice[0]
+        final fun <get-isTvDevice>(): kotlin/Boolean // tv.nomercy.player.core.ports/BufferConfig.isTvDevice.<get-isTvDevice>|<get-isTvDevice>(){}[0]
+    final val maxBufferMs // tv.nomercy.player.core.ports/BufferConfig.maxBufferMs|{}maxBufferMs[0]
+        final fun <get-maxBufferMs>(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.maxBufferMs.<get-maxBufferMs>|<get-maxBufferMs>(){}[0]
+    final val minBufferMs // tv.nomercy.player.core.ports/BufferConfig.minBufferMs|{}minBufferMs[0]
+        final fun <get-minBufferMs>(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.minBufferMs.<get-minBufferMs>|<get-minBufferMs>(){}[0]
+    final val retainBackBufferFromKeyframe // tv.nomercy.player.core.ports/BufferConfig.retainBackBufferFromKeyframe|{}retainBackBufferFromKeyframe[0]
+        final fun <get-retainBackBufferFromKeyframe>(): kotlin/Boolean // tv.nomercy.player.core.ports/BufferConfig.retainBackBufferFromKeyframe.<get-retainBackBufferFromKeyframe>|<get-retainBackBufferFromKeyframe>(){}[0]
+    final val targetBufferBytes // tv.nomercy.player.core.ports/BufferConfig.targetBufferBytes|{}targetBufferBytes[0]
+        final fun <get-targetBufferBytes>(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.targetBufferBytes.<get-targetBufferBytes>|<get-targetBufferBytes>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.component3|component3(){}[0]
+    final fun component4(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // tv.nomercy.player.core.ports/BufferConfig.component6|component6(){}[0]
+    final fun component7(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.component7|component7(){}[0]
+    final fun component8(): kotlin/Boolean // tv.nomercy.player.core.ports/BufferConfig.component8|component8(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ..., kotlin/Int = ..., kotlin/Boolean = ...): tv.nomercy.player.core.ports/BufferConfig // tv.nomercy.player.core.ports/BufferConfig.copy|copy(kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Boolean;kotlin.Int;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/BufferConfig.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/BufferConfig.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/BufferConfig.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/CrossfadeTransitionStrategy : tv.nomercy.player.core.ports/TransitionStrategy { // tv.nomercy.player.core.ports/CrossfadeTransitionStrategy|null[0]
     constructor <init>(kotlin/Double = ..., kotlin/Double = ..., tv.nomercy.player.core.ports/CrossfadeCurve = ...) // tv.nomercy.player.core.ports/CrossfadeTransitionStrategy.<init>|<init>(kotlin.Double;kotlin.Double;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
 
@@ -4818,6 +4852,10 @@ final object tv.nomercy.player.core.ports/BandwidthSanitizer { // tv.nomercy.pla
     }
 }
 
+final object tv.nomercy.player.core.ports/BufferBudget { // tv.nomercy.player.core.ports/BufferBudget|null[0]
+    final fun forMemory(kotlin/Int, kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.ports/BufferConfig // tv.nomercy.player.core.ports/BufferBudget.forMemory|forMemory(kotlin.Int;kotlin.Boolean;kotlin.Boolean){}[0]
+}
+
 final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.player.core.ports/CanonicalBackendEvent|null[0]
     final const val CAN_PLAY // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY|{}CAN_PLAY[0]
         final fun <get-CAN_PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY.<get-CAN_PLAY>|<get-CAN_PLAY>(){}[0]
@@ -4940,6 +4978,8 @@ final const val tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH // tv.nomercy.playe
     final fun <get-DEFAULT_BANDWIDTH>(): kotlin/Double // tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH.<get-DEFAULT_BANDWIDTH>|<get-DEFAULT_BANDWIDTH>(){}[0]
 final const val tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS|{}CHAPTER_GAP_EPSILON_SECONDS[0]
     final fun <get-CHAPTER_GAP_EPSILON_SECONDS>(): kotlin/Double // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS.<get-CHAPTER_GAP_EPSILON_SECONDS>|<get-CHAPTER_GAP_EPSILON_SECONDS>(){}[0]
+final const val tv.nomercy.player.core.ports/BYTES_PER_MB // tv.nomercy.player.core.ports/BYTES_PER_MB|{}BYTES_PER_MB[0]
+    final fun <get-BYTES_PER_MB>(): kotlin/Int // tv.nomercy.player.core.ports/BYTES_PER_MB.<get-BYTES_PER_MB>|<get-BYTES_PER_MB>(){}[0]
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
     final fun <get-CONTRACT_VERSION>(): kotlin/String // tv.nomercy.player.core/CONTRACT_VERSION.<get-CONTRACT_VERSION>|<get-CONTRACT_VERSION>(){}[0]
 final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]
