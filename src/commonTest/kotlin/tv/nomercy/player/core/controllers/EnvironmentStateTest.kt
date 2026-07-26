@@ -12,57 +12,88 @@ import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.player.CastState
 import tv.nomercy.player.core.player.NetworkState
 import tv.nomercy.player.core.player.VisibilityState
+import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.ports.BackendState
-import tv.nomercy.player.core.ports.EnvironmentMonitor
+import tv.nomercy.player.core.ports.CapabilitiesProbe
+import tv.nomercy.player.core.ports.NetworkMonitor
+import tv.nomercy.player.core.ports.NetworkSnapshot
+import tv.nomercy.player.core.ports.NetworkType
+import tv.nomercy.player.core.ports.Platform
+import tv.nomercy.player.core.ports.VisibilityMonitor
+import tv.nomercy.player.core.ports.NoopWakeLock
+import tv.nomercy.player.core.ports.PermissiveCapabilitiesProbe
+import tv.nomercy.player.core.ports.WakeLock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// What the host's own observers would report.
-private class StubEnvironment(
-    var connectivity: NetworkState = NetworkState.ONLINE,
-    var onScreen: VisibilityState = VisibilityState.VISIBLE,
-) : EnvironmentMonitor {
-    override fun network(): NetworkState = connectivity
-    override fun visibility(): VisibilityState = onScreen
+// What the host's own observers would report, over the real Platform port.
+private class StubPlatform(
+    var online: Boolean = true,
+    var downlink: Double? = null,
+    var onScreen: Boolean = true,
+) : Platform {
+    override val wakeLock: WakeLock = NoopWakeLock
+    override val capabilities: CapabilitiesProbe = PermissiveCapabilitiesProbe
+
+    override val network: NetworkMonitor = object : NetworkMonitor {
+        override fun isOnline(): Boolean = online
+        override fun type(): NetworkType = NetworkType.UNKNOWN
+        override fun downlinkMbps(): Double? = downlink
+        override fun rttMs(): Double? = null
+        override fun subscribe(fn: (NetworkSnapshot) -> Unit): Subscription = Subscription {}
+    }
+
+    override val visibility: VisibilityMonitor = object : VisibilityMonitor {
+        override fun isVisible(): Boolean = onScreen
+        override fun subscribe(fn: (Boolean) -> Unit): Subscription = Subscription {}
+    }
 }
 
 class EnvironmentStateTest {
-
-    @Test
-    fun withNoMonitorThePlayerAssumesOnlineAndVisible() {
-        // Both defaults lean the same way for the same reason: the wrong guess
-        // has to be the cheap one. Assuming offline would refuse to start on
-        // every host that never wired a monitor up, and assuming hidden would
-        // pause a player nobody told otherwise.
-        val player = ComposedPlayer(backend = FakeMediaBackend())
-
-        assertEquals(NetworkState.ONLINE, player.networkState())
-        assertEquals(VisibilityState.VISIBLE, player.visibilityState())
-    }
 
     @Test
     fun theMonitorIsAskedEveryTimeRatherThanCached() {
         // The whole point of it being a port: connectivity changes while the
         // process runs, and a cached answer is the state from whenever the
         // player last thought to ask.
-        val environment = StubEnvironment()
-        val player = ComposedPlayer(backend = FakeMediaBackend(), environment = environment)
+        val platform = StubPlatform()
+        val player = ComposedPlayer(backend = FakeMediaBackend(), platform = platform)
 
-        environment.connectivity = NetworkState.OFFLINE
-        environment.onScreen = VisibilityState.HIDDEN
+        platform.online = false
+        platform.onScreen = false
 
         assertEquals(NetworkState.OFFLINE, player.networkState())
         assertEquals(VisibilityState.HIDDEN, player.visibilityState())
     }
 
     @Test
-    fun slowIsTheHostsJudgementNotTheLibrarys() {
-        // "Slow" on a metered phone connection and on a TV's ethernet are
-        // different thresholds, and only the app knows which it is on.
-        val environment = StubEnvironment(connectivity = NetworkState.SLOW)
-        val player = ComposedPlayer(backend = FakeMediaBackend(), environment = environment)
+    fun aConnectionTooThinForAStreamIsSlowRatherThanOnline() {
+        val platform = StubPlatform(downlink = 0.8)
+        val player = ComposedPlayer(backend = FakeMediaBackend(), platform = platform)
 
         assertEquals(NetworkState.SLOW, player.networkState())
+    }
+
+    @Test
+    fun aPlatformThatCannotMeasureBandwidthIsNotTherebySlow() {
+        // A desktop with no such API reports null. Treating that as slow would
+        // leave it permanently degraded.
+        val player = ComposedPlayer(backend = FakeMediaBackend(), platform = StubPlatform(downlink = null))
+
+        assertEquals(NetworkState.ONLINE, player.networkState())
+    }
+
+    @Test
+    fun offlineWinsOverSlow() {
+        // A downlink figure from a connection that is gone is stale by
+        // definition, and 'slow' would send a consumer down a retry path when
+        // there is nothing to retry against.
+        val player = ComposedPlayer(
+            backend = FakeMediaBackend(),
+            platform = StubPlatform(online = false, downlink = 0.5),
+        )
+
+        assertEquals(NetworkState.OFFLINE, player.networkState())
     }
 
     @Test

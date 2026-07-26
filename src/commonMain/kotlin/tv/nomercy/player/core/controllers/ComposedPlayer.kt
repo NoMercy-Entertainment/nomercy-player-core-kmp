@@ -56,7 +56,8 @@ import tv.nomercy.player.core.ports.AnnouncementLevel
 import tv.nomercy.player.core.ports.Announcer
 import tv.nomercy.player.core.ports.BackendState
 import tv.nomercy.player.core.ports.Clock
-import tv.nomercy.player.core.ports.EnvironmentMonitor
+import tv.nomercy.player.core.ports.Platform
+import tv.nomercy.player.core.ports.UnconfiguredPlatform
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.CueParserRegistry
 import tv.nomercy.player.core.ports.DefaultPreloadStrategy
@@ -108,6 +109,16 @@ private val OK_STATUS = 200..299
 // The reason a transition ends when a consumer swaps the strategy under it.
 private const val STRATEGY_REPLACED = "strategy-replaced"
 
+// Under this and a 1080p rung is not going to hold. The number is the web
+// player's, kept so a consumer moving between them sees the same badge at the
+// same moment rather than discovering that native calls it slow later.
+private const val SLOW_DOWNLINK_MBPS = 1.5
+
+// Null means the platform cannot measure it, which is not the same as slow: a
+// desktop with no such API would otherwise be permanently degraded.
+private fun isSlow(downlinkMbps: Double?): Boolean =
+    downlinkMbps != null && downlinkMbps > 0.0 && downlinkMbps < SLOW_DOWNLINK_MBPS
+
 // Enough randomness to tell two players in one log apart, and no more.
 //
 // Not a UUID: this identifies an instance inside a process, and the id that has
@@ -137,10 +148,15 @@ public open class ComposedPlayer(
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
     private val announcer: Announcer? = null,
-    // Connectivity and visibility, from the app's own observers. A library that
-    // registered its own would be a second set beside them, disagreeing about
-    // state and outliving the screen.
-    private val environment: EnvironmentMonitor? = null,
+    // Wake lock, connectivity, visibility and codec probing, from the app's own
+    // observers. A library that registered its own would be a second set beside
+    // them, disagreeing about state and outliving the screen.
+    //
+    // Not defaultPlatform(): on Android that reaches for a Context the host has
+    // to have installed, and a player must be constructible before any of that
+    // has happened. A host that wants the real monitors passes defaultPlatform()
+    // once its own setup is done.
+    private val platform: Platform = UnconfiguredPlatform,
     // Injectable so a test decides what time it is, and so a fleet in a Connect
     // session can share one: two devices comparing timestamps have to agree
     // about now.
@@ -257,16 +273,26 @@ public open class ComposedPlayer(
 
     // Whether anything can be fetched, and roughly how well.
     //
-    // ONLINE without a monitor, which is the only safe default: a player that
-    // assumed offline would refuse to start on every host that has not wired
-    // one up, and being wrong about offline costs a failed request the error
-    // path already handles.
-    public open fun networkState(): NetworkState = environment?.network() ?: NetworkState.ONLINE
+    // Three states from two questions the monitor answers. Offline wins over
+    // slow, because a downlink figure from a connection that is gone is stale
+    // by definition.
+    public open fun networkState(): NetworkState = when {
+        !platform.network.isOnline() -> NetworkState.OFFLINE
+        isSlow(platform.network.downlinkMbps()) -> NetworkState.SLOW
+        else -> NetworkState.ONLINE
+    }
 
-    // VISIBLE without a monitor, for the same reason in the other direction: a
-    // player that assumed hidden would pause itself on a host that never told
-    // it otherwise.
-    public open fun visibilityState(): VisibilityState = environment?.visibility() ?: VisibilityState.VISIBLE
+    // Not whether the app is foregrounded: a Compose screen that scrolled away,
+    // a tab behind another and a backgrounded app are all hidden, and the
+    // pause-when-hidden policy wants all three.
+    public open fun visibilityState(): VisibilityState =
+        if (platform.visibility.isVisible()) VisibilityState.VISIBLE else VisibilityState.HIDDEN
+
+    // The host platform itself, for the two things a chrome needs that no state
+    // enum covers: whether fullscreen and picture-in-picture exist here. Both
+    // are nullable on the port, so a chrome asking gets an honest absent rather
+    // than a control that silently does nothing.
+    public open fun platform(): Platform = platform
 
     // What the engine is doing with the stream, as the engine sees it.
     //

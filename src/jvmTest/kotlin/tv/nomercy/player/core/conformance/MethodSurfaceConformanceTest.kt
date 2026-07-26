@@ -44,7 +44,7 @@ private val NOT_YET_PORTED_METHODS = setOf(
     "experimental",
     "getStreamFactory", 
     "load", 
-    "platform", 
+    
     "refreshAuth", "registerStream",
     "registerTitleTokens", 
     "seekable",

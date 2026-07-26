@@ -32,8 +32,8 @@ public final class tv/nomercy/player/core/controllers/BandwidthController {
 
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
-	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/EnvironmentMonitor;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/EnvironmentMonitor;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun activityTracking ()Z
 	public fun activityTracking (Z)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -119,6 +119,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun peekNext ()Ltv/nomercy/player/core/media/PlaylistItem;
 	public fun peekPrevious ()Ltv/nomercy/player/core/media/PlaylistItem;
 	public fun phase ()Ltv/nomercy/player/core/player/PlayerPhase;
+	public fun platform ()Ltv/nomercy/player/core/ports/Platform;
 	public fun play (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun play$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun playItem (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3079,11 +3080,6 @@ public final class tv/nomercy/player/core/ports/DynamicRange : java/lang/Enum {
 	public static fun values ()[Ltv/nomercy/player/core/ports/DynamicRange;
 }
 
-public abstract interface class tv/nomercy/player/core/ports/EnvironmentMonitor {
-	public abstract fun network ()Ltv/nomercy/player/core/player/NetworkState;
-	public abstract fun visibility ()Ltv/nomercy/player/core/player/VisibilityState;
-}
-
 public final class tv/nomercy/player/core/ports/EqualPowerCrossfader {
 	public static final field DEFAULT_STEP_MS J
 	public fun <init> ()V
@@ -3736,6 +3732,16 @@ public abstract interface class tv/nomercy/player/core/ports/Translator {
 public final class tv/nomercy/player/core/ports/Translator$DefaultImpls {
 	public static synthetic fun removeTranslations$default (Ltv/nomercy/player/core/ports/Translator;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun t$default (Ltv/nomercy/player/core/ports/Translator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/UnconfiguredPlatform : tv/nomercy/player/core/ports/Platform {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/UnconfiguredPlatform;
+	public fun getCapabilities ()Ltv/nomercy/player/core/ports/CapabilitiesProbe;
+	public fun getFullscreen ()Ltv/nomercy/player/core/ports/FullscreenController;
+	public fun getNetwork ()Ltv/nomercy/player/core/ports/NetworkMonitor;
+	public fun getPip ()Ltv/nomercy/player/core/ports/PipController;
+	public fun getVisibility ()Ltv/nomercy/player/core/ports/VisibilityMonitor;
+	public fun getWakeLock ()Ltv/nomercy/player/core/ports/WakeLock;
 }
 
 public final class tv/nomercy/player/core/ports/UrlCategory : java/lang/Enum {

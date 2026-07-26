@@ -52,3 +52,24 @@ public object PermissiveCapabilitiesProbe : CapabilitiesProbe {
 
     override suspend fun supportedCodecs(): List<String> = emptyList()
 }
+
+// A platform that needs nothing installed.
+//
+// Not the same as defaultPlatform(): that one reaches for real monitors, and on
+// Android reaching for them requires a Context the host has to have installed
+// first. A player must be constructible before any of that has happened — in a
+// test, in a headless tool, in a composable that runs before the app's
+// initialiser — so this is what it uses until a host supplies better.
+//
+// Every answer here is the safe direction. Online rather than offline, because a
+// player that assumed offline would refuse to start on every host that never
+// wired a monitor up. Visible rather than hidden, because one that assumed
+// hidden would pause itself for a host that never said otherwise. Both wrong
+// guesses cost a request the error path already handles; the opposite guesses
+// cost a player that does nothing and cannot say why.
+public object UnconfiguredPlatform : Platform {
+    override val wakeLock: WakeLock = NoopWakeLock
+    override val network: NetworkMonitor = StaticNetworkMonitor()
+    override val visibility: VisibilityMonitor = AlwaysVisible
+    override val capabilities: CapabilitiesProbe = PermissiveCapabilitiesProbe
+}
