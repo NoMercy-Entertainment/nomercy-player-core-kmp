@@ -17,7 +17,9 @@ import tv.nomercy.player.core.errors.NotImplementedError
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
+import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.PlaybackMetrics
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.Chapter
 import tv.nomercy.player.core.media.ChapterTrack
@@ -37,7 +39,9 @@ import tv.nomercy.player.core.plugin.ContributionBinding
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
+import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.Device
+import tv.nomercy.player.core.ports.defaultClock
 import tv.nomercy.player.core.ports.currentDevice
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.Fetcher
@@ -89,6 +93,10 @@ public open class ComposedPlayer(
     private val logger: Logger = SilentLogger,
     private val storage: Storage = InMemoryStorage(),
     private val translator: Translator? = null,
+    // Injectable so a test decides what time it is, and so a fleet in a Connect
+    // session can share one: two devices comparing timestamps have to agree
+    // about now.
+    clock: Clock = defaultClock(),
     // Null by default, and the failure when a plugin asks anyway is a named
     // one. A player that opened its own connections would be a second HTTP
     // stack beside the app's, with its own idea of auth and retries.
@@ -124,10 +132,18 @@ public open class ComposedPlayer(
 
     public val bandwidth: BandwidthController = BandwidthController()
 
+    public val metrics: MetricsController = MetricsController(clock)
+
     init {
         queue.transport = transport
         queue.wireQueue()
         backend?.let { bridge.attach(it) }
+
+        // Counting restarts with every item, because the question a metric
+        // answers is about this thing playing now. A session spanning a whole
+        // queue would answer "how long has this been playing" with how long the
+        // app has been open.
+        context.on(CoreEvents.Item) { metrics.startSession() }
     }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
@@ -154,6 +170,16 @@ public open class ComposedPlayer(
     // that came from the queue advancing", which are different rules and
     // indistinguishable from the payload alone.
     public open fun dispatching(): List<String> = context.dispatching()
+
+    // ── Instrumentation ──────────────────────────────────────────────────────
+
+    public open fun metrics(): PlaybackMetrics = metrics.metrics()
+
+    public open fun recordMetric(metric: Metric, value: Double): Unit = metrics.recordMetric(metric, value)
+
+    public open fun recordMetric(name: String, value: Double): Unit = metrics.recordMetric(name, value)
+
+    public open fun now(): Long = metrics.now()
 
     // ── Urls ─────────────────────────────────────────────────────────────────
 

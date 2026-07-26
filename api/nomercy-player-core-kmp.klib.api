@@ -6,6 +6,27 @@
 // - Show declarations: true
 
 // Library unique name: <nomercy-player-core-kmp>
+final enum class tv.nomercy.player.core.controllers/Metric : kotlin/Enum<tv.nomercy.player.core.controllers/Metric> { // tv.nomercy.player.core.controllers/Metric|null[0]
+    enum entry BITRATE // tv.nomercy.player.core.controllers/Metric.BITRATE|null[0]
+    enum entry BUFFERING_EVENTS // tv.nomercy.player.core.controllers/Metric.BUFFERING_EVENTS|null[0]
+    enum entry BUFFERING_SECONDS // tv.nomercy.player.core.controllers/Metric.BUFFERING_SECONDS|null[0]
+    enum entry DROPPED_FRAMES // tv.nomercy.player.core.controllers/Metric.DROPPED_FRAMES|null[0]
+    enum entry STARTUP_SECONDS // tv.nomercy.player.core.controllers/Metric.STARTUP_SECONDS|null[0]
+    enum entry TOTAL_FRAMES // tv.nomercy.player.core.controllers/Metric.TOTAL_FRAMES|null[0]
+
+    final val entries // tv.nomercy.player.core.controllers/Metric.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.controllers/Metric> // tv.nomercy.player.core.controllers/Metric.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val key // tv.nomercy.player.core.controllers/Metric.key|{}key[0]
+        final fun <get-key>(): kotlin/String // tv.nomercy.player.core.controllers/Metric.key.<get-key>|<get-key>(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.controllers/Metric // tv.nomercy.player.core.controllers/Metric.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.controllers/Metric> // tv.nomercy.player.core.controllers/Metric.values|values#static(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.controllers/Metric.Companion|null[0]
+        final fun byKey(kotlin/String): tv.nomercy.player.core.controllers/Metric? // tv.nomercy.player.core.controllers/Metric.Companion.byKey|byKey(kotlin.String){}[0]
+    }
+}
+
 final enum class tv.nomercy.player.core.errors/ScopeKind : kotlin/Enum<tv.nomercy.player.core.errors/ScopeKind> { // tv.nomercy.player.core.errors/ScopeKind|null[0]
     enum entry AUTH // tv.nomercy.player.core.errors/ScopeKind.AUTH|null[0]
     enum entry BACKEND // tv.nomercy.player.core.errors/ScopeKind.BACKEND|null[0]
@@ -1098,6 +1119,17 @@ final class tv.nomercy.player.core.controllers/LifecycleController { // tv.nomer
     final suspend fun setup(tv.nomercy.player.core.player/PlayerConfig = ...) // tv.nomercy.player.core.controllers/LifecycleController.setup|setup(tv.nomercy.player.core.player.PlayerConfig){}[0]
 }
 
+final class tv.nomercy.player.core.controllers/MetricsController { // tv.nomercy.player.core.controllers/MetricsController|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/Clock = ...) // tv.nomercy.player.core.controllers/MetricsController.<init>|<init>(tv.nomercy.player.core.ports.Clock){}[0]
+
+    final fun endSession() // tv.nomercy.player.core.controllers/MetricsController.endSession|endSession(){}[0]
+    final fun metrics(): tv.nomercy.player.core.events/PlaybackMetrics // tv.nomercy.player.core.controllers/MetricsController.metrics|metrics(){}[0]
+    final fun now(): kotlin/Long // tv.nomercy.player.core.controllers/MetricsController.now|now(){}[0]
+    final fun recordMetric(kotlin/String, kotlin/Double) // tv.nomercy.player.core.controllers/MetricsController.recordMetric|recordMetric(kotlin.String;kotlin.Double){}[0]
+    final fun recordMetric(tv.nomercy.player.core.controllers/Metric, kotlin/Double) // tv.nomercy.player.core.controllers/MetricsController.recordMetric|recordMetric(tv.nomercy.player.core.controllers.Metric;kotlin.Double){}[0]
+    final fun startSession() // tv.nomercy.player.core.controllers/MetricsController.startSession|startSession(){}[0]
+}
+
 final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.player.core.controllers/PlayerContext|null[0]
     constructor <init>(tv.nomercy.player.core.events/EventEmitter<kotlin/Unit> = ..., tv.nomercy.player.core.ports/MediaBackend? = ...) // tv.nomercy.player.core.controllers/PlayerContext.<init>|<init>(tv.nomercy.player.core.events.EventEmitter<kotlin.Unit>;tv.nomercy.player.core.ports.MediaBackend?){}[0]
 
@@ -1861,7 +1893,7 @@ final class tv.nomercy.player.core.events/PlaySource { // tv.nomercy.player.core
 }
 
 final class tv.nomercy.player.core.events/PlaybackMetrics { // tv.nomercy.player.core.events/PlaybackMetrics|null[0]
-    constructor <init>(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...) // tv.nomercy.player.core.events/PlaybackMetrics.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    constructor <init>(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Long = ..., kotlin.collections/Map<kotlin/String, kotlin/Double> = ...) // tv.nomercy.player.core.events/PlaybackMetrics.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Long;kotlin.collections.Map<kotlin.String,kotlin.Double>){}[0]
 
     final val bitrate // tv.nomercy.player.core.events/PlaybackMetrics.bitrate|{}bitrate[0]
         final fun <get-bitrate>(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.bitrate.<get-bitrate>|<get-bitrate>(){}[0]
@@ -1869,8 +1901,12 @@ final class tv.nomercy.player.core.events/PlaybackMetrics { // tv.nomercy.player
         final fun <get-bufferingEvents>(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.bufferingEvents.<get-bufferingEvents>|<get-bufferingEvents>(){}[0]
     final val bufferingSeconds // tv.nomercy.player.core.events/PlaybackMetrics.bufferingSeconds|{}bufferingSeconds[0]
         final fun <get-bufferingSeconds>(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.bufferingSeconds.<get-bufferingSeconds>|<get-bufferingSeconds>(){}[0]
+    final val custom // tv.nomercy.player.core.events/PlaybackMetrics.custom|{}custom[0]
+        final fun <get-custom>(): kotlin.collections/Map<kotlin/String, kotlin/Double> // tv.nomercy.player.core.events/PlaybackMetrics.custom.<get-custom>|<get-custom>(){}[0]
     final val droppedFrames // tv.nomercy.player.core.events/PlaybackMetrics.droppedFrames|{}droppedFrames[0]
         final fun <get-droppedFrames>(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.droppedFrames.<get-droppedFrames>|<get-droppedFrames>(){}[0]
+    final val sessionDurationMs // tv.nomercy.player.core.events/PlaybackMetrics.sessionDurationMs|{}sessionDurationMs[0]
+        final fun <get-sessionDurationMs>(): kotlin/Long // tv.nomercy.player.core.events/PlaybackMetrics.sessionDurationMs.<get-sessionDurationMs>|<get-sessionDurationMs>(){}[0]
     final val startupSeconds // tv.nomercy.player.core.events/PlaybackMetrics.startupSeconds|{}startupSeconds[0]
         final fun <get-startupSeconds>(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.startupSeconds.<get-startupSeconds>|<get-startupSeconds>(){}[0]
     final val totalFrames // tv.nomercy.player.core.events/PlaybackMetrics.totalFrames|{}totalFrames[0]
@@ -1882,7 +1918,9 @@ final class tv.nomercy.player.core.events/PlaybackMetrics { // tv.nomercy.player
     final fun component4(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.component4|component4(){}[0]
     final fun component5(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.component5|component5(){}[0]
     final fun component6(): kotlin/Double // tv.nomercy.player.core.events/PlaybackMetrics.component6|component6(){}[0]
-    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): tv.nomercy.player.core.events/PlaybackMetrics // tv.nomercy.player.core.events/PlaybackMetrics.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun component7(): kotlin/Long // tv.nomercy.player.core.events/PlaybackMetrics.component7|component7(){}[0]
+    final fun component8(): kotlin.collections/Map<kotlin/String, kotlin/Double> // tv.nomercy.player.core.events/PlaybackMetrics.component8|component8(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Long = ..., kotlin.collections/Map<kotlin/String, kotlin/Double> = ...): tv.nomercy.player.core.events/PlaybackMetrics // tv.nomercy.player.core.events/PlaybackMetrics.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Long;kotlin.collections.Map<kotlin.String,kotlin.Double>){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/PlaybackMetrics.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/PlaybackMetrics.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/PlaybackMetrics.toString|toString(){}[0]
@@ -3634,7 +3672,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?){}[0]
 
     final val bandwidth // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|{}bandwidth[0]
         final fun <get-bandwidth>(): tv.nomercy.player.core.controllers/BandwidthController // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
@@ -3644,6 +3682,8 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
         final fun <get-context>(): tv.nomercy.player.core.controllers/PlayerContext // tv.nomercy.player.core.controllers/ComposedPlayer.context.<get-context>|<get-context>(){}[0]
     final val lifecycle // tv.nomercy.player.core.controllers/ComposedPlayer.lifecycle|{}lifecycle[0]
         final fun <get-lifecycle>(): tv.nomercy.player.core.controllers/LifecycleController // tv.nomercy.player.core.controllers/ComposedPlayer.lifecycle.<get-lifecycle>|<get-lifecycle>(){}[0]
+    final val metrics // tv.nomercy.player.core.controllers/ComposedPlayer.metrics|{}metrics[0]
+        final fun <get-metrics>(): tv.nomercy.player.core.controllers/MetricsController // tv.nomercy.player.core.controllers/ComposedPlayer.metrics.<get-metrics>|<get-metrics>(){}[0]
     final val plugins // tv.nomercy.player.core.controllers/ComposedPlayer.plugins|{}plugins[0]
         final fun <get-plugins>(): tv.nomercy.player.core.plugin/PluginRegistry // tv.nomercy.player.core.controllers/ComposedPlayer.plugins.<get-plugins>|<get-plugins>(){}[0]
     final val queue // tv.nomercy.player.core.controllers/ComposedPlayer.queue|{}queue[0]
@@ -3696,6 +3736,8 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun isTv(): kotlin/Boolean // tv.nomercy.player.core.controllers/ComposedPlayer.isTv|isTv(){}[0]
     open fun item(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.item|item(){}[0]
     open fun language(): kotlin/String // tv.nomercy.player.core.controllers/ComposedPlayer.language|language(){}[0]
+    open fun metrics(): tv.nomercy.player.core.events/PlaybackMetrics // tv.nomercy.player.core.controllers/ComposedPlayer.metrics|metrics(){}[0]
+    open fun now(): kotlin/Long // tv.nomercy.player.core.controllers/ComposedPlayer.now|now(){}[0]
     open fun peekNext(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.peekNext|peekNext(){}[0]
     open fun peekPrevious(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.core.controllers/ComposedPlayer.peekPrevious|peekPrevious(){}[0]
     open fun phase(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.controllers/ComposedPlayer.phase|phase(){}[0]
@@ -3721,6 +3763,8 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun queueShuffle() // tv.nomercy.player.core.controllers/ComposedPlayer.queueShuffle|queueShuffle(){}[0]
     open fun queueSort(kotlin/Comparator<tv.nomercy.player.core.media/PlaylistItem>) // tv.nomercy.player.core.controllers/ComposedPlayer.queueSort|queueSort(kotlin.Comparator<tv.nomercy.player.core.media.PlaylistItem>){}[0]
     open fun ready(): kotlinx.coroutines/Deferred<kotlin/Unit> // tv.nomercy.player.core.controllers/ComposedPlayer.ready|ready(){}[0]
+    open fun recordMetric(kotlin/String, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(kotlin.String;kotlin.Double){}[0]
+    open fun recordMetric(tv.nomercy.player.core.controllers/Metric, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(tv.nomercy.player.core.controllers.Metric;kotlin.Double){}[0]
     open fun removePlugin(tv.nomercy.player.core.plugin/Plugin<*>) // tv.nomercy.player.core.controllers/ComposedPlayer.removePlugin|removePlugin(tv.nomercy.player.core.plugin.Plugin<*>){}[0]
     open fun removePluginById(kotlin/String) // tv.nomercy.player.core.controllers/ComposedPlayer.removePluginById|removePluginById(kotlin.String){}[0]
     open fun removeTranslations(kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.removeTranslations|removeTranslations(kotlin.String;kotlin.String?){}[0]

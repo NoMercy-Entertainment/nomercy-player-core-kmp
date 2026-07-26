@@ -67,6 +67,12 @@ public data class PlaybackMetrics(
     val bufferingSeconds: Double = 0.0,
     val startupSeconds: Double = 0.0,
     val bitrate: Double = 0.0,
+    // How long this item has been playing, filled in when the snapshot is read
+    // rather than stored, so it does not stand still during a stall.
+    val sessionDurationMs: Long = 0L,
+    // Counters this library does not know about: a plugin counting lyric
+    // fetches, a backend counting decoder resets.
+    val custom: Map<String, Double> = emptyMap(),
 )
 
 // Where a session is being handed to. Kept as a value rather than a platform
