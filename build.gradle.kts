@@ -145,12 +145,22 @@ kotlin {
             // worse than anything gained.
             implementation(libs.androidx.media3.exoplayer)
             implementation(libs.androidx.media3.common)
+            // The data source Media3 reads manifests through, so the sanitizer
+            // can sit in front of it. Media3's default source has no place to
+            // put an interceptor.
+            implementation(libs.androidx.media3.datasource.okhttp)
+            implementation(libs.okhttp)
             implementation(libs.kotlinx.coroutines.android)
         }
         // The desktop engine. libVLC decodes practically everything, which is
         // what a desktop client needs when the file came off a disc rip.
         jvmMain.dependencies {
             implementation(libs.vlcj)
+        }
+        getByName("androidHostTest").dependencies {
+            // A real HTTP exchange for the interceptor, because the plumbing it
+            // adds over the rule is exactly what a fake transport cannot check.
+            implementation(libs.okhttp.mockwebserver)
         }
         getByName("androidDeviceTest").dependencies {
             implementation(libs.androidx.test.runner)
