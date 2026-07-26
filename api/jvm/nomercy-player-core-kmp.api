@@ -548,6 +548,70 @@ public final class tv/nomercy/player/core/dsp/BiquadState {
 	public final fun step (Ltv/nomercy/player/core/dsp/BiquadCoefficients;D)D
 }
 
+public final class tv/nomercy/player/core/dsp/EqBand {
+	public fun <init> (IDD)V
+	public synthetic fun <init> (IDDILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (IDD)Ltv/nomercy/player/core/dsp/EqBand;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/dsp/EqBand;IDDILjava/lang/Object;)Ltv/nomercy/player/core/dsp/EqBand;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBandwidth ()D
+	public final fun getFrequency ()I
+	public final fun getGainDb ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/dsp/EqBands {
+	public static final field INSTANCE Ltv/nomercy/player/core/dsp/EqBands;
+	public final fun getDEFAULT ()Ljava/util/List;
+	public final fun preGainLinear (D)D
+}
+
+public final class tv/nomercy/player/core/dsp/EqBandsKt {
+	public static final field DEFAULT_BANDWIDTH D
+}
+
+public final class tv/nomercy/player/core/dsp/EqPreset {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;)Ltv/nomercy/player/core/dsp/EqPreset;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/dsp/EqPreset;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/dsp/EqPreset;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBands ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/dsp/EqPresets {
+	public static final field INSTANCE Ltv/nomercy/player/core/dsp/EqPresets;
+	public final fun byName (Ljava/lang/String;)Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getBUILTIN ()Ljava/util/List;
+	public final fun getCLASSICAL ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getCLUB ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getCUSTOM ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getDANCE ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getFLAT ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getFULL_BASS ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getFULL_BASS_TREBLE ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getFULL_TREBLE ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getLAPTOP_SPEAKERS_HEADPHONES ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getLARGE_HALL ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getLIVE ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getPARTY ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getPOP ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getREGGAE ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getROCK ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getSKA ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getSOFT ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getSOFT_ROCK ()Ltv/nomercy/player/core/dsp/EqPreset;
+	public final fun getTECHNO ()Ltv/nomercy/player/core/dsp/EqPreset;
+}
+
 public final class tv/nomercy/player/core/dsp/Fft {
 	public static final field INSTANCE Ltv/nomercy/player/core/dsp/Fft;
 	public final fun magnitudes ([D)[D

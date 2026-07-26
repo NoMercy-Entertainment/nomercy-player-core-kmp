@@ -1409,6 +1409,41 @@ final class tv.nomercy.player.core.dsp/BiquadState { // tv.nomercy.player.core.d
     final fun step(tv.nomercy.player.core.dsp/BiquadCoefficients, kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/BiquadState.step|step(tv.nomercy.player.core.dsp.BiquadCoefficients;kotlin.Double){}[0]
 }
 
+final class tv.nomercy.player.core.dsp/EqBand { // tv.nomercy.player.core.dsp/EqBand|null[0]
+    constructor <init>(kotlin/Int, kotlin/Double, kotlin/Double = ...) // tv.nomercy.player.core.dsp/EqBand.<init>|<init>(kotlin.Int;kotlin.Double;kotlin.Double){}[0]
+
+    final val bandwidth // tv.nomercy.player.core.dsp/EqBand.bandwidth|{}bandwidth[0]
+        final fun <get-bandwidth>(): kotlin/Double // tv.nomercy.player.core.dsp/EqBand.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
+    final val frequency // tv.nomercy.player.core.dsp/EqBand.frequency|{}frequency[0]
+        final fun <get-frequency>(): kotlin/Int // tv.nomercy.player.core.dsp/EqBand.frequency.<get-frequency>|<get-frequency>(){}[0]
+    final val gainDb // tv.nomercy.player.core.dsp/EqBand.gainDb|{}gainDb[0]
+        final fun <get-gainDb>(): kotlin/Double // tv.nomercy.player.core.dsp/EqBand.gainDb.<get-gainDb>|<get-gainDb>(){}[0]
+
+    final fun component1(): kotlin/Int // tv.nomercy.player.core.dsp/EqBand.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // tv.nomercy.player.core.dsp/EqBand.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // tv.nomercy.player.core.dsp/EqBand.component3|component3(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Double = ..., kotlin/Double = ...): tv.nomercy.player.core.dsp/EqBand // tv.nomercy.player.core.dsp/EqBand.copy|copy(kotlin.Int;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.dsp/EqBand.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.dsp/EqBand.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.dsp/EqBand.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.dsp/EqPreset { // tv.nomercy.player.core.dsp/EqPreset|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand>) // tv.nomercy.player.core.dsp/EqPreset.<init>|<init>(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.dsp.EqBand>){}[0]
+
+    final val bands // tv.nomercy.player.core.dsp/EqPreset.bands|{}bands[0]
+        final fun <get-bands>(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> // tv.nomercy.player.core.dsp/EqPreset.bands.<get-bands>|<get-bands>(){}[0]
+    final val name // tv.nomercy.player.core.dsp/EqPreset.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tv.nomercy.player.core.dsp/EqPreset.name.<get-name>|<get-name>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.dsp/EqPreset.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> // tv.nomercy.player.core.dsp/EqPreset.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> = ...): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPreset.copy|copy(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.dsp.EqBand>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.dsp/EqPreset.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.dsp/EqPreset.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.dsp/EqPreset.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.errors/ErrorCode { // tv.nomercy.player.core.errors/ErrorCode|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.errors/ErrorCode.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
 
@@ -4259,6 +4294,58 @@ final object tv.nomercy.player.core.dsp/BiquadPeaking { // tv.nomercy.player.cor
     final fun process(tv.nomercy.player.core.dsp/BiquadCoefficients, kotlin/DoubleArray): kotlin/DoubleArray // tv.nomercy.player.core.dsp/BiquadPeaking.process|process(tv.nomercy.player.core.dsp.BiquadCoefficients;kotlin.DoubleArray){}[0]
 }
 
+final object tv.nomercy.player.core.dsp/EqBands { // tv.nomercy.player.core.dsp/EqBands|null[0]
+    final val DEFAULT // tv.nomercy.player.core.dsp/EqBands.DEFAULT|{}DEFAULT[0]
+        final fun <get-DEFAULT>(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> // tv.nomercy.player.core.dsp/EqBands.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
+
+    final fun preGainLinear(kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/EqBands.preGainLinear|preGainLinear(kotlin.Double){}[0]
+}
+
+final object tv.nomercy.player.core.dsp/EqPresets { // tv.nomercy.player.core.dsp/EqPresets|null[0]
+    final val BUILTIN // tv.nomercy.player.core.dsp/EqPresets.BUILTIN|{}BUILTIN[0]
+        final fun <get-BUILTIN>(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqPreset> // tv.nomercy.player.core.dsp/EqPresets.BUILTIN.<get-BUILTIN>|<get-BUILTIN>(){}[0]
+    final val CLASSICAL // tv.nomercy.player.core.dsp/EqPresets.CLASSICAL|{}CLASSICAL[0]
+        final fun <get-CLASSICAL>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.CLASSICAL.<get-CLASSICAL>|<get-CLASSICAL>(){}[0]
+    final val CLUB // tv.nomercy.player.core.dsp/EqPresets.CLUB|{}CLUB[0]
+        final fun <get-CLUB>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.CLUB.<get-CLUB>|<get-CLUB>(){}[0]
+    final val CUSTOM // tv.nomercy.player.core.dsp/EqPresets.CUSTOM|{}CUSTOM[0]
+        final fun <get-CUSTOM>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.CUSTOM.<get-CUSTOM>|<get-CUSTOM>(){}[0]
+    final val DANCE // tv.nomercy.player.core.dsp/EqPresets.DANCE|{}DANCE[0]
+        final fun <get-DANCE>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.DANCE.<get-DANCE>|<get-DANCE>(){}[0]
+    final val FLAT // tv.nomercy.player.core.dsp/EqPresets.FLAT|{}FLAT[0]
+        final fun <get-FLAT>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.FLAT.<get-FLAT>|<get-FLAT>(){}[0]
+    final val FULL_BASS // tv.nomercy.player.core.dsp/EqPresets.FULL_BASS|{}FULL_BASS[0]
+        final fun <get-FULL_BASS>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.FULL_BASS.<get-FULL_BASS>|<get-FULL_BASS>(){}[0]
+    final val FULL_BASS_TREBLE // tv.nomercy.player.core.dsp/EqPresets.FULL_BASS_TREBLE|{}FULL_BASS_TREBLE[0]
+        final fun <get-FULL_BASS_TREBLE>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.FULL_BASS_TREBLE.<get-FULL_BASS_TREBLE>|<get-FULL_BASS_TREBLE>(){}[0]
+    final val FULL_TREBLE // tv.nomercy.player.core.dsp/EqPresets.FULL_TREBLE|{}FULL_TREBLE[0]
+        final fun <get-FULL_TREBLE>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.FULL_TREBLE.<get-FULL_TREBLE>|<get-FULL_TREBLE>(){}[0]
+    final val LAPTOP_SPEAKERS_HEADPHONES // tv.nomercy.player.core.dsp/EqPresets.LAPTOP_SPEAKERS_HEADPHONES|{}LAPTOP_SPEAKERS_HEADPHONES[0]
+        final fun <get-LAPTOP_SPEAKERS_HEADPHONES>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.LAPTOP_SPEAKERS_HEADPHONES.<get-LAPTOP_SPEAKERS_HEADPHONES>|<get-LAPTOP_SPEAKERS_HEADPHONES>(){}[0]
+    final val LARGE_HALL // tv.nomercy.player.core.dsp/EqPresets.LARGE_HALL|{}LARGE_HALL[0]
+        final fun <get-LARGE_HALL>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.LARGE_HALL.<get-LARGE_HALL>|<get-LARGE_HALL>(){}[0]
+    final val LIVE // tv.nomercy.player.core.dsp/EqPresets.LIVE|{}LIVE[0]
+        final fun <get-LIVE>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.LIVE.<get-LIVE>|<get-LIVE>(){}[0]
+    final val PARTY // tv.nomercy.player.core.dsp/EqPresets.PARTY|{}PARTY[0]
+        final fun <get-PARTY>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.PARTY.<get-PARTY>|<get-PARTY>(){}[0]
+    final val POP // tv.nomercy.player.core.dsp/EqPresets.POP|{}POP[0]
+        final fun <get-POP>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.POP.<get-POP>|<get-POP>(){}[0]
+    final val REGGAE // tv.nomercy.player.core.dsp/EqPresets.REGGAE|{}REGGAE[0]
+        final fun <get-REGGAE>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.REGGAE.<get-REGGAE>|<get-REGGAE>(){}[0]
+    final val ROCK // tv.nomercy.player.core.dsp/EqPresets.ROCK|{}ROCK[0]
+        final fun <get-ROCK>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.ROCK.<get-ROCK>|<get-ROCK>(){}[0]
+    final val SKA // tv.nomercy.player.core.dsp/EqPresets.SKA|{}SKA[0]
+        final fun <get-SKA>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.SKA.<get-SKA>|<get-SKA>(){}[0]
+    final val SOFT // tv.nomercy.player.core.dsp/EqPresets.SOFT|{}SOFT[0]
+        final fun <get-SOFT>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.SOFT.<get-SOFT>|<get-SOFT>(){}[0]
+    final val SOFT_ROCK // tv.nomercy.player.core.dsp/EqPresets.SOFT_ROCK|{}SOFT_ROCK[0]
+        final fun <get-SOFT_ROCK>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.SOFT_ROCK.<get-SOFT_ROCK>|<get-SOFT_ROCK>(){}[0]
+    final val TECHNO // tv.nomercy.player.core.dsp/EqPresets.TECHNO|{}TECHNO[0]
+        final fun <get-TECHNO>(): tv.nomercy.player.core.dsp/EqPreset // tv.nomercy.player.core.dsp/EqPresets.TECHNO.<get-TECHNO>|<get-TECHNO>(){}[0]
+
+    final fun byName(kotlin/String): tv.nomercy.player.core.dsp/EqPreset? // tv.nomercy.player.core.dsp/EqPresets.byName|byName(kotlin.String){}[0]
+}
+
 final object tv.nomercy.player.core.dsp/Fft { // tv.nomercy.player.core.dsp/Fft|null[0]
     final fun magnitudes(kotlin/DoubleArray): kotlin/DoubleArray // tv.nomercy.player.core.dsp/Fft.magnitudes|magnitudes(kotlin.DoubleArray){}[0]
 }
@@ -4849,6 +4936,8 @@ final object tv.nomercy.player.core.stream/ServerCodecNames { // tv.nomercy.play
         final fun <get-VP9>(): kotlin/String // tv.nomercy.player.core.stream/ServerCodecNames.VP9.<get-VP9>|<get-VP9>(){}[0]
 }
 
+final const val tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH // tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH|{}DEFAULT_BANDWIDTH[0]
+    final fun <get-DEFAULT_BANDWIDTH>(): kotlin/Double // tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH.<get-DEFAULT_BANDWIDTH>|<get-DEFAULT_BANDWIDTH>(){}[0]
 final const val tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS|{}CHAPTER_GAP_EPSILON_SECONDS[0]
     final fun <get-CHAPTER_GAP_EPSILON_SECONDS>(): kotlin/Double // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS.<get-CHAPTER_GAP_EPSILON_SECONDS>|<get-CHAPTER_GAP_EPSILON_SECONDS>(){}[0]
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
