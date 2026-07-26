@@ -40,7 +40,7 @@ private val WEB_ONLY_METHODS = setOf(
 private val NOT_YET_PORTED_METHODS = setOf(
     "activityTracking", "addTranslations", "announce", "audioOutput", "audioOutputs",
     "audioTrack", "audioTrackMode", "audioTracks", "auth", "backend", "backlog",
-    "backlogAppend", "backlogClear", "backlogRemove", "bandwidth", "bandwidthEstimator",
+    "backlogAppend", "backlogClear", "backlogRemove",
     "baseUrl", "bufferState", "bufferedRanges", "bumpActivity", "canPlay", "castState",
     "chapter", "chapters", "device", "dispatching", "enabledPlugins", "experimental",
     "forward", "getPluginById", "getStreamFactory", "isDesktop", "isMobile", "isTv",

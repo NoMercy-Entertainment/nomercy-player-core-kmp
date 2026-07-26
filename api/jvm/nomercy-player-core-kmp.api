@@ -14,12 +14,22 @@ public final class tv/nomercy/player/core/controllers/BackendBridge {
 	public final fun detach (Ltv/nomercy/player/core/ports/MediaBackend;)V
 }
 
+public final class tv/nomercy/player/core/controllers/BandwidthController {
+	public fun <init> ()V
+	public final fun bandwidth ()I
+	public final fun bandwidthEstimator ()Lkotlin/jvm/functions/Function0;
+	public final fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
+}
+
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
 	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Lkotlinx/coroutines/CoroutineScope;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Fetcher;Lkotlinx/coroutines/CoroutineScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun addPlugin$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public fun bandwidth ()I
+	public fun bandwidthEstimator ()Lkotlin/jvm/functions/Function0;
+	public fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
 	public fun buffered ()D
 	public fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
 	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -28,6 +38,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun duration ()D
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getBandwidth ()Ltv/nomercy/player/core/controllers/BandwidthController;
 	public final fun getBridge ()Ltv/nomercy/player/core/controllers/BackendBridge;
 	public final fun getContext ()Ltv/nomercy/player/core/controllers/PlayerContext;
 	public final fun getLifecycle ()Ltv/nomercy/player/core/controllers/LifecycleController;

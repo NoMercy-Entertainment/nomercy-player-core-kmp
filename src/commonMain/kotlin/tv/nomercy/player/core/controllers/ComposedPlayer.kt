@@ -85,6 +85,8 @@ public open class ComposedPlayer(
     // the controllers drive the engine and nothing listens to it come back.
     public val bridge: BackendBridge = BackendBridge(context)
 
+    public val bandwidth: BandwidthController = BandwidthController()
+
     init {
         queue.transport = transport
         queue.wireQueue()
@@ -166,6 +168,15 @@ public open class ComposedPlayer(
     public open suspend fun playItem(id: String): Unit = queue.playItem(id)
 
     // ── Modes and state ──────────────────────────────────────────────────────
+
+    // Bits per second, from whatever the host injected. Zero until something
+    // does: the library cannot measure a connection and a guessed number would
+    // make adaptation decide on a measurement that never happened.
+    public open fun bandwidth(): Int = bandwidth.bandwidth()
+
+    public open fun bandwidthEstimator(): (() -> Int)? = bandwidth.bandwidthEstimator()
+
+    public open fun bandwidthEstimator(fn: (() -> Int)?): Unit = bandwidth.bandwidthEstimator(fn)
 
     public open fun state(): PlayerState = state.state()
 

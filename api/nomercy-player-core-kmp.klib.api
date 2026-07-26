@@ -1003,6 +1003,14 @@ final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.pla
     final fun detach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.detach|detach(tv.nomercy.player.core.ports.MediaBackend){}[0]
 }
 
+final class tv.nomercy.player.core.controllers/BandwidthController { // tv.nomercy.player.core.controllers/BandwidthController|null[0]
+    constructor <init>() // tv.nomercy.player.core.controllers/BandwidthController.<init>|<init>(){}[0]
+
+    final fun bandwidth(): kotlin/Int // tv.nomercy.player.core.controllers/BandwidthController.bandwidth|bandwidth(){}[0]
+    final fun bandwidthEstimator(): kotlin/Function0<kotlin/Int>? // tv.nomercy.player.core.controllers/BandwidthController.bandwidthEstimator|bandwidthEstimator(){}[0]
+    final fun bandwidthEstimator(kotlin/Function0<kotlin/Int>?) // tv.nomercy.player.core.controllers/BandwidthController.bandwidthEstimator|bandwidthEstimator(kotlin.Function0<kotlin.Int>?){}[0]
+}
+
 final class tv.nomercy.player.core.controllers/InMemoryStorage : tv.nomercy.player.core.ports/Storage { // tv.nomercy.player.core.controllers/InMemoryStorage|null[0]
     constructor <init>() // tv.nomercy.player.core.controllers/InMemoryStorage.<init>|<init>(){}[0]
 
@@ -3481,6 +3489,8 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
     constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Fetcher? = ..., kotlinx.coroutines/CoroutineScope? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Fetcher?;kotlinx.coroutines.CoroutineScope?){}[0]
 
+    final val bandwidth // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|{}bandwidth[0]
+        final fun <get-bandwidth>(): tv.nomercy.player.core.controllers/BandwidthController // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
     final val bridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge|{}bridge[0]
         final fun <get-bridge>(): tv.nomercy.player.core.controllers/BackendBridge // tv.nomercy.player.core.controllers/ComposedPlayer.bridge.<get-bridge>|<get-bridge>(){}[0]
     final val context // tv.nomercy.player.core.controllers/ComposedPlayer.context|{}context[0]
@@ -3508,6 +3518,9 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
 
     open fun <#A1: kotlin/Any?> emit(tv.nomercy.player.core.events/EventKey<#A1>, #A1) // tv.nomercy.player.core.controllers/ComposedPlayer.emit|emit(tv.nomercy.player.core.events.EventKey<0:0>;0:0){0§<kotlin.Any?>}[0]
     open fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.controllers/ComposedPlayer.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    open fun bandwidth(): kotlin/Int // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|bandwidth(){}[0]
+    open fun bandwidthEstimator(): kotlin/Function0<kotlin/Int>? // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidthEstimator|bandwidthEstimator(){}[0]
+    open fun bandwidthEstimator(kotlin/Function0<kotlin/Int>?) // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidthEstimator|bandwidthEstimator(kotlin.Function0<kotlin.Int>?){}[0]
     open fun buffered(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.buffered|buffered(){}[0]
     open fun contributions(tv.nomercy.player.core.plugin/ChromeSlot): kotlin.collections/List<tv.nomercy.player.core.plugin/ContributionBinding> // tv.nomercy.player.core.controllers/ComposedPlayer.contributions|contributions(tv.nomercy.player.core.plugin.ChromeSlot){}[0]
     open fun duration(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.duration|duration(){}[0]
