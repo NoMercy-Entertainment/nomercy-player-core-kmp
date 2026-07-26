@@ -469,6 +469,51 @@ public final class tv/nomercy/player/core/controllers/VolumeController {
 	public static synthetic fun volumeUp$default (Ltv/nomercy/player/core/controllers/VolumeController;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class tv/nomercy/player/core/cues/SpriteCue {
+	public fun <init> (DDLjava/lang/String;IIII)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun copy (DDLjava/lang/String;IIII)Ltv/nomercy/player/core/cues/SpriteCue;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/cues/SpriteCue;DDLjava/lang/String;IIIIILjava/lang/Object;)Ltv/nomercy/player/core/cues/SpriteCue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnd ()D
+	public final fun getHeight ()I
+	public final fun getStart ()D
+	public final fun getUrl ()Ljava/lang/String;
+	public final fun getWidth ()I
+	public final fun getX ()I
+	public final fun getY ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/cues/VttCue {
+	public fun <init> (DDLjava/lang/String;)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (DDLjava/lang/String;)Ltv/nomercy/player/core/cues/VttCue;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/cues/VttCue;DDLjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/cues/VttCue;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBody ()Ljava/lang/String;
+	public final fun getEnd ()D
+	public final fun getStart ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/cues/VttParserKt {
+	public static final fun parseVtt (Ljava/lang/String;)Ljava/util/List;
+	public static final fun parseVttSprite (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+	public static synthetic fun parseVttSprite$default (Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ljava/util/List;
+	public static final fun parseVttTimestamp (Ljava/lang/String;)Ljava/lang/Double;
+}
+
 public class tv/nomercy/player/core/errors/AuthError : tv/nomercy/player/core/errors/NetworkError {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
