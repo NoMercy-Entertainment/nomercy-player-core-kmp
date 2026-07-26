@@ -35,6 +35,7 @@ import platform.CoreMedia.CMTimeMakeWithSeconds
 import platform.Foundation.NSNotificationCenter
 import platform.Foundation.NSOperationQueue
 import platform.Foundation.NSURL
+import platform.darwin.dispatch_queue_create
 
 private const val TIME_OBSERVER_HZ = 4.0
 private const val NANOS_PER_SECOND = 1_000_000_000
@@ -61,6 +62,16 @@ public class AVPlayerVideoBackend : MediaBackend {
     // what a scrubber can show; asking for sixty would wake the CPU for nothing.
     private var timeObserver: Any? = null
 
+    // The observer runs on its own serial queue rather than the main one.
+    //
+    // Passing null means the main queue, and then nothing is reported while the
+    // main thread is busy — no canplay, no timeupdate, until whatever is running
+    // there yields. A media backend that goes silent because the UI thread is
+    // working is a backend that cannot tell you it is buffering during the one
+    // moment that matters. The gate found this: it recorded loadstart, play and
+    // pause and nothing in between.
+    private val observerQueue = dispatch_queue_create("tv.nomercy.player.avplayer.observer", null)
+
     private var announcedCanPlay: Boolean = false
 
     // Mirrors of what the engine last reported. AVFoundation is main-thread
@@ -84,7 +95,7 @@ public class AVPlayerVideoBackend : MediaBackend {
 
         timeObserver = player.addPeriodicTimeObserverForInterval(
             interval = CMTimeMakeWithSeconds(1.0 / TIME_OBSERVER_HZ, NANOS_PER_SECOND),
-            queue = null,
+            queue = observerQueue,
         ) { _ ->
             refreshCache()
             reportStatusChanges()
