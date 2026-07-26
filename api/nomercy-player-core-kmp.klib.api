@@ -589,6 +589,13 @@ abstract interface tv.nomercy.player.core.ports/FullscreenController { // tv.nom
     abstract suspend fun exit() // tv.nomercy.player.core.ports/FullscreenController.exit|exit(){}[0]
 }
 
+abstract interface tv.nomercy.player.core.ports/GainSink { // tv.nomercy.player.core.ports/GainSink|null[0]
+    abstract fun gain(): kotlin/Float // tv.nomercy.player.core.ports/GainSink.gain|gain(){}[0]
+    abstract fun gain(kotlin/Float) // tv.nomercy.player.core.ports/GainSink.gain|gain(kotlin.Float){}[0]
+    abstract fun releaseAfterFade() // tv.nomercy.player.core.ports/GainSink.releaseAfterFade|releaseAfterFade(){}[0]
+    abstract suspend fun play() // tv.nomercy.player.core.ports/GainSink.play|play(){}[0]
+}
+
 abstract interface tv.nomercy.player.core.ports/IdGenerator { // tv.nomercy.player.core.ports/IdGenerator|null[0]
     abstract fun next(): kotlin/String // tv.nomercy.player.core.ports/IdGenerator.next|next(){}[0]
 }
@@ -2994,6 +3001,12 @@ final class tv.nomercy.player.core.ports/DefaultPreloadStrategy : tv.nomercy.pla
     final fun assetsToPreload(tv.nomercy.player.core.media/PlaylistItem): kotlin.collections/List<tv.nomercy.player.core.ports/PreloadAsset> // tv.nomercy.player.core.ports/DefaultPreloadStrategy.assetsToPreload|assetsToPreload(tv.nomercy.player.core.media.PlaylistItem){}[0]
     final fun cancel() // tv.nomercy.player.core.ports/DefaultPreloadStrategy.cancel|cancel(){}[0]
     final fun shouldPreload(tv.nomercy.player.core.ports/PreloadContext): kotlin/Boolean // tv.nomercy.player.core.ports/DefaultPreloadStrategy.shouldPreload|shouldPreload(tv.nomercy.player.core.ports.PreloadContext){}[0]
+}
+
+final class tv.nomercy.player.core.ports/EqualPowerCrossfader { // tv.nomercy.player.core.ports/EqualPowerCrossfader|null[0]
+    constructor <init>(kotlin/Long = ...) // tv.nomercy.player.core.ports/EqualPowerCrossfader.<init>|<init>(kotlin.Long){}[0]
+
+    final suspend fun run(tv.nomercy.player.core.ports/GainSink, tv.nomercy.player.core.ports/GainSink, kotlin/Float, kotlin/Long, tv.nomercy.player.core.ports/CrossfadeCurve) // tv.nomercy.player.core.ports/EqualPowerCrossfader.run|run(tv.nomercy.player.core.ports.GainSink;tv.nomercy.player.core.ports.GainSink;kotlin.Float;kotlin.Long;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
 }
 
 final class tv.nomercy.player.core.ports/FetchOptions { // tv.nomercy.player.core.ports/FetchOptions|null[0]
