@@ -101,16 +101,42 @@ class AppleDspGraphTest {
 
     @Test
     fun aPresetReachesTheFilterAsAWhole() {
-        // The plugin sends a preset in one call. This is the other end of that:
-        // the loudest band of Rock, measured after the whole curve was installed.
+        // Against the combined response of all ten bands, not against one band's
+        // gain — and that correction is the point of the test.
+        //
+        // It first asserted that the level at a band's centre equals that band's
+        // number, and Rock failed it: 6.75dB asked for at 12kHz, 16.1dB
+        // measured. Nothing was wrong. Rock boosts 12k, 14k and 16k, and their
+        // skirts overlap, so the response there is the product of every filter
+        // in the chain. A single band's gain is only readable when the others
+        // are flat, which is what the bandGain tests above arrange.
+        //
+        // Predicting the product is what proves the whole curve was installed
+        // rather than one band of it.
         graph.setEqBands(EqPresets.ROCK.bands)
-        val loudest = EqPresets.ROCK.bands.maxBy { it.gainDb }
+        val at: Double = PRESET_PROBE_HZ
 
-        val measured: Double = shaped(loudest.frequency.toDouble())
+        var expected = 0.0
+        for (band in EqPresets.ROCK.bands) {
+            expected += 20.0 * log10(
+                tv.nomercy.player.core.dsp.BiquadPeaking.magnitudeAt(
+                    tv.nomercy.player.core.dsp.BiquadPeaking.coefficients(
+                        band.frequency.toDouble(),
+                        band.gainDb,
+                        band.bandwidth,
+                        SAMPLE_RATE,
+                    ),
+                    at,
+                    SAMPLE_RATE,
+                ),
+            )
+        }
+
+        val measured: Double = shaped(at)
 
         assertTrue(
-            abs(measured - loudest.gainDb) < TOLERANCE_DB,
-            "Rock asked for ${loudest.gainDb}dB at ${loudest.frequency}Hz, measured ${measured}dB",
+            abs(measured - expected) < TOLERANCE_DB,
+            "the Rock curve predicts ${expected}dB at ${at}Hz, the graph gave ${measured}dB",
         )
     }
 
@@ -161,5 +187,8 @@ private const val TONE = 1_000.0
 private const val FAR_TONE = 10_000.0
 private const val BASS_TONE = 80.0
 private const val BOOST_DB = 12.0
+
+// A band centre, so the probe sits where the curve is doing the most.
+private const val PRESET_PROBE_HZ = 12_000.0
 private const val TOLERANCE_DB = 1.5
 private const val LEAK_DB = 1.0
