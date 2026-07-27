@@ -555,6 +555,33 @@ public final class tv/nomercy/player/core/cues/VttParserKt {
 	public static final fun parseVttTimestamp (Ljava/lang/String;)Ljava/lang/Double;
 }
 
+public final class tv/nomercy/player/core/device/DesktopCapabilitiesKt {
+	public static final fun platformDeviceCapabilities (Ltv/nomercy/player/core/ports/PlatformContext;)Ltv/nomercy/player/core/device/DeviceCapabilities;
+}
+
+public abstract interface class tv/nomercy/player/core/device/DeviceCapabilities {
+	public abstract fun getFormFactor ()Ltv/nomercy/player/core/device/FormFactor;
+	public abstract fun getHasDpad ()Z
+	public abstract fun getHasHardwareVolumeKeys ()Z
+	public abstract fun getHasPointer ()Z
+	public abstract fun getHasTouch ()Z
+	public fun getPrefersFocusNavigation ()Z
+}
+
+public final class tv/nomercy/player/core/device/DeviceCapabilities$DefaultImpls {
+	public static fun getPrefersFocusNavigation (Ltv/nomercy/player/core/device/DeviceCapabilities;)Z
+}
+
+public final class tv/nomercy/player/core/device/FormFactor : java/lang/Enum {
+	public static final field Desktop Ltv/nomercy/player/core/device/FormFactor;
+	public static final field Phone Ltv/nomercy/player/core/device/FormFactor;
+	public static final field Tablet Ltv/nomercy/player/core/device/FormFactor;
+	public static final field Tv Ltv/nomercy/player/core/device/FormFactor;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/device/FormFactor;
+	public static fun values ()[Ltv/nomercy/player/core/device/FormFactor;
+}
+
 public final class tv/nomercy/player/core/drm/ClearOnly : tv/nomercy/player/core/drm/DrmCapability {
 	public static final field INSTANCE Ltv/nomercy/player/core/drm/ClearOnly;
 	public fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z

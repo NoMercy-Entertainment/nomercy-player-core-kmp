@@ -28,6 +28,19 @@ final enum class tv.nomercy.player.core.controllers/Metric : kotlin/Enum<tv.nome
     }
 }
 
+final enum class tv.nomercy.player.core.device/FormFactor : kotlin/Enum<tv.nomercy.player.core.device/FormFactor> { // tv.nomercy.player.core.device/FormFactor|null[0]
+    enum entry Desktop // tv.nomercy.player.core.device/FormFactor.Desktop|null[0]
+    enum entry Phone // tv.nomercy.player.core.device/FormFactor.Phone|null[0]
+    enum entry Tablet // tv.nomercy.player.core.device/FormFactor.Tablet|null[0]
+    enum entry Tv // tv.nomercy.player.core.device/FormFactor.Tv|null[0]
+
+    final val entries // tv.nomercy.player.core.device/FormFactor.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.device/FormFactor> // tv.nomercy.player.core.device/FormFactor.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.device/FormFactor // tv.nomercy.player.core.device/FormFactor.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.device/FormFactor> // tv.nomercy.player.core.device/FormFactor.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.drm/DrmScheme : kotlin/Enum<tv.nomercy.player.core.drm/DrmScheme> { // tv.nomercy.player.core.drm/DrmScheme|null[0]
     enum entry AES_128 // tv.nomercy.player.core.drm/DrmScheme.AES_128|null[0]
     enum entry CLEAR // tv.nomercy.player.core.drm/DrmScheme.CLEAR|null[0]
@@ -683,6 +696,21 @@ abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.player/Player { // t
     abstract fun stop(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.player/Player.stop|stop(tv.nomercy.player.core.player.ActionOptions){}[0]
     abstract fun time(): kotlin/Double // tv.nomercy.player.core.player/Player.time|time(){}[0]
     abstract fun time(kotlin/Double) // tv.nomercy.player.core.player/Player.time|time(kotlin.Double){}[0]
+}
+
+abstract interface tv.nomercy.player.core.device/DeviceCapabilities { // tv.nomercy.player.core.device/DeviceCapabilities|null[0]
+    abstract val formFactor // tv.nomercy.player.core.device/DeviceCapabilities.formFactor|{}formFactor[0]
+        abstract fun <get-formFactor>(): tv.nomercy.player.core.device/FormFactor // tv.nomercy.player.core.device/DeviceCapabilities.formFactor.<get-formFactor>|<get-formFactor>(){}[0]
+    abstract val hasDpad // tv.nomercy.player.core.device/DeviceCapabilities.hasDpad|{}hasDpad[0]
+        abstract fun <get-hasDpad>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasDpad.<get-hasDpad>|<get-hasDpad>(){}[0]
+    abstract val hasHardwareVolumeKeys // tv.nomercy.player.core.device/DeviceCapabilities.hasHardwareVolumeKeys|{}hasHardwareVolumeKeys[0]
+        abstract fun <get-hasHardwareVolumeKeys>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasHardwareVolumeKeys.<get-hasHardwareVolumeKeys>|<get-hasHardwareVolumeKeys>(){}[0]
+    abstract val hasPointer // tv.nomercy.player.core.device/DeviceCapabilities.hasPointer|{}hasPointer[0]
+        abstract fun <get-hasPointer>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasPointer.<get-hasPointer>|<get-hasPointer>(){}[0]
+    abstract val hasTouch // tv.nomercy.player.core.device/DeviceCapabilities.hasTouch|{}hasTouch[0]
+        abstract fun <get-hasTouch>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasTouch.<get-hasTouch>|<get-hasTouch>(){}[0]
+    open val prefersFocusNavigation // tv.nomercy.player.core.device/DeviceCapabilities.prefersFocusNavigation|{}prefersFocusNavigation[0]
+        open fun <get-prefersFocusNavigation>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.prefersFocusNavigation.<get-prefersFocusNavigation>|<get-prefersFocusNavigation>(){}[0]
 }
 
 abstract interface tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/DrmCapability|null[0]
@@ -5671,6 +5699,7 @@ final fun <#A: kotlin/Any?> tv.nomercy.player.core.plugin/pluginEventKey(tv.nome
 final fun tv.nomercy.player.core.cues/parseVtt(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.cues/VttCue> // tv.nomercy.player.core.cues/parseVtt|parseVtt(kotlin.String){}[0]
 final fun tv.nomercy.player.core.cues/parseVttSprite(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.cues/SpriteCue> // tv.nomercy.player.core.cues/parseVttSprite|parseVttSprite(kotlin.String;kotlin.String?){}[0]
 final fun tv.nomercy.player.core.cues/parseVttTimestamp(kotlin/String): kotlin/Double? // tv.nomercy.player.core.cues/parseVttTimestamp|parseVttTimestamp(kotlin.String){}[0]
+final fun tv.nomercy.player.core.device/platformDeviceCapabilities(tv.nomercy.player.core.ports/PlatformContext): tv.nomercy.player.core.device/DeviceCapabilities // tv.nomercy.player.core.device/platformDeviceCapabilities|platformDeviceCapabilities(tv.nomercy.player.core.ports.PlatformContext){}[0]
 final fun tv.nomercy.player.core.errors/browserPolicyError(kotlin/String, kotlin/String, kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/BrowserPolicyError // tv.nomercy.player.core.errors/browserPolicyError|browserPolicyError(kotlin.String;kotlin.String;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/MediaFormatError // tv.nomercy.player.core.errors/mediaFormatError|mediaFormatError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
