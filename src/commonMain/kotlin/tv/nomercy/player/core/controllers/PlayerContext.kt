@@ -126,7 +126,27 @@ public class PlayerContext(
     public var loadedItemId: String? = null
         private set
 
+    // The load has settled by the time this returns: the engine holds the source
+    // and will accept a seek. That is what anything continuing a load waits for
+    // — hiding a poster, restoring a saved position, or reconciling to another
+    // device's position before starting.
+    //
+    // It used to be announced from the first-frame branch instead, which reads
+    // plausibly and is a deadlock: a caller waiting for it before playing waits
+    // for something that only happens once playing has already started.
     public suspend fun load(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
+        loadQuietly(item, opts)
+        emit(CoreEvents.MediaReady, Unit)
+    }
+
+    // The same load with the announcement left to the caller.
+    //
+    // For the one caller that has to announce later: starting playback on an
+    // empty player loads first, and in the reference the engine is kicked while
+    // that load is still settling — so readiness is reported after playback has
+    // begun, not before it. Announcing from here would put it first and change
+    // an ordering a chrome can see.
+    internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
         val url: String = auth?.transformUrl(item.url) ?: item.url
         backend?.load(url, opts)
         loadedItemId = item.id

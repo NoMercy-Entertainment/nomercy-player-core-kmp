@@ -53,12 +53,11 @@ public class BackendBridge(private val ctx: PlayerContext) {
             ctx.emit(CoreEvents.Playing, Unit)
 
             // Once per item, after the first frame is actually on screen. A
-            // chrome waiting for mediaReady to take its poster down needs the
-            // frame to exist first, or it swaps a still image for a black one.
+            // chrome waiting to take its poster down needs the frame to exist
+            // first, or it swaps a still image for a black one.
             if (!announcedFirstFrame) {
                 announcedFirstFrame = true
                 ctx.emit(CoreEvents.FirstFrame, Unit)
-                ctx.emit(CoreEvents.MediaReady, Unit)
             }
         }
 

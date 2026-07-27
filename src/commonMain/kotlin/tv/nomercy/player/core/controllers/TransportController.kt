@@ -37,21 +37,33 @@ public class TransportController(
         ctx.assertReady()
         if (!allowed(CoreEvents.BeforePlay, opts, CoreEvents.PlayPrevented)) return
 
-        loadCurrentItemIfTheEngineHasNothing()
+        val loadedToStart: Boolean = loadCurrentItemIfTheEngineHasNothing()
 
         ctx.playState = PlayState.PLAYING
         ctx.transitionPhase(PlayerPhase.STARTING)
         ctx.emit(CoreEvents.Play, PlaySource(opts.source))
         ctx.backend?.play()
+
+        // After the engine is kicked, not before it. In the reference the load
+        // is still settling when playback starts, so readiness is the last thing
+        // a viewer's chrome hears rather than the first — and a chrome that
+        // takes its poster down on this would otherwise uncover a black frame.
+        if (loadedToStart) ctx.emit(CoreEvents.MediaReady, Unit)
     }
 
     // queue(items) then play() plays the first item. Without this the engine is
     // told to play with nothing loaded and the viewer gets silence and a running
     // clock, which is the hardest kind of bug to report.
-    private suspend fun loadCurrentItemIfTheEngineHasNothing() {
-        if (ctx.loadedItemId != null || ctx.queue.length() == 0) return
+    //
+    // Answers whether it loaded, because the caller owes the readiness
+    // announcement for a load it caused and must not make one for a track that
+    // was already in the engine.
+    private suspend fun loadCurrentItemIfTheEngineHasNothing(): Boolean {
+        if (ctx.loadedItemId != null || ctx.queue.length() == 0) return false
         if (ctx.queue.currentIndex() < 0) ctx.queue.setCurrent(0)
-        ctx.queue.current()?.let { ctx.load(it) }
+        val item: PlaylistItem = ctx.queue.current() ?: return false
+        ctx.loadQuietly(item)
+        return true
     }
 
     public suspend fun pause(opts: ActionOptions = ActionOptions()) {
