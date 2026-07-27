@@ -469,6 +469,11 @@ public final class tv/nomercy/player/core/controllers/VolumeController {
 	public static synthetic fun volumeUp$default (Ltv/nomercy/player/core/controllers/VolumeController;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
+public final class tv/nomercy/player/core/cues/ChapterCues {
+	public static final field INSTANCE Ltv/nomercy/player/core/cues/ChapterCues;
+	public final fun parse (Ljava/lang/String;)Ljava/util/List;
+}
+
 public final class tv/nomercy/player/core/cues/SpriteCue {
 	public fun <init> (DDLjava/lang/String;IIII)V
 	public final fun component1 ()D

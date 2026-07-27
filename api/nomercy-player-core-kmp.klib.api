@@ -4504,6 +4504,10 @@ final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player
     final fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
 }
 
+final object tv.nomercy.player.core.cues/ChapterCues { // tv.nomercy.player.core.cues/ChapterCues|null[0]
+    final fun parse(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.cues/ChapterCues.parse|parse(kotlin.String){}[0]
+}
+
 final object tv.nomercy.player.core.dsp/AudioSpectrum { // tv.nomercy.player.core.dsp/AudioSpectrum|null[0]
     final fun analyse(kotlin/DoubleArray, kotlin/Int, kotlin/Double, kotlin/Double, tv.nomercy.player.core.plugins.audio/BandEnergies?): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.dsp/AudioSpectrum.analyse|analyse(kotlin.DoubleArray;kotlin.Int;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies?){}[0]
     final fun bandEnergy(kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/AudioSpectrum.bandEnergy|bandEnergy(kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
