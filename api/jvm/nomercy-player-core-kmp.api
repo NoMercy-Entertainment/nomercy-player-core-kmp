@@ -559,6 +559,10 @@ public final class tv/nomercy/player/core/device/DesktopCapabilitiesKt {
 	public static final fun platformDeviceCapabilities (Ltv/nomercy/player/core/ports/PlatformContext;)Ltv/nomercy/player/core/device/DeviceCapabilities;
 }
 
+public final class tv/nomercy/player/core/device/DesktopOverscanKt {
+	public static final fun platformOverscan (Ltv/nomercy/player/core/ports/PlatformContext;)Ltv/nomercy/player/core/device/SafeAreaInsets;
+}
+
 public abstract interface class tv/nomercy/player/core/device/DeviceCapabilities {
 	public abstract fun getFormFactor ()Ltv/nomercy/player/core/device/FormFactor;
 	public abstract fun getHasDpad ()Z
@@ -580,6 +584,31 @@ public final class tv/nomercy/player/core/device/FormFactor : java/lang/Enum {
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/device/FormFactor;
 	public static fun values ()[Ltv/nomercy/player/core/device/FormFactor;
+}
+
+public final class tv/nomercy/player/core/device/SafeAreaInsets {
+	public fun <init> ()V
+	public fun <init> (FFFF)V
+	public synthetic fun <init> (FFFFILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()F
+	public final fun component2 ()F
+	public final fun component3 ()F
+	public final fun component4 ()F
+	public final fun copy (FFFF)Ltv/nomercy/player/core/device/SafeAreaInsets;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/device/SafeAreaInsets;FFFFILjava/lang/Object;)Ltv/nomercy/player/core/device/SafeAreaInsets;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBottom ()F
+	public final fun getLeft ()F
+	public final fun getRight ()F
+	public final fun getTop ()F
+	public fun hashCode ()I
+	public final fun isEmpty ()Z
+	public final fun plus (Ltv/nomercy/player/core/device/SafeAreaInsets;)Ltv/nomercy/player/core/device/SafeAreaInsets;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/device/SafeAreaInsetsKt {
+	public static final fun getDEFAULT_TV_OVERSCAN ()Ltv/nomercy/player/core/device/SafeAreaInsets;
 }
 
 public final class tv/nomercy/player/core/drm/ClearOnly : tv/nomercy/player/core/drm/DrmCapability {

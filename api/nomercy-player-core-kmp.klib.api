@@ -1602,6 +1602,31 @@ final class tv.nomercy.player.core.cues/VttCue { // tv.nomercy.player.core.cues/
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttCue.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.device/SafeAreaInsets { // tv.nomercy.player.core.device/SafeAreaInsets|null[0]
+    constructor <init>(kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // tv.nomercy.player.core.device/SafeAreaInsets.<init>|<init>(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+
+    final val bottom // tv.nomercy.player.core.device/SafeAreaInsets.bottom|{}bottom[0]
+        final fun <get-bottom>(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.bottom.<get-bottom>|<get-bottom>(){}[0]
+    final val isEmpty // tv.nomercy.player.core.device/SafeAreaInsets.isEmpty|{}isEmpty[0]
+        final fun <get-isEmpty>(): kotlin/Boolean // tv.nomercy.player.core.device/SafeAreaInsets.isEmpty.<get-isEmpty>|<get-isEmpty>(){}[0]
+    final val left // tv.nomercy.player.core.device/SafeAreaInsets.left|{}left[0]
+        final fun <get-left>(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.left.<get-left>|<get-left>(){}[0]
+    final val right // tv.nomercy.player.core.device/SafeAreaInsets.right|{}right[0]
+        final fun <get-right>(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.right.<get-right>|<get-right>(){}[0]
+    final val top // tv.nomercy.player.core.device/SafeAreaInsets.top|{}top[0]
+        final fun <get-top>(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.top.<get-top>|<get-top>(){}[0]
+
+    final fun component1(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.component1|component1(){}[0]
+    final fun component2(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.component2|component2(){}[0]
+    final fun component3(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.component3|component3(){}[0]
+    final fun component4(): kotlin/Float // tv.nomercy.player.core.device/SafeAreaInsets.component4|component4(){}[0]
+    final fun copy(kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/SafeAreaInsets.copy|copy(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.device/SafeAreaInsets.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.device/SafeAreaInsets.hashCode|hashCode(){}[0]
+    final fun plus(tv.nomercy.player.core.device/SafeAreaInsets): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/SafeAreaInsets.plus|plus(tv.nomercy.player.core.device.SafeAreaInsets){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.device/SafeAreaInsets.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.drm/DrmConfig { // tv.nomercy.player.core.drm/DrmConfig|null[0]
     constructor <init>(tv.nomercy.player.core.drm/DrmScheme, kotlin/String? = ..., kotlin/ByteArray? = ..., tv.nomercy.player.core.drm/HdcpLevel? = ..., kotlin.coroutines/SuspendFunction1<tv.nomercy.player.core.drm/DrmLicenseExchange, tv.nomercy.player.core.drm/DrmLicenseExchange>? = ..., kotlin.coroutines/SuspendFunction1<kotlin/ByteArray, kotlin/ByteArray>? = ..., kotlin.coroutines/SuspendFunction1<kotlin/ByteArray, kotlin/ByteArray>? = ...) // tv.nomercy.player.core.drm/DrmConfig.<init>|<init>(tv.nomercy.player.core.drm.DrmScheme;kotlin.String?;kotlin.ByteArray?;tv.nomercy.player.core.drm.HdcpLevel?;kotlin.coroutines.SuspendFunction1<tv.nomercy.player.core.drm.DrmLicenseExchange,tv.nomercy.player.core.drm.DrmLicenseExchange>?;kotlin.coroutines.SuspendFunction1<kotlin.ByteArray,kotlin.ByteArray>?;kotlin.coroutines.SuspendFunction1<kotlin.ByteArray,kotlin.ByteArray>?){}[0]
 
@@ -5688,6 +5713,8 @@ final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.cor
 final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT_VERSION|{}KIT_VERSION[0]
     final fun <get-KIT_VERSION>(): kotlin/String // tv.nomercy.player.core/KIT_VERSION.<get-KIT_VERSION>|<get-KIT_VERSION>(){}[0]
 
+final val tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN // tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN|{}DEFAULT_TV_OVERSCAN[0]
+    final fun <get-DEFAULT_TV_OVERSCAN>(): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN.<get-DEFAULT_TV_OVERSCAN>|<get-DEFAULT_TV_OVERSCAN>(){}[0]
 final val tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY // tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY|{}DEFAULT_RETRY_POLICY[0]
     final fun <get-DEFAULT_RETRY_POLICY>(): kotlin.collections/Map<kotlin/String, tv.nomercy.player.core.ports/RetryConfig> // tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY.<get-DEFAULT_RETRY_POLICY>|<get-DEFAULT_RETRY_POLICY>(){}[0]
 
@@ -5700,6 +5727,7 @@ final fun tv.nomercy.player.core.cues/parseVtt(kotlin/String): kotlin.collection
 final fun tv.nomercy.player.core.cues/parseVttSprite(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.cues/SpriteCue> // tv.nomercy.player.core.cues/parseVttSprite|parseVttSprite(kotlin.String;kotlin.String?){}[0]
 final fun tv.nomercy.player.core.cues/parseVttTimestamp(kotlin/String): kotlin/Double? // tv.nomercy.player.core.cues/parseVttTimestamp|parseVttTimestamp(kotlin.String){}[0]
 final fun tv.nomercy.player.core.device/platformDeviceCapabilities(tv.nomercy.player.core.ports/PlatformContext): tv.nomercy.player.core.device/DeviceCapabilities // tv.nomercy.player.core.device/platformDeviceCapabilities|platformDeviceCapabilities(tv.nomercy.player.core.ports.PlatformContext){}[0]
+final fun tv.nomercy.player.core.device/platformOverscan(tv.nomercy.player.core.ports/PlatformContext): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/platformOverscan|platformOverscan(tv.nomercy.player.core.ports.PlatformContext){}[0]
 final fun tv.nomercy.player.core.errors/browserPolicyError(kotlin/String, kotlin/String, kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/BrowserPolicyError // tv.nomercy.player.core.errors/browserPolicyError|browserPolicyError(kotlin.String;kotlin.String;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/MediaFormatError // tv.nomercy.player.core.errors/mediaFormatError|mediaFormatError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
