@@ -1162,6 +1162,15 @@ final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.co
     final fun sort(kotlin/Comparator<#A>) // tv.nomercy.player.core.media/MediaList.sort|sort(kotlin.Comparator<1:0>){}[0]
 }
 
+final class tv.nomercy.player.core.chapters/ChapterController { // tv.nomercy.player.core.chapters/ChapterController|null[0]
+    constructor <init>(kotlin/Function0<kotlin/String> = ...) // tv.nomercy.player.core.chapters/ChapterController.<init>|<init>(kotlin.Function0<kotlin.String>){}[0]
+
+    final fun chapters(): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.chapters/ChapterController.chapters|chapters(){}[0]
+    final fun clear() // tv.nomercy.player.core.chapters/ChapterController.clear|clear(){}[0]
+    final fun durationChanged(kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.chapters/ChapterController.durationChanged|durationChanged(kotlin.Double){}[0]
+    final fun ingest(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>): kotlin/Boolean // tv.nomercy.player.core.chapters/ChapterController.ingest|ingest(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>){}[0]
+}
+
 final class tv.nomercy.player.core.controllers/ActivityController { // tv.nomercy.player.core.controllers/ActivityController|null[0]
     constructor <init>(tv.nomercy.player.core.controllers/PlayerContext, kotlinx.coroutines/CoroutineScope, kotlin/Long) // tv.nomercy.player.core.controllers/ActivityController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext;kotlinx.coroutines.CoroutineScope;kotlin.Long){}[0]
 
