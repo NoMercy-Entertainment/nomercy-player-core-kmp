@@ -90,6 +90,19 @@ class ChapterControllerTest {
     }
 
     @Test
+    fun anIdenticalIngestStillAnnounces() {
+        // "Chapters became available" rather than "chapters changed", and the
+        // difference shows on a reload after an error: the item resolves the
+        // same chapters it had, and a chrome that emptied its menu when the
+        // error fired needs telling even though nothing about the list moved.
+        val controller: ChapterController = controller()
+        val same: List<Chapter> = listOf(Chapter(startTime = 0.0, title = "Part A"))
+        controller.ingest(same)
+
+        assertTrue(controller.ingest(same), "a re-resolved identical list said nothing")
+    }
+
+    @Test
     fun ingestingAgainReplacesRatherThanAppends() {
         // A queue advancing to the next item ingests that item's chapters. The
         // previous title's must not still be in the list.

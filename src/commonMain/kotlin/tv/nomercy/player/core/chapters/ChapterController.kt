@@ -39,13 +39,21 @@ public class ChapterController(
 
     public fun chapters(): List<Chapter> = filled
 
-    // Returns whether anything changed, so a caller emits once rather than on
-    // every tick. A chapters event on every time update is a chrome rebuilding
-    // its menu several times a second.
+    // Both entry points answer "announce this", not "the list is different".
+    // The two are the same question for a duration tick and deliberately not
+    // for an ingest, which is why the answer is returned rather than the caller
+    // comparing lists for itself and reaching a different conclusion.
+
+    // Always worth announcing, even when the list is identical to the one
+    // before it. This is the "chapters became available" moment rather than a
+    // change notification: an item reloaded after an error resolves the same
+    // chapters it had, and a chrome that cleared its menu on the error would
+    // never get them back if the identical list were treated as nothing to say.
     public fun ingest(chapters: List<Chapter>): Boolean {
         source = chapters.sortedBy { it.startTime }
+        refill()
 
-        return refill()
+        return true
     }
 
     // Called when the engine reports a length, and again if it changes.
