@@ -3483,6 +3483,14 @@ public final class tv/nomercy/player/core/ports/IdGeneratorKt {
 	public static final fun defaultIdGenerator ()Ltv/nomercy/player/core/ports/IdGenerator;
 }
 
+public final class tv/nomercy/player/core/ports/LanguageNamesKt {
+	public static final fun labelsNeedQualifier (Ljava/util/List;)Z
+}
+
+public final class tv/nomercy/player/core/ports/LanguageNames_jvmKt {
+	public static final fun displayLanguage (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/ports/LoadOptions {
 	public fun <init> ()V
 	public fun <init> (JZLjava/util/Map;)V

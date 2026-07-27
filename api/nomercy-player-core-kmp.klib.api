@@ -5007,3 +5007,5 @@ final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.po
 final fun tv.nomercy.player.core.ports/defaultIdGenerator(): tv.nomercy.player.core.ports/IdGenerator // tv.nomercy.player.core.ports/defaultIdGenerator|defaultIdGenerator(){}[0]
 final fun tv.nomercy.player.core.ports/defaultPlatform(): tv.nomercy.player.core.ports/Platform // tv.nomercy.player.core.ports/defaultPlatform|defaultPlatform(){}[0]
 final fun tv.nomercy.player.core.ports/defaultStorage(kotlin/String): tv.nomercy.player.core.ports/Storage // tv.nomercy.player.core.ports/defaultStorage|defaultStorage(kotlin.String){}[0]
+final fun tv.nomercy.player.core.ports/displayLanguage(kotlin/String): kotlin/String // tv.nomercy.player.core.ports/displayLanguage|displayLanguage(kotlin.String){}[0]
+final fun tv.nomercy.player.core.ports/labelsNeedQualifier(kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.ports/labelsNeedQualifier|labelsNeedQualifier(kotlin.collections.List<kotlin.String>){}[0]
