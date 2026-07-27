@@ -688,7 +688,18 @@ abstract interface tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.
         open fun <get-translations>(): kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>>? // tv.nomercy.player.core.plugin/PluginManifest.translations.<get-translations>|<get-translations>(){}[0]
 }
 
-abstract interface tv.nomercy.player.core.ports/AudioBackend : tv.nomercy.player.core.ports/MediaBackend, tv.nomercy.player.core.ports/TransitionBackend // tv.nomercy.player.core.ports/AudioBackend|null[0]
+abstract interface tv.nomercy.player.core.ports/AudioBackend : tv.nomercy.player.core.ports/MediaBackend, tv.nomercy.player.core.ports/TransitionBackend { // tv.nomercy.player.core.ports/AudioBackend|null[0]
+    open fun audioGraph(): tv.nomercy.player.core.ports/AudioDspGraph? // tv.nomercy.player.core.ports/AudioBackend.audioGraph|audioGraph(){}[0]
+}
+
+abstract interface tv.nomercy.player.core.ports/AudioDspGraph { // tv.nomercy.player.core.ports/AudioDspGraph|null[0]
+    abstract fun bandGain(kotlin/Int, kotlin/Double) // tv.nomercy.player.core.ports/AudioDspGraph.bandGain|bandGain(kotlin.Int;kotlin.Double){}[0]
+    abstract fun eqEnabled(kotlin/Boolean) // tv.nomercy.player.core.ports/AudioDspGraph.eqEnabled|eqEnabled(kotlin.Boolean){}[0]
+    abstract fun installFrameTap(kotlin/Function1<tv.nomercy.player.core.plugins.audio/VisualizationFrame, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.ports/AudioDspGraph.installFrameTap|installFrameTap(kotlin.Function1<tv.nomercy.player.core.plugins.audio.VisualizationFrame,kotlin.Unit>){}[0]
+    abstract fun preGain(kotlin/Double) // tv.nomercy.player.core.ports/AudioDspGraph.preGain|preGain(kotlin.Double){}[0]
+    abstract fun removeFrameTap() // tv.nomercy.player.core.ports/AudioDspGraph.removeFrameTap|removeFrameTap(){}[0]
+    abstract fun setEqBands(kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand>) // tv.nomercy.player.core.ports/AudioDspGraph.setEqBands|setEqBands(kotlin.collections.List<tv.nomercy.player.core.dsp.EqBand>){}[0]
+}
 
 abstract interface tv.nomercy.player.core.ports/AudioOutputRouter { // tv.nomercy.player.core.ports/AudioOutputRouter|null[0]
     abstract suspend fun current(): tv.nomercy.player.core.ports/AudioOutput? // tv.nomercy.player.core.ports/AudioOutputRouter.current|current(){}[0]

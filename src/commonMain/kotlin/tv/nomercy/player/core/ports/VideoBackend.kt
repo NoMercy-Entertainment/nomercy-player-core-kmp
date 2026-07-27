@@ -37,4 +37,15 @@ public interface VideoBackend : MediaBackend {
 
 // An audio engine is a media engine that can also play two things at once,
 // which is what makes crossfade possible.
-public interface AudioBackend : MediaBackend, TransitionBackend
+public interface AudioBackend : MediaBackend, TransitionBackend {
+
+    // The signal path an equaliser and a spectrum plugin drive, when this
+    // engine has one.
+    //
+    // Null by default, and that is an honest answer rather than a gap. The
+    // video engines have no DSP graph today — a plugin asking one for an
+    // equaliser should be told there is none, not handed a graph that accepts
+    // every call and changes nothing. A control that appears to work is worse
+    // than one that is absent.
+    public fun audioGraph(): AudioDspGraph? = null
+}
