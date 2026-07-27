@@ -4843,6 +4843,94 @@ public abstract interface class tv/nomercy/player/core/ports/WakeLock {
 	public abstract fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransport : tv/nomercy/player/core/ports/SystemTransport {
+	public fun <init> (Ltv/nomercy/player/core/ports/desktop/MprisBus;)V
+	public fun clear ()V
+	public fun release ()V
+	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
+	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+}
+
+public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransportKt {
+	public static final field MPRIS_PAUSED Ljava/lang/String;
+	public static final field MPRIS_PLAYING Ljava/lang/String;
+	public static final field MPRIS_STOPPED Ljava/lang/String;
+	public static final fun microsecondsOf (J)J
+	public static final fun millisecondsOf (J)J
+	public static final fun mprisMetadataOf (Ltv/nomercy/player/core/ports/NowPlaying;)Ljava/util/Map;
+	public static final fun mprisStatusOf (Ltv/nomercy/player/core/ports/TransportPlaybackState;)Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/desktop/MprisBus {
+	public abstract fun onMethodCall (Lkotlin/jvm/functions/Function2;)V
+	public abstract fun publishCanControl (Ljava/util/Set;)V
+	public abstract fun publishMetadata (Ljava/util/Map;)V
+	public abstract fun publishPosition (J)V
+	public abstract fun publishStatus (Ljava/lang/String;)V
+	public abstract fun unexport ()V
+}
+
+public final class tv/nomercy/player/core/ports/desktop/MprisMethod : java/lang/Enum {
+	public static final field NEXT Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static final field PAUSE Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static final field PLAY Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static final field PREVIOUS Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static final field SEEK Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static final field SET_POSITION Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static final field STOP Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+	public static fun values ()[Ltv/nomercy/player/core/ports/desktop/MprisMethod;
+}
+
+public final class tv/nomercy/player/core/ports/desktop/SmtcButton : java/lang/Enum {
+	public static final field NEXT Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+	public static final field PAUSE Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+	public static final field PLAY Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+	public static final field PREVIOUS Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+	public static final field STOP Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+	public static fun values ()[Ltv/nomercy/player/core/ports/desktop/SmtcButton;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/desktop/SmtcControls {
+	public abstract fun clear ()V
+	public abstract fun close ()V
+	public abstract fun commit ()V
+	public abstract fun enableButtons (Ljava/util/Set;)V
+	public abstract fun onButtonPressed (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun setStatus (Ltv/nomercy/player/core/ports/desktop/SmtcStatus;)V
+	public abstract fun showArtwork (Ljava/lang/String;)V
+	public abstract fun showMusic (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class tv/nomercy/player/core/ports/desktop/SmtcStatus : java/lang/Enum {
+	public static final field CHANGING Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+	public static final field CLOSED Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+	public static final field PAUSED Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+	public static final field PLAYING Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+	public static final field STOPPED Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getWinrtValue ()I
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+	public static fun values ()[Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+}
+
+public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransport : tv/nomercy/player/core/ports/SystemTransport {
+	public fun <init> (Ltv/nomercy/player/core/ports/desktop/SmtcControls;)V
+	public fun clear ()V
+	public fun release ()V
+	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
+	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+}
+
+public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransportKt {
+	public static final fun smtcStatusOf (Ltv/nomercy/player/core/ports/TransportPlaybackState;)Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+}
+
 public final class tv/nomercy/player/core/stream/ClientCapabilities {
 	public static final field Companion Ltv/nomercy/player/core/stream/ClientCapabilities$Companion;
 	public static final field STEREO I

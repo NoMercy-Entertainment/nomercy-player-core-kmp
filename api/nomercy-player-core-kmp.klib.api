@@ -3775,6 +3775,13 @@ final class tv.nomercy.player.core.ports/BufferConfig { // tv.nomercy.player.cor
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/BufferConfig.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/CarPlayContent { // tv.nomercy.player.core.ports/CarPlayContent|null[0]
+    constructor <init>(tv.nomercy.player.core.plugin/BrowseTreeProvider, kotlin/Int? = ...) // tv.nomercy.player.core.ports/CarPlayContent.<init>|<init>(tv.nomercy.player.core.plugin.BrowseTreeProvider;kotlin.Int?){}[0]
+
+    final suspend fun listing(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.plugin/BrowseNode> // tv.nomercy.player.core.ports/CarPlayContent.listing|listing(kotlin.String){}[0]
+    final suspend fun root(): tv.nomercy.player.core.plugin/BrowseNode // tv.nomercy.player.core.ports/CarPlayContent.root|root(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/CrossfadeTransitionStrategy : tv.nomercy.player.core.ports/TransitionStrategy { // tv.nomercy.player.core.ports/CrossfadeTransitionStrategy|null[0]
     constructor <init>(kotlin/Double = ..., kotlin/Double = ..., tv.nomercy.player.core.ports/CrossfadeCurve = ...) // tv.nomercy.player.core.ports/CrossfadeTransitionStrategy.<init>|<init>(kotlin.Double;kotlin.Double;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
 
