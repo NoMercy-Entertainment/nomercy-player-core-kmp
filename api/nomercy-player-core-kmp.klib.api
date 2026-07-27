@@ -1,5 +1,6 @@
 // Klib ABI Dump
 // Targets: [iosArm64, iosSimulatorArm64, iosX64, tvosArm64, tvosSimulatorArm64]
+// Alias: ios => [iosArm64, iosSimulatorArm64, iosX64]
 // Rendering settings:
 // - Signature version: 2
 // - Show manifest properties: true
@@ -5453,3 +5454,19 @@ final fun tv.nomercy.player.core.ports/defaultStorage(kotlin/String): tv.nomercy
 final fun tv.nomercy.player.core.ports/defaultSystemTransport(): tv.nomercy.player.core.ports/SystemTransport // tv.nomercy.player.core.ports/defaultSystemTransport|defaultSystemTransport(){}[0]
 final fun tv.nomercy.player.core.ports/displayLanguage(kotlin/String): kotlin/String // tv.nomercy.player.core.ports/displayLanguage|displayLanguage(kotlin.String){}[0]
 final fun tv.nomercy.player.core.ports/labelsNeedQualifier(kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.ports/labelsNeedQualifier|labelsNeedQualifier(kotlin.collections.List<kotlin.String>){}[0]
+
+// Targets: [ios]
+final class tv.nomercy.player.core.ports/AVPlayerExternalPlayback : tv.nomercy.player.core.ports/ExternalPlayback { // tv.nomercy.player.core.ports/AVPlayerExternalPlayback|null[0]
+    constructor <init>(platform.AVFoundation/AVPlayer) // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.<init>|<init>(platform.AVFoundation.AVPlayer){}[0]
+
+    final val isSupported // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.isSupported|{}isSupported[0]
+        final fun <get-isSupported>(): kotlin/Boolean // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.isSupported.<get-isSupported>|<get-isSupported>(){}[0]
+    final val routePickerView // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.routePickerView|{}routePickerView[0]
+        final fun <get-routePickerView>(): platform.AVKit/AVRoutePickerView // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.routePickerView.<get-routePickerView>|<get-routePickerView>(){}[0]
+    final val state // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.state|{}state[0]
+        final fun <get-state>(): kotlinx.coroutines.flow/StateFlow<tv.nomercy.player.core.ports/ExternalPlaybackState> // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.state.<get-state>|<get-state>(){}[0]
+
+    final fun dispose() // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.dispose|dispose(){}[0]
+    final fun setAllowed(kotlin/Boolean) // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.setAllowed|setAllowed(kotlin.Boolean){}[0]
+    final fun showRoutePicker() // tv.nomercy.player.core.ports/AVPlayerExternalPlayback.showRoutePicker|showRoutePicker(){}[0]
+}

@@ -206,6 +206,7 @@ detekt {
         "src/commonTest/kotlin",
         "src/androidMain/kotlin",
         "src/appleMain/kotlin",
+        "src/iosMain/kotlin",
         "src/jvmTest/kotlin",
         "src/jvmMain/kotlin",
     )
