@@ -2921,6 +2921,27 @@ public class tv/nomercy/player/core/plugin/LifecycleRegistry {
 	public final fun timeout (JLkotlin/jvm/functions/Function0;)Lkotlinx/coroutines/Job;
 }
 
+public class tv/nomercy/player/core/plugin/MediaSessionPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugin/MediaSessionPlugin$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun dispose ()V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	protected fun nowPlayingFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/ports/NowPlaying;
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/plugin/MediaSessionPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
 public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public fun <init> ()V
 	public final fun disable (Ljava/lang/String;)V

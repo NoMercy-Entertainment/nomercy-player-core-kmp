@@ -4519,6 +4519,24 @@ open class tv.nomercy.player.core.plugin/LifecycleRegistry { // tv.nomercy.playe
     final fun timeout(kotlin/Long, kotlin/Function0<kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/LifecycleRegistry.timeout|timeout(kotlin.Long;kotlin.Function0<kotlin.Unit>){}[0]
 }
 
+open class tv.nomercy.player.core.plugin/MediaSessionPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugin/MediaSessionPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.plugin/TransportCommands, kotlin/Function0<tv.nomercy.player.core.ports/SystemTransport> = ...) // tv.nomercy.player.core.plugin/MediaSessionPlugin.<init>|<init>(tv.nomercy.player.core.plugin.TransportCommands;kotlin.Function0<tv.nomercy.player.core.ports.SystemTransport>){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugin/MediaSessionPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugin/MediaSessionPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+
+    open fun dispose() // tv.nomercy.player.core.plugin/MediaSessionPlugin.dispose|dispose(){}[0]
+    open fun nowPlayingFor(tv.nomercy.player.core.media/PlaylistItem): tv.nomercy.player.core.ports/NowPlaying // tv.nomercy.player.core.plugin/MediaSessionPlugin.nowPlayingFor|nowPlayingFor(tv.nomercy.player.core.media.PlaylistItem){}[0]
+    open fun use() // tv.nomercy.player.core.plugin/MediaSessionPlugin.use|use(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugin/MediaSessionPlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugin/MediaSessionPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugin/MediaSessionPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugin/MediaSessionPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugin/MediaSessionPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 open class tv.nomercy.player.core.plugins.audio/EqualizerPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugins.audio/EqualizerPlugin|null[0]
     constructor <init>(tv.nomercy.player.core.ports/AudioDspGraph?) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.<init>|<init>(tv.nomercy.player.core.ports.AudioDspGraph?){}[0]
 
