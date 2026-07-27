@@ -4390,6 +4390,32 @@ open class tv.nomercy.player.core.plugin/LifecycleRegistry { // tv.nomercy.playe
     final fun timeout(kotlin/Long, kotlin/Function0<kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/LifecycleRegistry.timeout|timeout(kotlin.Long;kotlin.Function0<kotlin.Unit>){}[0]
 }
 
+open class tv.nomercy.player.core.plugins.audio/EqualizerPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugins.audio/EqualizerPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/AudioDspGraph?) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.<init>|<init>(tv.nomercy.player.core.ports.AudioDspGraph?){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+
+    open fun available(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.available|available(){}[0]
+    open fun band(kotlin/Int, kotlin/Double) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.band|band(kotlin.Int;kotlin.Double){}[0]
+    open fun bands(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.bands|bands(){}[0]
+    open fun enabled(kotlin/Boolean) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.enabled|enabled(kotlin.Boolean){}[0]
+    open fun equalizerEnabled(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.equalizerEnabled|equalizerEnabled(){}[0]
+    open fun preGain(): kotlin/Double // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.preGain|preGain(){}[0]
+    open fun preGain(kotlin/Double) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.preGain|preGain(kotlin.Double){}[0]
+    open fun preset(): kotlin/String // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.preset|preset(){}[0]
+    open fun preset(kotlin/String) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.preset|preset(kotlin.String){}[0]
+    open fun presets(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqPreset> // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.presets|presets(){}[0]
+    open fun reset() // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.reset|reset(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.core.controllers/SilentLogger|null[0]
     final fun child(kotlin/String): tv.nomercy.player.core.ports/Logger // tv.nomercy.player.core.controllers/SilentLogger.child|child(kotlin.String){}[0]
     final fun debug(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.debug|debug(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
