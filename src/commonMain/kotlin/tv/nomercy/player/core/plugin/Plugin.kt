@@ -148,7 +148,12 @@ public abstract class Plugin<O : Any> {
     // A bare key listens to a core event; another plugin's key is already
     // namespaced, so listening across plugins is the same call.
     protected fun <T> on(key: EventKey<T>, fn: (T) -> Unit): Subscription {
-        val subscription: Subscription = wired.host.on(key, fn)
+        // The short-circuit the paragraph above promises, in the one place every
+        // plugin's handlers pass through. It was documented and not implemented,
+        // which made disable() an announcement rather than an off switch: a
+        // settings toggle emitted the event, a consumer redrew the control, and
+        // the plugin carried on doing exactly what it had been doing.
+        val subscription: Subscription = wired.host.on(key) { data -> if (active) fn(data) }
         wired.lifecycle.addCleanup { subscription.dispose() }
         return subscription
     }

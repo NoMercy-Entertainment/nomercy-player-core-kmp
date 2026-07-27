@@ -190,3 +190,75 @@ class PluginEnableDisableTest {
         assertEquals(player.enabledPlugins().map { it.id }, player.enabledPlugins().map { it.id })
     }
 }
+
+// A plugin that records what its handler saw, so "disabled" can be measured as
+// silence rather than as a flag.
+private class CountingPlugin : Plugin<Unit>() {
+    companion object Manifest : PluginManifest {
+        override val id: String = "counting"
+        override val version: String = "1.0.0"
+    }
+
+    override val manifest: PluginManifest get() = Manifest
+
+    var heard: Int = 0
+        private set
+
+    override fun use() {
+        on(CoreEvents.Play) { heard += 1 }
+    }
+}
+
+// Disabling has to reach the handlers.
+//
+// The base class documents that a disabled plugin keeps its listeners and
+// short-circuits, and for a while it only did the first half: disable() emitted
+// its event, a chrome redrew the toggle, and the plugin carried on doing exactly
+// what it had been doing. A settings switch that announces itself and changes
+// nothing is worse than no switch.
+class PluginDisableSilencesHandlersTest {
+
+    private suspend fun playerWith(plugin: Plugin<Unit>): ComposedPlayer {
+        val player = ComposedPlayer(backend = FakeMediaBackend())
+        player.setup()
+        player.addPlugin(plugin)
+        return player
+    }
+
+    @Test
+    fun anEnabledPluginHearsWhatHappens() = runTest {
+        val plugin = CountingPlugin()
+        val player: ComposedPlayer = playerWith(plugin)
+
+        player.play()
+
+        assertEquals(1, plugin.heard)
+    }
+
+    @Test
+    fun aDisabledPluginHearsNothing() = runTest {
+        val plugin = CountingPlugin()
+        val player: ComposedPlayer = playerWith(plugin)
+        plugin.disable("turned off in settings")
+
+        player.play()
+
+        assertEquals(0, plugin.heard, "a disabled plugin was still acting")
+    }
+
+    @Test
+    fun enablingAgainStartsHearingWithoutReRegistering() = runTest {
+        // The reason it short-circuits rather than unsubscribing. A plugin that
+        // had to re-register would lose what it remembered, which is exactly
+        // what a settings toggle must not do.
+        val plugin = CountingPlugin()
+        val player: ComposedPlayer = playerWith(plugin)
+        plugin.disable()
+        player.play()
+
+        plugin.enable()
+        player.play()
+
+        assertEquals(1, plugin.heard)
+    }
+}
