@@ -2465,6 +2465,83 @@ public final class tv/nomercy/player/core/events/VolumeChange {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/input/KeyBindingTable {
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public final fun bind (Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public final fun bind (Ltv/nomercy/player/core/input/PlayerKey;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun bind$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public static synthetic fun bind$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/PlayerKey;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public final fun handle (Ltv/nomercy/player/core/input/KeyCombo;)Z
+	public final fun handle (Ltv/nomercy/player/core/input/PlayerKey;)Z
+	public final fun isBound (Ltv/nomercy/player/core/input/KeyCombo;)Z
+	public final fun replace (Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
+	public static synthetic fun replace$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public final fun unbind (Ltv/nomercy/player/core/input/KeyCombo;)V
+}
+
+public final class tv/nomercy/player/core/input/KeyCombo {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/input/KeyCombo;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/input/KeyCombo;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/input/KeyCombo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCanonical ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/input/KeyComboKt {
+	public static final fun asCombo (Ltv/nomercy/player/core/input/PlayerKey;)Ltv/nomercy/player/core/input/KeyCombo;
+	public static final fun keyCombo (Ljava/lang/String;ZZZZ)Ltv/nomercy/player/core/input/KeyCombo;
+	public static synthetic fun keyCombo$default (Ljava/lang/String;ZZZZILjava/lang/Object;)Ltv/nomercy/player/core/input/KeyCombo;
+}
+
+public abstract class tv/nomercy/player/core/input/KeyHandlerPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	protected abstract fun addDefaults ()V
+	protected final fun getBindings ()Ltv/nomercy/player/core/input/KeyBindingTable;
+	public fun handle (Ltv/nomercy/player/core/input/KeyCombo;)Z
+	public fun handle (Ltv/nomercy/player/core/input/PlayerKey;)Z
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/input/PlayerKey : java/lang/Enum {
+	public static final field AudioTrack Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Back Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Captions Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Center Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field ColorBlue Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field ColorGreen Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field ColorRed Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field ColorYellow Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Down Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Favorites Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Info Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Left Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaFastForward Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaNext Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaPause Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaPlay Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaPlayPause Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaPrevious Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaRecord Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaRewind Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field MediaStop Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Pause Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Play Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field PlayPause Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Right Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Stop Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field Up Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field VolumeDown Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field VolumeMute Ltv/nomercy/player/core/input/PlayerKey;
+	public static final field VolumeUp Ltv/nomercy/player/core/input/PlayerKey;
+	public final fun getCombo ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/input/PlayerKey;
+	public static fun values ()[Ltv/nomercy/player/core/input/PlayerKey;
+}
+
 public final class tv/nomercy/player/core/media/Chapter {
 	public fun <init> (DLjava/lang/String;Ljava/lang/String;Z)V
 	public synthetic fun <init> (DLjava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V

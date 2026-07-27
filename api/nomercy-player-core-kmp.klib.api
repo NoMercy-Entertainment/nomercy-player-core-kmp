@@ -110,6 +110,47 @@ final enum class tv.nomercy.player.core.errors/Severity : kotlin/Enum<tv.nomercy
     }
 }
 
+final enum class tv.nomercy.player.core.input/PlayerKey : kotlin/Enum<tv.nomercy.player.core.input/PlayerKey> { // tv.nomercy.player.core.input/PlayerKey|null[0]
+    enum entry AudioTrack // tv.nomercy.player.core.input/PlayerKey.AudioTrack|null[0]
+    enum entry Back // tv.nomercy.player.core.input/PlayerKey.Back|null[0]
+    enum entry Captions // tv.nomercy.player.core.input/PlayerKey.Captions|null[0]
+    enum entry Center // tv.nomercy.player.core.input/PlayerKey.Center|null[0]
+    enum entry ColorBlue // tv.nomercy.player.core.input/PlayerKey.ColorBlue|null[0]
+    enum entry ColorGreen // tv.nomercy.player.core.input/PlayerKey.ColorGreen|null[0]
+    enum entry ColorRed // tv.nomercy.player.core.input/PlayerKey.ColorRed|null[0]
+    enum entry ColorYellow // tv.nomercy.player.core.input/PlayerKey.ColorYellow|null[0]
+    enum entry Down // tv.nomercy.player.core.input/PlayerKey.Down|null[0]
+    enum entry Favorites // tv.nomercy.player.core.input/PlayerKey.Favorites|null[0]
+    enum entry Info // tv.nomercy.player.core.input/PlayerKey.Info|null[0]
+    enum entry Left // tv.nomercy.player.core.input/PlayerKey.Left|null[0]
+    enum entry MediaFastForward // tv.nomercy.player.core.input/PlayerKey.MediaFastForward|null[0]
+    enum entry MediaNext // tv.nomercy.player.core.input/PlayerKey.MediaNext|null[0]
+    enum entry MediaPause // tv.nomercy.player.core.input/PlayerKey.MediaPause|null[0]
+    enum entry MediaPlay // tv.nomercy.player.core.input/PlayerKey.MediaPlay|null[0]
+    enum entry MediaPlayPause // tv.nomercy.player.core.input/PlayerKey.MediaPlayPause|null[0]
+    enum entry MediaPrevious // tv.nomercy.player.core.input/PlayerKey.MediaPrevious|null[0]
+    enum entry MediaRecord // tv.nomercy.player.core.input/PlayerKey.MediaRecord|null[0]
+    enum entry MediaRewind // tv.nomercy.player.core.input/PlayerKey.MediaRewind|null[0]
+    enum entry MediaStop // tv.nomercy.player.core.input/PlayerKey.MediaStop|null[0]
+    enum entry Pause // tv.nomercy.player.core.input/PlayerKey.Pause|null[0]
+    enum entry Play // tv.nomercy.player.core.input/PlayerKey.Play|null[0]
+    enum entry PlayPause // tv.nomercy.player.core.input/PlayerKey.PlayPause|null[0]
+    enum entry Right // tv.nomercy.player.core.input/PlayerKey.Right|null[0]
+    enum entry Stop // tv.nomercy.player.core.input/PlayerKey.Stop|null[0]
+    enum entry Up // tv.nomercy.player.core.input/PlayerKey.Up|null[0]
+    enum entry VolumeDown // tv.nomercy.player.core.input/PlayerKey.VolumeDown|null[0]
+    enum entry VolumeMute // tv.nomercy.player.core.input/PlayerKey.VolumeMute|null[0]
+    enum entry VolumeUp // tv.nomercy.player.core.input/PlayerKey.VolumeUp|null[0]
+
+    final val combo // tv.nomercy.player.core.input/PlayerKey.combo|{}combo[0]
+        final fun <get-combo>(): kotlin/String // tv.nomercy.player.core.input/PlayerKey.combo.<get-combo>|<get-combo>(){}[0]
+    final val entries // tv.nomercy.player.core.input/PlayerKey.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.input/PlayerKey> // tv.nomercy.player.core.input/PlayerKey.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.input/PlayerKey // tv.nomercy.player.core.input/PlayerKey.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.input/PlayerKey> // tv.nomercy.player.core.input/PlayerKey.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.media/DynamicRange : kotlin/Enum<tv.nomercy.player.core.media/DynamicRange> { // tv.nomercy.player.core.media/DynamicRange|null[0]
     enum entry DolbyVision // tv.nomercy.player.core.media/DynamicRange.DolbyVision|null[0]
     enum entry Hdr10 // tv.nomercy.player.core.media/DynamicRange.Hdr10|null[0]
@@ -1110,6 +1151,18 @@ sealed interface tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nome
         final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.toString|toString(){}[0]
     }
+}
+
+abstract class <#A: kotlin/Any> tv.nomercy.player.core.input/KeyHandlerPlugin : tv.nomercy.player.core.plugin/Plugin<#A> { // tv.nomercy.player.core.input/KeyHandlerPlugin|null[0]
+    constructor <init>(kotlin/Function0<kotlin/Long>) // tv.nomercy.player.core.input/KeyHandlerPlugin.<init>|<init>(kotlin.Function0<kotlin.Long>){}[0]
+
+    final val bindings // tv.nomercy.player.core.input/KeyHandlerPlugin.bindings|{}bindings[0]
+        final fun <get-bindings>(): tv.nomercy.player.core.input/KeyBindingTable // tv.nomercy.player.core.input/KeyHandlerPlugin.bindings.<get-bindings>|<get-bindings>(){}[0]
+
+    abstract fun addDefaults() // tv.nomercy.player.core.input/KeyHandlerPlugin.addDefaults|addDefaults(){}[0]
+    open fun handle(tv.nomercy.player.core.input/KeyCombo): kotlin/Boolean // tv.nomercy.player.core.input/KeyHandlerPlugin.handle|handle(tv.nomercy.player.core.input.KeyCombo){}[0]
+    open fun handle(tv.nomercy.player.core.input/PlayerKey): kotlin/Boolean // tv.nomercy.player.core.input/KeyHandlerPlugin.handle|handle(tv.nomercy.player.core.input.PlayerKey){}[0]
+    open fun use() // tv.nomercy.player.core.input/KeyHandlerPlugin.use|use(){}[0]
 }
 
 abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nomercy.player.core.plugin/Plugin|null[0]
@@ -3217,6 +3270,31 @@ final class tv.nomercy.player.core.events/VolumeChange { // tv.nomercy.player.co
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/VolumeChange.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/VolumeChange.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/VolumeChange.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.input/KeyBindingTable { // tv.nomercy.player.core.input/KeyBindingTable|null[0]
+    constructor <init>(kotlin/Function0<kotlin/Long>) // tv.nomercy.player.core.input/KeyBindingTable.<init>|<init>(kotlin.Function0<kotlin.Long>){}[0]
+
+    final fun bind(tv.nomercy.player.core.input/KeyCombo, kotlin/Long = ..., kotlin/Function0<kotlin/Boolean> = ..., kotlin/Function0<kotlin/Unit>) // tv.nomercy.player.core.input/KeyBindingTable.bind|bind(tv.nomercy.player.core.input.KeyCombo;kotlin.Long;kotlin.Function0<kotlin.Boolean>;kotlin.Function0<kotlin.Unit>){}[0]
+    final fun bind(tv.nomercy.player.core.input/PlayerKey, kotlin/Long = ..., kotlin/Function0<kotlin/Boolean> = ..., kotlin/Function0<kotlin/Unit>) // tv.nomercy.player.core.input/KeyBindingTable.bind|bind(tv.nomercy.player.core.input.PlayerKey;kotlin.Long;kotlin.Function0<kotlin.Boolean>;kotlin.Function0<kotlin.Unit>){}[0]
+    final fun handle(tv.nomercy.player.core.input/KeyCombo): kotlin/Boolean // tv.nomercy.player.core.input/KeyBindingTable.handle|handle(tv.nomercy.player.core.input.KeyCombo){}[0]
+    final fun handle(tv.nomercy.player.core.input/PlayerKey): kotlin/Boolean // tv.nomercy.player.core.input/KeyBindingTable.handle|handle(tv.nomercy.player.core.input.PlayerKey){}[0]
+    final fun isBound(tv.nomercy.player.core.input/KeyCombo): kotlin/Boolean // tv.nomercy.player.core.input/KeyBindingTable.isBound|isBound(tv.nomercy.player.core.input.KeyCombo){}[0]
+    final fun replace(tv.nomercy.player.core.input/KeyCombo, kotlin/Long = ..., kotlin/Function0<kotlin/Boolean> = ..., kotlin/Function0<kotlin/Unit>) // tv.nomercy.player.core.input/KeyBindingTable.replace|replace(tv.nomercy.player.core.input.KeyCombo;kotlin.Long;kotlin.Function0<kotlin.Boolean>;kotlin.Function0<kotlin.Unit>){}[0]
+    final fun unbind(tv.nomercy.player.core.input/KeyCombo) // tv.nomercy.player.core.input/KeyBindingTable.unbind|unbind(tv.nomercy.player.core.input.KeyCombo){}[0]
+}
+
+final class tv.nomercy.player.core.input/KeyCombo { // tv.nomercy.player.core.input/KeyCombo|null[0]
+    constructor <init>(kotlin/String) // tv.nomercy.player.core.input/KeyCombo.<init>|<init>(kotlin.String){}[0]
+
+    final val canonical // tv.nomercy.player.core.input/KeyCombo.canonical|{}canonical[0]
+        final fun <get-canonical>(): kotlin/String // tv.nomercy.player.core.input/KeyCombo.canonical.<get-canonical>|<get-canonical>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.input/KeyCombo.component1|component1(){}[0]
+    final fun copy(kotlin/String = ...): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/KeyCombo.copy|copy(kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.input/KeyCombo.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.input/KeyCombo.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.input/KeyCombo.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.media/Chapter { // tv.nomercy.player.core.media/Chapter|null[0]
@@ -5720,6 +5798,7 @@ final val tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY // tv.nomercy.player
 
 final fun (kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange>).tv.nomercy.player.core.ports/covers(kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.ports/covers|covers@kotlin.collections.List<tv.nomercy.player.core.ports.TimeRange>(kotlin.Double){}[0]
 final fun (kotlin.collections/Map<kotlin/String, tv.nomercy.player.core.ports/RetryConfig>).tv.nomercy.player.core.ports/resolve(kotlin/String): tv.nomercy.player.core.ports/RetryConfig // tv.nomercy.player.core.ports/resolve|resolve@kotlin.collections.Map<kotlin.String,tv.nomercy.player.core.ports.RetryConfig>(kotlin.String){}[0]
+final fun (tv.nomercy.player.core.input/PlayerKey).tv.nomercy.player.core.input/asCombo(): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/asCombo|asCombo@tv.nomercy.player.core.input.PlayerKey(){}[0]
 final fun (tv.nomercy.player.core.ports/RetryConfig).tv.nomercy.player.core.ports/delayMs(kotlin/Int): kotlin/Long // tv.nomercy.player.core.ports/delayMs|delayMs@tv.nomercy.player.core.ports.RetryConfig(kotlin.Int){}[0]
 final fun (tv.nomercy.player.core.stream/LiveSessionRequest).tv.nomercy.player.core.stream/toJson(): kotlin/String // tv.nomercy.player.core.stream/toJson|toJson@tv.nomercy.player.core.stream.LiveSessionRequest(){}[0]
 final fun <#A: kotlin/Any?> tv.nomercy.player.core.plugin/pluginEventKey(tv.nomercy.player.core.plugin/PluginManifest, kotlin/String): tv.nomercy.player.core.events/EventKey<#A> // tv.nomercy.player.core.plugin/pluginEventKey|pluginEventKey(tv.nomercy.player.core.plugin.PluginManifest;kotlin.String){0§<kotlin.Any?>}[0]
@@ -5733,6 +5812,7 @@ final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/S
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/resourceError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/ResourceError // tv.nomercy.player.core.errors/resourceError|resourceError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/stateError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/StateError // tv.nomercy.player.core.errors/stateError|stateError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+final fun tv.nomercy.player.core.input/keyCombo(kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/keyCombo|keyCombo(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 final fun tv.nomercy.player.core.media/fillChapterGaps(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>, kotlin/Double, kotlin/Function0<kotlin/String>): tv.nomercy.player.core.media/ChapterGapFill // tv.nomercy.player.core.media/fillChapterGaps|fillChapterGaps(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>;kotlin.Double;kotlin.Function0<kotlin.String>){}[0]
 final fun tv.nomercy.player.core.ports/currentDevice(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/currentDevice|currentDevice(){}[0]
 final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.ports/Clock // tv.nomercy.player.core.ports/defaultClock|defaultClock(){}[0]
