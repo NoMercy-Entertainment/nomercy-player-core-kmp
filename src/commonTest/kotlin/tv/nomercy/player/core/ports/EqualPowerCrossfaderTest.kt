@@ -18,6 +18,10 @@ private const val STEP_MS = 16L
 private const val FADE_MS = 320L
 private const val FULL = 1.0f
 
+// Float rounding on a gain, not a measurement tolerance. The scheduler stores
+// what the curve returns; anything larger would let a different curve through.
+private const val CURVE_TOLERANCE = 1e-6f
+
 // A handle that records every gain it is given, in order.
 //
 // The order is the point: a crossfade that ended at the right numbers having
@@ -77,6 +81,33 @@ class EqualPowerCrossfaderTest {
             abs(1.0 - (out * out + into * into).toDouble())
         }
         assertTrue(worst < POWER_TOLERANCE, "power moved by $worst across the fade")
+    }
+
+    @Test
+    fun theScheduledRampIsThisCurveAndNotMerelyAConstantPowerOne() {
+        // Constant power is necessary and not sufficient. More than one curve
+        // holds in² + out² = 1 — the previous test would pass on any of them,
+        // and a scheduler that quietly grew its own would drift from the web's
+        // fade while staying green. This pins the shape step by step.
+        runTest {
+            val outgoing = RecordingSink(FULL)
+            val incoming = RecordingSink(0f)
+
+            fader().run(outgoing, incoming, EqualPowerCrossfader.Fade(FULL, FADE_MS))
+
+            // Aligned the same way the power test aligns them: each list carries
+            // its constructor value, and the incoming one carries the pre-ramp
+            // silence too.
+            val inSteps: List<Float> = incoming.gains.drop(2).dropLast(1)
+            for ((step, actual) in inSteps.withIndex()) {
+                val progress: Double = (step * STEP_MS).toDouble() / FADE_MS
+                val expected: Float = CrossfadeCurve.EQUAL_POWER.gain(progress).toFloat()
+                assertTrue(
+                    abs(actual - expected) < CURVE_TOLERANCE,
+                    "step $step scheduled $actual, the curve says $expected",
+                )
+            }
+        }
     }
 
     @Test
