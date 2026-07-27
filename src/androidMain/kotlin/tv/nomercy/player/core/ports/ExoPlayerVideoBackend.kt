@@ -52,6 +52,10 @@ private const val TIME_UPDATE_INTERVAL_MS = 250L
 public class ExoPlayerVideoBackend(
     context: Context,
     scope: CoroutineScope? = null,
+    // Only the audio backend passes one. Video has no equaliser today, and a
+    // processor in a video sink would cost a pass over every sample to change
+    // nothing.
+    private val equaliser: BiquadEqAudioProcessor? = null,
 ) : VideoBackend {
 
     private val bus = StringEventBus()
@@ -119,7 +123,7 @@ public class ExoPlayerVideoBackend(
     // and this is the render target alone.
     //
     // Main thread, like everything else Media3 owns.
-    public val exoPlayer: ExoPlayer = buildEngine(context, authHeaders, trackSelector)
+    public val exoPlayer: ExoPlayer = buildEngine(context, authHeaders, trackSelector, equaliser)
 
     private val player: ExoPlayer = exoPlayer
 

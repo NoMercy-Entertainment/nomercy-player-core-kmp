@@ -34,7 +34,11 @@ import androidx.media3.exoplayer.audio.DefaultAudioSink
 // are surrounded by Bluetooth and USB-C dongles that claim surround support they
 // do not have. A television is plugged into something by wire or it is not.
 @OptIn(UnstableApi::class)
-public class AudioPassthroughRenderersFactory private constructor(
+// Open, with a constructor a subclass can reach, because one subclass exists in
+// this module: the variant that splices the equaliser into the sink. Media3
+// builds its audio sink inside the renderers factory, so overriding the method
+// that makes it is the only way in.
+public open class AudioPassthroughRenderersFactory protected constructor(
     context: Context,
     enablePassthrough: Boolean,
 ) : DefaultRenderersFactory(context) {

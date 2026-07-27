@@ -17,6 +17,8 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.audio.AudioSink
+import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -46,10 +48,21 @@ import okhttp3.OkHttpClient
 // The looper is named for the same reason. Left to itself the builder binds to
 // whatever looper happens to be current, so an engine built off the main thread
 // would answer a different thread than every callback arrives on.
-internal fun buildEngine(context: Context, auth: AuthHeaders, selector: DefaultTrackSelector): ExoPlayer {
+internal fun buildEngine(
+    context: Context,
+    auth: AuthHeaders,
+    selector: DefaultTrackSelector,
+    // Given only by the audio backend. Video has no equaliser today, and
+    // inserting a processor into a video sink to change nothing would cost a
+    // pass over every sample for no reason.
+    processor: BiquadEqAudioProcessor? = null,
+): ExoPlayer {
     val budget: BufferConfig = bufferConfigForDevice(context)
-    val renderers: AudioPassthroughRenderersFactory =
+    val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
         AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
+    } else {
+        EqualiserRenderersFactory(context, budget.isTvDevice, processor)
+    }
 
     selector.parameters = selector.buildUponParameters()
         // A rung change that is not seamless is still better than a stall. On
@@ -93,6 +106,31 @@ internal fun buildEngine(context: Context, auth: AuthHeaders, selector: DefaultT
                 .build(),
             true,
         )
+        .build()
+}
+
+// The renderers factory with the equaliser spliced into its sink.
+//
+// A subclass rather than a configuration, because Media3 builds its audio sink
+// inside the renderers factory and the only way in is to override the method
+// that makes it. Passthrough is left alone here: a device bitstreaming Atmos to
+// a receiver is not decoding the audio at all, so there are no samples for an
+// equaliser to filter and inserting one would silently defeat the passthrough
+// this same factory exists to enable.
+private class EqualiserRenderersFactory(
+    context: Context,
+    isTvForm: Boolean,
+    private val processor: BiquadEqAudioProcessor,
+) : AudioPassthroughRenderersFactory(context, isTvForm) {
+
+    override fun buildAudioSink(
+        context: Context,
+        enableFloatOutput: Boolean,
+        enableAudioTrackPlaybackParams: Boolean,
+    ): AudioSink = DefaultAudioSink.Builder(context)
+        .setEnableFloatOutput(false)
+        .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+        .setAudioProcessors(arrayOf(processor))
         .build()
 }
 
