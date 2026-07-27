@@ -1565,6 +1565,12 @@ final class tv.nomercy.player.core.drm/DrmConfig { // tv.nomercy.player.core.drm
         final fun <get-transformLicenseResponse>(): kotlin.coroutines/SuspendFunction1<kotlin/ByteArray, kotlin/ByteArray>? // tv.nomercy.player.core.drm/DrmConfig.transformLicenseResponse.<get-transformLicenseResponse>|<get-transformLicenseResponse>(){}[0]
 }
 
+final class tv.nomercy.player.core.drm/DrmKeyAuthorizer { // tv.nomercy.player.core.drm/DrmKeyAuthorizer|null[0]
+    constructor <init>(kotlin/Function0<kotlin.collections/Map<kotlin/String, kotlin/String>>) // tv.nomercy.player.core.drm/DrmKeyAuthorizer.<init>|<init>(kotlin.Function0<kotlin.collections.Map<kotlin.String,kotlin.String>>){}[0]
+
+    final fun authorize(tv.nomercy.player.core.drm/KeyRequest): tv.nomercy.player.core.drm/KeyRequest // tv.nomercy.player.core.drm/DrmKeyAuthorizer.authorize|authorize(tv.nomercy.player.core.drm.KeyRequest){}[0]
+}
+
 final class tv.nomercy.player.core.drm/DrmKeyError { // tv.nomercy.player.core.drm/DrmKeyError|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.drm/DrmKeyError.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
 
@@ -1607,6 +1613,22 @@ final class tv.nomercy.player.core.drm/DrmUnsupported { // tv.nomercy.player.cor
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.drm/DrmUnsupported.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.drm/DrmUnsupported.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.drm/DrmUnsupported.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.drm/KeyRequest { // tv.nomercy.player.core.drm/KeyRequest|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // tv.nomercy.player.core.drm/KeyRequest.<init>|<init>(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val headers // tv.nomercy.player.core.drm/KeyRequest.headers|{}headers[0]
+        final fun <get-headers>(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.drm/KeyRequest.headers.<get-headers>|<get-headers>(){}[0]
+    final val url // tv.nomercy.player.core.drm/KeyRequest.url|{}url[0]
+        final fun <get-url>(): kotlin/String // tv.nomercy.player.core.drm/KeyRequest.url.<get-url>|<get-url>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.drm/KeyRequest.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.drm/KeyRequest.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): tv.nomercy.player.core.drm/KeyRequest // tv.nomercy.player.core.drm/KeyRequest.copy|copy(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.drm/KeyRequest.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.drm/KeyRequest.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.drm/KeyRequest.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.dsp/BiquadCoefficients { // tv.nomercy.player.core.dsp/BiquadCoefficients|null[0]
