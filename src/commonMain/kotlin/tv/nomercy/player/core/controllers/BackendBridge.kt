@@ -124,7 +124,10 @@ public class BackendBridge(private val ctx: PlayerContext) {
     // it. Swapping engines mid-session otherwise leaves the old one's listeners
     // emitting into a player that has moved on.
     public fun detach(backend: MediaBackend) {
-        for ((event, handler) in handlers) backend.off(event, handler)
+        // Over a copy. off() is the backend's code and not ours, and an engine
+        // that unregisters a sibling handler while being asked to drop one would
+        // otherwise take the whole detach down with a concurrent modification.
+        for ((event, handler) in handlers.toList()) backend.off(event, handler)
         handlers.clear()
     }
 
