@@ -3590,6 +3590,21 @@ public final class tv/nomercy/player/core/ports/DefaultPreloadStrategy : tv/nome
 	public fun shouldPreload (Ltv/nomercy/player/core/ports/PreloadContext;)Z
 }
 
+public final class tv/nomercy/player/core/ports/DesktopFamily : java/lang/Enum {
+	public static final field Companion Ltv/nomercy/player/core/ports/DesktopFamily$Companion;
+	public static final field LINUX Ltv/nomercy/player/core/ports/DesktopFamily;
+	public static final field MAC Ltv/nomercy/player/core/ports/DesktopFamily;
+	public static final field UNKNOWN Ltv/nomercy/player/core/ports/DesktopFamily;
+	public static final field WINDOWS Ltv/nomercy/player/core/ports/DesktopFamily;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/DesktopFamily;
+	public static fun values ()[Ltv/nomercy/player/core/ports/DesktopFamily;
+}
+
+public final class tv/nomercy/player/core/ports/DesktopFamily$Companion {
+	public final fun of (Ljava/lang/String;)Ltv/nomercy/player/core/ports/DesktopFamily;
+}
+
 public final class tv/nomercy/player/core/ports/Device {
 	public fun <init> (Ltv/nomercy/player/core/ports/FormFactor;Ltv/nomercy/player/core/ports/OperatingSystem;)V
 	public final fun component1 ()Ltv/nomercy/player/core/ports/FormFactor;
