@@ -65,8 +65,15 @@ public class ExoPlayerVideoBackend(
     // the UI layer touches it: every playback call goes through MediaBackend,
     // and this is the render target alone.
     //
+    // The credentials every manifest and segment request carries.
+    //
+    // A host sets `authHeaders.provider` once and refreshes behind it; the
+    // engine asks per request rather than capturing a token that expires
+    // partway through a film.
+    public val authHeaders: AuthHeaders = AuthHeaders()
+
     // Main thread, like everything else Media3 owns.
-    public val exoPlayer: ExoPlayer = buildEngine(context)
+    public val exoPlayer: ExoPlayer = buildEngine(context, authHeaders)
 
     private val player: ExoPlayer = exoPlayer
 

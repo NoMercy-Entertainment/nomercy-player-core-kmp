@@ -44,12 +44,12 @@ import okhttp3.OkHttpClient
 // The looper is named for the same reason. Left to itself the builder binds to
 // whatever looper happens to be current, so an engine built off the main thread
 // would answer a different thread than every callback arrives on.
-internal fun buildEngine(context: Context): ExoPlayer {
+internal fun buildEngine(context: Context, auth: AuthHeaders): ExoPlayer {
     val budget: BufferConfig = bufferConfigForDevice(context)
 
     return ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())
-        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory(context), DefaultExtractorsFactory()))
+        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory(context, auth), DefaultExtractorsFactory()))
         .setLoadControl(loadControlFor(budget))
         // Hold a network wakelock while playing. Without it a TV that dims its
         // screen can let the radio idle mid-stream, and the rebuffer that
@@ -96,8 +96,11 @@ internal fun buildEngine(context: Context): ExoPlayer {
 // a 256MB heap and is not comfortable on a phone either. Sidecar ASS is drawn
 // by the subtitle overlay, which streams it, and NoMercy serves HLS rather than
 // MKV-embedded ASS, so nothing is lost by leaving the extractor path alone.
-private fun dataSourceFactory(context: Context): DataSource.Factory {
+private fun dataSourceFactory(context: Context, auth: AuthHeaders): DataSource.Factory {
     val client = OkHttpClient.Builder()
+        // Auth first, so the repair below sees the response that the
+        // authenticated request actually returned rather than a 401 body.
+        .addInterceptor(auth.asInterceptor())
         .addInterceptor(CodecFixInterceptor())
         .build()
 
