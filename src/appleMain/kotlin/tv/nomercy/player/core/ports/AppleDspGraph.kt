@@ -169,7 +169,11 @@ public class AppleDspGraph(
 // Top level because a staticCFunction cannot be a method and cannot capture.
 // It finds its graph through the tap's storage, which is the pointer handed to
 // clientInfo at creation.
+//
+// Six parameters because MediaToolbox chose them. This signature is the C
+// callback ABI and cannot be narrowed without failing to be a callback.
 @OptIn(ExperimentalForeignApi::class)
+@Suppress("LongParameterList")
 private fun processTap(
     tap: MTAudioProcessingTapRef?,
     numberFrames: Long,
