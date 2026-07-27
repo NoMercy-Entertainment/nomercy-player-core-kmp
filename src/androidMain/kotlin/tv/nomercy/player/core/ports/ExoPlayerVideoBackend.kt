@@ -18,6 +18,7 @@ import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.android.asCoroutineDispatcher
@@ -41,6 +42,13 @@ private const val TIME_UPDATE_INTERVAL_MS = 250L
 // Media3 is main-thread-only. Every call into it hops there, and every callback
 // arrives there, which is why the event bus is locked — a controller may
 // subscribe from anywhere.
+//
+// The method count is VideoBackend's, not a decision made here. Transport,
+// tracks and a quality ladder is what an engine has to answer, and splitting
+// the implementation to satisfy a threshold would put half of one object's
+// state behind a delegate — which is how the track cache and the playback cache
+// would drift apart.
+@Suppress("TooManyFunctions")
 public class ExoPlayerVideoBackend(
     context: Context,
     scope: CoroutineScope? = null,
@@ -59,12 +67,6 @@ public class ExoPlayerVideoBackend(
         Handler(Looper.getMainLooper()).asCoroutineDispatcher()
 
     private val main: CoroutineScope = scope ?: CoroutineScope(SupervisorJob() + mainDispatcher)
-    // Public because video has to be drawn somewhere and only the caller knows
-    // where. A PlayerView is handed the engine, not a frame buffer, so a backend
-    // that kept this private could decode a film and show no one. Nothing above
-    // the UI layer touches it: every playback call goes through MediaBackend,
-    // and this is the render target alone.
-    //
     // The credentials every manifest and segment request carries.
     //
     // A host sets `authHeaders.provider` once and refreshes behind it; the
@@ -72,8 +74,52 @@ public class ExoPlayerVideoBackend(
     // partway through a film.
     public val authHeaders: AuthHeaders = AuthHeaders()
 
+    // Held rather than reached for through the player, because the tunneling
+    // decision is re-applied per item and the engine's own accessor gives back
+    // parameters rather than the selector that owns them.
+    private val trackSelector: DefaultTrackSelector = DefaultTrackSelector(context)
+
+    // Read once. A device does not stop being a television while the app runs,
+    // and this is consulted on every load.
+    private val isTvDevice: Boolean = bufferConfigForDevice(context).isTvDevice
+
+    // What the selector was actually told, rather than what this class decided.
+    //
+    // Read straight off Media3's own parameters so a gate cannot pass by
+    // agreeing with a field the setter wrote. Not public: a consumer has no
+    // decision to make here, and exposing it would invite one.
+    internal val tunnelingActive: Boolean
+        get() = trackSelector.parameters.tunnelingEnabled
+
+    // Latches on for this player's lifetime once the audio sink refuses a
+    // tunneled configuration. Retrying tunneling after it has been refused once
+    // gives a viewer the same failure on every item, and the sink's answer does
+    // not change while the same cable is plugged into the same receiver.
+    private var tunnelingRefusedByAudioSink: Boolean = false
+
+    // Whether a video output surface exists yet, and therefore whether
+    // tunneling may be asked for at all.
+    //
+    // Tunneling hands decoded frames straight to the display pipeline, so it
+    // requires a surface to hand them to. Enabled without one, the decoder
+    // never initialises and the item never becomes ready — no error, no event,
+    // just a player that sits there. That is what it did on the television: the
+    // audio-menu gates went red with "never reported metadata" while the phone,
+    // which never tunnels, was unaffected.
+    //
+    // Default off and opt-in because this class does not own the surface. The
+    // engine is public precisely so a host can attach a PlayerView to it, and
+    // only the host knows when it has.
+    public var videoSurfaceAttached: Boolean = false
+
+    // Public because video has to be drawn somewhere and only the caller knows
+    // where. A PlayerView is handed the engine, not a frame buffer, so a backend
+    // that kept this private could decode a film and show no one. Nothing above
+    // the UI layer touches it: every playback call goes through MediaBackend,
+    // and this is the render target alone.
+    //
     // Main thread, like everything else Media3 owns.
-    public val exoPlayer: ExoPlayer = buildEngine(context, authHeaders)
+    public val exoPlayer: ExoPlayer = buildEngine(context, authHeaders, trackSelector)
 
     private val player: ExoPlayer = exoPlayer
 
@@ -165,14 +211,50 @@ public class ExoPlayerVideoBackend(
             }
 
             override fun onPlayerError(error: PlaybackException) {
+                if (recoverFromTunnelingRefusal(error)) return
                 bus.emit(CanonicalBackendEvent.ERROR, error.errorCodeName)
             }
         })
     }
 
+    // Re-decided per item, because it depends on the container rather than the
+    // device. Tunneling is what lets HDR frames reach the display pipeline
+    // untouched on a direct MP4, and it breaks HLS over TS — so a player that
+    // decided once at construction would be wrong for half a library.
+    private fun applyTunneling(url: String) {
+        val wanted: Boolean = videoSurfaceAttached && TunnelingRule.shouldTunnel(
+            isTv = isTvDevice,
+            sourceIsHls = url.substringBefore('?').endsWith(".m3u8", ignoreCase = true),
+            refusedByAudioSink = tunnelingRefusedByAudioSink,
+        )
+        trackSelector.parameters = trackSelector.buildUponParameters()
+            .setTunnelingEnabled(wanted)
+            .build()
+    }
+
+    // A hostile audio HAL refuses a tunneled configuration by failing to
+    // initialise the AudioTrack, which surfaces as a fatal playback error even
+    // though the film is fine. Latching the refusal off and reloading turns an
+    // ended session into a hiccup.
+    //
+    // Returns whether it handled the error, so the caller does not also report
+    // one the viewer is about to stop seeing.
+    private fun recoverFromTunnelingRefusal(error: PlaybackException): Boolean {
+        val tunneling: Boolean = trackSelector.parameters.tunnelingEnabled
+        if (!TunnelingRule.isTunnelingRefusal(error.errorCode, tunneling)) return false
+
+        tunnelingRefusedByAudioSink = true
+        trackSelector.parameters = trackSelector.buildUponParameters()
+            .setTunnelingEnabled(false)
+            .build()
+        player.prepare()
+        return true
+    }
+
     override suspend fun load(url: String, opts: LoadOptions): Unit = onMain {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
+        applyTunneling(url)
         player.setMediaItem(MediaItem.fromUri(url))
         // prepare, not play: starting is a separate decision above, and an
         // engine that started on its own would ignore a refused beforePlay.

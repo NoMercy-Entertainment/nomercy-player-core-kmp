@@ -12,12 +12,14 @@ import android.content.Context
 import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.TrackSelectionParameters.AudioOffloadPreferences
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import okhttp3.OkHttpClient
@@ -44,11 +46,32 @@ import okhttp3.OkHttpClient
 // The looper is named for the same reason. Left to itself the builder binds to
 // whatever looper happens to be current, so an engine built off the main thread
 // would answer a different thread than every callback arrives on.
-internal fun buildEngine(context: Context, auth: AuthHeaders): ExoPlayer {
+internal fun buildEngine(context: Context, auth: AuthHeaders, selector: DefaultTrackSelector): ExoPlayer {
     val budget: BufferConfig = bufferConfigForDevice(context)
+    val renderers: AudioPassthroughRenderersFactory =
+        AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
+
+    selector.parameters = selector.buildUponParameters()
+        // A rung change that is not seamless is still better than a stall. On
+        // TV hardware the seamless path is often unavailable and refusing to
+        // adapt at all is what a viewer sees as buffering.
+        .setAllowVideoNonSeamlessAdaptiveness(true)
+        // Adapt to the panel, not to the decoder's ambitions. Without this a
+        // 4K ladder is climbed on a 1080p television, spending bandwidth on
+        // pixels that are thrown away before they are shown.
+        .setViewportSizeToPhysicalDisplaySize(context, true)
+        // Never offer a stream this device cannot actually decode. Exceeding
+        // capabilities turns a rung that would have been skipped into one that
+        // starts and then fails partway through.
+        .setExceedRendererCapabilitiesIfNecessary(false)
+        .setExceedVideoConstraintsIfNecessary(false)
+        .setAudioOffloadPreferences(offloadFor(renderers))
+        .build()
 
     return ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())
+        .setRenderersFactory(renderers)
+        .setTrackSelector(selector)
         .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory(context, auth), DefaultExtractorsFactory()))
         .setLoadControl(loadControlFor(budget))
         // Hold a network wakelock while playing. Without it a TV that dims its
@@ -72,6 +95,26 @@ internal fun buildEngine(context: Context, auth: AuthHeaders): ExoPlayer {
         )
         .build()
 }
+
+// ENABLED, never REQUIRED.
+//
+// Offload is what tells Media3 to hand compressed frames to the audio HAL
+// rather than decoding them first, which is the half of passthrough the sink
+// cannot do on its own. REQUIRED would refuse any track the device cannot
+// offload — and a device that advertises surround still cannot offload every
+// stream, so the strict form turns a working soundtrack into silence.
+private fun offloadFor(renderers: AudioPassthroughRenderersFactory): AudioOffloadPreferences =
+    if (!renderers.deviceSupportsSurround) {
+        AudioOffloadPreferences.DEFAULT
+    } else {
+        AudioOffloadPreferences.Builder()
+            .setAudioOffloadMode(AudioOffloadPreferences.AUDIO_OFFLOAD_MODE_ENABLED)
+            // Gapless needs the decoder's own trim information, which offload
+            // skips. Requiring it here would disable offload on exactly the
+            // formats worth offloading.
+            .setIsGaplessSupportRequired(false)
+            .build()
+    }
 
 // Media3 reads every manifest and segment through this, which is the only place
 // an interceptor can sit. The stock data source has nowhere to put one, so
