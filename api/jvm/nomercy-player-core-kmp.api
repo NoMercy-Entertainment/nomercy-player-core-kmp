@@ -555,6 +555,57 @@ public final class tv/nomercy/player/core/cues/VttParserKt {
 	public static final fun parseVttTimestamp (Ljava/lang/String;)Ljava/lang/Double;
 }
 
+public final class tv/nomercy/player/core/drm/DrmConfig {
+	public fun <init> (Ltv/nomercy/player/core/drm/DrmScheme;Ljava/lang/String;[BLtv/nomercy/player/core/drm/HdcpLevel;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/drm/DrmScheme;Ljava/lang/String;[BLtv/nomercy/player/core/drm/HdcpLevel;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getCertificate ()[B
+	public final fun getHdcpRequired ()Ltv/nomercy/player/core/drm/HdcpLevel;
+	public final fun getLicenseUrl ()Ljava/lang/String;
+	public final fun getScheme ()Ltv/nomercy/player/core/drm/DrmScheme;
+	public final fun getSignRequest ()Lkotlin/jvm/functions/Function2;
+	public final fun getTransformLicenseRequest ()Lkotlin/jvm/functions/Function2;
+	public final fun getTransformLicenseResponse ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class tv/nomercy/player/core/drm/DrmErrorCodes {
+	public static final field INSTANCE Ltv/nomercy/player/core/drm/DrmErrorCodes;
+	public static final field KEY_REQUEST_FAILED Ljava/lang/String;
+	public static final field LICENSE_REFUSED Ljava/lang/String;
+	public static final field LICENSE_REQUEST_FAILED Ljava/lang/String;
+	public static final field NO_LICENSE_URL Ljava/lang/String;
+	public static final field OUTPUT_NOT_PROTECTED Ljava/lang/String;
+	public static final field UNSUPPORTED_SCHEME Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/drm/DrmLicenseExchange {
+	public fun <init> ([BLjava/util/Map;)V
+	public synthetic fun <init> ([BLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getBody ()[B
+	public final fun getHeaders ()Ljava/util/Map;
+}
+
+public final class tv/nomercy/player/core/drm/DrmScheme : java/lang/Enum {
+	public static final field AES_128 Ltv/nomercy/player/core/drm/DrmScheme;
+	public static final field CLEAR Ltv/nomercy/player/core/drm/DrmScheme;
+	public static final field FAIRPLAY Ltv/nomercy/player/core/drm/DrmScheme;
+	public static final field PLAYREADY Ltv/nomercy/player/core/drm/DrmScheme;
+	public static final field WIDEVINE Ltv/nomercy/player/core/drm/DrmScheme;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getKeySystem ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/drm/DrmScheme;
+	public static fun values ()[Ltv/nomercy/player/core/drm/DrmScheme;
+}
+
+public final class tv/nomercy/player/core/drm/HdcpLevel : java/lang/Enum {
+	public static final field NONE Ltv/nomercy/player/core/drm/HdcpLevel;
+	public static final field TYPE_0 Ltv/nomercy/player/core/drm/HdcpLevel;
+	public static final field TYPE_1 Ltv/nomercy/player/core/drm/HdcpLevel;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getWireValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/drm/HdcpLevel;
+	public static fun values ()[Ltv/nomercy/player/core/drm/HdcpLevel;
+}
+
 public final class tv/nomercy/player/core/dsp/AudioSpectrum {
 	public static final field INSTANCE Ltv/nomercy/player/core/dsp/AudioSpectrum;
 	public final fun analyse ([DIDDLtv/nomercy/player/core/plugins/audio/BandEnergies;)Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
