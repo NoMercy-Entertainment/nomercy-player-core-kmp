@@ -539,6 +539,17 @@ final enum class tv.nomercy.player.core.ports/RealtimeState : kotlin/Enum<tv.nom
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/RealtimeState> // tv.nomercy.player.core.ports/RealtimeState.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.ports/RouteKind : kotlin/Enum<tv.nomercy.player.core.ports/RouteKind> { // tv.nomercy.player.core.ports/RouteKind|null[0]
+    enum entry AIRPLAY // tv.nomercy.player.core.ports/RouteKind.AIRPLAY|null[0]
+    enum entry UNKNOWN // tv.nomercy.player.core.ports/RouteKind.UNKNOWN|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/RouteKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/RouteKind> // tv.nomercy.player.core.ports/RouteKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/RouteKind // tv.nomercy.player.core.ports/RouteKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/RouteKind> // tv.nomercy.player.core.ports/RouteKind.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.ports/StreamKind : kotlin/Enum<tv.nomercy.player.core.ports/StreamKind> { // tv.nomercy.player.core.ports/StreamKind|null[0]
     enum entry DASH // tv.nomercy.player.core.ports/StreamKind.DASH|null[0]
     enum entry HLS // tv.nomercy.player.core.ports/StreamKind.HLS|null[0]
@@ -755,6 +766,17 @@ abstract interface tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player
     abstract fun parse(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.ports/CueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
+abstract interface tv.nomercy.player.core.ports/ExternalPlayback { // tv.nomercy.player.core.ports/ExternalPlayback|null[0]
+    abstract val isSupported // tv.nomercy.player.core.ports/ExternalPlayback.isSupported|{}isSupported[0]
+        abstract fun <get-isSupported>(): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalPlayback.isSupported.<get-isSupported>|<get-isSupported>(){}[0]
+    abstract val state // tv.nomercy.player.core.ports/ExternalPlayback.state|{}state[0]
+        abstract fun <get-state>(): kotlinx.coroutines.flow/StateFlow<tv.nomercy.player.core.ports/ExternalPlaybackState> // tv.nomercy.player.core.ports/ExternalPlayback.state.<get-state>|<get-state>(){}[0]
+
+    abstract fun dispose() // tv.nomercy.player.core.ports/ExternalPlayback.dispose|dispose(){}[0]
+    abstract fun setAllowed(kotlin/Boolean) // tv.nomercy.player.core.ports/ExternalPlayback.setAllowed|setAllowed(kotlin.Boolean){}[0]
+    abstract fun showRoutePicker() // tv.nomercy.player.core.ports/ExternalPlayback.showRoutePicker|showRoutePicker(){}[0]
+}
+
 abstract interface tv.nomercy.player.core.ports/FullscreenController { // tv.nomercy.player.core.ports/FullscreenController|null[0]
     abstract fun isActive(): kotlin/Boolean // tv.nomercy.player.core.ports/FullscreenController.isActive|isActive(){}[0]
     abstract fun isSupported(): kotlin/Boolean // tv.nomercy.player.core.ports/FullscreenController.isSupported|isSupported(){}[0]
@@ -952,6 +974,30 @@ abstract interface tv.nomercy.player.core.ports/WakeLock { // tv.nomercy.player.
     abstract fun isSupported(): kotlin/Boolean // tv.nomercy.player.core.ports/WakeLock.isSupported|isSupported(){}[0]
     abstract suspend fun acquire() // tv.nomercy.player.core.ports/WakeLock.acquire|acquire(){}[0]
     abstract suspend fun release() // tv.nomercy.player.core.ports/WakeLock.release|release(){}[0]
+}
+
+sealed interface tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState|null[0]
+    final class Available : tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState.Available|null[0]
+        constructor <init>(kotlin/Boolean, tv.nomercy.player.core.ports/ExternalRoute?) // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.<init>|<init>(kotlin.Boolean;tv.nomercy.player.core.ports.ExternalRoute?){}[0]
+
+        final val active // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.active|{}active[0]
+            final fun <get-active>(): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.active.<get-active>|<get-active>(){}[0]
+        final val activeRoute // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.activeRoute|{}activeRoute[0]
+            final fun <get-activeRoute>(): tv.nomercy.player.core.ports/ExternalRoute? // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.activeRoute.<get-activeRoute>|<get-activeRoute>(){}[0]
+
+        final fun component1(): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.component1|component1(){}[0]
+        final fun component2(): tv.nomercy.player.core.ports/ExternalRoute? // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.component2|component2(){}[0]
+        final fun copy(kotlin/Boolean = ..., tv.nomercy.player.core.ports/ExternalRoute? = ...): tv.nomercy.player.core.ports/ExternalPlaybackState.Available // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.copy|copy(kotlin.Boolean;tv.nomercy.player.core.ports.ExternalRoute?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.toString|toString(){}[0]
+    }
+
+    final object Unsupported : tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.toString|toString(){}[0]
+    }
 }
 
 abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nomercy.player.core.plugin/Plugin|null[0]
@@ -3681,6 +3727,25 @@ final class tv.nomercy.player.core.ports/EqualPowerCrossfader { // tv.nomercy.pl
     }
 }
 
+final class tv.nomercy.player.core.ports/ExternalRoute { // tv.nomercy.player.core.ports/ExternalRoute|null[0]
+    constructor <init>(kotlin/String, kotlin/String, tv.nomercy.player.core.ports/RouteKind) // tv.nomercy.player.core.ports/ExternalRoute.<init>|<init>(kotlin.String;kotlin.String;tv.nomercy.player.core.ports.RouteKind){}[0]
+
+    final val id // tv.nomercy.player.core.ports/ExternalRoute.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.ports/ExternalRoute.id.<get-id>|<get-id>(){}[0]
+    final val kind // tv.nomercy.player.core.ports/ExternalRoute.kind|{}kind[0]
+        final fun <get-kind>(): tv.nomercy.player.core.ports/RouteKind // tv.nomercy.player.core.ports/ExternalRoute.kind.<get-kind>|<get-kind>(){}[0]
+    final val name // tv.nomercy.player.core.ports/ExternalRoute.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tv.nomercy.player.core.ports/ExternalRoute.name.<get-name>|<get-name>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.ports/ExternalRoute.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.ports/ExternalRoute.component2|component2(){}[0]
+    final fun component3(): tv.nomercy.player.core.ports/RouteKind // tv.nomercy.player.core.ports/ExternalRoute.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., tv.nomercy.player.core.ports/RouteKind = ...): tv.nomercy.player.core.ports/ExternalRoute // tv.nomercy.player.core.ports/ExternalRoute.copy|copy(kotlin.String;kotlin.String;tv.nomercy.player.core.ports.RouteKind){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalRoute.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/ExternalRoute.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/ExternalRoute.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/FetchOptions { // tv.nomercy.player.core.ports/FetchOptions|null[0]
     constructor <init>(kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ...) // tv.nomercy.player.core.ports/FetchOptions.<init>|<init>(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?){}[0]
 
@@ -5306,6 +5371,17 @@ final object tv.nomercy.player.core.ports/UnconfiguredPlatform : tv.nomercy.play
         final fun <get-visibility>(): tv.nomercy.player.core.ports/VisibilityMonitor // tv.nomercy.player.core.ports/UnconfiguredPlatform.visibility.<get-visibility>|<get-visibility>(){}[0]
     final val wakeLock // tv.nomercy.player.core.ports/UnconfiguredPlatform.wakeLock|{}wakeLock[0]
         final fun <get-wakeLock>(): tv.nomercy.player.core.ports/WakeLock // tv.nomercy.player.core.ports/UnconfiguredPlatform.wakeLock.<get-wakeLock>|<get-wakeLock>(){}[0]
+}
+
+final object tv.nomercy.player.core.ports/UnsupportedExternalPlayback : tv.nomercy.player.core.ports/ExternalPlayback { // tv.nomercy.player.core.ports/UnsupportedExternalPlayback|null[0]
+    final val isSupported // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.isSupported|{}isSupported[0]
+        final fun <get-isSupported>(): kotlin/Boolean // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.isSupported.<get-isSupported>|<get-isSupported>(){}[0]
+    final val state // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.state|{}state[0]
+        final fun <get-state>(): kotlinx.coroutines.flow/StateFlow<tv.nomercy.player.core.ports/ExternalPlaybackState> // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.state.<get-state>|<get-state>(){}[0]
+
+    final fun dispose() // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.dispose|dispose(){}[0]
+    final fun setAllowed(kotlin/Boolean) // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.setAllowed|setAllowed(kotlin.Boolean){}[0]
+    final fun showRoutePicker() // tv.nomercy.player.core.ports/UnsupportedExternalPlayback.showRoutePicker|showRoutePicker(){}[0]
 }
 
 final object tv.nomercy.player.core.ports/UrlResolution { // tv.nomercy.player.core.ports/UrlResolution|null[0]

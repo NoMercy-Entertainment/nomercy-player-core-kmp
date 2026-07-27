@@ -3661,6 +3661,52 @@ public final class tv/nomercy/player/core/ports/EqualPowerCrossfader$Fade {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/ExternalPlayback {
+	public abstract fun dispose ()V
+	public abstract fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+	public abstract fun isSupported ()Z
+	public abstract fun setAllowed (Z)V
+	public abstract fun showRoutePicker ()V
+}
+
+public abstract interface class tv/nomercy/player/core/ports/ExternalPlaybackState {
+}
+
+public final class tv/nomercy/player/core/ports/ExternalPlaybackState$Available : tv/nomercy/player/core/ports/ExternalPlaybackState {
+	public fun <init> (ZLtv/nomercy/player/core/ports/ExternalRoute;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ltv/nomercy/player/core/ports/ExternalRoute;
+	public final fun copy (ZLtv/nomercy/player/core/ports/ExternalRoute;)Ltv/nomercy/player/core/ports/ExternalPlaybackState$Available;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/ExternalPlaybackState$Available;ZLtv/nomercy/player/core/ports/ExternalRoute;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/ExternalPlaybackState$Available;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getActive ()Z
+	public final fun getActiveRoute ()Ltv/nomercy/player/core/ports/ExternalRoute;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/ExternalPlaybackState$Unsupported : tv/nomercy/player/core/ports/ExternalPlaybackState {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/ExternalPlaybackState$Unsupported;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/ExternalRoute {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/RouteKind;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ltv/nomercy/player/core/ports/RouteKind;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/RouteKind;)Ltv/nomercy/player/core/ports/ExternalRoute;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/ExternalRoute;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/ports/RouteKind;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/ExternalRoute;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getId ()Ljava/lang/String;
+	public final fun getKind ()Ltv/nomercy/player/core/ports/RouteKind;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/ports/FetchOptions {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ljava/lang/String;)V
@@ -4139,6 +4185,14 @@ public final class tv/nomercy/player/core/ports/RetryPolicyKt {
 	public static final fun resolve (Ljava/util/Map;Ljava/lang/String;)Ltv/nomercy/player/core/ports/RetryConfig;
 }
 
+public final class tv/nomercy/player/core/ports/RouteKind : java/lang/Enum {
+	public static final field AIRPLAY Ltv/nomercy/player/core/ports/RouteKind;
+	public static final field UNKNOWN Ltv/nomercy/player/core/ports/RouteKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/RouteKind;
+	public static fun values ()[Ltv/nomercy/player/core/ports/RouteKind;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/ShuffleStrategy {
 	public abstract fun order (Ljava/util/List;I)Ljava/util/List;
 }
@@ -4430,6 +4484,15 @@ public final class tv/nomercy/player/core/ports/UnconfiguredPlatform : tv/nomerc
 	public fun getPip ()Ltv/nomercy/player/core/ports/PipController;
 	public fun getVisibility ()Ltv/nomercy/player/core/ports/VisibilityMonitor;
 	public fun getWakeLock ()Ltv/nomercy/player/core/ports/WakeLock;
+}
+
+public final class tv/nomercy/player/core/ports/UnsupportedExternalPlayback : tv/nomercy/player/core/ports/ExternalPlayback {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/UnsupportedExternalPlayback;
+	public fun dispose ()V
+	public fun getState ()Lkotlinx/coroutines/flow/StateFlow;
+	public fun isSupported ()Z
+	public fun setAllowed (Z)V
+	public fun showRoutePicker ()V
 }
 
 public final class tv/nomercy/player/core/ports/UrlCategory : java/lang/Enum {
