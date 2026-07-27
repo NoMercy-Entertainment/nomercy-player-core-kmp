@@ -689,6 +689,10 @@ abstract interface tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.play
     abstract fun supports(tv.nomercy.player.core.drm/DrmScheme): kotlin/Boolean // tv.nomercy.player.core.drm/DrmCapability.supports|supports(tv.nomercy.player.core.drm.DrmScheme){}[0]
 }
 
+abstract interface tv.nomercy.player.core.drm/StudioDrmBinding { // tv.nomercy.player.core.drm/StudioDrmBinding|null[0]
+    abstract fun prepare(tv.nomercy.player.core.drm/DrmConfig): tv.nomercy.player.core.drm/DrmBindingResult // tv.nomercy.player.core.drm/StudioDrmBinding.prepare|prepare(tv.nomercy.player.core.drm.DrmConfig){}[0]
+}
+
 abstract interface tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/PlaylistItem|null[0]
     abstract val id // tv.nomercy.player.core.media/PlaylistItem.id|{}id[0]
         abstract fun <get-id>(): kotlin/String // tv.nomercy.player.core.media/PlaylistItem.id.<get-id>|<get-id>(){}[0]
@@ -1029,6 +1033,30 @@ sealed interface tv.nomercy.player.core.cast/HandoffResult { // tv.nomercy.playe
         final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cast/HandoffResult.Routed.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cast/HandoffResult.Routed.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // tv.nomercy.player.core.cast/HandoffResult.Routed.toString|toString(){}[0]
+    }
+}
+
+sealed interface tv.nomercy.player.core.drm/DrmBindingResult { // tv.nomercy.player.core.drm/DrmBindingResult|null[0]
+    final class Blocked : tv.nomercy.player.core.drm/DrmBindingResult { // tv.nomercy.player.core.drm/DrmBindingResult.Blocked|null[0]
+        constructor <init>(kotlin/String, kotlin/String) // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.<init>|<init>(kotlin.String;kotlin.String){}[0]
+
+        final val code // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.code|{}code[0]
+            final fun <get-code>(): kotlin/String // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.code.<get-code>|<get-code>(){}[0]
+        final val reason // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.reason|{}reason[0]
+            final fun <get-reason>(): kotlin/String // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.reason.<get-reason>|<get-reason>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.component1|component1(){}[0]
+        final fun component2(): kotlin/String // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.component2|component2(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/String = ...): tv.nomercy.player.core.drm/DrmBindingResult.Blocked // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.copy|copy(kotlin.String;kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.drm/DrmBindingResult.Blocked.toString|toString(){}[0]
+    }
+
+    final object Ready : tv.nomercy.player.core.drm/DrmBindingResult { // tv.nomercy.player.core.drm/DrmBindingResult.Ready|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.drm/DrmBindingResult.Ready.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.drm/DrmBindingResult.Ready.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.drm/DrmBindingResult.Ready.toString|toString(){}[0]
     }
 }
 
@@ -5650,6 +5678,20 @@ final fun tv.nomercy.player.core.ports/defaultStorage(kotlin/String): tv.nomercy
 final fun tv.nomercy.player.core.ports/defaultSystemTransport(): tv.nomercy.player.core.ports/SystemTransport // tv.nomercy.player.core.ports/defaultSystemTransport|defaultSystemTransport(){}[0]
 final fun tv.nomercy.player.core.ports/displayLanguage(kotlin/String): kotlin/String // tv.nomercy.player.core.ports/displayLanguage|displayLanguage(kotlin.String){}[0]
 final fun tv.nomercy.player.core.ports/labelsNeedQualifier(kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.ports/labelsNeedQualifier|labelsNeedQualifier(kotlin.collections.List<kotlin.String>){}[0]
+
+// Targets: [ios]
+final class tv.nomercy.player.core.drm/AvPlayerDrmCapability : tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/AvPlayerDrmCapability|null[0]
+    constructor <init>() // tv.nomercy.player.core.drm/AvPlayerDrmCapability.<init>|<init>(){}[0]
+
+    final fun supports(tv.nomercy.player.core.drm/DrmScheme): kotlin/Boolean // tv.nomercy.player.core.drm/AvPlayerDrmCapability.supports|supports(tv.nomercy.player.core.drm.DrmScheme){}[0]
+}
+
+// Targets: [ios]
+final class tv.nomercy.player.core.drm/FairPlayBinding : tv.nomercy.player.core.drm/StudioDrmBinding { // tv.nomercy.player.core.drm/FairPlayBinding|null[0]
+    constructor <init>() // tv.nomercy.player.core.drm/FairPlayBinding.<init>|<init>(){}[0]
+
+    final fun prepare(tv.nomercy.player.core.drm/DrmConfig): tv.nomercy.player.core.drm/DrmBindingResult // tv.nomercy.player.core.drm/FairPlayBinding.prepare|prepare(tv.nomercy.player.core.drm.DrmConfig){}[0]
+}
 
 // Targets: [ios]
 final class tv.nomercy.player.core.ports/AVPlayerExternalPlayback : tv.nomercy.player.core.ports/ExternalPlayback { // tv.nomercy.player.core.ports/AVPlayerExternalPlayback|null[0]

@@ -560,6 +560,29 @@ public final class tv/nomercy/player/core/drm/ClearOnly : tv/nomercy/player/core
 	public fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z
 }
 
+public abstract interface class tv/nomercy/player/core/drm/DrmBindingResult {
+}
+
+public final class tv/nomercy/player/core/drm/DrmBindingResult$Blocked : tv/nomercy/player/core/drm/DrmBindingResult {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/drm/DrmBindingResult$Blocked;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/drm/DrmBindingResult$Blocked;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/drm/DrmBindingResult$Blocked;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/drm/DrmBindingResult$Ready : tv/nomercy/player/core/drm/DrmBindingResult {
+	public static final field INSTANCE Ltv/nomercy/player/core/drm/DrmBindingResult$Ready;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class tv/nomercy/player/core/drm/DrmCapability {
 	public abstract fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z
 }
@@ -690,6 +713,15 @@ public final class tv/nomercy/player/core/drm/KeyRequest {
 	public final fun getUrl ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/drm/StudioDrmBinding {
+	public abstract fun prepare (Ltv/nomercy/player/core/drm/DrmConfig;)Ltv/nomercy/player/core/drm/DrmBindingResult;
+}
+
+public final class tv/nomercy/player/core/drm/VlcjDrmCapability : tv/nomercy/player/core/drm/DrmCapability {
+	public fun <init> ()V
+	public fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z
 }
 
 public final class tv/nomercy/player/core/dsp/AudioSpectrum {
