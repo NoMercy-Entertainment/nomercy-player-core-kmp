@@ -8,6 +8,12 @@
 
 package tv.nomercy.player.core.ports
 
-// Not built yet. The port and the plugin land first so both can be proven
-// against fakes, and each platform's real integration replaces this one file.
-public actual fun defaultSystemTransport(): SystemTransport = NoSystemTransport()
+// Straight cinterop rather than a Swift bridge.
+//
+// That was an open question with a fallback plan behind it: MPRemoteCommandCenter
+// hands out its targets through blocks returning a status, and
+// MPNowPlayingInfoCenter wants a heterogeneous dictionary keyed by framework
+// constants — neither obviously bridgeable from Kotlin, and the app already has
+// Swift that does both. Both bridge without help, so the Swift is not needed and
+// there is no second implementation to keep in step with this one.
+public actual fun defaultSystemTransport(): SystemTransport = AppleSystemTransport()
