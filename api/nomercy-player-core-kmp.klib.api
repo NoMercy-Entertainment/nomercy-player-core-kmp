@@ -977,6 +977,27 @@ abstract interface tv.nomercy.player.core.ports/WakeLock { // tv.nomercy.player.
     abstract suspend fun release() // tv.nomercy.player.core.ports/WakeLock.release|release(){}[0]
 }
 
+sealed interface tv.nomercy.player.core.cast/HandoffResult { // tv.nomercy.player.core.cast/HandoffResult|null[0]
+    final class Unsupported : tv.nomercy.player.core.cast/HandoffResult { // tv.nomercy.player.core.cast/HandoffResult.Unsupported|null[0]
+        constructor <init>(kotlin/String) // tv.nomercy.player.core.cast/HandoffResult.Unsupported.<init>|<init>(kotlin.String){}[0]
+
+        final val reason // tv.nomercy.player.core.cast/HandoffResult.Unsupported.reason|{}reason[0]
+            final fun <get-reason>(): kotlin/String // tv.nomercy.player.core.cast/HandoffResult.Unsupported.reason.<get-reason>|<get-reason>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.cast/HandoffResult.Unsupported.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): tv.nomercy.player.core.cast/HandoffResult.Unsupported // tv.nomercy.player.core.cast/HandoffResult.Unsupported.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cast/HandoffResult.Unsupported.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cast/HandoffResult.Unsupported.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.cast/HandoffResult.Unsupported.toString|toString(){}[0]
+    }
+
+    final object Routed : tv.nomercy.player.core.cast/HandoffResult { // tv.nomercy.player.core.cast/HandoffResult.Routed|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cast/HandoffResult.Routed.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cast/HandoffResult.Routed.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.cast/HandoffResult.Routed.toString|toString(){}[0]
+    }
+}
+
 sealed interface tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState|null[0]
     final class Available : tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState.Available|null[0]
         constructor <init>(kotlin/Boolean, tv.nomercy.player.core.ports/ExternalRoute?) // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.<init>|<init>(kotlin.Boolean;tv.nomercy.player.core.ports.ExternalRoute?){}[0]
@@ -1241,6 +1262,12 @@ final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.co
     final fun setCurrent(kotlin/String) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.String){}[0]
     final fun shuffle() // tv.nomercy.player.core.media/MediaList.shuffle|shuffle(){}[0]
     final fun sort(kotlin/Comparator<#A>) // tv.nomercy.player.core.media/MediaList.sort|sort(kotlin.Comparator<1:0>){}[0]
+}
+
+final class tv.nomercy.player.core.cast/AirPlayHandoff { // tv.nomercy.player.core.cast/AirPlayHandoff|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/ExternalPlayback) // tv.nomercy.player.core.cast/AirPlayHandoff.<init>|<init>(tv.nomercy.player.core.ports.ExternalPlayback){}[0]
+
+    final fun transfer(): tv.nomercy.player.core.cast/HandoffResult // tv.nomercy.player.core.cast/AirPlayHandoff.transfer|transfer(){}[0]
 }
 
 final class tv.nomercy.player.core.chapters/ChapterController { // tv.nomercy.player.core.chapters/ChapterController|null[0]
