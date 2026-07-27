@@ -4537,6 +4537,17 @@ open class tv.nomercy.player.core.plugin/MediaSessionPlugin : tv.nomercy.player.
     }
 }
 
+open class tv.nomercy.player.core.plugin/PlayerTransportCommands : tv.nomercy.player.core.plugin/TransportCommands { // tv.nomercy.player.core.plugin/PlayerTransportCommands|null[0]
+    constructor <init>(tv.nomercy.player.core.controllers/ComposedPlayer, kotlinx.coroutines/CoroutineScope) // tv.nomercy.player.core.plugin/PlayerTransportCommands.<init>|<init>(tv.nomercy.player.core.controllers.ComposedPlayer;kotlinx.coroutines.CoroutineScope){}[0]
+
+    open fun next() // tv.nomercy.player.core.plugin/PlayerTransportCommands.next|next(){}[0]
+    open fun pause() // tv.nomercy.player.core.plugin/PlayerTransportCommands.pause|pause(){}[0]
+    open fun play() // tv.nomercy.player.core.plugin/PlayerTransportCommands.play|play(){}[0]
+    open fun previous() // tv.nomercy.player.core.plugin/PlayerTransportCommands.previous|previous(){}[0]
+    open fun seekTo(kotlin/Long) // tv.nomercy.player.core.plugin/PlayerTransportCommands.seekTo|seekTo(kotlin.Long){}[0]
+    open fun stop() // tv.nomercy.player.core.plugin/PlayerTransportCommands.stop|stop(){}[0]
+}
+
 open class tv.nomercy.player.core.plugins.audio/EqualizerPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugins.audio/EqualizerPlugin|null[0]
     constructor <init>(tv.nomercy.player.core.ports/AudioDspGraph?) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.<init>|<init>(tv.nomercy.player.core.ports.AudioDspGraph?){}[0]
 

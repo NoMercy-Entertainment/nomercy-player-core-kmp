@@ -2942,6 +2942,16 @@ public final class tv/nomercy/player/core/plugin/MediaSessionPlugin$Manifest : t
 	public fun getVersion ()Ljava/lang/String;
 }
 
+public class tv/nomercy/player/core/plugin/PlayerTransportCommands : tv/nomercy/player/core/plugin/TransportCommands {
+	public fun <init> (Ltv/nomercy/player/core/controllers/ComposedPlayer;Lkotlinx/coroutines/CoroutineScope;)V
+	public fun next ()V
+	public fun pause ()V
+	public fun play ()V
+	public fun previous ()V
+	public fun seekTo (J)V
+	public fun stop ()V
+}
+
 public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public fun <init> ()V
 	public final fun disable (Ljava/lang/String;)V
