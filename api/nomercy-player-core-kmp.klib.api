@@ -762,6 +762,10 @@ abstract interface tv.nomercy.player.core.drm/StudioDrmBinding { // tv.nomercy.p
     abstract fun prepare(tv.nomercy.player.core.drm/DrmConfig): tv.nomercy.player.core.drm/DrmBindingResult // tv.nomercy.player.core.drm/StudioDrmBinding.prepare|prepare(tv.nomercy.player.core.drm.DrmConfig){}[0]
 }
 
+abstract interface tv.nomercy.player.core.input/InputAdapter { // tv.nomercy.player.core.input/InputAdapter|null[0]
+    abstract fun toPlayerKey(kotlin/Int): tv.nomercy.player.core.input/PlayerKey? // tv.nomercy.player.core.input/InputAdapter.toPlayerKey|toPlayerKey(kotlin.Int){}[0]
+}
+
 abstract interface tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/PlaylistItem|null[0]
     abstract val id // tv.nomercy.player.core.media/PlaylistItem.id|{}id[0]
         abstract fun <get-id>(): kotlin/String // tv.nomercy.player.core.media/PlaylistItem.id.<get-id>|<get-id>(){}[0]
@@ -5812,7 +5816,9 @@ final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/S
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/resourceError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/ResourceError // tv.nomercy.player.core.errors/resourceError|resourceError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/stateError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/StateError // tv.nomercy.player.core.errors/stateError|stateError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+final fun tv.nomercy.player.core.input/defaultInputAdapter(): tv.nomercy.player.core.input/InputAdapter // tv.nomercy.player.core.input/defaultInputAdapter|defaultInputAdapter(){}[0]
 final fun tv.nomercy.player.core.input/keyCombo(kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/keyCombo|keyCombo(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+final fun tv.nomercy.player.core.input/namedKey(kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/namedKey|namedKey(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 final fun tv.nomercy.player.core.media/fillChapterGaps(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>, kotlin/Double, kotlin/Function0<kotlin/String>): tv.nomercy.player.core.media/ChapterGapFill // tv.nomercy.player.core.media/fillChapterGaps|fillChapterGaps(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>;kotlin.Double;kotlin.Function0<kotlin.String>){}[0]
 final fun tv.nomercy.player.core.ports/currentDevice(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/currentDevice|currentDevice(){}[0]
 final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.ports/Clock // tv.nomercy.player.core.ports/defaultClock|defaultClock(){}[0]

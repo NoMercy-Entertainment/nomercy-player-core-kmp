@@ -2465,6 +2465,19 @@ public final class tv/nomercy/player/core/events/VolumeChange {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/input/DesktopInputAdapterKt {
+	public static final fun defaultInputAdapter ()Ltv/nomercy/player/core/input/InputAdapter;
+}
+
+public abstract interface class tv/nomercy/player/core/input/InputAdapter {
+	public abstract fun toPlayerKey (I)Ltv/nomercy/player/core/input/PlayerKey;
+}
+
+public final class tv/nomercy/player/core/input/InputAdapterKt {
+	public static final fun namedKey (Ljava/lang/String;ZZZZ)Ltv/nomercy/player/core/input/KeyCombo;
+	public static synthetic fun namedKey$default (Ljava/lang/String;ZZZZILjava/lang/Object;)Ltv/nomercy/player/core/input/KeyCombo;
+}
+
 public final class tv/nomercy/player/core/input/KeyBindingTable {
 	public fun <init> (Lkotlin/jvm/functions/Function0;)V
 	public final fun bind (Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
