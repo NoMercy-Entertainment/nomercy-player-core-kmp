@@ -3230,6 +3230,71 @@ final class tv.nomercy.player.core.plugin/Requirement { // tv.nomercy.player.cor
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/Requirement.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.audio/BandEnergies { // tv.nomercy.player.core.plugins.audio/BandEnergies|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double) // tv.nomercy.player.core.plugins.audio/BandEnergies.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+
+    final val bass // tv.nomercy.player.core.plugins.audio/BandEnergies.bass|{}bass[0]
+        final fun <get-bass>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergies.bass.<get-bass>|<get-bass>(){}[0]
+    final val mid // tv.nomercy.player.core.plugins.audio/BandEnergies.mid|{}mid[0]
+        final fun <get-mid>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergies.mid.<get-mid>|<get-mid>(){}[0]
+    final val treble // tv.nomercy.player.core.plugins.audio/BandEnergies.treble|{}treble[0]
+        final fun <get-treble>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergies.treble.<get-treble>|<get-treble>(){}[0]
+
+    final fun component1(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergies.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergies.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergies.component3|component3(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): tv.nomercy.player.core.plugins.audio/BandEnergies // tv.nomercy.player.core.plugins.audio/BandEnergies.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/BandEnergies.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/BandEnergies.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/BandEnergies.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.audio/VisualizationFrame { // tv.nomercy.player.core.plugins.audio/VisualizationFrame|null[0]
+    constructor <init>(kotlin/DoubleArray, kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double, tv.nomercy.player.core.plugins.audio/BandEnergies, kotlin/Int, kotlin/Double, kotlin/Double, tv.nomercy.player.core.plugins.audio/BandEnergies, kotlin/Boolean? = ..., kotlin/Double? = ...) // tv.nomercy.player.core.plugins.audio/VisualizationFrame.<init>|<init>(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies;kotlin.Int;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies;kotlin.Boolean?;kotlin.Double?){}[0]
+
+    final val bandEnergies // tv.nomercy.player.core.plugins.audio/VisualizationFrame.bandEnergies|{}bandEnergies[0]
+        final fun <get-bandEnergies>(): tv.nomercy.player.core.plugins.audio/BandEnergies // tv.nomercy.player.core.plugins.audio/VisualizationFrame.bandEnergies.<get-bandEnergies>|<get-bandEnergies>(){}[0]
+    final val beat // tv.nomercy.player.core.plugins.audio/VisualizationFrame.beat|{}beat[0]
+        final fun <get-beat>(): kotlin/Boolean? // tv.nomercy.player.core.plugins.audio/VisualizationFrame.beat.<get-beat>|<get-beat>(){}[0]
+    final val binHz // tv.nomercy.player.core.plugins.audio/VisualizationFrame.binHz|{}binHz[0]
+        final fun <get-binHz>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.binHz.<get-binHz>|<get-binHz>(){}[0]
+    final val bpm // tv.nomercy.player.core.plugins.audio/VisualizationFrame.bpm|{}bpm[0]
+        final fun <get-bpm>(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/VisualizationFrame.bpm.<get-bpm>|<get-bpm>(){}[0]
+    final val deltaMs // tv.nomercy.player.core.plugins.audio/VisualizationFrame.deltaMs|{}deltaMs[0]
+        final fun <get-deltaMs>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.deltaMs.<get-deltaMs>|<get-deltaMs>(){}[0]
+    final val energy // tv.nomercy.player.core.plugins.audio/VisualizationFrame.energy|{}energy[0]
+        final fun <get-energy>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.energy.<get-energy>|<get-energy>(){}[0]
+    final val frequency // tv.nomercy.player.core.plugins.audio/VisualizationFrame.frequency|{}frequency[0]
+        final fun <get-frequency>(): kotlin/DoubleArray // tv.nomercy.player.core.plugins.audio/VisualizationFrame.frequency.<get-frequency>|<get-frequency>(){}[0]
+    final val peakBandEnergies // tv.nomercy.player.core.plugins.audio/VisualizationFrame.peakBandEnergies|{}peakBandEnergies[0]
+        final fun <get-peakBandEnergies>(): tv.nomercy.player.core.plugins.audio/BandEnergies // tv.nomercy.player.core.plugins.audio/VisualizationFrame.peakBandEnergies.<get-peakBandEnergies>|<get-peakBandEnergies>(){}[0]
+    final val peakHz // tv.nomercy.player.core.plugins.audio/VisualizationFrame.peakHz|{}peakHz[0]
+        final fun <get-peakHz>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.peakHz.<get-peakHz>|<get-peakHz>(){}[0]
+    final val sampleRate // tv.nomercy.player.core.plugins.audio/VisualizationFrame.sampleRate|{}sampleRate[0]
+        final fun <get-sampleRate>(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationFrame.sampleRate.<get-sampleRate>|<get-sampleRate>(){}[0]
+    final val time // tv.nomercy.player.core.plugins.audio/VisualizationFrame.time|{}time[0]
+        final fun <get-time>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.time.<get-time>|<get-time>(){}[0]
+    final val waveform // tv.nomercy.player.core.plugins.audio/VisualizationFrame.waveform|{}waveform[0]
+        final fun <get-waveform>(): kotlin/DoubleArray // tv.nomercy.player.core.plugins.audio/VisualizationFrame.waveform.<get-waveform>|<get-waveform>(){}[0]
+
+    final fun component1(): kotlin/DoubleArray // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component1|component1(){}[0]
+    final fun component10(): tv.nomercy.player.core.plugins.audio/BandEnergies // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component10|component10(){}[0]
+    final fun component11(): kotlin/Boolean? // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component11|component11(){}[0]
+    final fun component12(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component12|component12(){}[0]
+    final fun component2(): kotlin/DoubleArray // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component3|component3(){}[0]
+    final fun component4(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component4|component4(){}[0]
+    final fun component5(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component5|component5(){}[0]
+    final fun component6(): tv.nomercy.player.core.plugins.audio/BandEnergies // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component6|component6(){}[0]
+    final fun component7(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component7|component7(){}[0]
+    final fun component8(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component8|component8(){}[0]
+    final fun component9(): kotlin/Double // tv.nomercy.player.core.plugins.audio/VisualizationFrame.component9|component9(){}[0]
+    final fun copy(kotlin/DoubleArray = ..., kotlin/DoubleArray = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., tv.nomercy.player.core.plugins.audio/BandEnergies = ..., kotlin/Int = ..., kotlin/Double = ..., kotlin/Double = ..., tv.nomercy.player.core.plugins.audio/BandEnergies = ..., kotlin/Boolean? = ..., kotlin/Double? = ...): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.plugins.audio/VisualizationFrame.copy|copy(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies;kotlin.Int;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies;kotlin.Boolean?;kotlin.Double?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationFrame.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationFrame.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationFrame.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/AVPlayerAudioBackend : tv.nomercy.player.core.ports/AudioBackend { // tv.nomercy.player.core.ports/AVPlayerAudioBackend|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.<init>|<init>(){}[0]
 
@@ -4320,6 +4385,11 @@ final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player
     final fun error(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.error|error(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
     final fun info(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.info|info(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
     final fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+}
+
+final object tv.nomercy.player.core.dsp/AudioSpectrum { // tv.nomercy.player.core.dsp/AudioSpectrum|null[0]
+    final fun analyse(kotlin/DoubleArray, kotlin/Int, kotlin/Double, kotlin/Double, tv.nomercy.player.core.plugins.audio/BandEnergies?): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.dsp/AudioSpectrum.analyse|analyse(kotlin.DoubleArray;kotlin.Int;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies?){}[0]
+    final fun bandEnergy(kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/AudioSpectrum.bandEnergy|bandEnergy(kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 }
 
 final object tv.nomercy.player.core.dsp/BiquadPeaking { // tv.nomercy.player.core.dsp/BiquadPeaking|null[0]
