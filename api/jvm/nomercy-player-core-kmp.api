@@ -3750,6 +3750,18 @@ public final class tv/nomercy/player/core/ports/OperatingSystem : java/lang/Enum
 	public static fun values ()[Ltv/nomercy/player/core/ports/OperatingSystem;
 }
 
+public final class tv/nomercy/player/core/ports/PcmEqualiser : tv/nomercy/player/core/ports/AudioDspGraph {
+	public fun <init> (II)V
+	public fun bandGain (ID)V
+	public fun eqEnabled (Z)V
+	public fun installFrameTap (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun preGain (D)V
+	public final fun process ([FI)V
+	public fun removeFrameTap ()V
+	public final fun reset ()V
+	public fun setEqBands (Ljava/util/List;)V
+}
+
 public final class tv/nomercy/player/core/ports/PermissiveCapabilitiesProbe : tv/nomercy/player/core/ports/CapabilitiesProbe {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/PermissiveCapabilitiesProbe;
 	public fun canDecode (Ltv/nomercy/player/core/ports/DecodeProfile;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
