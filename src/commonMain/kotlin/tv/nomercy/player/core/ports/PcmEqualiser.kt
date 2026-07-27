@@ -18,7 +18,13 @@ import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugins.audio.BandEnergies
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 
-// The desktop equaliser and spectrum, over libVLC's PCM callback.
+// The equaliser and spectrum for any engine that hands over raw PCM.
+//
+// commonMain rather than per platform, because the arithmetic is the same
+// everywhere and the only thing that differs is who calls it: libVLC's amem
+// callback on the desktop, a processing tap on Apple. Android is the exception
+// and has its own — Media3 wants an AudioProcessor with its own buffer
+// lifecycle, and forcing that shape onto this one would make both worse.
 //
 // Deliberately the same arithmetic as Android's, not libVLC's own equaliser.
 // libVLC has one built in, and it would have been fewer lines — but its bands

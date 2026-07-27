@@ -3319,6 +3319,7 @@ final class tv.nomercy.player.core.plugins.audio/VisualizationFrame { // tv.nome
 final class tv.nomercy.player.core.ports/AVPlayerAudioBackend : tv.nomercy.player.core.ports/AudioBackend { // tv.nomercy.player.core.ports/AVPlayerAudioBackend|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.<init>|<init>(){}[0]
 
+    final fun audioGraph(): tv.nomercy.player.core.ports/AudioDspGraph // tv.nomercy.player.core.ports/AVPlayerAudioBackend.audioGraph|audioGraph(){}[0]
     final fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerAudioBackend.buffered|buffered(){}[0]
     final fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerAudioBackend.currentTime|currentTime(){}[0]
     final fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerAudioBackend.currentTime|currentTime(kotlin.Double){}[0]
@@ -3385,6 +3386,20 @@ final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.playe
     final fun volume(kotlin/Float) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.volume|volume(kotlin.Float){}[0]
     final suspend fun load(kotlin/String, tv.nomercy.player.core.ports/LoadOptions) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.load|load(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
     final suspend fun play() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.play|play(){}[0]
+}
+
+final class tv.nomercy.player.core.ports/AppleDspGraph : tv.nomercy.player.core.ports/AudioDspGraph { // tv.nomercy.player.core.ports/AppleDspGraph|null[0]
+    constructor <init>(kotlin/Int = ..., kotlin/Int = ...) // tv.nomercy.player.core.ports/AppleDspGraph.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
+
+    final fun audioMix(platform.AVFoundation/AVAssetTrack): platform.AVFoundation/AVMutableAudioMix? // tv.nomercy.player.core.ports/AppleDspGraph.audioMix|audioMix(platform.AVFoundation.AVAssetTrack){}[0]
+    final fun bandGain(kotlin/Int, kotlin/Double) // tv.nomercy.player.core.ports/AppleDspGraph.bandGain|bandGain(kotlin.Int;kotlin.Double){}[0]
+    final fun eqEnabled(kotlin/Boolean) // tv.nomercy.player.core.ports/AppleDspGraph.eqEnabled|eqEnabled(kotlin.Boolean){}[0]
+    final fun flush() // tv.nomercy.player.core.ports/AppleDspGraph.flush|flush(){}[0]
+    final fun installFrameTap(kotlin/Function1<tv.nomercy.player.core.plugins.audio/VisualizationFrame, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.ports/AppleDspGraph.installFrameTap|installFrameTap(kotlin.Function1<tv.nomercy.player.core.plugins.audio.VisualizationFrame,kotlin.Unit>){}[0]
+    final fun preGain(kotlin/Double) // tv.nomercy.player.core.ports/AppleDspGraph.preGain|preGain(kotlin.Double){}[0]
+    final fun release() // tv.nomercy.player.core.ports/AppleDspGraph.release|release(){}[0]
+    final fun removeFrameTap() // tv.nomercy.player.core.ports/AppleDspGraph.removeFrameTap|removeFrameTap(){}[0]
+    final fun setEqBands(kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand>) // tv.nomercy.player.core.ports/AppleDspGraph.setEqBands|setEqBands(kotlin.collections.List<tv.nomercy.player.core.dsp.EqBand>){}[0]
 }
 
 final class tv.nomercy.player.core.ports/AudioOutput { // tv.nomercy.player.core.ports/AudioOutput|null[0]
@@ -3680,6 +3695,19 @@ final class tv.nomercy.player.core.ports/NetworkSnapshot { // tv.nomercy.player.
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/NetworkSnapshot.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/NetworkSnapshot.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/NetworkSnapshot.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.ports/PcmEqualiser : tv.nomercy.player.core.ports/AudioDspGraph { // tv.nomercy.player.core.ports/PcmEqualiser|null[0]
+    constructor <init>(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.ports/PcmEqualiser.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
+
+    final fun bandGain(kotlin/Int, kotlin/Double) // tv.nomercy.player.core.ports/PcmEqualiser.bandGain|bandGain(kotlin.Int;kotlin.Double){}[0]
+    final fun eqEnabled(kotlin/Boolean) // tv.nomercy.player.core.ports/PcmEqualiser.eqEnabled|eqEnabled(kotlin.Boolean){}[0]
+    final fun installFrameTap(kotlin/Function1<tv.nomercy.player.core.plugins.audio/VisualizationFrame, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.ports/PcmEqualiser.installFrameTap|installFrameTap(kotlin.Function1<tv.nomercy.player.core.plugins.audio.VisualizationFrame,kotlin.Unit>){}[0]
+    final fun preGain(kotlin/Double) // tv.nomercy.player.core.ports/PcmEqualiser.preGain|preGain(kotlin.Double){}[0]
+    final fun process(kotlin/FloatArray, kotlin/Int) // tv.nomercy.player.core.ports/PcmEqualiser.process|process(kotlin.FloatArray;kotlin.Int){}[0]
+    final fun removeFrameTap() // tv.nomercy.player.core.ports/PcmEqualiser.removeFrameTap|removeFrameTap(){}[0]
+    final fun reset() // tv.nomercy.player.core.ports/PcmEqualiser.reset|reset(){}[0]
+    final fun setEqBands(kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand>) // tv.nomercy.player.core.ports/PcmEqualiser.setEqBands|setEqBands(kotlin.collections.List<tv.nomercy.player.core.dsp.EqBand>){}[0]
 }
 
 final class tv.nomercy.player.core.ports/PlatformContext { // tv.nomercy.player.core.ports/PlatformContext|null[0]

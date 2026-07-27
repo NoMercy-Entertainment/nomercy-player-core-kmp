@@ -21,6 +21,17 @@ package tv.nomercy.player.core.ports
 // same way the session category is.
 public class AVPlayerAudioBackend : AudioBackend {
 
+    // The equaliser and spectrum, shared by both players.
+    //
+    // One graph rather than one per player, unlike Android. The tap attaches to
+    // an item's audio mix rather than to the engine, so a crossfade does not
+    // move it — both players' items carry a mix built from this same graph, and
+    // the filter state that matters is per item anyway because each mix has its
+    // own tap instance underneath.
+    private val dsp = AppleDspGraph()
+
+    override fun audioGraph(): AudioDspGraph = dsp
+
     private var current: AVPlayerVideoBackend = AVPlayerVideoBackend()
     private var standby: AVPlayerVideoBackend? = null
 
