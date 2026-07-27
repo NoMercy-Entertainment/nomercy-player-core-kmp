@@ -3038,6 +3038,20 @@ public final class tv/nomercy/player/core/plugin/Requirement {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/plugin/TransportCommands {
+	public fun next ()V
+	public abstract fun pause ()V
+	public abstract fun play ()V
+	public fun previous ()V
+	public abstract fun seekTo (J)V
+	public abstract fun stop ()V
+}
+
+public final class tv/nomercy/player/core/plugin/TransportCommands$DefaultImpls {
+	public static fun next (Ltv/nomercy/player/core/plugin/TransportCommands;)V
+	public static fun previous (Ltv/nomercy/player/core/plugin/TransportCommands;)V
+}
+
 public final class tv/nomercy/player/core/plugins/audio/BandEnergies {
 	public fun <init> (DDD)V
 	public final fun component1 ()D
@@ -3744,12 +3758,41 @@ public final class tv/nomercy/player/core/ports/NetworkType : java/lang/Enum {
 	public static fun values ()[Ltv/nomercy/player/core/ports/NetworkType;
 }
 
+public class tv/nomercy/player/core/ports/NoSystemTransport : tv/nomercy/player/core/ports/SystemTransport {
+	public fun <init> ()V
+	public fun clear ()V
+	public fun release ()V
+	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
+	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+}
+
 public final class tv/nomercy/player/core/ports/NoopWakeLock : tv/nomercy/player/core/ports/WakeLock {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/NoopWakeLock;
 	public fun acquire (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun isHeld ()Z
 	public fun isSupported ()Z
 	public fun release (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/NowPlaying {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()J
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Ltv/nomercy/player/core/ports/NowPlaying;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/NowPlaying;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Ltv/nomercy/player/core/ports/NowPlaying;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlbum ()Ljava/lang/String;
+	public final fun getArtist ()Ljava/lang/String;
+	public final fun getArtworkUrl ()Ljava/lang/String;
+	public final fun getDurationMs ()J
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/OperatingSystem : java/lang/Enum {
@@ -4169,6 +4212,18 @@ public final class tv/nomercy/player/core/ports/SubtitleTrack {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/SystemTransport {
+	public abstract fun clear ()V
+	public abstract fun release ()V
+	public abstract fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public abstract fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
+	public abstract fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+}
+
+public final class tv/nomercy/player/core/ports/SystemTransport_jvmKt {
+	public static final fun defaultSystemTransport ()Ltv/nomercy/player/core/ports/SystemTransport;
+}
+
 public final class tv/nomercy/player/core/ports/TimeRange {
 	public fun <init> (DD)V
 	public final fun component1 ()D
@@ -4246,6 +4301,38 @@ public abstract interface class tv/nomercy/player/core/ports/Translator {
 public final class tv/nomercy/player/core/ports/Translator$DefaultImpls {
 	public static synthetic fun removeTranslations$default (Ltv/nomercy/player/core/ports/Translator;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun t$default (Ltv/nomercy/player/core/ports/Translator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/TransportActions {
+	public fun <init> ()V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun component2 ()Lkotlin/jvm/functions/Function0;
+	public final fun component3 ()Lkotlin/jvm/functions/Function0;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun component5 ()Lkotlin/jvm/functions/Function0;
+	public final fun component6 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/ports/TransportActions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnNext ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnPause ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnPlay ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnPrevious ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnSeekTo ()Lkotlin/jvm/functions/Function1;
+	public final fun getOnStop ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/TransportPlaybackState : java/lang/Enum {
+	public static final field PAUSED Ltv/nomercy/player/core/ports/TransportPlaybackState;
+	public static final field PLAYING Ltv/nomercy/player/core/ports/TransportPlaybackState;
+	public static final field STOPPED Ltv/nomercy/player/core/ports/TransportPlaybackState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/TransportPlaybackState;
+	public static fun values ()[Ltv/nomercy/player/core/ports/TransportPlaybackState;
 }
 
 public final class tv/nomercy/player/core/ports/UnconfiguredPlatform : tv/nomercy/player/core/ports/Platform {

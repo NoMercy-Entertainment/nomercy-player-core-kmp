@@ -569,6 +569,18 @@ final enum class tv.nomercy.player.core.ports/StreamSourceState : kotlin/Enum<tv
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/StreamSourceState> // tv.nomercy.player.core.ports/StreamSourceState.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.ports/TransportPlaybackState : kotlin/Enum<tv.nomercy.player.core.ports/TransportPlaybackState> { // tv.nomercy.player.core.ports/TransportPlaybackState|null[0]
+    enum entry PAUSED // tv.nomercy.player.core.ports/TransportPlaybackState.PAUSED|null[0]
+    enum entry PLAYING // tv.nomercy.player.core.ports/TransportPlaybackState.PLAYING|null[0]
+    enum entry STOPPED // tv.nomercy.player.core.ports/TransportPlaybackState.STOPPED|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/TransportPlaybackState.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/TransportPlaybackState> // tv.nomercy.player.core.ports/TransportPlaybackState.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/TransportPlaybackState // tv.nomercy.player.core.ports/TransportPlaybackState.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/TransportPlaybackState> // tv.nomercy.player.core.ports/TransportPlaybackState.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.ports/UrlCategory : kotlin/Enum<tv.nomercy.player.core.ports/UrlCategory> { // tv.nomercy.player.core.ports/UrlCategory|null[0]
     enum entry CAST // tv.nomercy.player.core.ports/UrlCategory.CAST|null[0]
     enum entry FONT // tv.nomercy.player.core.ports/UrlCategory.FONT|null[0]
@@ -686,6 +698,15 @@ abstract interface tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.
         open fun <get-requires>(): kotlin.collections/List<tv.nomercy.player.core.plugin/Requirement> // tv.nomercy.player.core.plugin/PluginManifest.requires.<get-requires>|<get-requires>(){}[0]
     open val translations // tv.nomercy.player.core.plugin/PluginManifest.translations|{}translations[0]
         open fun <get-translations>(): kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>>? // tv.nomercy.player.core.plugin/PluginManifest.translations.<get-translations>|<get-translations>(){}[0]
+}
+
+abstract interface tv.nomercy.player.core.plugin/TransportCommands { // tv.nomercy.player.core.plugin/TransportCommands|null[0]
+    abstract fun pause() // tv.nomercy.player.core.plugin/TransportCommands.pause|pause(){}[0]
+    abstract fun play() // tv.nomercy.player.core.plugin/TransportCommands.play|play(){}[0]
+    abstract fun seekTo(kotlin/Long) // tv.nomercy.player.core.plugin/TransportCommands.seekTo|seekTo(kotlin.Long){}[0]
+    abstract fun stop() // tv.nomercy.player.core.plugin/TransportCommands.stop|stop(){}[0]
+    open fun next() // tv.nomercy.player.core.plugin/TransportCommands.next|next(){}[0]
+    open fun previous() // tv.nomercy.player.core.plugin/TransportCommands.previous|previous(){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/AudioBackend : tv.nomercy.player.core.ports/MediaBackend, tv.nomercy.player.core.ports/TransitionBackend { // tv.nomercy.player.core.ports/AudioBackend|null[0]
@@ -865,6 +886,14 @@ abstract interface tv.nomercy.player.core.ports/StreamSource { // tv.nomercy.pla
     abstract fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.core.ports/StreamSource.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
     abstract fun state(): tv.nomercy.player.core.ports/StreamSourceState // tv.nomercy.player.core.ports/StreamSource.state|state(){}[0]
     abstract suspend fun attach() // tv.nomercy.player.core.ports/StreamSource.attach|attach(){}[0]
+}
+
+abstract interface tv.nomercy.player.core.ports/SystemTransport { // tv.nomercy.player.core.ports/SystemTransport|null[0]
+    abstract fun clear() // tv.nomercy.player.core.ports/SystemTransport.clear|clear(){}[0]
+    abstract fun release() // tv.nomercy.player.core.ports/SystemTransport.release|release(){}[0]
+    abstract fun setActionHandlers(tv.nomercy.player.core.ports/TransportActions) // tv.nomercy.player.core.ports/SystemTransport.setActionHandlers|setActionHandlers(tv.nomercy.player.core.ports.TransportActions){}[0]
+    abstract fun setNowPlaying(tv.nomercy.player.core.ports/NowPlaying) // tv.nomercy.player.core.ports/SystemTransport.setNowPlaying|setNowPlaying(tv.nomercy.player.core.ports.NowPlaying){}[0]
+    abstract fun setPlaybackState(tv.nomercy.player.core.ports/TransportPlaybackState, kotlin/Long, kotlin/Double) // tv.nomercy.player.core.ports/SystemTransport.setPlaybackState|setPlaybackState(tv.nomercy.player.core.ports.TransportPlaybackState;kotlin.Long;kotlin.Double){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/TransitionBackend { // tv.nomercy.player.core.ports/TransitionBackend|null[0]
@@ -3706,6 +3735,31 @@ final class tv.nomercy.player.core.ports/NetworkSnapshot { // tv.nomercy.player.
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/NetworkSnapshot.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/NowPlaying { // tv.nomercy.player.core.ports/NowPlaying|null[0]
+    constructor <init>(kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Long = ...) // tv.nomercy.player.core.ports/NowPlaying.<init>|<init>(kotlin.String;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Long){}[0]
+
+    final val album // tv.nomercy.player.core.ports/NowPlaying.album|{}album[0]
+        final fun <get-album>(): kotlin/String? // tv.nomercy.player.core.ports/NowPlaying.album.<get-album>|<get-album>(){}[0]
+    final val artist // tv.nomercy.player.core.ports/NowPlaying.artist|{}artist[0]
+        final fun <get-artist>(): kotlin/String? // tv.nomercy.player.core.ports/NowPlaying.artist.<get-artist>|<get-artist>(){}[0]
+    final val artworkUrl // tv.nomercy.player.core.ports/NowPlaying.artworkUrl|{}artworkUrl[0]
+        final fun <get-artworkUrl>(): kotlin/String? // tv.nomercy.player.core.ports/NowPlaying.artworkUrl.<get-artworkUrl>|<get-artworkUrl>(){}[0]
+    final val durationMs // tv.nomercy.player.core.ports/NowPlaying.durationMs|{}durationMs[0]
+        final fun <get-durationMs>(): kotlin/Long // tv.nomercy.player.core.ports/NowPlaying.durationMs.<get-durationMs>|<get-durationMs>(){}[0]
+    final val title // tv.nomercy.player.core.ports/NowPlaying.title|{}title[0]
+        final fun <get-title>(): kotlin/String // tv.nomercy.player.core.ports/NowPlaying.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.ports/NowPlaying.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tv.nomercy.player.core.ports/NowPlaying.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // tv.nomercy.player.core.ports/NowPlaying.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // tv.nomercy.player.core.ports/NowPlaying.component4|component4(){}[0]
+    final fun component5(): kotlin/Long // tv.nomercy.player.core.ports/NowPlaying.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Long = ...): tv.nomercy.player.core.ports/NowPlaying // tv.nomercy.player.core.ports/NowPlaying.copy|copy(kotlin.String;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/NowPlaying.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/NowPlaying.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/NowPlaying.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/PcmEqualiser : tv.nomercy.player.core.ports/AudioDspGraph { // tv.nomercy.player.core.ports/PcmEqualiser|null[0]
     constructor <init>(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.ports/PcmEqualiser.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
 
@@ -4015,6 +4069,34 @@ final class tv.nomercy.player.core.ports/TransitionContext { // tv.nomercy.playe
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/TransitionContext.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/TransitionContext.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/TransitionContext.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.ports/TransportActions { // tv.nomercy.player.core.ports/TransportActions|null[0]
+    constructor <init>(kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function1<kotlin/Long, kotlin/Unit>? = ...) // tv.nomercy.player.core.ports/TransportActions.<init>|<init>(kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function1<kotlin.Long,kotlin.Unit>?){}[0]
+
+    final val onNext // tv.nomercy.player.core.ports/TransportActions.onNext|{}onNext[0]
+        final fun <get-onNext>(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.onNext.<get-onNext>|<get-onNext>(){}[0]
+    final val onPause // tv.nomercy.player.core.ports/TransportActions.onPause|{}onPause[0]
+        final fun <get-onPause>(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.onPause.<get-onPause>|<get-onPause>(){}[0]
+    final val onPlay // tv.nomercy.player.core.ports/TransportActions.onPlay|{}onPlay[0]
+        final fun <get-onPlay>(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.onPlay.<get-onPlay>|<get-onPlay>(){}[0]
+    final val onPrevious // tv.nomercy.player.core.ports/TransportActions.onPrevious|{}onPrevious[0]
+        final fun <get-onPrevious>(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.onPrevious.<get-onPrevious>|<get-onPrevious>(){}[0]
+    final val onSeekTo // tv.nomercy.player.core.ports/TransportActions.onSeekTo|{}onSeekTo[0]
+        final fun <get-onSeekTo>(): kotlin/Function1<kotlin/Long, kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.onSeekTo.<get-onSeekTo>|<get-onSeekTo>(){}[0]
+    final val onStop // tv.nomercy.player.core.ports/TransportActions.onStop|{}onStop[0]
+        final fun <get-onStop>(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.onStop.<get-onStop>|<get-onStop>(){}[0]
+
+    final fun component1(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.component1|component1(){}[0]
+    final fun component2(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.component2|component2(){}[0]
+    final fun component3(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.component3|component3(){}[0]
+    final fun component4(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.component4|component4(){}[0]
+    final fun component5(): kotlin/Function0<kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.component5|component5(){}[0]
+    final fun component6(): kotlin/Function1<kotlin/Long, kotlin/Unit>? // tv.nomercy.player.core.ports/TransportActions.component6|component6(){}[0]
+    final fun copy(kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function0<kotlin/Unit>? = ..., kotlin/Function1<kotlin/Long, kotlin/Unit>? = ...): tv.nomercy.player.core.ports/TransportActions // tv.nomercy.player.core.ports/TransportActions.copy|copy(kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function0<kotlin.Unit>?;kotlin.Function1<kotlin.Long,kotlin.Unit>?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/TransportActions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/TransportActions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/TransportActions.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.ports/UrlResolverContext { // tv.nomercy.player.core.ports/UrlResolverContext|null[0]
@@ -4503,6 +4585,16 @@ open class tv.nomercy.player.core.plugins.audio/WaveformVisualization : tv.nomer
         final val version // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest.version|{}version[0]
             final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest.version.<get-version>|<get-version>(){}[0]
     }
+}
+
+open class tv.nomercy.player.core.ports/NoSystemTransport : tv.nomercy.player.core.ports/SystemTransport { // tv.nomercy.player.core.ports/NoSystemTransport|null[0]
+    constructor <init>() // tv.nomercy.player.core.ports/NoSystemTransport.<init>|<init>(){}[0]
+
+    open fun clear() // tv.nomercy.player.core.ports/NoSystemTransport.clear|clear(){}[0]
+    open fun release() // tv.nomercy.player.core.ports/NoSystemTransport.release|release(){}[0]
+    open fun setActionHandlers(tv.nomercy.player.core.ports/TransportActions) // tv.nomercy.player.core.ports/NoSystemTransport.setActionHandlers|setActionHandlers(tv.nomercy.player.core.ports.TransportActions){}[0]
+    open fun setNowPlaying(tv.nomercy.player.core.ports/NowPlaying) // tv.nomercy.player.core.ports/NoSystemTransport.setNowPlaying|setNowPlaying(tv.nomercy.player.core.ports.NowPlaying){}[0]
+    open fun setPlaybackState(tv.nomercy.player.core.ports/TransportPlaybackState, kotlin/Long, kotlin/Double) // tv.nomercy.player.core.ports/NoSystemTransport.setPlaybackState|setPlaybackState(tv.nomercy.player.core.ports.TransportPlaybackState;kotlin.Long;kotlin.Double){}[0]
 }
 
 final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.core.controllers/SilentLogger|null[0]
@@ -5208,5 +5300,6 @@ final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.po
 final fun tv.nomercy.player.core.ports/defaultIdGenerator(): tv.nomercy.player.core.ports/IdGenerator // tv.nomercy.player.core.ports/defaultIdGenerator|defaultIdGenerator(){}[0]
 final fun tv.nomercy.player.core.ports/defaultPlatform(): tv.nomercy.player.core.ports/Platform // tv.nomercy.player.core.ports/defaultPlatform|defaultPlatform(){}[0]
 final fun tv.nomercy.player.core.ports/defaultStorage(kotlin/String): tv.nomercy.player.core.ports/Storage // tv.nomercy.player.core.ports/defaultStorage|defaultStorage(kotlin.String){}[0]
+final fun tv.nomercy.player.core.ports/defaultSystemTransport(): tv.nomercy.player.core.ports/SystemTransport // tv.nomercy.player.core.ports/defaultSystemTransport|defaultSystemTransport(){}[0]
 final fun tv.nomercy.player.core.ports/displayLanguage(kotlin/String): kotlin/String // tv.nomercy.player.core.ports/displayLanguage|displayLanguage(kotlin.String){}[0]
 final fun tv.nomercy.player.core.ports/labelsNeedQualifier(kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.ports/labelsNeedQualifier|labelsNeedQualifier(kotlin.collections.List<kotlin.String>){}[0]
