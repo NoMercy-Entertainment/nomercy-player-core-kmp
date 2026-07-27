@@ -657,6 +657,11 @@ abstract interface tv.nomercy.player.core.player/TokenEnum { // tv.nomercy.playe
         abstract fun <get-token>(): kotlin/String // tv.nomercy.player.core.player/TokenEnum.token.<get-token>|<get-token>(){}[0]
 }
 
+abstract interface tv.nomercy.player.core.plugin/BrowseTreeProvider { // tv.nomercy.player.core.plugin/BrowseTreeProvider|null[0]
+    abstract suspend fun children(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.plugin/BrowseNode> // tv.nomercy.player.core.plugin/BrowseTreeProvider.children|children(kotlin.String){}[0]
+    abstract suspend fun root(): tv.nomercy.player.core.plugin/BrowseNode // tv.nomercy.player.core.plugin/BrowseTreeProvider.root|root(){}[0]
+}
+
 abstract interface tv.nomercy.player.core.plugin/ChromeContribution { // tv.nomercy.player.core.plugin/ChromeContribution|null[0]
     abstract val slot // tv.nomercy.player.core.plugin/ChromeContribution.slot|{}slot[0]
         abstract fun <get-slot>(): tv.nomercy.player.core.plugin/ChromeSlot // tv.nomercy.player.core.plugin/ChromeContribution.slot.<get-slot>|<get-slot>(){}[0]
@@ -3241,6 +3246,34 @@ final class tv.nomercy.player.core.player/PlayerStateHolder { // tv.nomercy.play
     final fun update(kotlin/Function1<tv.nomercy.player.core.player/PlayerState, tv.nomercy.player.core.player/PlayerState>) // tv.nomercy.player.core.player/PlayerStateHolder.update|update(kotlin.Function1<tv.nomercy.player.core.player.PlayerState,tv.nomercy.player.core.player.PlayerState>){}[0]
 }
 
+final class tv.nomercy.player.core.plugin/BrowseNode { // tv.nomercy.player.core.plugin/BrowseNode|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.plugin/BrowseNode.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?;kotlin.String?;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val artworkUrl // tv.nomercy.player.core.plugin/BrowseNode.artworkUrl|{}artworkUrl[0]
+        final fun <get-artworkUrl>(): kotlin/String? // tv.nomercy.player.core.plugin/BrowseNode.artworkUrl.<get-artworkUrl>|<get-artworkUrl>(){}[0]
+    final val browsable // tv.nomercy.player.core.plugin/BrowseNode.browsable|{}browsable[0]
+        final fun <get-browsable>(): kotlin/Boolean // tv.nomercy.player.core.plugin/BrowseNode.browsable.<get-browsable>|<get-browsable>(){}[0]
+    final val id // tv.nomercy.player.core.plugin/BrowseNode.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugin/BrowseNode.id.<get-id>|<get-id>(){}[0]
+    final val playable // tv.nomercy.player.core.plugin/BrowseNode.playable|{}playable[0]
+        final fun <get-playable>(): kotlin/Boolean // tv.nomercy.player.core.plugin/BrowseNode.playable.<get-playable>|<get-playable>(){}[0]
+    final val subtitle // tv.nomercy.player.core.plugin/BrowseNode.subtitle|{}subtitle[0]
+        final fun <get-subtitle>(): kotlin/String? // tv.nomercy.player.core.plugin/BrowseNode.subtitle.<get-subtitle>|<get-subtitle>(){}[0]
+    final val title // tv.nomercy.player.core.plugin/BrowseNode.title|{}title[0]
+        final fun <get-title>(): kotlin/String // tv.nomercy.player.core.plugin/BrowseNode.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugin/BrowseNode.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.plugin/BrowseNode.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // tv.nomercy.player.core.plugin/BrowseNode.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // tv.nomercy.player.core.plugin/BrowseNode.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // tv.nomercy.player.core.plugin/BrowseNode.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // tv.nomercy.player.core.plugin/BrowseNode.component6|component6(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.plugin/BrowseNode // tv.nomercy.player.core.plugin/BrowseNode.copy|copy(kotlin.String;kotlin.String;kotlin.String?;kotlin.String?;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugin/BrowseNode.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugin/BrowseNode.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/BrowseNode.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugin/ContributionBinding { // tv.nomercy.player.core.plugin/ContributionBinding|null[0]
     constructor <init>(kotlin/String, tv.nomercy.player.core.plugin/ChromeContribution) // tv.nomercy.player.core.plugin/ContributionBinding.<init>|<init>(kotlin.String;tv.nomercy.player.core.plugin.ChromeContribution){}[0]
 
@@ -4500,6 +4533,18 @@ open class tv.nomercy.player.core.errors/StateError : tv.nomercy.player.core.err
 
 open class tv.nomercy.player.core.errors/StreamError : tv.nomercy.player.core.errors/PlayerError { // tv.nomercy.player.core.errors/StreamError|null[0]
     constructor <init>(kotlin/String, tv.nomercy.player.core.errors/ErrorScope = ..., tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...) // tv.nomercy.player.core.errors/StreamError.<init>|<init>(kotlin.String;tv.nomercy.player.core.errors.ErrorScope;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+}
+
+open class tv.nomercy.player.core.plugin/EmptyBrowseTree : tv.nomercy.player.core.plugin/BrowseTreeProvider { // tv.nomercy.player.core.plugin/EmptyBrowseTree|null[0]
+    constructor <init>(kotlin/String = ...) // tv.nomercy.player.core.plugin/EmptyBrowseTree.<init>|<init>(kotlin.String){}[0]
+
+    open suspend fun children(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.plugin/BrowseNode> // tv.nomercy.player.core.plugin/EmptyBrowseTree.children|children(kotlin.String){}[0]
+    open suspend fun root(): tv.nomercy.player.core.plugin/BrowseNode // tv.nomercy.player.core.plugin/EmptyBrowseTree.root|root(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.plugin/EmptyBrowseTree.Companion|null[0]
+        final const val ROOT_ID // tv.nomercy.player.core.plugin/EmptyBrowseTree.Companion.ROOT_ID|{}ROOT_ID[0]
+            final fun <get-ROOT_ID>(): kotlin/String // tv.nomercy.player.core.plugin/EmptyBrowseTree.Companion.ROOT_ID.<get-ROOT_ID>|<get-ROOT_ID>(){}[0]
+    }
 }
 
 open class tv.nomercy.player.core.plugin/LifecycleRegistry { // tv.nomercy.player.core.plugin/LifecycleRegistry|null[0]
