@@ -145,6 +145,10 @@ kotlin {
             // worse than anything gained.
             implementation(libs.androidx.media3.exoplayer)
             implementation(libs.androidx.media3.common)
+            // The system transport. One Media3 session owns the lock screen,
+            // the notification and whatever a car is showing, and it is built
+            // here rather than in an app so there is exactly one of it.
+            implementation(libs.androidx.media3.session)
             // The data source Media3 reads manifests through, so the sanitizer
             // can sit in front of it. Media3's default source has no place to
             // put an interceptor.

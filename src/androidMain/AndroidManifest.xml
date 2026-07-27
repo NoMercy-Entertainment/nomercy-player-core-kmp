@@ -1,5 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- What a system transport needs to keep playing with the screen off.
+         Merged from the library so an app adopting it does not have to know
+         which permissions its player wants; the app's own manifest keeps
+         whatever else it declares. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application>
         <!-- Merged into androidx.startup's own provider rather than declaring a
              second one with its own authority. Two providers naming the same
