@@ -4449,6 +4449,25 @@ open class tv.nomercy.player.core.plugins.audio/SpectrumPlugin : tv.nomercy.play
     }
 }
 
+open class tv.nomercy.player.core.plugins.audio/WaveformVisualization : tv.nomercy.player.core.plugins.audio/VisualizationPlugin { // tv.nomercy.player.core.plugins.audio/WaveformVisualization|null[0]
+    constructor <init>(tv.nomercy.player.core.plugins.audio/SpectrumPlugin, kotlin/Int = ...) // tv.nomercy.player.core.plugins.audio/WaveformVisualization.<init>|<init>(tv.nomercy.player.core.plugins.audio.SpectrumPlugin;kotlin.Int){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugins.audio/WaveformVisualization.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.audio/WaveformVisualization.manifest.<get-manifest>|<get-manifest>(){}[0]
+
+    open fun columns(): kotlin/DoubleArray // tv.nomercy.player.core.plugins.audio/WaveformVisualization.columns|columns(){}[0]
+    open fun onColumns(kotlin/Function1<kotlin/DoubleArray, kotlin/Unit>) // tv.nomercy.player.core.plugins.audio/WaveformVisualization.onColumns|onColumns(kotlin.Function1<kotlin.DoubleArray,kotlin.Unit>){}[0]
+    open fun reduce(kotlin/DoubleArray, kotlin/Int): kotlin/DoubleArray // tv.nomercy.player.core.plugins.audio/WaveformVisualization.reduce|reduce(kotlin.DoubleArray;kotlin.Int){}[0]
+    open fun render(tv.nomercy.player.core.plugins.audio/VisualizationFrame) // tv.nomercy.player.core.plugins.audio/WaveformVisualization.render|render(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/WaveformVisualization.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 final object tv.nomercy.player.core.controllers/SilentLogger : tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.core.controllers/SilentLogger|null[0]
     final fun child(kotlin/String): tv.nomercy.player.core.ports/Logger // tv.nomercy.player.core.controllers/SilentLogger.child|child(kotlin.String){}[0]
     final fun debug(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.controllers/SilentLogger.debug|debug(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
@@ -4473,6 +4492,7 @@ final object tv.nomercy.player.core.dsp/EqBands { // tv.nomercy.player.core.dsp/
         final fun <get-DEFAULT>(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> // tv.nomercy.player.core.dsp/EqBands.DEFAULT.<get-DEFAULT>|<get-DEFAULT>(){}[0]
 
     final fun preGainLinear(kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/EqBands.preGainLinear|preGainLinear(kotlin.Double){}[0]
+    final fun snapPreGain(kotlin/Double): kotlin/Double // tv.nomercy.player.core.dsp/EqBands.snapPreGain|snapPreGain(kotlin.Double){}[0]
 }
 
 final object tv.nomercy.player.core.dsp/EqPresets { // tv.nomercy.player.core.dsp/EqPresets|null[0]

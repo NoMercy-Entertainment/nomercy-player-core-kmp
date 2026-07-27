@@ -53,5 +53,18 @@ public object EqBands {
     // Clamped at zero rather than allowed negative, because a negative
     // multiplier inverts the waveform — inaudible alone, and a comb filter the
     // moment it meets another copy of the same signal.
-    public fun preGainLinear(sliderValue: Double): Double = (sliderValue + 1.0).coerceAtLeast(0.0)
+    public fun preGainLinear(sliderValue: Double): Double = (snapPreGain(sliderValue) + 1.0).coerceAtLeast(0.0)
+
+    // A detent at the middle of the slider.
+    //
+    // Unity is the position a viewer returns to, and a pointer or a D-pad lands
+    // on 0.004 rather than 0. Left alone that is a permanent, inaudible offset
+    // on everything they play, and no amount of nudging removes it — the one
+    // value the control cannot reach is the one it is meant to rest at.
+    public fun snapPreGain(sliderValue: Double): Double =
+        if (sliderValue > -SNAP_THRESHOLD && sliderValue < SNAP_THRESHOLD) 0.0 else sliderValue
+
+    // The web's PRE_GAIN_SNAP_THRESHOLD. Wide enough to catch a fumbled
+    // gesture, narrow enough that a deliberate small adjustment survives.
+    private const val SNAP_THRESHOLD = 0.05
 }

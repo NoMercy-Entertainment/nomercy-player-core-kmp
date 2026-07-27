@@ -101,6 +101,40 @@ class SpectrumPluginTest {
     }
 
     @Test
+    fun syntheticModeSuppressesTheRealSpectrumRatherThanRacingIt() {
+        // Both arriving means a visualiser alternates between the audio and the
+        // stand-in every frame, which reads as a display that cannot make up
+        // its mind. The web drops tap frames while the mode is on.
+        val graph = FakeDspGraph()
+        val spectrum = SpectrumPlugin(graph)
+        val seen: MutableList<Double> = mutableListOf()
+        spectrum.onFrame { seen += it.time }
+        spectrum.syntheticMode(true)
+
+        graph.pushFrame(frameAt(1.0))
+        spectrum.pushFrame(frameAt(9.0))
+
+        assertEquals(listOf(9.0), seen, "a tap frame got through while synthetic mode was on")
+    }
+
+    @Test
+    fun leavingSyntheticModeThrowsTheStandInAway() {
+        // Left behind it would still answer currentFrame() after the real
+        // spectrum came back, so a visualiser polling it draws a shape the
+        // audio never had.
+        val graph = FakeDspGraph()
+        val spectrum = SpectrumPlugin(graph)
+        spectrum.onFrame { }
+        spectrum.syntheticMode(true)
+        spectrum.pushFrame(frameAt(9.0))
+
+        spectrum.syntheticMode(false)
+        graph.pushFrame(frameAt(2.0))
+
+        assertEquals(2.0, spectrum.currentFrame()?.time, "the synthetic frame outlived the mode")
+    }
+
+    @Test
     fun disposingStopsTheGraphEvenWhileAListenerRemains() {
         // A host tearing the plugin down while a view still holds a
         // subscription must still stop the graph running an FFT into nothing.

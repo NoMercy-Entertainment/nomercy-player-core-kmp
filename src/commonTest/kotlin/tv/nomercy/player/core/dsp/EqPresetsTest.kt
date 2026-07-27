@@ -115,6 +115,24 @@ class EqPresetsTest {
     }
 
     @Test
+    fun theMiddleOfThePreGainSliderIsSticky() {
+        // Unity is the position a viewer returns to, and a pointer or a D-pad
+        // lands on 0.004 rather than 0. Left alone that is a permanent,
+        // inaudible offset on everything they play, and no amount of nudging
+        // removes it — the one value the control cannot reach is the one it is
+        // meant to rest at. The web snaps within the same window.
+        assertEquals(1.0, EqBands.preGainLinear(0.004))
+        assertEquals(1.0, EqBands.preGainLinear(-0.049))
+    }
+
+    @Test
+    fun aDeliberateSmallAdjustmentSurvivesTheDetent() {
+        // The detent has to be narrow enough that someone who meant it is not
+        // overruled. Just outside the window is left exactly where it was put.
+        assertEquals(1.06, EqBands.preGainLinear(0.06), absoluteTolerance = 1e-9)
+    }
+
+    @Test
     fun theBottomOfThePreGainSliderIsSilenceAndNotInversion() {
         // A negative multiplier inverts the waveform. Inaudible alone, and a
         // comb filter the moment it meets another copy of the same signal.

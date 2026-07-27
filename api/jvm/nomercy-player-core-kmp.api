@@ -574,6 +574,7 @@ public final class tv/nomercy/player/core/dsp/EqBands {
 	public static final field INSTANCE Ltv/nomercy/player/core/dsp/EqBands;
 	public final fun getDEFAULT ()Ljava/util/List;
 	public final fun preGainLinear (D)D
+	public final fun snapPreGain (D)D
 }
 
 public final class tv/nomercy/player/core/dsp/EqBandsKt {
@@ -3131,6 +3132,28 @@ public abstract class tv/nomercy/player/core/plugins/audio/VisualizationPlugin :
 	public fun running ()Z
 	public fun start ()V
 	public fun stop ()V
+}
+
+public class tv/nomercy/player/core/plugins/audio/WaveformVisualization : tv/nomercy/player/core/plugins/audio/VisualizationPlugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/WaveformVisualization$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;I)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun columns ()[D
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public fun onColumns (Lkotlin/jvm/functions/Function1;)V
+	protected fun reduce ([DI)[D
+	public fun render (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/WaveformVisualization$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/AlwaysVisible : tv/nomercy/player/core/ports/VisibilityMonitor {

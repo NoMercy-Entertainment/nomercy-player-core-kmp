@@ -42,6 +42,10 @@ public open class SpectrumPlugin(
 
     private var synthetic: Boolean = false
 
+    // The last frame pushed by hand, kept so turning the mode off can throw it
+    // away deliberately rather than leaving it as the answer to currentFrame().
+    private var syntheticFrame: VisualizationFrame? = null
+
     // The last frame that arrived, for anything drawing on its own clock.
     //
     // A visualiser driven by the display's refresh rather than by the audio
@@ -60,7 +64,11 @@ public open class SpectrumPlugin(
     private fun ensureTap() {
         if (tap != null) return
 
-        tap = graph?.installFrameTap { frame -> deliver(frame) }
+        // Tap frames are dropped while synthetic mode is on rather than the
+        // tap being closed. A viewer toggling the mode expects the real
+        // spectrum back immediately, and reopening a tap costs a frame or two
+        // of blank display every time.
+        tap = graph?.installFrameTap { frame -> if (!synthetic) deliver(frame) }
     }
 
     // A copy of the list, because a visualiser that removes itself from inside
@@ -79,6 +87,10 @@ public open class SpectrumPlugin(
     // nobody is told it is the music.
     public open fun syntheticMode(enabled: Boolean) {
         synthetic = enabled
+        // Leaving the last synthetic frame behind would let it be read as the
+        // current one after the real spectrum came back, so a visualiser
+        // polling currentFrame would draw a shape the audio never had.
+        if (!enabled) syntheticFrame = null
     }
 
     public open fun syntheticMode(): Boolean = synthetic
@@ -90,6 +102,7 @@ public open class SpectrumPlugin(
     public open fun pushFrame(frame: VisualizationFrame) {
         if (!synthetic) return
 
+        syntheticFrame = frame
         deliver(frame)
     }
 
@@ -113,5 +126,6 @@ public open class SpectrumPlugin(
         tap = null
         listeners.clear()
         latest = null
+        syntheticFrame = null
     }
 }
