@@ -38,6 +38,13 @@ public class FakeDspGraph : AudioDspGraph {
     public var setEqBandsCalls: Int = 0
         private set
 
+    // How many times a tap was installed, not how many are live. The
+    // difference is the leak: a consumer that opens a second tap without
+    // disposing the first leaves the graph running an FFT nobody reads, and
+    // counting only live ones would show that as one.
+    public var tapInstalls: Int = 0
+        private set
+
     private var tap: ((VisualizationFrame) -> Unit)? = null
 
     override fun setEqBands(bands: List<EqBand>) {
@@ -54,6 +61,7 @@ public class FakeDspGraph : AudioDspGraph {
     }
 
     override fun installFrameTap(onFrame: (VisualizationFrame) -> Unit): Subscription {
+        tapInstalls++
         tap = onFrame
         return Subscription { if (tap === onFrame) tap = null }
     }

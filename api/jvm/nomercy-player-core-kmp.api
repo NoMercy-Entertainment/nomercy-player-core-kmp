@@ -3065,6 +3065,31 @@ public final class tv/nomercy/player/core/plugins/audio/EqualizerPlugin$Manifest
 	public fun getVersion ()Ljava/lang/String;
 }
 
+public class tv/nomercy/player/core/plugins/audio/SpectrumPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/ports/AudioDspGraph;)V
+	public fun available ()Z
+	public fun bandEnergy (DD)D
+	public fun currentFrame ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
+	public fun dispose ()V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public fun onFrame (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun pushFrame (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V
+	public fun syntheticMode ()Z
+	public fun syntheticMode (Z)V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/SpectrumPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 	public fun <init> ([D[DDDDLtv/nomercy/player/core/plugins/audio/BandEnergies;IDDLtv/nomercy/player/core/plugins/audio/BandEnergies;Ljava/lang/Boolean;Ljava/lang/Double;)V
 	public synthetic fun <init> ([D[DDDDLtv/nomercy/player/core/plugins/audio/BandEnergies;IDDLtv/nomercy/player/core/plugins/audio/BandEnergies;Ljava/lang/Boolean;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -3097,6 +3122,15 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 	public final fun getWaveform ()[D
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class tv/nomercy/player/core/plugins/audio/VisualizationPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;)V
+	public fun dispose ()V
+	public abstract fun render (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V
+	public fun running ()Z
+	public fun start ()V
+	public fun stop ()V
 }
 
 public final class tv/nomercy/player/core/ports/AlwaysVisible : tv/nomercy/player/core/ports/VisibilityMonitor {

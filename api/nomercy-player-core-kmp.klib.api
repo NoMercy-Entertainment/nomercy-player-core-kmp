@@ -955,6 +955,16 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
     open fun use() // tv.nomercy.player.core.plugin/Plugin.use|use(){}[0]
 }
 
+abstract class tv.nomercy.player.core.plugins.audio/VisualizationPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugins.audio/VisualizationPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.plugins.audio/SpectrumPlugin) // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.<init>|<init>(tv.nomercy.player.core.plugins.audio.SpectrumPlugin){}[0]
+
+    abstract fun render(tv.nomercy.player.core.plugins.audio/VisualizationFrame) // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.render|render(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
+    open fun dispose() // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.dispose|dispose(){}[0]
+    open fun running(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.running|running(){}[0]
+    open fun start() // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.start|start(){}[0]
+    open fun stop() // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.stop|stop(){}[0]
+}
+
 final class <#A: kotlin/Any?> tv.nomercy.player.core.events/BeforeDispatchResult { // tv.nomercy.player.core.events/BeforeDispatchResult|null[0]
     constructor <init>(kotlin/Boolean, #A, kotlin/String?) // tv.nomercy.player.core.events/BeforeDispatchResult.<init>|<init>(kotlin.Boolean;1:0;kotlin.String?){}[0]
 
@@ -4413,6 +4423,29 @@ open class tv.nomercy.player.core.plugins.audio/EqualizerPlugin : tv.nomercy.pla
             final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
         final val version // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.version|{}version[0]
             final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
+open class tv.nomercy.player.core.plugins.audio/SpectrumPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugins.audio/SpectrumPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/AudioDspGraph?) // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.<init>|<init>(tv.nomercy.player.core.ports.AudioDspGraph?){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+
+    open fun available(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.available|available(){}[0]
+    open fun bandEnergy(kotlin/Double, kotlin/Double): kotlin/Double // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.bandEnergy|bandEnergy(kotlin.Double;kotlin.Double){}[0]
+    open fun currentFrame(): tv.nomercy.player.core.plugins.audio/VisualizationFrame? // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.currentFrame|currentFrame(){}[0]
+    open fun dispose() // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.dispose|dispose(){}[0]
+    open fun onFrame(kotlin/Function1<tv.nomercy.player.core.plugins.audio/VisualizationFrame, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.onFrame|onFrame(kotlin.Function1<tv.nomercy.player.core.plugins.audio.VisualizationFrame,kotlin.Unit>){}[0]
+    open fun pushFrame(tv.nomercy.player.core.plugins.audio/VisualizationFrame) // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.pushFrame|pushFrame(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
+    open fun syntheticMode(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.syntheticMode|syntheticMode(){}[0]
+    open fun syntheticMode(kotlin/Boolean) // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.syntheticMode|syntheticMode(kotlin.Boolean){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
     }
 }
 
