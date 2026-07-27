@@ -685,6 +685,10 @@ abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.player/Player { // t
     abstract fun time(kotlin/Double) // tv.nomercy.player.core.player/Player.time|time(kotlin.Double){}[0]
 }
 
+abstract interface tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/DrmCapability|null[0]
+    abstract fun supports(tv.nomercy.player.core.drm/DrmScheme): kotlin/Boolean // tv.nomercy.player.core.drm/DrmCapability.supports|supports(tv.nomercy.player.core.drm.DrmScheme){}[0]
+}
+
 abstract interface tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/PlaylistItem|null[0]
     abstract val id // tv.nomercy.player.core.media/PlaylistItem.id|{}id[0]
         abstract fun <get-id>(): kotlin/String // tv.nomercy.player.core.media/PlaylistItem.id.<get-id>|<get-id>(){}[0]
@@ -1561,6 +1565,25 @@ final class tv.nomercy.player.core.drm/DrmConfig { // tv.nomercy.player.core.drm
         final fun <get-transformLicenseResponse>(): kotlin.coroutines/SuspendFunction1<kotlin/ByteArray, kotlin/ByteArray>? // tv.nomercy.player.core.drm/DrmConfig.transformLicenseResponse.<get-transformLicenseResponse>|<get-transformLicenseResponse>(){}[0]
 }
 
+final class tv.nomercy.player.core.drm/DrmKeyError { // tv.nomercy.player.core.drm/DrmKeyError|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.drm/DrmKeyError.<init>|<init>(kotlin.String;kotlin.String;kotlin.String){}[0]
+
+    final val code // tv.nomercy.player.core.drm/DrmKeyError.code|{}code[0]
+        final fun <get-code>(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.code.<get-code>|<get-code>(){}[0]
+    final val message // tv.nomercy.player.core.drm/DrmKeyError.message|{}message[0]
+        final fun <get-message>(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.message.<get-message>|<get-message>(){}[0]
+    final val sessionId // tv.nomercy.player.core.drm/DrmKeyError.sessionId|{}sessionId[0]
+        final fun <get-sessionId>(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.sessionId.<get-sessionId>|<get-sessionId>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.component2|component2(){}[0]
+    final fun component3(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ...): tv.nomercy.player.core.drm/DrmKeyError // tv.nomercy.player.core.drm/DrmKeyError.copy|copy(kotlin.String;kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.drm/DrmKeyError.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.drm/DrmKeyError.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.drm/DrmKeyError.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.drm/DrmLicenseExchange { // tv.nomercy.player.core.drm/DrmLicenseExchange|null[0]
     constructor <init>(kotlin/ByteArray, kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // tv.nomercy.player.core.drm/DrmLicenseExchange.<init>|<init>(kotlin.ByteArray;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
 
@@ -1568,6 +1591,22 @@ final class tv.nomercy.player.core.drm/DrmLicenseExchange { // tv.nomercy.player
         final fun <get-body>(): kotlin/ByteArray // tv.nomercy.player.core.drm/DrmLicenseExchange.body.<get-body>|<get-body>(){}[0]
     final val headers // tv.nomercy.player.core.drm/DrmLicenseExchange.headers|{}headers[0]
         final fun <get-headers>(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.drm/DrmLicenseExchange.headers.<get-headers>|<get-headers>(){}[0]
+}
+
+final class tv.nomercy.player.core.drm/DrmUnsupported { // tv.nomercy.player.core.drm/DrmUnsupported|null[0]
+    constructor <init>(tv.nomercy.player.core.drm/DrmScheme, kotlin/String) // tv.nomercy.player.core.drm/DrmUnsupported.<init>|<init>(tv.nomercy.player.core.drm.DrmScheme;kotlin.String){}[0]
+
+    final val code // tv.nomercy.player.core.drm/DrmUnsupported.code|{}code[0]
+        final fun <get-code>(): kotlin/String // tv.nomercy.player.core.drm/DrmUnsupported.code.<get-code>|<get-code>(){}[0]
+    final val scheme // tv.nomercy.player.core.drm/DrmUnsupported.scheme|{}scheme[0]
+        final fun <get-scheme>(): tv.nomercy.player.core.drm/DrmScheme // tv.nomercy.player.core.drm/DrmUnsupported.scheme.<get-scheme>|<get-scheme>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.drm/DrmScheme // tv.nomercy.player.core.drm/DrmUnsupported.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.drm/DrmUnsupported.component2|component2(){}[0]
+    final fun copy(tv.nomercy.player.core.drm/DrmScheme = ..., kotlin/String = ...): tv.nomercy.player.core.drm/DrmUnsupported // tv.nomercy.player.core.drm/DrmUnsupported.copy|copy(tv.nomercy.player.core.drm.DrmScheme;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.drm/DrmUnsupported.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.drm/DrmUnsupported.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.drm/DrmUnsupported.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.dsp/BiquadCoefficients { // tv.nomercy.player.core.dsp/BiquadCoefficients|null[0]
@@ -4629,6 +4668,26 @@ open class tv.nomercy.player.core.controllers/QueueController { // tv.nomercy.pl
     open fun ingest(tv.nomercy.player.core.media/PlaylistItem): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.controllers/QueueController.ingest|ingest(tv.nomercy.player.core.media.PlaylistItem){}[0]
 }
 
+open class tv.nomercy.player.core.drm/DrmPlugin : tv.nomercy.player.core.plugin/Plugin<tv.nomercy.player.core.drm/DrmConfig> { // tv.nomercy.player.core.drm/DrmPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.drm/DrmConfig, tv.nomercy.player.core.drm/DrmCapability = ...) // tv.nomercy.player.core.drm/DrmPlugin.<init>|<init>(tv.nomercy.player.core.drm.DrmConfig;tv.nomercy.player.core.drm.DrmCapability){}[0]
+
+    open val isPlayable // tv.nomercy.player.core.drm/DrmPlugin.isPlayable|{}isPlayable[0]
+        open fun <get-isPlayable>(): kotlin/Boolean // tv.nomercy.player.core.drm/DrmPlugin.isPlayable.<get-isPlayable>|<get-isPlayable>(){}[0]
+    open val manifest // tv.nomercy.player.core.drm/DrmPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.drm/DrmPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+    open val options // tv.nomercy.player.core.drm/DrmPlugin.options|{}options[0]
+        open fun <get-options>(): tv.nomercy.player.core.drm/DrmConfig // tv.nomercy.player.core.drm/DrmPlugin.options.<get-options>|<get-options>(){}[0]
+
+    open fun use() // tv.nomercy.player.core.drm/DrmPlugin.use|use(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.drm/DrmPlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.drm/DrmPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.drm/DrmPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.drm/DrmPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.drm/DrmPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 open class tv.nomercy.player.core.errors/AuthError : tv.nomercy.player.core.errors/NetworkError { // tv.nomercy.player.core.errors/AuthError|null[0]
     constructor <init>(kotlin/String, tv.nomercy.player.core.errors/ErrorScope = ..., tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ..., kotlin/String? = ...) // tv.nomercy.player.core.errors/AuthError.<init>|<init>(kotlin.String;tv.nomercy.player.core.errors.ErrorScope;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>;kotlin.String?){}[0]
 }
@@ -4834,6 +4893,10 @@ final object tv.nomercy.player.core.cues/ChapterCues { // tv.nomercy.player.core
     final fun parse(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.cues/ChapterCues.parse|parse(kotlin.String){}[0]
 }
 
+final object tv.nomercy.player.core.drm/ClearOnly : tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/ClearOnly|null[0]
+    final fun supports(tv.nomercy.player.core.drm/DrmScheme): kotlin/Boolean // tv.nomercy.player.core.drm/ClearOnly.supports|supports(tv.nomercy.player.core.drm.DrmScheme){}[0]
+}
+
 final object tv.nomercy.player.core.drm/DrmErrorCodes { // tv.nomercy.player.core.drm/DrmErrorCodes|null[0]
     final const val KEY_REQUEST_FAILED // tv.nomercy.player.core.drm/DrmErrorCodes.KEY_REQUEST_FAILED|{}KEY_REQUEST_FAILED[0]
         final fun <get-KEY_REQUEST_FAILED>(): kotlin/String // tv.nomercy.player.core.drm/DrmErrorCodes.KEY_REQUEST_FAILED.<get-KEY_REQUEST_FAILED>|<get-KEY_REQUEST_FAILED>(){}[0]
@@ -4847,6 +4910,17 @@ final object tv.nomercy.player.core.drm/DrmErrorCodes { // tv.nomercy.player.cor
         final fun <get-OUTPUT_NOT_PROTECTED>(): kotlin/String // tv.nomercy.player.core.drm/DrmErrorCodes.OUTPUT_NOT_PROTECTED.<get-OUTPUT_NOT_PROTECTED>|<get-OUTPUT_NOT_PROTECTED>(){}[0]
     final const val UNSUPPORTED_SCHEME // tv.nomercy.player.core.drm/DrmErrorCodes.UNSUPPORTED_SCHEME|{}UNSUPPORTED_SCHEME[0]
         final fun <get-UNSUPPORTED_SCHEME>(): kotlin/String // tv.nomercy.player.core.drm/DrmErrorCodes.UNSUPPORTED_SCHEME.<get-UNSUPPORTED_SCHEME>|<get-UNSUPPORTED_SCHEME>(){}[0]
+}
+
+final object tv.nomercy.player.core.drm/DrmEvents { // tv.nomercy.player.core.drm/DrmEvents|null[0]
+    final val KeyError // tv.nomercy.player.core.drm/DrmEvents.KeyError|{}KeyError[0]
+        final fun <get-KeyError>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.drm/DrmKeyError> // tv.nomercy.player.core.drm/DrmEvents.KeyError.<get-KeyError>|<get-KeyError>(){}[0]
+    final val KeyErrorOnPlayer // tv.nomercy.player.core.drm/DrmEvents.KeyErrorOnPlayer|{}KeyErrorOnPlayer[0]
+        final fun <get-KeyErrorOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.drm/DrmKeyError> // tv.nomercy.player.core.drm/DrmEvents.KeyErrorOnPlayer.<get-KeyErrorOnPlayer>|<get-KeyErrorOnPlayer>(){}[0]
+    final val Unsupported // tv.nomercy.player.core.drm/DrmEvents.Unsupported|{}Unsupported[0]
+        final fun <get-Unsupported>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.drm/DrmUnsupported> // tv.nomercy.player.core.drm/DrmEvents.Unsupported.<get-Unsupported>|<get-Unsupported>(){}[0]
+    final val UnsupportedOnPlayer // tv.nomercy.player.core.drm/DrmEvents.UnsupportedOnPlayer|{}UnsupportedOnPlayer[0]
+        final fun <get-UnsupportedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.drm/DrmUnsupported> // tv.nomercy.player.core.drm/DrmEvents.UnsupportedOnPlayer.<get-UnsupportedOnPlayer>|<get-UnsupportedOnPlayer>(){}[0]
 }
 
 final object tv.nomercy.player.core.dsp/AudioSpectrum { // tv.nomercy.player.core.dsp/AudioSpectrum|null[0]
