@@ -12,9 +12,15 @@ import android.content.Context
 import android.os.Looper
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
+import okhttp3.OkHttpClient
 
 // How the engine is actually configured, as opposed to merely constructed.
 //
@@ -43,6 +49,7 @@ internal fun buildEngine(context: Context): ExoPlayer {
 
     return ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())
+        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory(context), DefaultExtractorsFactory()))
         .setLoadControl(loadControlFor(budget))
         // Hold a network wakelock while playing. Without it a TV that dims its
         // screen can let the radio idle mid-stream, and the rebuffer that
@@ -64,6 +71,37 @@ internal fun buildEngine(context: Context): ExoPlayer {
             true,
         )
         .build()
+}
+
+// Media3 reads every manifest and segment through this, which is the only place
+// an interceptor can sit. The stock data source has nowhere to put one, so
+// without this seam the codec repair could not exist at all.
+//
+// OkHttp is the upstream, not the whole of it. An OkHttpDataSource can only
+// fetch http and https. Handing Media3 one on its
+// own took fifteen device tests down at once — every gate that plays a local
+// file, because there is no such thing as an OkHttp request for
+// /data/user/0/.../ladder.mp4. In a shipped build that is downloaded media and
+// anything a viewer opened from their own storage, which is precisely the case
+// least likely to be noticed by a developer testing against a server.
+//
+// DefaultDataSource handles file, asset, content and raw resources itself and
+// only delegates to the upstream for network schemes, so the interceptor sits
+// where it is needed and nothing else changes.
+//
+// The extractors are stock, and deliberately have no ASS subtitle parser wired
+// into them. Both routes into one funnel a whole .ass body through
+// ResponseBody.bytes(), so a karaoke track of ninety megabytes becomes a
+// transient heap peak near a hundred and eighty — which OOMs a television with
+// a 256MB heap and is not comfortable on a phone either. Sidecar ASS is drawn
+// by the subtitle overlay, which streams it, and NoMercy serves HLS rather than
+// MKV-embedded ASS, so nothing is lost by leaving the extractor path alone.
+private fun dataSourceFactory(context: Context): DataSource.Factory {
+    val client = OkHttpClient.Builder()
+        .addInterceptor(CodecFixInterceptor())
+        .build()
+
+    return DefaultDataSource.Factory(context, OkHttpDataSource.Factory(client))
 }
 
 // The allocator is primed to the whole budget up front.
