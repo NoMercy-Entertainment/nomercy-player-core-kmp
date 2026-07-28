@@ -28,13 +28,16 @@ class PlayerRulesTest {
     private fun idents(code: String) = NoSingleLetterIdent(Config.empty).lint(code)
     private fun sequenced(code: String) = NoSequencedCollectionApi(Config.empty).lint(code)
 
+    // The shape a Kotlin plugin actually leaks through: it was handed the
+    // player and calls the bus on it. The base class has the same four methods
+    // and cleans up after them.
     @Test
-    fun theRawBusIsFlaggedInsideAPlugin() {
+    fun theRawBusIsFlaggedWhenThePluginHoldsThePlayer() {
         val findings = bus(
             """
-            class Lyrics : Plugin<Options>() {
+            class Lyrics(private val host: PluginHost) : Plugin<Options>() {
                 fun use() {
-                    this.player.on("play") { }
+                    host.on("play") { }
                 }
             }
             """.trimIndent(),
@@ -44,15 +47,52 @@ class PlayerRulesTest {
         assertTrue(findings.single().message.contains("this.on"))
     }
 
+    // Same reach, written through this. An IDE produces this spelling as soon
+    // as anything in the method shadows the name.
+    @Test
+    fun theRawBusIsFlaggedThroughThisToo() {
+        val findings = bus(
+            """
+            class Lyrics : Plugin<Options>() {
+                private val owner: ComposedPlayer = somePlayer()
+                fun use() {
+                    this.owner.emit(MyEvents.Line, line)
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertEquals(1, findings.size)
+    }
+
+    // The name says nothing. A property called `player` that is not one is a
+    // property, and the rule that fired on it would be firing on a name.
+    @Test
+    fun aReceiverThatIsNotAPlayerIsNotTheRulesBusiness() {
+        val findings = bus(
+            """
+            class Lyrics(private val channel: RealtimeChannel) : Plugin<Options>() {
+                private val player: LyricsAnimator = LyricsAnimator()
+                fun use() {
+                    channel.on(RealtimeEvent.MESSAGE) { }
+                    player.on("frame") { }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        assertTrue(findings.isEmpty())
+    }
+
     @Test
     fun theScopedFormAndOrdinaryPlayerCallsAreLeftAlone() {
         val findings = bus(
             """
-            class Lyrics : Plugin<Options>() {
+            class Lyrics(private val host: PluginHost) : Plugin<Options>() {
                 fun use() {
                     this.on("play") { }
-                    this.player.play()
-                    this.player.seekByPercentage(50)
+                    host.play()
+                    host.seekByPercentage(50)
                 }
             }
             """.trimIndent(),
@@ -66,9 +106,9 @@ class PlayerRulesTest {
         // Core's controllers reach the bus directly because they are the bus.
         val findings = bus(
             """
-            class TransportController {
+            class TransportController(private val host: PluginHost) {
                 fun use() {
-                    this.player.on("play") { }
+                    host.on("play") { }
                 }
             }
             """.trimIndent(),
@@ -81,10 +121,10 @@ class PlayerRulesTest {
     fun theRawBusRuleCanBeSilenced() {
         val findings = bus(
             """
-            class Lyrics : Plugin<Options>() {
+            class Lyrics(private val host: PluginHost) : Plugin<Options>() {
                 @Suppress("NoRawPlayerBus")
                 fun use() {
-                    this.player.on("play") { }
+                    host.on("play") { }
                 }
             }
             """.trimIndent(),

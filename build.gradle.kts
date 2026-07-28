@@ -270,6 +270,12 @@ apiValidation {
     // of its class signatures would churn on every rule without guarding anyone.
     ignoredProjects.add("detekt-player")
 
+    // Nor is the template. It is source a consumer copies and edits, not an
+    // artifact anyone resolves, so it has no public surface to keep stable —
+    // a dump of it would be a file that has to be regenerated every time the
+    // example changes, guarding nobody.
+    ignoredProjects.add("plugin")
+
     // On covers Apple. Kotlin/Native compiles klibs on any host — only linking a
     // framework needs macOS — so the iOS and tvOS public surface is checked on
     // Windows and Linux too, not just on the Mac runner.

@@ -36,3 +36,8 @@ include(":testing")
 // own build, and its own artifact because an application drawing its own chrome
 // should be able to take the engine and leave this.
 include(":ui-compose")
+
+// The plugin a consumer copies. In the build because a scaffold that does not
+// compile is a scaffold whose first act is to waste somebody's afternoon.
+// Deliberately not published: it is source to copy, not a dependency to add.
+include(":templates:plugin")

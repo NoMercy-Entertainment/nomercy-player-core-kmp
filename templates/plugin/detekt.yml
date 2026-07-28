@@ -1,0 +1,49 @@
+# The advisory pack, on.
+#
+# Copy this next to your plugin. Every rule here is guidance rather than a wall:
+# each one names the sanctioned call at the site of the raw one, and
+# @Suppress("<RuleName>") silences it with nothing changing at runtime. A
+# consumer who means it is not blocked.
+#
+# What they are for is the half hour between writing `player.on(...)` inside a
+# plugin and finding out at teardown that it was never removed.
+player:
+  active: true
+
+  # this.on/emit instead of this.player.on/emit: scoped to your plugin id and
+  # unsubscribed when your plugin goes away.
+  NoRawPlayerBus:
+    active: true
+
+  # this.timeout/interval/frame instead of a raw coroutine: cancelled with your
+  # plugin rather than outliving it.
+  NoRawTimersInPlugin:
+    active: true
+
+  # this.fetch instead of your own client: the token, the refresh-and-retry and
+  # the base url live behind it, so a plugin cannot get authentication wrong by
+  # not knowing about it.
+  NoRawFetchInPlugin:
+    active: true
+
+  # Every plugin needs a manifest. Without one the registry cannot validate a
+  # dependency, order a before-chain, or name your plugin in an error.
+  PluginManifestRequired:
+    active: true
+
+  NoUncheckedCast:
+    active: true
+
+  NoSingleLetterIdent:
+    active: true
+    excludes: ['**/commonTest/**']
+
+  NoSequencedCollectionApi:
+    active: true
+
+# Composables are PascalCase in Compose's own API, so a plugin contributing UI
+# reads like the toolkit rather than like the odd one out.
+naming:
+  FunctionNaming:
+    active: true
+    ignoreAnnotated: ['Composable']

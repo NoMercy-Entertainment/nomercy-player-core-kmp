@@ -49,6 +49,10 @@ private class LeakyPlugin(private val host: FakePlayer) : Plugin<Unit>() {
 
     override val manifest: PluginManifest get() = Manifest
 
+    // Suppressed because this is the leak. The rule pack flagged it the first
+    // time it ran over this repository, which is the rule working: everywhere
+    // else in the tree, this exact shape is a bug.
+    @Suppress("NoRawPlayerBus")
     override fun use() {
         host.on(CoreEvents.Play) { }
     }
