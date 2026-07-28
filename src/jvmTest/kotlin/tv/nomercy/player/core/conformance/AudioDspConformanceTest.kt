@@ -20,7 +20,7 @@ import kotlin.reflect.full.memberFunctions
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import tv.nomercy.player.conformance.*
+import tv.nomercy.player.conformance.loadScenarios
 
 // The audio surface, held against the web player's.
 //

@@ -1,3 +1,10 @@
+public final class tv/nomercy/player/core/ContractSurfaceExport {
+	public static final field INSTANCE Ltv/nomercy/player/core/ContractSurfaceExport;
+	public final fun getContractVersion ()Ljava/lang/String;
+	public final fun getErrorCodes ()Ljava/util/List;
+	public final fun getEventNames ()Ljava/util/List;
+}
+
 public final class tv/nomercy/player/core/KitVersionKt {
 	public static final field CONTRACT_VERSION Ljava/lang/String;
 	public static final field KIT_VERSION Ljava/lang/String;
@@ -3799,6 +3806,7 @@ public final class tv/nomercy/player/core/ports/BufferConfigKt {
 }
 
 public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
+	public static final field ADAPTIVE_LEVEL_SWITCHED Ljava/lang/String;
 	public static final field CAN_PLAY Ljava/lang/String;
 	public static final field ENDED Ljava/lang/String;
 	public static final field ERROR Ljava/lang/String;

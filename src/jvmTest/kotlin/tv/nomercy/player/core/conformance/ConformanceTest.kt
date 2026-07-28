@@ -13,7 +13,12 @@ import tv.nomercy.player.core.events.CoreEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import tv.nomercy.player.conformance.*
+import tv.nomercy.player.conformance.Scenario
+import tv.nomercy.player.conformance.ScenarioAction
+import tv.nomercy.player.conformance.ScenarioResult
+import tv.nomercy.player.conformance.firstUnmatched
+import tv.nomercy.player.conformance.loadScenarios
+import tv.nomercy.player.conformance.scenarioItems
 
 // The native player against the same scenarios the web harness runs.
 //

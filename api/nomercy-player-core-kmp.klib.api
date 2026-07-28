@@ -5656,6 +5656,8 @@ final object tv.nomercy.player.core.ports/BufferBudget { // tv.nomercy.player.co
 }
 
 final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.player.core.ports/CanonicalBackendEvent|null[0]
+    final const val ADAPTIVE_LEVEL_SWITCHED // tv.nomercy.player.core.ports/CanonicalBackendEvent.ADAPTIVE_LEVEL_SWITCHED|{}ADAPTIVE_LEVEL_SWITCHED[0]
+        final fun <get-ADAPTIVE_LEVEL_SWITCHED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ADAPTIVE_LEVEL_SWITCHED.<get-ADAPTIVE_LEVEL_SWITCHED>|<get-ADAPTIVE_LEVEL_SWITCHED>(){}[0]
     final const val CAN_PLAY // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY|{}CAN_PLAY[0]
         final fun <get-CAN_PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY.<get-CAN_PLAY>|<get-CAN_PLAY>(){}[0]
     final const val ENDED // tv.nomercy.player.core.ports/CanonicalBackendEvent.ENDED|{}ENDED[0]
@@ -5782,6 +5784,15 @@ final object tv.nomercy.player.core.stream/ServerCodecNames { // tv.nomercy.play
         final fun <get-OPUS>(): kotlin/String // tv.nomercy.player.core.stream/ServerCodecNames.OPUS.<get-OPUS>|<get-OPUS>(){}[0]
     final const val VP9 // tv.nomercy.player.core.stream/ServerCodecNames.VP9|{}VP9[0]
         final fun <get-VP9>(): kotlin/String // tv.nomercy.player.core.stream/ServerCodecNames.VP9.<get-VP9>|<get-VP9>(){}[0]
+}
+
+final object tv.nomercy.player.core/ContractSurfaceExport { // tv.nomercy.player.core/ContractSurfaceExport|null[0]
+    final val contractVersion // tv.nomercy.player.core/ContractSurfaceExport.contractVersion|{}contractVersion[0]
+        final fun <get-contractVersion>(): kotlin/String // tv.nomercy.player.core/ContractSurfaceExport.contractVersion.<get-contractVersion>|<get-contractVersion>(){}[0]
+    final val errorCodes // tv.nomercy.player.core/ContractSurfaceExport.errorCodes|{}errorCodes[0]
+        final fun <get-errorCodes>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core/ContractSurfaceExport.errorCodes.<get-errorCodes>|<get-errorCodes>(){}[0]
+    final val eventNames // tv.nomercy.player.core/ContractSurfaceExport.eventNames|{}eventNames[0]
+        final fun <get-eventNames>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core/ContractSurfaceExport.eventNames.<get-eventNames>|<get-eventNames>(){}[0]
 }
 
 final const val tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH // tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH|{}DEFAULT_BANDWIDTH[0]
