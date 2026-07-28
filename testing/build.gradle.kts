@@ -1,4 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFrameworkConfig
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -41,14 +43,28 @@ kotlin {
         }
     }
 
-    // The same Apple targets the engine has. A fake that existed everywhere
-    // except the platform whose conformance is hardest to run would leave that
-    // platform writing its own again.
-    iosArm64()
-    iosSimulatorArm64()
-    iosX64()
-    tvosArm64()
-    tvosSimulatorArm64()
+    // The same Apple targets the engine has, assembled into their own
+    // framework. A fake that existed everywhere except the platform whose
+    // conformance is hardest to run would leave that platform writing its own
+    // again — and exporting these into the engine's framework would put test
+    // doubles in every consumer's production binary, which is the thing this
+    // module being separate exists to prevent.
+    val testingXcf: XCFrameworkConfig = XCFramework("NoMercyPlayerTesting")
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+        iosX64(),
+        tvosArm64(),
+        tvosSimulatorArm64(),
+    ).forEach { target ->
+        target.binaries.framework {
+            baseName = "NoMercyPlayerTesting"
+            isStatic = true
+            binaryOption("bundleId", "tv.nomercy.player.testing")
+            export(project(":"))
+            testingXcf.add(this)
+        }
+    }
 
     sourceSets {
         commonMain.dependencies {
