@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.ports
 
 import kotlinx.coroutines.test.runTest
+import tv.nomercy.player.testing.FakeRealtimeChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -46,45 +47,6 @@ private class FakeTranslator(private var current: String = "en") : Translator {
 
     override fun dispose() {
         table.clear()
-    }
-}
-
-private class FakeChannel : RealtimeChannel {
-    private var state: RealtimeState = RealtimeState.CONNECTING
-    private val listeners = mutableMapOf<RealtimeEvent, MutableList<(Any?) -> Unit>>()
-
-    val sent: MutableList<String> = mutableListOf()
-
-    override val readyState: RealtimeState get() = state
-
-    fun open() {
-        state = RealtimeState.OPEN
-        listeners[RealtimeEvent.OPEN]?.toList()?.forEach { it(null) }
-    }
-
-    fun deliver(message: String) {
-        listeners[RealtimeEvent.MESSAGE]?.toList()?.forEach { it(message) }
-    }
-
-    override fun send(data: String) {
-        sent.add(data)
-    }
-
-    override fun send(data: ByteArray) {
-        sent.add(data.decodeToString())
-    }
-
-    override fun close(code: Int?, reason: String?) {
-        state = RealtimeState.CLOSED
-        listeners[RealtimeEvent.CLOSE]?.toList()?.forEach { it(reason) }
-    }
-
-    override fun on(event: RealtimeEvent, fn: (Any?) -> Unit) {
-        listeners.getOrPut(event) { mutableListOf() }.add(fn)
-    }
-
-    override fun off(event: RealtimeEvent, fn: (Any?) -> Unit) {
-        listeners[event]?.remove(fn)
     }
 }
 
@@ -137,34 +99,35 @@ class TranslatorRealtimeTest {
 
     @Test
     fun aChannelSendsReceivesAndReportsItsState() {
-        val channel = FakeChannel()
+        val channel = FakeRealtimeChannel(RealtimeState.CONNECTING)
         val received = mutableListOf<Any?>()
         channel.on(RealtimeEvent.MESSAGE) { received.add(it) }
         assertEquals(RealtimeState.CONNECTING, channel.readyState)
 
         channel.open()
         channel.send("ping")
-        channel.deliver("pong")
+        channel.deliver(RealtimeEvent.MESSAGE, "pong")
 
         assertEquals(RealtimeState.OPEN, channel.readyState)
-        assertEquals(listOf("ping"), channel.sent)
+        assertEquals(listOf("ping"), channel.sentText)
         assertEquals(listOf<Any?>("pong"), received)
     }
 
     @Test
-    fun binaryAndTextSharedTheSameChannel() {
-        val channel = FakeChannel()
+    fun binaryAndTextShareTheSameChannelAndStayApart() {
+        val channel = FakeRealtimeChannel(RealtimeState.CONNECTING)
         channel.open()
 
         channel.send("text")
         channel.send("bytes".encodeToByteArray())
 
-        assertEquals(listOf("text", "bytes"), channel.sent)
+        assertEquals(listOf("text"), channel.sentText)
+        assertEquals(listOf("bytes"), channel.sentBytes.map { it.decodeToString() })
     }
 
     @Test
     fun closingReportsClosedAndTellsItsListeners() {
-        val channel = FakeChannel()
+        val channel = FakeRealtimeChannel(RealtimeState.CONNECTING)
         var closeReason: Any? = null
         channel.on(RealtimeEvent.CLOSE) { closeReason = it }
         channel.open()

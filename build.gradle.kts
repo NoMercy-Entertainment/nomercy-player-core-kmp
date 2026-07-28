@@ -217,6 +217,12 @@ detekt {
         "src/tvosMain/kotlin",
         "src/jvmTest/kotlin",
         "src/jvmMain/kotlin",
+        // The testing kit is a separate Gradle module and the same codebase.
+        // It is also the module consumers read to learn what good use of this
+        // library looks like, so holding it to a lower standard than the
+        // library would be exactly backwards.
+        "testing/src/commonMain/kotlin",
+        "testing/src/commonTest/kotlin",
     )
     config.setFrom("config/detekt/detekt.yml")
     buildUponDefaultConfig = true

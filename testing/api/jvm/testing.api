@@ -1,3 +1,40 @@
+public final class tv/nomercy/player/testing/FakeFetchCall {
+	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ltv/nomercy/player/core/ports/FetchOptions;
+	public final fun copy (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;)Ltv/nomercy/player/testing/FakeFetchCall;
+	public static synthetic fun copy$default (Ltv/nomercy/player/testing/FakeFetchCall;Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;ILjava/lang/Object;)Ltv/nomercy/player/testing/FakeFetchCall;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOptions ()Ltv/nomercy/player/core/ports/FetchOptions;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/testing/FakeFetcher : tv/nomercy/player/core/ports/Fetcher {
+	public fun <init> ()V
+	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getCalls ()Ljava/util/List;
+	public final fun reset ()V
+	public final fun respondWith (ILjava/lang/String;)Ltv/nomercy/player/testing/FakeFetcher;
+	public final fun respondWith (Ltv/nomercy/player/core/ports/FetchResponse;)Ltv/nomercy/player/testing/FakeFetcher;
+	public static synthetic fun respondWith$default (Ltv/nomercy/player/testing/FakeFetcher;ILjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/testing/FakeFetcher;
+}
+
+public final class tv/nomercy/player/testing/FakeLogger : tv/nomercy/player/core/ports/Logger {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun allLines ()Ljava/util/List;
+	public fun child (Ljava/lang/String;)Ltv/nomercy/player/core/ports/Logger;
+	public fun debug (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun error (Ljava/lang/String;[Ljava/lang/Object;)V
+	public final fun getChildren ()Ljava/util/List;
+	public final fun getLines ()Ljava/util/List;
+	public fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
+}
+
 public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core/ports/MediaBackend {
 	public fun <init> ()V
 	public fun buffered ()D
@@ -46,6 +83,82 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun volume (F)V
 }
 
+public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core/player/Player, tv/nomercy/player/core/plugin/PluginHost {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;)V
+	public synthetic fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;)Ltv/nomercy/player/core/player/Player;
+	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun dispose ()V
+	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
+	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun getPlugin (Lkotlin/reflect/KClass;)Ltv/nomercy/player/core/plugin/Plugin;
+	public final fun getPluginById (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
+	public final fun getPlugins ()Ltv/nomercy/player/core/plugin/PluginRegistry;
+	public final fun getReportedErrors ()Ljava/util/List;
+	public fun getRootLogger ()Ltv/nomercy/player/core/ports/Logger;
+	public fun getRootStorage ()Ltv/nomercy/player/core/ports/Storage;
+	public fun getStateFlow ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getTranslations ()Ljava/util/Map;
+	public fun index ()I
+	public fun item ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun listenerCount ()I
+	public fun next ()V
+	public fun off (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)V
+	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
+	public fun once (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun pause (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public fun play (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public fun previous ()V
+	public fun queue ()Ljava/util/List;
+	public final fun removePluginById (Ljava/lang/String;)V
+	public fun report (Ltv/nomercy/player/core/errors/PlayerError;)V
+	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;)Ltv/nomercy/player/core/player/Player;
+	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
+	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public fun time ()D
+	public fun time (D)V
+	public fun websocket (Ljava/lang/String;Ltv/nomercy/player/core/ports/RealtimeFactoryOptions;)Ltv/nomercy/player/core/ports/RealtimeChannel;
+}
+
+public final class tv/nomercy/player/testing/FakeRealtimeChannel : tv/nomercy/player/core/ports/RealtimeChannel {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/ports/RealtimeState;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/RealtimeState;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun close (Ljava/lang/Integer;Ljava/lang/String;)V
+	public final fun deliver (Ltv/nomercy/player/core/ports/RealtimeEvent;Ljava/lang/Object;)V
+	public static synthetic fun deliver$default (Ltv/nomercy/player/testing/FakeRealtimeChannel;Ltv/nomercy/player/core/ports/RealtimeEvent;Ljava/lang/Object;ILjava/lang/Object;)V
+	public final fun dropped (ILjava/lang/String;)V
+	public static synthetic fun dropped$default (Ltv/nomercy/player/testing/FakeRealtimeChannel;ILjava/lang/String;ILjava/lang/Object;)V
+	public final fun getCloseCode ()Ljava/lang/Integer;
+	public final fun getCloseReason ()Ljava/lang/String;
+	public fun getReadyState ()Ltv/nomercy/player/core/ports/RealtimeState;
+	public final fun getSentBytes ()Ljava/util/List;
+	public final fun getSentText ()Ljava/util/List;
+	public fun off (Ltv/nomercy/player/core/ports/RealtimeEvent;Lkotlin/jvm/functions/Function1;)V
+	public fun on (Ltv/nomercy/player/core/ports/RealtimeEvent;Lkotlin/jvm/functions/Function1;)V
+	public final fun open ()V
+	public fun send (Ljava/lang/String;)V
+	public fun send ([B)V
+	public final fun setCloseCode (Ljava/lang/Integer;)V
+	public final fun setCloseReason (Ljava/lang/String;)V
+}
+
+public final class tv/nomercy/player/testing/FakeStorage : tv/nomercy/player/core/ports/Storage {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun get (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getEntries ()Ljava/util/Map;
+	public fun getJSON (Ljava/lang/String;Lkotlinx/serialization/DeserializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun remove (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun set (Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun setJSON (Ljava/lang/String;Ljava/lang/Object;Lkotlinx/serialization/SerializationStrategy;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
 	public fun <init> ()V
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
@@ -88,6 +201,38 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun unmute ()V
 	public fun volume ()F
 	public fun volume (F)V
+}
+
+public final class tv/nomercy/player/testing/LeakAssertionResult {
+	public fun <init> (Ljava/lang/String;IIII)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun copy (Ljava/lang/String;IIII)Ltv/nomercy/player/testing/LeakAssertionResult;
+	public static synthetic fun copy$default (Ltv/nomercy/player/testing/LeakAssertionResult;Ljava/lang/String;IIIIILjava/lang/Object;)Ltv/nomercy/player/testing/LeakAssertionResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLeaked ()I
+	public final fun getListenersAfterSetup ()I
+	public final fun getListenersAfterTeardown ()I
+	public final fun getListenersBefore ()I
+	public final fun getSubjectId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/testing/LeakHarnessKt {
+	public static final field DEFAULT_LEAK_CYCLES I
+	public static final fun assertNoListenerLeak (Ljava/lang/String;Ltv/nomercy/player/testing/FakePlayer;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)Ltv/nomercy/player/testing/LeakAssertionResult;
+	public static synthetic fun assertNoListenerLeak$default (Ljava/lang/String;Ltv/nomercy/player/testing/FakePlayer;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ltv/nomercy/player/testing/LeakAssertionResult;
+	public static final fun assertNoListenerLeakOverCycles (Ljava/lang/String;Ltv/nomercy/player/testing/FakePlayer;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;I)Ljava/util/List;
+	public static synthetic fun assertNoListenerLeakOverCycles$default (Ljava/lang/String;Ltv/nomercy/player/testing/FakePlayer;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;IILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class tv/nomercy/player/testing/PluginTestHarnessKt {
+	public static final fun testPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ltv/nomercy/player/testing/FakePlayer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/testing/LeakAssertionResult;
+	public static synthetic fun testPlugin$default (Ltv/nomercy/player/core/plugin/Plugin;Ltv/nomercy/player/testing/FakePlayer;Ljava/lang/Object;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)Ltv/nomercy/player/testing/LeakAssertionResult;
 }
 
 public final class tv/nomercy/player/testing/TestItem : tv/nomercy/player/core/media/PlaylistItem {

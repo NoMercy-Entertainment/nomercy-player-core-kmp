@@ -6,6 +6,160 @@
 // - Show declarations: true
 
 // Library unique name: <nomercy-player-core-kmp:testing>
+final class tv.nomercy.player.testing/FakeFetchCall { // tv.nomercy.player.testing/FakeFetchCall|null[0]
+    constructor <init>(kotlin/String, tv.nomercy.player.core.ports/FetchOptions) // tv.nomercy.player.testing/FakeFetchCall.<init>|<init>(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+
+    final val options // tv.nomercy.player.testing/FakeFetchCall.options|{}options[0]
+        final fun <get-options>(): tv.nomercy.player.core.ports/FetchOptions // tv.nomercy.player.testing/FakeFetchCall.options.<get-options>|<get-options>(){}[0]
+    final val url // tv.nomercy.player.testing/FakeFetchCall.url|{}url[0]
+        final fun <get-url>(): kotlin/String // tv.nomercy.player.testing/FakeFetchCall.url.<get-url>|<get-url>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.testing/FakeFetchCall.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.ports/FetchOptions // tv.nomercy.player.testing/FakeFetchCall.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., tv.nomercy.player.core.ports/FetchOptions = ...): tv.nomercy.player.testing/FakeFetchCall // tv.nomercy.player.testing/FakeFetchCall.copy|copy(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.testing/FakeFetchCall.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.testing/FakeFetchCall.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.testing/FakeFetchCall.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.testing/FakeFetcher : tv.nomercy.player.core.ports/Fetcher { // tv.nomercy.player.testing/FakeFetcher|null[0]
+    constructor <init>() // tv.nomercy.player.testing/FakeFetcher.<init>|<init>(){}[0]
+
+    final val calls // tv.nomercy.player.testing/FakeFetcher.calls|{}calls[0]
+        final fun <get-calls>(): kotlin.collections/MutableList<tv.nomercy.player.testing/FakeFetchCall> // tv.nomercy.player.testing/FakeFetcher.calls.<get-calls>|<get-calls>(){}[0]
+
+    final fun reset() // tv.nomercy.player.testing/FakeFetcher.reset|reset(){}[0]
+    final fun respondWith(kotlin/Int = ..., kotlin/String = ...): tv.nomercy.player.testing/FakeFetcher // tv.nomercy.player.testing/FakeFetcher.respondWith|respondWith(kotlin.Int;kotlin.String){}[0]
+    final fun respondWith(tv.nomercy.player.core.ports/FetchResponse): tv.nomercy.player.testing/FakeFetcher // tv.nomercy.player.testing/FakeFetcher.respondWith|respondWith(tv.nomercy.player.core.ports.FetchResponse){}[0]
+    final suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.testing/FakeFetcher.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+}
+
+final class tv.nomercy.player.testing/FakeLogger : tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.testing/FakeLogger|null[0]
+    constructor <init>(kotlin/String = ...) // tv.nomercy.player.testing/FakeLogger.<init>|<init>(kotlin.String){}[0]
+
+    final val children // tv.nomercy.player.testing/FakeLogger.children|{}children[0]
+        final fun <get-children>(): kotlin.collections/MutableList<tv.nomercy.player.testing/FakeLogger> // tv.nomercy.player.testing/FakeLogger.children.<get-children>|<get-children>(){}[0]
+    final val lines // tv.nomercy.player.testing/FakeLogger.lines|{}lines[0]
+        final fun <get-lines>(): kotlin.collections/MutableList<kotlin/String> // tv.nomercy.player.testing/FakeLogger.lines.<get-lines>|<get-lines>(){}[0]
+
+    final fun allLines(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.testing/FakeLogger.allLines|allLines(){}[0]
+    final fun child(kotlin/String): tv.nomercy.player.core.ports/Logger // tv.nomercy.player.testing/FakeLogger.child|child(kotlin.String){}[0]
+    final fun debug(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.testing/FakeLogger.debug|debug(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+    final fun error(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.testing/FakeLogger.error|error(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+    final fun info(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.testing/FakeLogger.info|info(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+    final fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.testing/FakeLogger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+}
+
+final class tv.nomercy.player.testing/FakePlayer : tv.nomercy.player.core.player/Player<kotlin/Unit>, tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.testing/FakePlayer|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ..., kotlinx.coroutines/CoroutineScope = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.testing/FakeFetcher? = ..., kotlin/Function2<kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions, tv.nomercy.player.core.ports/RealtimeChannel>? = ...) // tv.nomercy.player.testing/FakePlayer.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlinx.coroutines.CoroutineScope;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.testing.FakeFetcher?;kotlin.Function2<kotlin.String,tv.nomercy.player.core.ports.RealtimeFactoryOptions,tv.nomercy.player.core.ports.RealtimeChannel>?){}[0]
+
+    final val plugins // tv.nomercy.player.testing/FakePlayer.plugins|{}plugins[0]
+        final fun <get-plugins>(): tv.nomercy.player.core.plugin/PluginRegistry // tv.nomercy.player.testing/FakePlayer.plugins.<get-plugins>|<get-plugins>(){}[0]
+    final val reportedErrors // tv.nomercy.player.testing/FakePlayer.reportedErrors|{}reportedErrors[0]
+        final fun <get-reportedErrors>(): kotlin.collections/MutableList<tv.nomercy.player.core.errors/PlayerError> // tv.nomercy.player.testing/FakePlayer.reportedErrors.<get-reportedErrors>|<get-reportedErrors>(){}[0]
+    final val rootLogger // tv.nomercy.player.testing/FakePlayer.rootLogger|{}rootLogger[0]
+        final fun <get-rootLogger>(): tv.nomercy.player.core.ports/Logger // tv.nomercy.player.testing/FakePlayer.rootLogger.<get-rootLogger>|<get-rootLogger>(){}[0]
+    final val rootStorage // tv.nomercy.player.testing/FakePlayer.rootStorage|{}rootStorage[0]
+        final fun <get-rootStorage>(): tv.nomercy.player.core.ports/Storage // tv.nomercy.player.testing/FakePlayer.rootStorage.<get-rootStorage>|<get-rootStorage>(){}[0]
+    final val stateFlow // tv.nomercy.player.testing/FakePlayer.stateFlow|{}stateFlow[0]
+        final fun <get-stateFlow>(): kotlinx.coroutines.flow/StateFlow<tv.nomercy.player.core.player/PlayerState> // tv.nomercy.player.testing/FakePlayer.stateFlow.<get-stateFlow>|<get-stateFlow>(){}[0]
+    final val translations // tv.nomercy.player.testing/FakePlayer.translations|{}translations[0]
+        final fun <get-translations>(): kotlin.collections/MutableMap<kotlin/String, kotlin/String> // tv.nomercy.player.testing/FakePlayer.translations.<get-translations>|<get-translations>(){}[0]
+
+    final fun <#A1: kotlin/Any?> emit(tv.nomercy.player.core.events/EventKey<#A1>, #A1) // tv.nomercy.player.testing/FakePlayer.emit|emit(tv.nomercy.player.core.events.EventKey<0:0>;0:0){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> off(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>) // tv.nomercy.player.testing/FakePlayer.off|off(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.testing/FakePlayer.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> once(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.testing/FakePlayer.once|once(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun <#A1: tv.nomercy.player.core.plugin/Plugin<*>> addPlugin(#A1, kotlin/Any?): tv.nomercy.player.core.player/Player<kotlin/Unit> // tv.nomercy.player.testing/FakePlayer.addPlugin|addPlugin(0:0;kotlin.Any?){0§<tv.nomercy.player.core.plugin.Plugin<*>>}[0]
+    final fun <#A1: tv.nomercy.player.core.plugin/Plugin<*>> getPlugin(kotlin.reflect/KClass<#A1>): #A1? // tv.nomercy.player.testing/FakePlayer.getPlugin|getPlugin(kotlin.reflect.KClass<0:0>){0§<tv.nomercy.player.core.plugin.Plugin<*>>}[0]
+    final fun dispose() // tv.nomercy.player.testing/FakePlayer.dispose|dispose(){}[0]
+    final fun getPluginById(kotlin/String): tv.nomercy.player.core.plugin/Plugin<*>? // tv.nomercy.player.testing/FakePlayer.getPluginById|getPluginById(kotlin.String){}[0]
+    final fun index(): kotlin/Int // tv.nomercy.player.testing/FakePlayer.index|index(){}[0]
+    final fun item(): tv.nomercy.player.core.media/PlaylistItem? // tv.nomercy.player.testing/FakePlayer.item|item(){}[0]
+    final fun listenerCount(): kotlin/Int // tv.nomercy.player.testing/FakePlayer.listenerCount|listenerCount(){}[0]
+    final fun next() // tv.nomercy.player.testing/FakePlayer.next|next(){}[0]
+    final fun on(kotlin/String, kotlin/Function1<kotlin/Any?, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.testing/FakePlayer.on|on(kotlin.String;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun onAll(kotlin/Function2<kotlin/String, kotlin/Any?, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.testing/FakePlayer.onAll|onAll(kotlin.Function2<kotlin.String,kotlin.Any?,kotlin.Unit>){}[0]
+    final fun pause(tv.nomercy.player.core.player/ActionOptions) // tv.nomercy.player.testing/FakePlayer.pause|pause(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final fun play(tv.nomercy.player.core.player/ActionOptions) // tv.nomercy.player.testing/FakePlayer.play|play(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final fun previous() // tv.nomercy.player.testing/FakePlayer.previous|previous(){}[0]
+    final fun queue(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.testing/FakePlayer.queue|queue(){}[0]
+    final fun removePluginById(kotlin/String) // tv.nomercy.player.testing/FakePlayer.removePluginById|removePluginById(kotlin.String){}[0]
+    final fun report(tv.nomercy.player.core.errors/PlayerError) // tv.nomercy.player.testing/FakePlayer.report|report(tv.nomercy.player.core.errors.PlayerError){}[0]
+    final fun setup(tv.nomercy.player.core.player/PlayerConfig): tv.nomercy.player.core.player/Player<kotlin/Unit> // tv.nomercy.player.testing/FakePlayer.setup|setup(tv.nomercy.player.core.player.PlayerConfig){}[0]
+    final fun state(): tv.nomercy.player.core.player/PlayerState // tv.nomercy.player.testing/FakePlayer.state|state(){}[0]
+    final fun stop(tv.nomercy.player.core.player/ActionOptions) // tv.nomercy.player.testing/FakePlayer.stop|stop(tv.nomercy.player.core.player.ActionOptions){}[0]
+    final fun t(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>): kotlin/String // tv.nomercy.player.testing/FakePlayer.t|t(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun time(): kotlin/Double // tv.nomercy.player.testing/FakePlayer.time|time(){}[0]
+    final fun time(kotlin/Double) // tv.nomercy.player.testing/FakePlayer.time|time(kotlin.Double){}[0]
+    final fun websocket(kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions): tv.nomercy.player.core.ports/RealtimeChannel // tv.nomercy.player.testing/FakePlayer.websocket|websocket(kotlin.String;tv.nomercy.player.core.ports.RealtimeFactoryOptions){}[0]
+    final suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.testing/FakePlayer.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
+    final suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.testing/FakePlayer.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+}
+
+final class tv.nomercy.player.testing/FakeRealtimeChannel : tv.nomercy.player.core.ports/RealtimeChannel { // tv.nomercy.player.testing/FakeRealtimeChannel|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/RealtimeState = ...) // tv.nomercy.player.testing/FakeRealtimeChannel.<init>|<init>(tv.nomercy.player.core.ports.RealtimeState){}[0]
+
+    final val readyState // tv.nomercy.player.testing/FakeRealtimeChannel.readyState|{}readyState[0]
+        final fun <get-readyState>(): tv.nomercy.player.core.ports/RealtimeState // tv.nomercy.player.testing/FakeRealtimeChannel.readyState.<get-readyState>|<get-readyState>(){}[0]
+    final val sentBytes // tv.nomercy.player.testing/FakeRealtimeChannel.sentBytes|{}sentBytes[0]
+        final fun <get-sentBytes>(): kotlin.collections/MutableList<kotlin/ByteArray> // tv.nomercy.player.testing/FakeRealtimeChannel.sentBytes.<get-sentBytes>|<get-sentBytes>(){}[0]
+    final val sentText // tv.nomercy.player.testing/FakeRealtimeChannel.sentText|{}sentText[0]
+        final fun <get-sentText>(): kotlin.collections/MutableList<kotlin/String> // tv.nomercy.player.testing/FakeRealtimeChannel.sentText.<get-sentText>|<get-sentText>(){}[0]
+
+    final var closeCode // tv.nomercy.player.testing/FakeRealtimeChannel.closeCode|{}closeCode[0]
+        final fun <get-closeCode>(): kotlin/Int? // tv.nomercy.player.testing/FakeRealtimeChannel.closeCode.<get-closeCode>|<get-closeCode>(){}[0]
+        final fun <set-closeCode>(kotlin/Int?) // tv.nomercy.player.testing/FakeRealtimeChannel.closeCode.<set-closeCode>|<set-closeCode>(kotlin.Int?){}[0]
+    final var closeReason // tv.nomercy.player.testing/FakeRealtimeChannel.closeReason|{}closeReason[0]
+        final fun <get-closeReason>(): kotlin/String? // tv.nomercy.player.testing/FakeRealtimeChannel.closeReason.<get-closeReason>|<get-closeReason>(){}[0]
+        final fun <set-closeReason>(kotlin/String?) // tv.nomercy.player.testing/FakeRealtimeChannel.closeReason.<set-closeReason>|<set-closeReason>(kotlin.String?){}[0]
+
+    final fun close(kotlin/Int?, kotlin/String?) // tv.nomercy.player.testing/FakeRealtimeChannel.close|close(kotlin.Int?;kotlin.String?){}[0]
+    final fun deliver(tv.nomercy.player.core.ports/RealtimeEvent, kotlin/Any? = ...) // tv.nomercy.player.testing/FakeRealtimeChannel.deliver|deliver(tv.nomercy.player.core.ports.RealtimeEvent;kotlin.Any?){}[0]
+    final fun dropped(kotlin/Int = ..., kotlin/String = ...) // tv.nomercy.player.testing/FakeRealtimeChannel.dropped|dropped(kotlin.Int;kotlin.String){}[0]
+    final fun off(tv.nomercy.player.core.ports/RealtimeEvent, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.testing/FakeRealtimeChannel.off|off(tv.nomercy.player.core.ports.RealtimeEvent;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun on(tv.nomercy.player.core.ports/RealtimeEvent, kotlin/Function1<kotlin/Any?, kotlin/Unit>) // tv.nomercy.player.testing/FakeRealtimeChannel.on|on(tv.nomercy.player.core.ports.RealtimeEvent;kotlin.Function1<kotlin.Any?,kotlin.Unit>){}[0]
+    final fun open() // tv.nomercy.player.testing/FakeRealtimeChannel.open|open(){}[0]
+    final fun send(kotlin/ByteArray) // tv.nomercy.player.testing/FakeRealtimeChannel.send|send(kotlin.ByteArray){}[0]
+    final fun send(kotlin/String) // tv.nomercy.player.testing/FakeRealtimeChannel.send|send(kotlin.String){}[0]
+}
+
+final class tv.nomercy.player.testing/FakeStorage : tv.nomercy.player.core.ports/Storage { // tv.nomercy.player.testing/FakeStorage|null[0]
+    constructor <init>(kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // tv.nomercy.player.testing/FakeStorage.<init>|<init>(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val entries // tv.nomercy.player.testing/FakeStorage.entries|{}entries[0]
+        final fun <get-entries>(): kotlin.collections/MutableMap<kotlin/String, kotlin/String> // tv.nomercy.player.testing/FakeStorage.entries.<get-entries>|<get-entries>(){}[0]
+
+    final suspend fun get(kotlin/String): kotlin/String? // tv.nomercy.player.testing/FakeStorage.get|get(kotlin.String){}[0]
+    final suspend fun remove(kotlin/String) // tv.nomercy.player.testing/FakeStorage.remove|remove(kotlin.String){}[0]
+    final suspend fun set(kotlin/String, kotlin/String) // tv.nomercy.player.testing/FakeStorage.set|set(kotlin.String;kotlin.String){}[0]
+}
+
+final class tv.nomercy.player.testing/LeakAssertionResult { // tv.nomercy.player.testing/LeakAssertionResult|null[0]
+    constructor <init>(kotlin/String, kotlin/Int, kotlin/Int, kotlin/Int, kotlin/Int) // tv.nomercy.player.testing/LeakAssertionResult.<init>|<init>(kotlin.String;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+
+    final val leaked // tv.nomercy.player.testing/LeakAssertionResult.leaked|{}leaked[0]
+        final fun <get-leaked>(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.leaked.<get-leaked>|<get-leaked>(){}[0]
+    final val listenersAfterSetup // tv.nomercy.player.testing/LeakAssertionResult.listenersAfterSetup|{}listenersAfterSetup[0]
+        final fun <get-listenersAfterSetup>(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.listenersAfterSetup.<get-listenersAfterSetup>|<get-listenersAfterSetup>(){}[0]
+    final val listenersAfterTeardown // tv.nomercy.player.testing/LeakAssertionResult.listenersAfterTeardown|{}listenersAfterTeardown[0]
+        final fun <get-listenersAfterTeardown>(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.listenersAfterTeardown.<get-listenersAfterTeardown>|<get-listenersAfterTeardown>(){}[0]
+    final val listenersBefore // tv.nomercy.player.testing/LeakAssertionResult.listenersBefore|{}listenersBefore[0]
+        final fun <get-listenersBefore>(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.listenersBefore.<get-listenersBefore>|<get-listenersBefore>(){}[0]
+    final val subjectId // tv.nomercy.player.testing/LeakAssertionResult.subjectId|{}subjectId[0]
+        final fun <get-subjectId>(): kotlin/String // tv.nomercy.player.testing/LeakAssertionResult.subjectId.<get-subjectId>|<get-subjectId>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.testing/LeakAssertionResult.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.component3|component3(){}[0]
+    final fun component4(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ...): tv.nomercy.player.testing/LeakAssertionResult // tv.nomercy.player.testing/LeakAssertionResult.copy|copy(kotlin.String;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.testing/LeakAssertionResult.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.testing/LeakAssertionResult.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.testing/LeakAssertionResult.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.testing/TestItem : tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.testing/TestItem|null[0]
     constructor <init>(kotlin/String, kotlin/String = ..., kotlin/String? = ...) // tv.nomercy.player.testing/TestItem.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?){}[0]
 
@@ -136,3 +290,10 @@ open class tv.nomercy.player.testing/FakeVideoBackend : tv.nomercy.player.core.p
     open suspend fun load(kotlin/String, tv.nomercy.player.core.ports/LoadOptions) // tv.nomercy.player.testing/FakeVideoBackend.load|load(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
     open suspend fun play() // tv.nomercy.player.testing/FakeVideoBackend.play|play(){}[0]
 }
+
+final const val tv.nomercy.player.testing/DEFAULT_LEAK_CYCLES // tv.nomercy.player.testing/DEFAULT_LEAK_CYCLES|{}DEFAULT_LEAK_CYCLES[0]
+    final fun <get-DEFAULT_LEAK_CYCLES>(): kotlin/Int // tv.nomercy.player.testing/DEFAULT_LEAK_CYCLES.<get-DEFAULT_LEAK_CYCLES>|<get-DEFAULT_LEAK_CYCLES>(){}[0]
+
+final fun <#A: kotlin/Any, #B: tv.nomercy.player.core.plugin/Plugin<#A>> tv.nomercy.player.testing/testPlugin(#B, tv.nomercy.player.testing/FakePlayer = ..., #A? = ..., kotlin/Function2<tv.nomercy.player.testing/FakePlayer, #B, kotlin/Unit> = ...): tv.nomercy.player.testing/LeakAssertionResult // tv.nomercy.player.testing/testPlugin|testPlugin(0:1;tv.nomercy.player.testing.FakePlayer;0:0?;kotlin.Function2<tv.nomercy.player.testing.FakePlayer,0:1,kotlin.Unit>){0§<kotlin.Any>;1§<tv.nomercy.player.core.plugin.Plugin<0:0>>}[0]
+final fun tv.nomercy.player.testing/assertNoListenerLeak(kotlin/String, tv.nomercy.player.testing/FakePlayer, kotlin/Function0<kotlin/Unit>, kotlin/Function0<kotlin/Unit> = ..., kotlin/Function0<kotlin/Unit>): tv.nomercy.player.testing/LeakAssertionResult // tv.nomercy.player.testing/assertNoListenerLeak|assertNoListenerLeak(kotlin.String;tv.nomercy.player.testing.FakePlayer;kotlin.Function0<kotlin.Unit>;kotlin.Function0<kotlin.Unit>;kotlin.Function0<kotlin.Unit>){}[0]
+final fun tv.nomercy.player.testing/assertNoListenerLeakOverCycles(kotlin/String, tv.nomercy.player.testing/FakePlayer, kotlin/Function0<kotlin/Unit>, kotlin/Function0<kotlin/Unit> = ..., kotlin/Function0<kotlin/Unit>, kotlin/Int = ...): kotlin.collections/List<tv.nomercy.player.testing/LeakAssertionResult> // tv.nomercy.player.testing/assertNoListenerLeakOverCycles|assertNoListenerLeakOverCycles(kotlin.String;tv.nomercy.player.testing.FakePlayer;kotlin.Function0<kotlin.Unit>;kotlin.Function0<kotlin.Unit>;kotlin.Function0<kotlin.Unit>;kotlin.Int){}[0]

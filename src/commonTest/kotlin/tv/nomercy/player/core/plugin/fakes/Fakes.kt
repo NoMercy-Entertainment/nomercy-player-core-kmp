@@ -19,10 +19,9 @@ import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.RealtimeChannel
-import tv.nomercy.player.core.ports.RealtimeEvent
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
-import tv.nomercy.player.core.ports.RealtimeState
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.testing.FakeRealtimeChannel
 
 // Records every line with the prefix it was written under, so a test can assert
 // that a plugin's logger really is scoped rather than that a logger exists.
@@ -90,19 +89,4 @@ class FakePluginHost(
     }
 
     override fun report(error: PlayerError) { reported.add(error) }
-}
-
-class FakeRealtimeChannel : RealtimeChannel {
-    override var readyState: RealtimeState = RealtimeState.OPEN
-        private set
-
-    val sent: MutableList<String> = mutableListOf()
-
-    override fun send(data: String) { sent.add(data) }
-    override fun send(data: ByteArray) { sent.add(data.decodeToString()) }
-
-    override fun close(code: Int?, reason: String?) { readyState = RealtimeState.CLOSED }
-
-    override fun on(event: RealtimeEvent, fn: (Any?) -> Unit) = Unit
-    override fun off(event: RealtimeEvent, fn: (Any?) -> Unit) = Unit
 }
