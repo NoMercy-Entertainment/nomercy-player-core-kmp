@@ -171,6 +171,13 @@ kotlin {
             implementation(libs.androidx.test.core)
         }
         commonTest.dependencies {
+            // The shipped fakes, used by the library's own suite.
+            //
+            // The point of publishing them is that a consumer and this library
+            // test against the same stand-in. Keeping a private copy here would
+            // make that two stand-ins immediately, and the published one would
+            // be the untested of the pair.
+            implementation(project(":testing"))
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }

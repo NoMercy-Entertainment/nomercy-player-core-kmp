@@ -16,6 +16,7 @@ import tv.nomercy.player.core.events.StreamManifestLoadedPayload
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // What the adaptive pipeline says about itself.
 //

@@ -29,6 +29,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 private val SPEAKER = AudioOutput("0", "Built-in speaker", AudioOutputKind.SPEAKER, isDefault = true)
 private val EARBUDS = AudioOutput("17", "Earbuds", AudioOutputKind.BLUETOOTH)

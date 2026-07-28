@@ -16,6 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // Who this player is, what it was configured with, and what it says out loud.
 class IdentityAndAnnounceTest {

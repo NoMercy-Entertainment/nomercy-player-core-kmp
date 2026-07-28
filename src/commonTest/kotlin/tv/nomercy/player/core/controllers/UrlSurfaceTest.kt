@@ -16,6 +16,7 @@ import tv.nomercy.player.core.ports.UrlResolver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // Url resolution through the player, where the bases live.
 class UrlSurfaceTest {

@@ -14,6 +14,7 @@ import tv.nomercy.player.core.ports.Translator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // A translator that only records, so what reaches the port is the assertion.
 private class RecordingTranslator : Translator {

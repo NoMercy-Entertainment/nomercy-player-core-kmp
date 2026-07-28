@@ -14,6 +14,8 @@ import tv.nomercy.player.core.ports.Clock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 
 // A clock a test drives, which is the whole reason Clock is a port.
 private class StoppedClock(var millis: Long = 0L) : Clock {

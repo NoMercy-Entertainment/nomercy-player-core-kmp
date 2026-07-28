@@ -13,8 +13,8 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.controllers.ComposedPlayer
-import tv.nomercy.player.core.controllers.FakeMediaBackend
-import tv.nomercy.player.core.controllers.TestItem
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.PlaySource
 import tv.nomercy.player.core.events.SeekPosition

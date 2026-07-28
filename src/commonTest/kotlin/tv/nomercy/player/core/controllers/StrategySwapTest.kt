@@ -22,6 +22,7 @@ import tv.nomercy.player.core.ports.TransitionStrategy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 private class RecordingPreload : PreloadStrategy {
     var cancelled: Int = 0

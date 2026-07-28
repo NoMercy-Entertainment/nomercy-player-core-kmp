@@ -10,6 +10,8 @@ package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.PlayerPhase
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 
 fun items(vararg ids: String): List<PlaylistItem> = ids.map { TestItem(it) }
 

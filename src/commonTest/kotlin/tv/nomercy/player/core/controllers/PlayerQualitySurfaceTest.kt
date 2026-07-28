@@ -18,6 +18,7 @@ import tv.nomercy.player.core.ports.VideoBackend
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 private val LADDER = listOf(
     QualityLevel(height = 1080, bitrate = 6_000_000, codec = "avc1", dynamicRange = DynamicRange.SDR),

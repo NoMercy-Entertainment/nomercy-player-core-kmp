@@ -19,8 +19,8 @@ import tv.nomercy.player.conformance.ScenarioResult
 import tv.nomercy.player.conformance.firstUnmatched
 import tv.nomercy.player.conformance.scenarioItems
 import tv.nomercy.player.core.controllers.ComposedPlayer
-import tv.nomercy.player.core.controllers.FakeMediaBackend
-import tv.nomercy.player.core.controllers.TestItem
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey

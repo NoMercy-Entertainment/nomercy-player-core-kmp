@@ -13,6 +13,8 @@ import tv.nomercy.player.core.media.Chapter
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 
 private val CHAPTERS = listOf(
     Chapter(startTime = 0.0, title = "Cold open"),

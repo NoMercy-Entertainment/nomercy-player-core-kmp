@@ -15,6 +15,7 @@ import tv.nomercy.player.core.ports.BackendEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // An engine's stream failure, in the stream vocabulary.
 //

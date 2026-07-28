@@ -10,7 +10,7 @@ package tv.nomercy.player.core.plugin
 
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.controllers.ComposedPlayer
-import tv.nomercy.player.core.controllers.FakeMediaBackend
+import tv.nomercy.player.testing.FakeMediaBackend
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PluginDisabledPayload

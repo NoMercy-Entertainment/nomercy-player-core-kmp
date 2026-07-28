@@ -18,6 +18,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.TestItem
 
 private class SigningAuth : AuthController() {
     override fun transformUrl(url: String): String = "$url?token=abc"

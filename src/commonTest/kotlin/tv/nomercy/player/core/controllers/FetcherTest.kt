@@ -16,6 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 private const val OK = 200
 

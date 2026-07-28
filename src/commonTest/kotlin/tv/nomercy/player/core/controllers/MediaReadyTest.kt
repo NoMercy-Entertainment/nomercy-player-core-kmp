@@ -13,6 +13,8 @@ import tv.nomercy.player.core.events.CoreEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 
 // When the player says the media is ready.
 //

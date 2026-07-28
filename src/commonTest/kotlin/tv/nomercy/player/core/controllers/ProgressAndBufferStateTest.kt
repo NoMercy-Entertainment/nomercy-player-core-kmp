@@ -14,6 +14,8 @@ import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 
 // The progress bar's numbers, and the reason the picture is not moving.
 class ProgressAndBufferStateTest {

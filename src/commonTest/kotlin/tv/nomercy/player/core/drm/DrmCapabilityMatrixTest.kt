@@ -10,7 +10,7 @@ package tv.nomercy.player.core.drm
 
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.controllers.ComposedPlayer
-import tv.nomercy.player.core.controllers.FakeMediaBackend
+import tv.nomercy.player.testing.FakeMediaBackend
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

@@ -11,6 +11,8 @@ package tv.nomercy.player.core.controllers
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import tv.nomercy.player.testing.FakeMediaBackend
+import tv.nomercy.player.testing.TestItem
 
 // The queue, changed through the player rather than through a property that
 // happens to be public.

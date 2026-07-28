@@ -25,6 +25,7 @@ import tv.nomercy.player.core.ports.PermissiveCapabilitiesProbe
 import tv.nomercy.player.core.ports.WakeLock
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // What the host's own observers would report, over the real Platform port.
 private class StubPlatform(

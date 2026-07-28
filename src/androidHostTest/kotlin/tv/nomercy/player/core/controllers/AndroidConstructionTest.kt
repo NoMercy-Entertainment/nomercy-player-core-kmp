@@ -14,6 +14,7 @@ import tv.nomercy.player.core.ports.PlatformEnvironment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // Building a player on Android before anything has been installed.
 //

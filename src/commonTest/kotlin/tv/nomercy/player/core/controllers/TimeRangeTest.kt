@@ -15,6 +15,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 // An engine that reports real ranges, which is what AVFoundation does.
 private class RangeReportingBackend : FakeMediaBackend() {

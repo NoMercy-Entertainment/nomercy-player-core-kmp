@@ -14,6 +14,7 @@ import tv.nomercy.player.core.player.PlayerPhase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 class TimeControllerTest {
 

@@ -23,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+import tv.nomercy.player.testing.FakeMediaBackend
 
 private class NotePlugin(id: String = "note") : Plugin<Unit>() {
     private val contribution = object : ChromeContribution {

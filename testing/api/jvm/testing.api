@@ -1,0 +1,64 @@
+public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core/ports/MediaBackend {
+	public fun <init> ()V
+	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
+	public fun currentTime ()D
+	public fun currentTime (D)V
+	public fun duration ()D
+	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
+	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeMediaBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
+	public final fun getBufferedValue ()D
+	public final fun getCurrentTimeValue ()D
+	public final fun getDurationValue ()D
+	public final fun getLoadedOptions ()Ljava/util/List;
+	public final fun getLoadedUrls ()Ljava/util/List;
+	public final fun getMuteCount ()I
+	public final fun getPauseCount ()I
+	public final fun getPlayCount ()I
+	public final fun getRatesSet ()Ljava/util/List;
+	public final fun getSeekedTo ()Ljava/util/List;
+	public final fun getStateValue ()Ltv/nomercy/player/core/ports/BackendState;
+	public final fun getStopCount ()I
+	public final fun getUnmuteCount ()I
+	public final fun getVolumesSet ()Ljava/util/List;
+	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun mute ()V
+	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun pause ()V
+	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playbackRate ()D
+	public fun playbackRate (D)V
+	public fun seekableRanges ()Ljava/util/List;
+	public final fun setBufferedValue (D)V
+	public final fun setCurrentTimeValue (D)V
+	public final fun setDurationValue (D)V
+	public final fun setMuteCount (I)V
+	public final fun setPauseCount (I)V
+	public final fun setPlayCount (I)V
+	public final fun setStateValue (Ltv/nomercy/player/core/ports/BackendState;)V
+	public final fun setStopCount (I)V
+	public final fun setUnmuteCount (I)V
+	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
+	public fun stop ()V
+	public fun unmute ()V
+	public fun volume ()F
+	public fun volume (F)V
+}
+
+public final class tv/nomercy/player/testing/TestItem : tv/nomercy/player/core/media/PlaylistItem {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/testing/TestItem;
+	public static synthetic fun copy$default (Ltv/nomercy/player/testing/TestItem;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/testing/TestItem;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getId ()Ljava/lang/String;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
