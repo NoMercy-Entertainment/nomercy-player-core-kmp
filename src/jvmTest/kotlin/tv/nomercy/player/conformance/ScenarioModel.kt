@@ -79,7 +79,7 @@ public fun scenarioItems(scenario: Scenario): List<ScenarioItem> =
     scenario.playlist.map { entry ->
         ScenarioItem(
             id = entry["id"]?.jsonPrimitive?.content ?: "item",
-            url = "https://example.test/item",
+            url = entry["url"]?.jsonPrimitive?.content ?: "https://example.test/item",
             title = entry["title"]?.jsonPrimitive?.content,
         )
     }

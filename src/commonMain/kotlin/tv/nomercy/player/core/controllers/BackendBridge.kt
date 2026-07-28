@@ -95,6 +95,7 @@ public class BackendBridge(private val ctx: PlayerContext) {
         forward(backend, CanonicalBackendEvent.FRAGMENT_LOADED, CoreEvents.StreamFragmentLoaded)
         forward(backend, CanonicalBackendEvent.LEVEL_CONSIDERED, CoreEvents.StreamLevelConsidered)
         forward(backend, CanonicalBackendEvent.LEVEL_SWITCHED, CoreEvents.StreamLevelSwitched)
+        forward(backend, CanonicalBackendEvent.ADAPTIVE_LEVEL_SWITCHED, CoreEvents.LevelSwitched)
     }
 
     private inline fun <reified T : Any> forward(backend: MediaBackend, event: String, key: EventKey<T>) {

@@ -45,6 +45,15 @@ public object CanonicalBackendEvent {
     public const val LEVEL_CONSIDERED: String = "stream:level-considered"
     public const val LEVEL_SWITCHED: String = "stream:level-switched"
 
+    // The plain one, which is not the stream-scoped one above.
+    //
+    // A backend doing its own adaptive switching announces it under this name —
+    // the web's IVideoBackend declares exactly this — and the contract carries
+    // it as a base event. Only the stream-scoped variant was forwarded, so
+    // CoreEvents.LevelSwitched was declared, documented, and never emitted by
+    // anything. A chrome showing "Auto (720p)" had nothing to bind to.
+    public const val ADAPTIVE_LEVEL_SWITCHED: String = "level-switched"
+
     // The relative order every engine must produce. Not everything an engine
     // emits — just the five points that have to happen in this sequence for the
     // controllers above to make sense. An engine that reports play before
