@@ -159,10 +159,16 @@ class MethodSurfaceConformanceTest {
 
         // Things the native port has that the web does not need a name for: the
         // controllers it is composed of, and the Kotlin-shaped state surface.
+        //
+        // The emitter methods are here for a different reason than the rest.
+        // The web player extends EventEmitter, so on / once / off / emit /
+        // onAll are inherited and the generator, which reads the player class's
+        // own declarations, never sees them. They are the same methods on both
+        // sides; only the contract cannot say so.
         val NATIVE_ONLY = setOf(
             "context", "transport", "volume", "time", "state", "lifecycle", "bridge",
             "activity", "cueParsers", "streamFactories",
-            "stateFlow", "rootLogger", "rootStorage", "emit", "on", "once", "off",
+            "stateFlow", "rootLogger", "rootStorage", "emit", "on", "onAll", "once", "off",
             "dispatchBefore", "fetch", "websocket", "report", "aspectRatio",
             "pluginList", "contributions", "coreVersion", "formatTitle",
         )

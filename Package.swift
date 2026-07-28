@@ -4,10 +4,20 @@ import PackageDescription
 
 // The headless engine, for a Swift app that draws its own player.
 //
-// Core ships one tier and only one: there is no chrome in it. An application
-// that wants controls takes the video or music package, whose drop-in product is
-// the SwiftUI player; an application that has already drawn its own takes this
-// and gets the engine with nothing on top.
+// Core ships no chrome, and still does not: an application that wants controls
+// takes the video or music package, whose drop-in product is the SwiftUI
+// player. What it now also ships is a second, separate product holding the
+// debug surfaces — the inspector overlay and nothing else.
+//
+// A separate product rather than a second tier of the first: an application
+// taking the engine gets the engine, exactly as before, and has to ask for the
+// debug view by name. A debug tool that arrives with the engine is a debug tool
+// that ships to production because nobody chose it.
+//
+// It lives here rather than in the two player packages because the inspector it
+// renders is core's. Putting it in the video package would make it a video
+// feature the music package has to copy, and two copies of one debug tool is
+// how one of them stops being maintained.
 //
 // Two shapes of the same target, chosen by an environment variable. A released
 // consumer resolves a checksummed zip from the tag; somebody working on this
@@ -36,6 +46,14 @@ let package = Package(
     platforms: [.iOS(.v15), .tvOS(.v15)],
     products: [
         .library(name: "NoMercyPlayerCore", targets: ["NoMercyPlayerCore"]),
+        .library(name: "NoMercyPlayerDevTools", targets: ["NoMercyPlayerDevTools"]),
     ],
-    targets: [engine]
+    targets: [
+        engine,
+        .target(name: "NoMercyPlayerDevTools", dependencies: ["NoMercyPlayerCore"]),
+        .testTarget(
+            name: "NoMercyPlayerDevToolsTests",
+            dependencies: ["NoMercyPlayerDevTools"]
+        ),
+    ]
 )

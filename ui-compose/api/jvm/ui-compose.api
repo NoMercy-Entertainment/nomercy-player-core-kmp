@@ -1,0 +1,4 @@
+public final class tv/nomercy/player/ui/devtools/PlayerInspectorOverlayKt {
+	public static final fun PlayerInspectorOverlay (Ltv/nomercy/player/core/devtools/PlayerInspector;Landroidx/compose/ui/Modifier;Landroidx/compose/runtime/Composer;II)V
+}
+

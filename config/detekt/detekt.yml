@@ -140,6 +140,11 @@ naming:
     active: true
   FunctionNaming:
     active: true
+    # A composable is a noun the caller writes like a tag, and Compose's own API
+    # is PascalCase throughout. Naming ours camelCase would make the library the
+    # odd one out in every file that uses it. Same exemption as the video and
+    # music repos, so the three Compose modules read alike.
+    ignoreAnnotated: ['Composable']
   ClassNaming:
     active: true
   ForbiddenClassName:

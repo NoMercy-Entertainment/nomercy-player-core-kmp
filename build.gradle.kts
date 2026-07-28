@@ -223,6 +223,8 @@ detekt {
         // library would be exactly backwards.
         "testing/src/commonMain/kotlin",
         "testing/src/commonTest/kotlin",
+        "ui-compose/src/commonMain/kotlin",
+        "ui-compose/src/jvmTest/kotlin",
     )
     config.setFrom("config/detekt/detekt.yml")
     buildUponDefaultConfig = true

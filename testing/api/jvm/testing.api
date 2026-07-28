@@ -83,7 +83,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun volume (F)V
 }
 
-public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core/player/Player, tv/nomercy/player/core/plugin/PluginHost {
+public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core/devtools/EventFirehose, tv/nomercy/player/core/player/Player, tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
 	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -107,7 +107,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun off (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)V
 	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
-	public final fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
+	public fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
 	public fun once (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public fun pause (Ltv/nomercy/player/core/player/ActionOptions;)V
 	public fun play (Ltv/nomercy/player/core/player/ActionOptions;)V

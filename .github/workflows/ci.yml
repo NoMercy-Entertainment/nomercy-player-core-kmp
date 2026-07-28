@@ -77,6 +77,17 @@ jobs:
       - name: Link the xcframework
         run: ./gradlew assembleNoMercyPlayerCoreXCFramework
 
+      # Builds the debug product for both platforms, runs its simulator suites,
+      # and type-checks the surface file against the framework that was just
+      # linked.
+      #
+      # The surface file was written to answer "does this read like an API from
+      # Swift" and then nothing ran it. The constructor gained seven arguments
+      # over the campaign and every one of them was a compile error sitting in a
+      # file no job opened. A check nobody runs is a check that is already wrong.
+      - name: Swift surfaces build and their suites run
+        run: ./check.sh
+
       - if: always()
         uses: actions/upload-artifact@v4
         with:

@@ -30,3 +30,9 @@ include(":detekt-player")
 // not carry a stand-in backend into production, and its own artifact because
 // that is the line the web trio draws with ./testing.
 include(":testing")
+
+// The Compose surfaces that belong to the engine rather than to either player.
+// Its own module because the Compose toolchain has no business in the engine's
+// own build, and its own artifact because an application drawing its own chrome
+// should be able to take the engine and leave this.
+include(":ui-compose")

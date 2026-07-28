@@ -14,6 +14,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import tv.nomercy.player.core.KIT_VERSION
+import tv.nomercy.player.core.devtools.EventFirehose
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.NotImplementedError
@@ -217,7 +218,7 @@ public open class ComposedPlayer(
     // named when it does, because "video" and "music" read better in a log than
     // two hex strings.
     public val playerId: String = generatePlayerId(),
-) : PluginHost {
+) : PluginHost, EventFirehose {
 
     public val context: PlayerContext = PlayerContext(backend = backend)
 
@@ -1093,6 +1094,15 @@ public open class ComposedPlayer(
     override val rootStorage: Storage get() = storage
 
     override fun <T> on(key: EventKey<T>, fn: (T) -> Unit): Subscription = context.on(key, fn)
+
+    // ── EventFirehose ────────────────────────────────────────────────────────
+
+    // The web player inherits this from its emitter, so on('all') has always
+    // been reachable there. Here the emitter is a field, and the only code that
+    // wanted the firehose was reaching through context.emitter to get it. This
+    // is that reach, on the surface where the web contract already puts it.
+    override fun onAll(fn: (name: String, data: Any?) -> Unit): Subscription =
+        context.emitter.onAll(fn)
 
     override fun <T> emit(key: EventKey<T>, data: T): Unit = context.emit(key, data)
 

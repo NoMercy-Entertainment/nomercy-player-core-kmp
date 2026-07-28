@@ -74,7 +74,7 @@ public final class tv/nomercy/player/core/controllers/BandwidthController {
 	public final fun bandwidthEstimator (Lkotlin/jvm/functions/Function0;)V
 }
 
-public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/plugin/PluginHost {
+public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/devtools/EventFirehose, tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
 	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -170,6 +170,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun nextChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun now ()J
 	public fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
 	public fun options ()Ltv/nomercy/player/core/player/PlayerConfig;
 	public fun pause (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun pause$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -616,6 +617,42 @@ public final class tv/nomercy/player/core/device/SafeAreaInsets {
 
 public final class tv/nomercy/player/core/device/SafeAreaInsetsKt {
 	public static final fun getDEFAULT_TV_OVERSCAN ()Ltv/nomercy/player/core/device/SafeAreaInsets;
+}
+
+public abstract interface class tv/nomercy/player/core/devtools/EventFirehose {
+	public abstract fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
+}
+
+public final class tv/nomercy/player/core/devtools/InspectorEvent {
+	public fun <init> (JJLjava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()J
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (JJLjava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/devtools/InspectorEvent;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/devtools/InspectorEvent;JJLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/devtools/InspectorEvent;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAtMs ()J
+	public final fun getName ()Ljava/lang/String;
+	public final fun getSequence ()J
+	public final fun getSummary ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/devtools/PlayerInspector {
+	public static final field Companion Ltv/nomercy/player/core/devtools/PlayerInspector$Companion;
+	public static final field DEFAULT_CAPACITY I
+	public static final field SUMMARY_LIMIT I
+	public fun <init> (Ltv/nomercy/player/core/devtools/EventFirehose;I)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/devtools/EventFirehose;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clear ()V
+	public final fun counts ()Ljava/util/Map;
+	public final fun dispose ()V
+	public final fun getEvents ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class tv/nomercy/player/core/devtools/PlayerInspector$Companion {
 }
 
 public final class tv/nomercy/player/core/drm/ClearOnly : tv/nomercy/player/core/drm/DrmCapability {

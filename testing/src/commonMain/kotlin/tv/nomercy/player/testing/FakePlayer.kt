@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import tv.nomercy.player.core.KIT_VERSION
+import tv.nomercy.player.core.devtools.EventFirehose
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
@@ -70,7 +71,7 @@ public class FakePlayer(
     override val rootLogger: Logger = FakeLogger(),
     private val fetcher: FakeFetcher? = null,
     private val realtime: ((String, RealtimeFactoryOptions) -> RealtimeChannel)? = null,
-) : Player<Unit>, PluginHost {
+) : Player<Unit>, PluginHost, EventFirehose {
 
     private val bus: EventEmitter<Unit> = EventEmitter()
     private val holder: PlayerStateHolder = PlayerStateHolder()
@@ -145,7 +146,7 @@ public class FakePlayer(
 
     // The firehose, so an inspector attached to this sees what one attached to
     // the real player sees.
-    public fun onAll(fn: (name: String, data: Any?) -> Unit): Subscription = bus.onAll(fn)
+    override fun onAll(fn: (name: String, data: Any?) -> Unit): Subscription = bus.onAll(fn)
 
     // The leak baseline. The same diagnostic the real emitter exposes, read off
     // the same emitter the plugins subscribed to.

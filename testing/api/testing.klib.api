@@ -50,7 +50,7 @@ final class tv.nomercy.player.testing/FakeLogger : tv.nomercy.player.core.ports/
     final fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.testing/FakeLogger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
 }
 
-final class tv.nomercy.player.testing/FakePlayer : tv.nomercy.player.core.player/Player<kotlin/Unit>, tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.testing/FakePlayer|null[0]
+final class tv.nomercy.player.testing/FakePlayer : tv.nomercy.player.core.devtools/EventFirehose, tv.nomercy.player.core.player/Player<kotlin/Unit>, tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.testing/FakePlayer|null[0]
     constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ..., kotlinx.coroutines/CoroutineScope = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.testing/FakeFetcher? = ..., kotlin/Function2<kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions, tv.nomercy.player.core.ports/RealtimeChannel>? = ...) // tv.nomercy.player.testing/FakePlayer.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlinx.coroutines.CoroutineScope;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.testing.FakeFetcher?;kotlin.Function2<kotlin.String,tv.nomercy.player.core.ports.RealtimeFactoryOptions,tv.nomercy.player.core.ports.RealtimeChannel>?){}[0]
 
     final val plugins // tv.nomercy.player.testing/FakePlayer.plugins|{}plugins[0]

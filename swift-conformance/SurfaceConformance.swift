@@ -93,12 +93,26 @@ enum SurfaceConformance {
     // StateFlow has to arrive as something a SwiftUI view can observe; and the
     // constructor has to be reachable without handing it a CoroutineScope.
     static func player() async throws {
+        // Every argument, because Kotlin defaults do not cross to Objective-C.
+        //
+        // This list is the cost, written out. It also grows on its own: the
+        // constructor gained announcer, castSender, platform, clock, fetcher,
+        // video and playerId over the campaign, and each one arrived here as a
+        // compile error nobody saw, because nothing ran this file. That is what
+        // ./check.sh is for now, and why it is in CI.
         let player = ComposedPlayer(
             backend: nil,
             logger: SilentLogger.shared,
             storage: InMemoryStorage(),
             translator: nil,
-            scope: nil
+            announcer: nil,
+            castSender: nil,
+            platform: UnconfiguredPlatform.shared,
+            clock: ClockKt.defaultClock(),
+            fetcher: nil,
+            video: nil,
+            scope: nil,
+            playerId: "swift-surface"
         )
 
         // Every field of both, because Kotlin defaults do not cross. This is
