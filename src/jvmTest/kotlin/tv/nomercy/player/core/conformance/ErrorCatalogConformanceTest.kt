@@ -19,6 +19,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.conformance.ContractFixture
 
 // Codes that cannot exist away from a browser: a DOM element the caller never
 // passed, an HLS attach that only MSE performs. Nothing native can raise these,
@@ -90,15 +91,7 @@ private val NOT_YET_PORTED = setOf(
 // only against a stated reason.
 class ErrorCatalogConformanceTest {
 
-    private fun contractErrorCodes(): Set<String> {
-        val file = File("contract/contract.json")
-        assertTrue(file.exists(), "no vendored contract at ${file.absolutePath}")
-
-        return Json.parseToJsonElement(file.readText()).jsonObject
-            .getValue("errors").jsonArray
-            .map { it.jsonPrimitive.content }
-            .toSet()
-    }
+    private fun contractErrorCodes(): Set<String> = ContractFixture.errorCodes()
 
     private fun declared(): Set<String> = CoreErrorCodes.all + PluginErrorCodes.all
 

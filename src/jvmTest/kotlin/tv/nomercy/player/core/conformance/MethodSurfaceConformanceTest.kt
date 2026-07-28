@@ -20,6 +20,7 @@ import kotlin.reflect.full.memberProperties
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.conformance.ContractFixture
 
 // Methods that exist on the web player because the web has a DOM. There is no
 // element to add a class to and no SVG to create, and a native player growing
@@ -71,20 +72,9 @@ private val NOT_YET_PORTED_METHODS: Set<String> = emptySet()
 // and this gate would pass by comparing nothing.
 class MethodSurfaceConformanceTest {
 
-    private fun contractMethods(player: String): Set<String> {
-        val file = File("contract/contract.json")
-        assertTrue(file.exists(), "no vendored contract at ${file.absolutePath}")
+    private fun contractMethods(player: String): Set<String> = ContractFixture.methods(player)
 
-        return Json.parseToJsonElement(file.readText()).jsonObject
-            .getValue("methods").jsonArray
-            .map { it.jsonObject }
-            .filter { it["player"]?.jsonPrimitive?.content == player }
-            .map { it.getValue("name").jsonPrimitive.content }
-            .toSet()
-    }
-
-    private fun contractBaseMethods(): Set<String> =
-        contractMethods("video") intersect contractMethods("music")
+    private fun contractBaseMethods(): Set<String> = ContractFixture.baseMethods()
 
     // Everything a caller can reach on the player, by name. Properties count:
     // the contract does not distinguish `player.plugins` from `player.plugins()`

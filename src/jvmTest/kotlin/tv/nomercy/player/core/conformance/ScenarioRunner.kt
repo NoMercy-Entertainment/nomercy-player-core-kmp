@@ -13,6 +13,11 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
+import tv.nomercy.player.conformance.Scenario
+import tv.nomercy.player.conformance.ScenarioAction
+import tv.nomercy.player.conformance.ScenarioResult
+import tv.nomercy.player.conformance.firstUnmatched
+import tv.nomercy.player.conformance.scenarioItems
 import tv.nomercy.player.core.controllers.ComposedPlayer
 import tv.nomercy.player.core.controllers.FakeMediaBackend
 import tv.nomercy.player.core.controllers.TestItem
@@ -34,46 +39,6 @@ import java.io.File
 // every before-event by name as well as to the firehose, because the
 // before-dispatch invokes listeners directly and never goes through emit(), so
 // the whole cancellable seam is invisible to a firehose observer.
-
-@Serializable
-data class ScenarioAction(
-    val method: String? = null,
-    val args: List<JsonElement> = emptyList(),
-    val preventVia: String? = null,
-    val backend: String? = null,
-)
-
-@Serializable
-data class Scenario(
-    val id: String,
-    val name: String,
-    val medium: String,
-    val playlist: List<Map<String, JsonElement>> = emptyList(),
-    val actions: List<ScenarioAction> = emptyList(),
-    val expect: List<String> = emptyList(),
-)
-
-@Serializable
-data class ScenarioFile(
-    val contractVersion: String,
-    val scenarios: List<Scenario>,
-)
-
-data class ScenarioResult(
-    val id: String,
-    val ok: Boolean,
-    val expected: List<String>,
-    val observed: List<String>,
-    val reason: String? = null,
-)
-
-private val json = Json { ignoreUnknownKeys = true }
-
-fun loadScenarios(path: String = "scenarios/scenarios.json"): ScenarioFile {
-    val file = File(path)
-    check(file.exists()) { "no vendored scenarios at ${file.absolutePath}" }
-    return json.decodeFromString(ScenarioFile.serializer(), file.readText())
-}
 
 // Every before-event name the registry knows. Read from CoreEvents rather than
 // hard-coded so a before-event added to the contract is captured without anyone
@@ -109,24 +74,8 @@ class NativeCapture(player: ComposedPlayer) {
 // A subsequence, like the web runner. A scenario says what must happen and in
 // what order; it does not say nothing else may happen, because what else
 // happens legitimately differs between engines and mediums.
-fun firstUnmatched(expected: List<String>, observed: List<String>): Int {
-    var cursor = 0
-    for (index in expected.indices) {
-        val found = observed.subList(cursor, observed.size).indexOf(expected[index])
-        if (found == -1) return index
-        cursor += found + 1
-    }
-    return -1
-}
-
 private fun playlistOf(scenario: Scenario): List<PlaylistItem> =
-    scenario.playlist.map { entry ->
-        TestItem(
-            id = entry["id"]?.jsonPrimitive?.content ?: "item",
-            url = entry["url"]?.jsonPrimitive?.content ?: "https://example.test/item",
-            title = entry["title"]?.jsonPrimitive?.content,
-        )
-    }
+    scenarioItems(scenario).map { TestItem(id = it.id, url = it.url, title = it.title) }
 
 private fun JsonElement.asDouble(): Double = (this as JsonPrimitive).content.toDouble()
 

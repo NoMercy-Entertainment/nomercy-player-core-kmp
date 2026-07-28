@@ -13,6 +13,7 @@ import tv.nomercy.player.core.events.CoreEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.conformance.*
 
 // The native player against the same scenarios the web harness runs.
 //

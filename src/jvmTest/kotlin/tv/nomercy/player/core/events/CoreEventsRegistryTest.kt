@@ -16,6 +16,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.conformance.ContractFixture
 
 // The registry against the contract it was generated from.
 //
@@ -30,13 +31,10 @@ import kotlin.test.assertTrue
 class CoreEventsRegistryTest {
 
     private fun contractBaseEventNames(): Set<String> {
-        // Vendored so this repo runs standalone in CI, where the generator's
-        // output does not exist. scripts/sync-contract.py refreshes it.
-        val file = File("contract/contract.json")
-        assertTrue(file.exists(), "no vendored contract at ${file.absolutePath}")
-
-        val root = Json.parseToJsonElement(file.readText()).jsonObject
-        return root.getValue("events").jsonArray
+        // The base map only: an event tagged video or music is one this
+        // registry is not responsible for, and counting it would fail core for
+        // a name it was never meant to carry.
+        return ContractFixture.read().getValue("events").jsonArray
             .map { it.jsonObject }
             .filter { it["map"]?.jsonPrimitive?.content == "base" }
             .map { it.getValue("name").jsonPrimitive.content }
