@@ -46,6 +46,50 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun volume (F)V
 }
 
+public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
+	public fun <init> ()V
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
+	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public fun audioTracks ()Ljava/util/List;
+	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
+	public fun currentTime ()D
+	public fun currentTime (D)V
+	public fun duration ()D
+	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
+	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeVideoBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
+	public final fun getAudio ()Ljava/util/List;
+	public final fun getLevels ()Ljava/util/List;
+	public final fun getPauseCount ()I
+	public final fun getPlayCount ()I
+	public final fun getSeekedTo ()Ljava/util/List;
+	public final fun getSubtitleTracks ()Ljava/util/List;
+	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun mute ()V
+	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun pause ()V
+	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playbackRate ()D
+	public fun playbackRate (D)V
+	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
+	public fun qualityLevels ()Ljava/util/List;
+	public fun seekableRanges ()Ljava/util/List;
+	public final fun setAudio (Ljava/util/List;)V
+	public final fun setLevels (Ljava/util/List;)V
+	public final fun setSubtitleTracks (Ljava/util/List;)V
+	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
+	public fun stop ()V
+	public fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
+	public fun subtitleTrack (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
+	public fun subtitleTracks ()Ljava/util/List;
+	public final fun tick (D)V
+	public fun unmute ()V
+	public fun volume ()F
+	public fun volume (F)V
+}
+
 public final class tv/nomercy/player/testing/TestItem : tv/nomercy/player/core/media/PlaylistItem {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
