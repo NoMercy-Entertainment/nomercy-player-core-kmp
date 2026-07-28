@@ -71,8 +71,16 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Every module with Apple targets, not just the engine. The testing kit
+      # and the plugin template both compile for iOS and tvOS, and a suite that
+      # only ran the root project's would leave the two modules a consumer
+      # actually copies checked by nothing on the platform with the least
+      # tooling.
       - name: Run Apple unit tests
-        run: ./gradlew iosSimulatorArm64Test tvosSimulatorArm64Test
+        run: >-
+          ./gradlew iosSimulatorArm64Test tvosSimulatorArm64Test
+          :testing:iosSimulatorArm64Test :testing:tvosSimulatorArm64Test
+          :templates:plugin:compileKotlinIosArm64 :templates:plugin:compileKotlinTvosArm64
 
       - name: Link the xcframework
         run: ./gradlew assembleNoMercyPlayerCoreXCFramework

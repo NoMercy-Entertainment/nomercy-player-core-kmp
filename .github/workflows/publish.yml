@@ -43,6 +43,26 @@ jobs:
       # Gates first. A release that skips them is a release nothing checked.
       - run: ./gradlew build
 
+      # Three artifacts leave this repository, and a release missing one of
+      # them is only noticed by the consumer who resolves it. The engine, the
+      # testing kit and the Compose surfaces are named here so a module that
+      # stopped publishing shows up as a red release rather than as a
+      # dependency somebody cannot find.
+      - name: Every artifact is in the release
+        run: |
+          set -euo pipefail
+          # Full task paths, because ':' + ':publishToMavenCentral' is
+          # '::publishToMavenCentral' and Gradle does not have that task.
+          # The first version of this guard would have reddened a correct
+          # release on the engine and passed the two modules it was written
+          # to watch.
+          for task in ':publishToMavenCentral' ':testing:publishToMavenCentral' ':ui-compose:publishToMavenCentral'; do
+            if ! ./gradlew "$task" --dry-run -q >/dev/null; then
+              echo "$task does not exist: that artifact would not be published" >&2
+              exit 1
+            fi
+          done
+
       - name: Publish to Maven Central
         run: ./gradlew publishToMavenCentral --no-configuration-cache
         env:
