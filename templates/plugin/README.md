@@ -117,3 +117,15 @@ override fun use() {
 It is cancelled with your plugin, which is the whole difference between it and a
 `CoroutineScope` you make yourself: a fetch that outlives the item it was for
 lands on a player that has moved on.
+
+Testing one means handing the stand-in your test scheduler:
+
+```kotlin
+@Test fun itLoadsTheSheet() = runTest {
+    val player = FakePlayer(scope = this)
+    testPlugin(MyPlugin(), player = player) { host, _ -> ... }
+}
+```
+
+Without it the plugin's `launch` runs on a real dispatcher, `runCurrent()`
+advances nothing, and the failure reads as a plugin that did not do anything.

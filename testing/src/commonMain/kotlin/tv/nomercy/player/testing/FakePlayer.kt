@@ -66,6 +66,11 @@ import kotlin.reflect.KClass
 @Suppress("TooManyFunctions")
 public class FakePlayer(
     private val items: List<PlaylistItem> = emptyList(),
+    // Pass the test scope. A plugin that calls this.launch runs on whatever
+    // scope the registry was given, and the default here is a real dispatcher
+    // the test scheduler does not drive — so runCurrent() advances nothing, the
+    // work races the assertion, and the failure reads as a plugin that did not
+    // do anything. `FakePlayer(scope = this)` inside runTest is the fix.
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
     override val rootStorage: Storage = FakeStorage(),
     override val rootLogger: Logger = FakeLogger(),
