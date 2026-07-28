@@ -13,6 +13,7 @@ import tv.nomercy.player.core.events.CoreEvents
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import tv.nomercy.player.conformance.ContractFixture
 import tv.nomercy.player.conformance.Scenario
 import tv.nomercy.player.conformance.ScenarioAction
 import tv.nomercy.player.conformance.ScenarioResult
@@ -45,7 +46,10 @@ class ConformanceTest {
 
     @Test
     fun theVendoredScenariosParseAndMatchTheContractTheyWereWrittenFor() {
-        assertEquals("2.0.1", file.contractVersion)
+        // Against the fixture, not a literal. A version typed here has to be
+        // remembered on every bump, and the one thing this whole harness exists
+        // to prevent is two numbers that drift while both look deliberate.
+        assertEquals(ContractFixture.version(), file.contractVersion)
         assertTrue(file.scenarios.isNotEmpty())
 
         val names = CoreEvents.all.map { it.name }.toSet()
