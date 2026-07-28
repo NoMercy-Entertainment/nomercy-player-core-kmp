@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.plugin
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import tv.nomercy.player.core.errors.ErrorScope
@@ -216,6 +217,20 @@ public abstract class Plugin<O : Any> {
     // namespace and cannot shadow a core string.
     protected fun t(key: String, vars: Map<String, String> = emptyMap()): String =
         wired.host.t("plugin.$id.$key", vars)
+
+    // Anything suspending, scoped to this plugin.
+    //
+    // fetch and dispatchBefore are suspend and every one of the helpers below
+    // takes a plain lambda, which left an author needing to load something no
+    // sanctioned way to do it: the first real plugin ported onto this API
+    // wanted to fetch a sprite sheet and had to reach for a CoroutineScope of
+    // its own, which is exactly the raw timer the rule pack objects to and a
+    // scope nothing cancels.
+    //
+    // Cancelled with the plugin, like the timers. That is the whole difference
+    // between this and a scope an author makes: a fetch outliving the item it
+    // was for lands on a player that has moved on.
+    protected fun launch(block: suspend CoroutineScope.() -> Unit): Job = wired.lifecycle.launch(block)
 
     protected fun timeout(delayMs: Long, fn: () -> Unit): Job = wired.lifecycle.timeout(delayMs, fn)
 

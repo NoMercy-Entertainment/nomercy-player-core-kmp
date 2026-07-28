@@ -3396,6 +3396,7 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	protected final fun getResolvedOptions ()Ljava/lang/Object;
 	protected final fun getStorage ()Ltv/nomercy/player/core/ports/Storage;
 	protected final fun interval (JLkotlin/jvm/functions/Function0;)Lkotlinx/coroutines/Job;
+	protected final fun launch (Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/Job;
 	protected final fun listen (Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
 	protected final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	protected final fun report (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;)V

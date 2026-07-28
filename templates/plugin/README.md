@@ -97,3 +97,23 @@ are testing cares about what an engine said.
 
 The plugin base class in `src/commonMain/kotlin/tv/nomercy/player/core/plugin/Plugin.kt`
 is the full surface, and its comments say what each helper cleans up.
+
+## Doing something that suspends
+
+`this.fetch` is a suspend function and so is `this.dispatchBefore`. Reach them
+through `this.launch`:
+
+```kotlin
+override fun use() {
+    on(CoreEvents.Item) { change ->
+        launch {
+            val sheet = fetch(spriteUrl(change.item)).body
+            emit(MyEvents.Loaded, parseVttSprite(sheet))
+        }
+    }
+}
+```
+
+It is cancelled with your plugin, which is the whole difference between it and a
+`CoroutineScope` you make yourself: a fetch that outlives the item it was for
+lands on a player that has moved on.
