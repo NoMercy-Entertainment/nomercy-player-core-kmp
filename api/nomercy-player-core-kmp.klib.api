@@ -1712,7 +1712,7 @@ final class tv.nomercy.player.core.devtools/InspectorEvent { // tv.nomercy.playe
 }
 
 final class tv.nomercy.player.core.devtools/PlayerInspector { // tv.nomercy.player.core.devtools/PlayerInspector|null[0]
-    constructor <init>(tv.nomercy.player.core.devtools/EventFirehose, kotlin/Int = ...) // tv.nomercy.player.core.devtools/PlayerInspector.<init>|<init>(tv.nomercy.player.core.devtools.EventFirehose;kotlin.Int){}[0]
+    constructor <init>(tv.nomercy.player.core.devtools/EventFirehose, kotlin/Int = ..., kotlin.collections/Set<kotlin/String> = ...) // tv.nomercy.player.core.devtools/PlayerInspector.<init>|<init>(tv.nomercy.player.core.devtools.EventFirehose;kotlin.Int;kotlin.collections.Set<kotlin.String>){}[0]
 
     final val events // tv.nomercy.player.core.devtools/PlayerInspector.events|{}events[0]
         final fun <get-events>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<tv.nomercy.player.core.devtools/InspectorEvent>> // tv.nomercy.player.core.devtools/PlayerInspector.events.<get-events>|<get-events>(){}[0]
@@ -1720,12 +1720,18 @@ final class tv.nomercy.player.core.devtools/PlayerInspector { // tv.nomercy.play
     final fun clear() // tv.nomercy.player.core.devtools/PlayerInspector.clear|clear(){}[0]
     final fun counts(): kotlin.collections/Map<kotlin/String, kotlin/Int> // tv.nomercy.player.core.devtools/PlayerInspector.counts|counts(){}[0]
     final fun dispose() // tv.nomercy.player.core.devtools/PlayerInspector.dispose|dispose(){}[0]
+    final fun mute(kotlin.collections/Set<kotlin/String>) // tv.nomercy.player.core.devtools/PlayerInspector.mute|mute(kotlin.collections.Set<kotlin.String>){}[0]
+    final fun muted(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.devtools/PlayerInspector.muted|muted(){}[0]
+    final fun unmute(kotlin.collections/Set<kotlin/String>) // tv.nomercy.player.core.devtools/PlayerInspector.unmute|unmute(kotlin.collections.Set<kotlin.String>){}[0]
 
     final object Companion { // tv.nomercy.player.core.devtools/PlayerInspector.Companion|null[0]
         final const val DEFAULT_CAPACITY // tv.nomercy.player.core.devtools/PlayerInspector.Companion.DEFAULT_CAPACITY|{}DEFAULT_CAPACITY[0]
             final fun <get-DEFAULT_CAPACITY>(): kotlin/Int // tv.nomercy.player.core.devtools/PlayerInspector.Companion.DEFAULT_CAPACITY.<get-DEFAULT_CAPACITY>|<get-DEFAULT_CAPACITY>(){}[0]
         final const val SUMMARY_LIMIT // tv.nomercy.player.core.devtools/PlayerInspector.Companion.SUMMARY_LIMIT|{}SUMMARY_LIMIT[0]
             final fun <get-SUMMARY_LIMIT>(): kotlin/Int // tv.nomercy.player.core.devtools/PlayerInspector.Companion.SUMMARY_LIMIT.<get-SUMMARY_LIMIT>|<get-SUMMARY_LIMIT>(){}[0]
+
+        final val NOISY_EVENT_NAMES // tv.nomercy.player.core.devtools/PlayerInspector.Companion.NOISY_EVENT_NAMES|{}NOISY_EVENT_NAMES[0]
+            final fun <get-NOISY_EVENT_NAMES>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.devtools/PlayerInspector.Companion.NOISY_EVENT_NAMES.<get-NOISY_EVENT_NAMES>|<get-NOISY_EVENT_NAMES>(){}[0]
     }
 }
 

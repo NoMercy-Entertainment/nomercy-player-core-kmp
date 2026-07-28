@@ -31,12 +31,23 @@ import kotlin.time.TimeSource
 public class PlayerInspector(
     player: EventFirehose,
     private val capacity: Int = DEFAULT_CAPACITY,
+    muted: Set<String> = emptySet(),
 ) {
     private val buffer: ArrayDeque<InspectorEvent> = ArrayDeque()
     private val mutable: MutableStateFlow<List<InspectorEvent>> = MutableStateFlow(emptyList())
     private val startedAt: TimeSource.Monotonic.ValueTimeMark = TimeSource.Monotonic.markNow()
 
     private var sequence: Long = 0
+
+    // Names that are recorded but not kept.
+    //
+    // `time` fires several times a second, so on a default buffer it evicts the
+    // run-up to a failure inside a few seconds — the exact window this tool
+    // exists to hold. Muting is opt-in rather than the default: a debug tool
+    // that silently drops events answers "is time arriving" with a confident no.
+    // [NOISY_EVENT_NAMES] is the set most callers want, named so opting in is
+    // one symbol instead of a hand-written list that drifts.
+    private val muted: MutableSet<String> = muted.toMutableSet()
 
     // The live stream, newest last, for anything that renders.
     public val events: StateFlow<List<InspectorEvent>> = mutable.asStateFlow()
@@ -50,6 +61,21 @@ public class PlayerInspector(
     // and the lines under them would describe different windows.
     public fun counts(): Map<String, Int> =
         buffer.groupingBy { it.name }.eachCount()
+
+    /** Which names are currently dropped. */
+    public fun muted(): Set<String> = muted.toSet()
+
+    /**
+     * Stop keeping these. Already-buffered lines stay: dropping them would
+     * erase the history somebody muted in order to read.
+     */
+    public fun mute(names: Set<String>) {
+        muted += names
+    }
+
+    public fun unmute(names: Set<String>) {
+        muted -= names
+    }
 
     public fun clear() {
         buffer.clear()
@@ -65,6 +91,8 @@ public class PlayerInspector(
     }
 
     private fun record(name: String, payload: Any?) {
+        if (name in muted) return
+
         // removeAt(0), not removeFirst(). On JVM target 21 Kotlin resolves
         // removeFirst() to java.util.SequencedCollection's, which does not
         // exist on every Android runtime this library supports.
@@ -107,5 +135,10 @@ public class PlayerInspector(
         // one somebody should be reading in a debugger, and letting it through
         // makes every other line in the stream harder to scan.
         public const val SUMMARY_LIMIT: Int = 200
+
+        // The high-frequency ones. Every consumer who has ever attached this
+        // has muted the same three by hand, and a hand-written list drifts the
+        // moment the player emits a fourth.
+        public val NOISY_EVENT_NAMES: Set<String> = setOf("time", "progress", "buffered")
     }
 }

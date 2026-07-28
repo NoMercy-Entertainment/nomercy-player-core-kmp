@@ -644,15 +644,19 @@ public final class tv/nomercy/player/core/devtools/PlayerInspector {
 	public static final field Companion Ltv/nomercy/player/core/devtools/PlayerInspector$Companion;
 	public static final field DEFAULT_CAPACITY I
 	public static final field SUMMARY_LIMIT I
-	public fun <init> (Ltv/nomercy/player/core/devtools/EventFirehose;I)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/devtools/EventFirehose;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/devtools/EventFirehose;ILjava/util/Set;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/devtools/EventFirehose;ILjava/util/Set;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clear ()V
 	public final fun counts ()Ljava/util/Map;
 	public final fun dispose ()V
 	public final fun getEvents ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun mute (Ljava/util/Set;)V
+	public final fun muted ()Ljava/util/Set;
+	public final fun unmute (Ljava/util/Set;)V
 }
 
 public final class tv/nomercy/player/core/devtools/PlayerInspector$Companion {
+	public final fun getNOISY_EVENT_NAMES ()Ljava/util/Set;
 }
 
 public final class tv/nomercy/player/core/drm/ClearOnly : tv/nomercy/player/core/drm/DrmCapability {

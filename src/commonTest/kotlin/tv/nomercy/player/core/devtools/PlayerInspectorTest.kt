@@ -112,8 +112,64 @@ class PlayerInspectorTest {
             "the summary hid the failure: ${inspector.events.value.single().summary}",
         )
     }
-}
 
+    // `time` fires several times a second, so on a default buffer it evicts the
+    // run-up to a failure inside a few seconds — the exact window this tool
+    // exists to hold.
+    @Test
+    fun mutedNamesAreNotKept() {
+        val player = FakePlayer()
+        val inspector = PlayerInspector(player, muted = setOf("time"))
+        val time: EventKey<Any> = EventKey("time")
+        val failed: EventKey<Any> = EventKey("error")
+
+        repeat(50) { player.emit(time, it) }
+        player.emit(failed, "boom")
+
+        assertEquals(listOf("error"), inspector.events.value.map { it.name })
+    }
+
+    // Opt-in rather than the default: a debug tool that silently drops events
+    // answers "is time arriving" with a confident no.
+    @Test
+    fun nothingIsMutedUnlessAsked() {
+        val player = FakePlayer()
+        val inspector = PlayerInspector(player)
+
+        player.emit(EventKey<Any>("time"), 1)
+
+        assertEquals(listOf("time"), inspector.events.value.map { it.name })
+    }
+
+    @Test
+    fun mutingLaterLeavesWhatWasAlreadyRead() {
+        val player = FakePlayer()
+        val inspector = PlayerInspector(player)
+        val time: EventKey<Any> = EventKey("time")
+
+        player.emit(time, 1)
+        inspector.mute(setOf("time"))
+        player.emit(time, 2)
+
+        // The first line stays: dropping it would erase the history somebody
+        // muted in order to read.
+        assertEquals(1, inspector.events.value.size)
+        assertEquals(setOf("time"), inspector.muted())
+    }
+
+    @Test
+    fun unmutingLetsThemThroughAgain() {
+        val player = FakePlayer()
+        val inspector = PlayerInspector(player, muted = PlayerInspector.NOISY_EVENT_NAMES)
+        val time: EventKey<Any> = EventKey("time")
+
+        player.emit(time, 1)
+        inspector.unmute(setOf("time"))
+        player.emit(time, 2)
+
+        assertEquals(1, inspector.events.value.size)
+    }
+}
 // A toString that throws is the thing under test, so both rules that object to
 // one are off here and nowhere else. The payloads that do this in the wild are
 // not written on purpose either: a field computed on first read that is not
