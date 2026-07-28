@@ -231,7 +231,10 @@ detekt {
 // native port drifted from the ecosystem contract" in seconds, before the
 // multiplatform build spends ten minutes arriving at the same answer under a
 // heading that says nothing.
-tasks.register<Test>("skeletonConformance") {
+// Named for what it now is. It began as a skeleton over five events and covers
+// the whole surface plus the behavioural runners, and a task called "skeleton"
+// is one people assume is the cheap subset of something more thorough.
+tasks.register<Test>("parityConformance") {
     group = "verification"
     description = "Checks the port against the vendored contract: events, error codes and behaviour."
 
@@ -241,6 +244,7 @@ tasks.register<Test>("skeletonConformance") {
 
     filter {
         includeTestsMatching("tv.nomercy.player.core.conformance.*")
+        includeTestsMatching("tv.nomercy.player.conformance.*")
         includeTestsMatching("tv.nomercy.player.core.events.CoreEventsRegistryTest")
     }
 

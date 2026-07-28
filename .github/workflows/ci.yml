@@ -38,7 +38,7 @@ jobs:
       # the one failure whose cause is not in this repo's diff. Named, so a red
       # run says which question was answered no.
       - name: Conformance gate
-        run: ./gradlew skeletonConformance
+        run: ./gradlew parityConformance
 
       - run: ./gradlew build
 
