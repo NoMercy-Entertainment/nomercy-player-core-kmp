@@ -47,19 +47,7 @@ public class VlcjVideoBackend private constructor(
 ) : VideoBackend {
 
     // Made its own factory, and will release it.
-    //
-    // `--vout=dummy` because this backend never renders into a window of its
-    // own: the picture goes to a callback surface the UI layer attaches, and
-    // libVLC's job is to decode. Without it, a play() that arrives before that
-    // surface is attached makes libVLC choose its own output, and on Windows
-    // that is a native "VLC (Direct3D11 output)" window sitting beside the
-    // application with the film in it while the player pane stays black.
-    //
-    // Set on the factory rather than by attaching a placeholder surface at
-    // construction. That was tried and it segfaults: swapping a live callback
-    // surface for the real one mid-stream takes libVLC down with an access
-    // violation. This removes the fallback instead of racing it.
-    public constructor() : this(MediaPlayerFactory(*NO_WINDOW), ownsFactory = true)
+    public constructor() : this(MediaPlayerFactory(), ownsFactory = true)
 
     // Given someone else's, and will not. A factory owns libVLC's plugin cache
     // and every player made from it, so an engine that released one it was
@@ -411,10 +399,3 @@ public class VlcjVideoBackend private constructor(
         }
     }
 }
-
-// What libVLC is told when this backend makes its own factory.
-//
-// A dummy video output, because every picture this decodes is delivered through
-// a callback the UI layer owns. libVLC still needs an output module named; it
-// just must not be one that can open a window.
-private val NO_WINDOW: Array<String> = arrayOf("--vout=dummy")
