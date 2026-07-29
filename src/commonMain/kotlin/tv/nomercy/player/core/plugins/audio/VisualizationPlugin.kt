@@ -10,6 +10,7 @@ package tv.nomercy.player.core.plugins.audio
 
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.Plugin
+import tv.nomercy.player.core.plugin.PluginManifest
 
 // The base a visualiser is written against.
 //
@@ -23,6 +24,19 @@ import tv.nomercy.player.core.plugin.Plugin
 public abstract class VisualizationPlugin(
     private val spectrum: SpectrumPlugin,
 ) : Plugin<Unit>() {
+
+    public companion object Manifest : PluginManifest {
+        // The web's base plugin carries this id and its subclasses override it
+        // — a consumer's own visualiser ships as `fillz:winamp-classic`. The
+        // base here carried none at all, so `visualization` did not exist in
+        // the native trio's surface even though every piece of it did.
+        override val id: String = "visualization"
+
+        // Two, matching the web plugin this mirrors.
+        override val version: String = "2.0.0"
+    }
+
+    override val manifest: PluginManifest get() = Manifest
 
     private var subscription: Subscription? = null
 

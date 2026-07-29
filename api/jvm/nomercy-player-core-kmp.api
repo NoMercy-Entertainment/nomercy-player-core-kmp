@@ -3616,12 +3616,25 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 }
 
 public abstract class tv/nomercy/player/core/plugins/audio/VisualizationPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/VisualizationPlugin$Manifest;
 	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;)V
 	public fun dispose ()V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
 	public abstract fun render (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V
 	public fun running ()Z
 	public fun start ()V
 	public fun stop ()V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VisualizationPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
 }
 
 public class tv/nomercy/player/core/plugins/audio/WaveformVisualization : tv/nomercy/player/core/plugins/audio/VisualizationPlugin {
