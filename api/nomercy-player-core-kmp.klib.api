@@ -3419,6 +3419,25 @@ final class tv.nomercy.player.core.media/ChapterTrack { // tv.nomercy.player.cor
     }
 }
 
+final class tv.nomercy.player.core.media/MediaItem : tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/MediaItem|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.media/MediaItem.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?){}[0]
+
+    final val id // tv.nomercy.player.core.media/MediaItem.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.media/MediaItem.id.<get-id>|<get-id>(){}[0]
+    final val title // tv.nomercy.player.core.media/MediaItem.title|{}title[0]
+        final fun <get-title>(): kotlin/String? // tv.nomercy.player.core.media/MediaItem.title.<get-title>|<get-title>(){}[0]
+    final val url // tv.nomercy.player.core.media/MediaItem.url|{}url[0]
+        final fun <get-url>(): kotlin/String // tv.nomercy.player.core.media/MediaItem.url.<get-url>|<get-url>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.media/MediaItem.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.media/MediaItem.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // tv.nomercy.player.core.media/MediaItem.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String? = ...): tv.nomercy.player.core.media/MediaItem // tv.nomercy.player.core.media/MediaItem.copy|copy(kotlin.String;kotlin.String;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaItem.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaItem.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaItem.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.media/MediaListClear { // tv.nomercy.player.core.media/MediaListClear|null[0]
     constructor <init>(kotlin/Int) // tv.nomercy.player.core.media/MediaListClear.<init>|<init>(kotlin.Int){}[0]
 
