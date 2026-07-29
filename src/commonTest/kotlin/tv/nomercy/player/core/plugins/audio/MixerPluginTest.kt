@@ -26,8 +26,9 @@ import kotlin.test.assertTrue
 // mixer touches preGain and nothing else, and a stand-in that did something for
 // the rest would be inventing behaviour the plugin never asked for.
 @Suppress("EmptyFunctionBlock")
-private class RecordingGraph : AudioDspGraph {
+internal class RecordingGraph : AudioDspGraph {
     val preGains: MutableList<Double> = mutableListOf()
+    val eqStates: MutableList<Boolean> = mutableListOf()
 
     override fun setEqBands(bands: List<EqBand>) {}
 
@@ -42,7 +43,9 @@ private class RecordingGraph : AudioDspGraph {
 
     override fun removeFrameTap() {}
 
-    override fun eqEnabled(enabled: Boolean) {}
+    override fun eqEnabled(enabled: Boolean) {
+        eqStates += enabled
+    }
 }
 
 class MixerPluginTest {

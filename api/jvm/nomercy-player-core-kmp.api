@@ -3513,6 +3513,53 @@ public final class tv/nomercy/player/core/plugin/TransportCommands$DefaultImpls 
 	public static fun previous (Ltv/nomercy/player/core/plugin/TransportCommands;)V
 }
 
+public final class tv/nomercy/player/core/plugins/audio/AudioGraphEvents {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/AudioGraphEvents;
+	public final fun getChainRebuilt ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getChainRebuiltOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getReady ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getReadyOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getUnsupported ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getUnsupportedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/AudioGraphOptions {
+	public fun <init> ()V
+	public fun <init> (Z)V
+	public synthetic fun <init> (ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;ZILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEqEnabled ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class tv/nomercy/player/core/plugins/audio/AudioGraphPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/AudioGraphPlugin$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/ports/AudioDspGraph;Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/AudioDspGraph;Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun eqEnabled (Z)V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public synthetic fun getOptions ()Ljava/lang/Object;
+	public fun getOptions ()Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;
+	public final fun graph ()Ltv/nomercy/player/core/ports/AudioDspGraph;
+	public final fun isReady ()Z
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/AudioGraphPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/BandEnergies {
 	public fun <init> (DDD)V
 	public final fun component1 ()D

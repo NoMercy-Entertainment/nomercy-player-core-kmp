@@ -3739,6 +3739,19 @@ final class tv.nomercy.player.core.plugin/Requirement { // tv.nomercy.player.cor
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/Requirement.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.audio/AudioGraphOptions { // tv.nomercy.player.core.plugins.audio/AudioGraphOptions|null[0]
+    constructor <init>(kotlin/Boolean = ...) // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.<init>|<init>(kotlin.Boolean){}[0]
+
+    final val eqEnabled // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.eqEnabled|{}eqEnabled[0]
+        final fun <get-eqEnabled>(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.eqEnabled.<get-eqEnabled>|<get-eqEnabled>(){}[0]
+
+    final fun component1(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.component1|component1(){}[0]
+    final fun copy(kotlin/Boolean = ...): tv.nomercy.player.core.plugins.audio/AudioGraphOptions // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.copy|copy(kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/AudioGraphOptions.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugins.audio/BandEnergies { // tv.nomercy.player.core.plugins.audio/BandEnergies|null[0]
     constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double) // tv.nomercy.player.core.plugins.audio/BandEnergies.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
 
@@ -5105,6 +5118,27 @@ open class tv.nomercy.player.core.plugin/PlayerTransportCommands : tv.nomercy.pl
     open fun stop() // tv.nomercy.player.core.plugin/PlayerTransportCommands.stop|stop(){}[0]
 }
 
+open class tv.nomercy.player.core.plugins.audio/AudioGraphPlugin : tv.nomercy.player.core.plugin/Plugin<tv.nomercy.player.core.plugins.audio/AudioGraphOptions> { // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/AudioDspGraph?, tv.nomercy.player.core.plugins.audio/AudioGraphOptions = ...) // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.<init>|<init>(tv.nomercy.player.core.ports.AudioDspGraph?;tv.nomercy.player.core.plugins.audio.AudioGraphOptions){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+    open val options // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.options|{}options[0]
+        open fun <get-options>(): tv.nomercy.player.core.plugins.audio/AudioGraphOptions // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.options.<get-options>|<get-options>(){}[0]
+
+    final fun eqEnabled(kotlin/Boolean) // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.eqEnabled|eqEnabled(kotlin.Boolean){}[0]
+    final fun graph(): tv.nomercy.player.core.ports/AudioDspGraph? // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.graph|graph(){}[0]
+    final fun isReady(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.isReady|isReady(){}[0]
+    open fun use() // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.use|use(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/AudioGraphPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 open class tv.nomercy.player.core.plugins.audio/EqualizerPlugin : tv.nomercy.player.core.plugin/Plugin<kotlin/Unit> { // tv.nomercy.player.core.plugins.audio/EqualizerPlugin|null[0]
     constructor <init>(tv.nomercy.player.core.ports/AudioDspGraph?) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.<init>|<init>(tv.nomercy.player.core.ports.AudioDspGraph?){}[0]
 
@@ -5735,6 +5769,21 @@ final object tv.nomercy.player.core.plugin/PluginErrorCodes { // tv.nomercy.play
 
     final val all // tv.nomercy.player.core.plugin/PluginErrorCodes.all|{}all[0]
         final fun <get-all>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.plugin/PluginErrorCodes.all.<get-all>|<get-all>(){}[0]
+}
+
+final object tv.nomercy.player.core.plugins.audio/AudioGraphEvents { // tv.nomercy.player.core.plugins.audio/AudioGraphEvents|null[0]
+    final val ChainRebuilt // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.ChainRebuilt|{}ChainRebuilt[0]
+        final fun <get-ChainRebuilt>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.ChainRebuilt.<get-ChainRebuilt>|<get-ChainRebuilt>(){}[0]
+    final val ChainRebuiltOnPlayer // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.ChainRebuiltOnPlayer|{}ChainRebuiltOnPlayer[0]
+        final fun <get-ChainRebuiltOnPlayer>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.ChainRebuiltOnPlayer.<get-ChainRebuiltOnPlayer>|<get-ChainRebuiltOnPlayer>(){}[0]
+    final val Ready // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.Ready|{}Ready[0]
+        final fun <get-Ready>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.Ready.<get-Ready>|<get-Ready>(){}[0]
+    final val ReadyOnPlayer // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.ReadyOnPlayer|{}ReadyOnPlayer[0]
+        final fun <get-ReadyOnPlayer>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.ReadyOnPlayer.<get-ReadyOnPlayer>|<get-ReadyOnPlayer>(){}[0]
+    final val Unsupported // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.Unsupported|{}Unsupported[0]
+        final fun <get-Unsupported>(): tv.nomercy.player.core.events/EventKey<kotlin/String> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.Unsupported.<get-Unsupported>|<get-Unsupported>(){}[0]
+    final val UnsupportedOnPlayer // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.UnsupportedOnPlayer|{}UnsupportedOnPlayer[0]
+        final fun <get-UnsupportedOnPlayer>(): tv.nomercy.player.core.events/EventKey<kotlin/String> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.UnsupportedOnPlayer.<get-UnsupportedOnPlayer>|<get-UnsupportedOnPlayer>(){}[0]
 }
 
 final object tv.nomercy.player.core.plugins.audio/MixerEvents { // tv.nomercy.player.core.plugins.audio/MixerEvents|null[0]
