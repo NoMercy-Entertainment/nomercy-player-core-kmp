@@ -49,13 +49,34 @@ public data class SubtitleCueChange(
 
 // How the consumer wants subtitles drawn. Every field is optional because a
 // chrome sets the ones it cares about and inherits the rest.
+// How subtitles are drawn, as the web's `SubtitleStyle` carries it.
+//
+// Nine fields with the web's names and the web's defaults. It was six, two of
+// them renamed — `color` for textColor and `opacity` for textOpacity — and
+// three absent: the background's own opacity, and the area colour and opacity
+// behind the whole cue block. A viewer who set a background on the web and
+// opened the same account here got a setting the native player could not carry.
+//
+// Concrete rather than nullable now, because null meant two things at once:
+// "the viewer has not chosen" and "there is no such setting", and a renderer
+// reading a null had to invent a default that the browser had already decided.
+// The defaults ARE defaultSubtitleStyles, so an untouched style renders the
+// same picture in both players.
+//
+// The percentages are percentages. `fontSize = 100` is the base size and
+// `textOpacity = 100` is opaque, exactly as the web spells them, so a value
+// carried between the two clients means the same thing at both ends.
 public data class SubtitleStyle(
-    val fontFamily: String? = null,
-    val fontSize: Double? = null,
-    val color: String? = null,
-    val backgroundColor: String? = null,
-    val edgeStyle: String? = null,
-    val opacity: Double? = null,
+    val fontSize: Int = 100,
+    val fontFamily: String = "ReithSans, sans-serif",
+    val textColor: String = "white",
+    val textOpacity: Int = 100,
+    val backgroundColor: String = "black",
+    val backgroundOpacity: Int = 0,
+    val edgeStyle: String = "textShadow",
+    val areaColor: String = "black",
+    // The web calls the area's opacity `windowOpacity`. Kept, not renamed.
+    val windowOpacity: Int = 0,
 )
 
 // What playback actually cost, sampled on an interval. The numbers a support
