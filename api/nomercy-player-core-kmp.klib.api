@@ -3804,6 +3804,35 @@ final class tv.nomercy.player.core.plugins.audio/VisualizationFrame { // tv.nome
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationFrame.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.message/Message { // tv.nomercy.player.core.plugins.message/Message|null[0]
+    constructor <init>(kotlin/String, kotlin/Long? = ...) // tv.nomercy.player.core.plugins.message/Message.<init>|<init>(kotlin.String;kotlin.Long?){}[0]
+
+    final val durationMs // tv.nomercy.player.core.plugins.message/Message.durationMs|{}durationMs[0]
+        final fun <get-durationMs>(): kotlin/Long? // tv.nomercy.player.core.plugins.message/Message.durationMs.<get-durationMs>|<get-durationMs>(){}[0]
+    final val text // tv.nomercy.player.core.plugins.message/Message.text|{}text[0]
+        final fun <get-text>(): kotlin/String // tv.nomercy.player.core.plugins.message/Message.text.<get-text>|<get-text>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugins.message/Message.component1|component1(){}[0]
+    final fun component2(): kotlin/Long? // tv.nomercy.player.core.plugins.message/Message.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Long? = ...): tv.nomercy.player.core.plugins.message/Message // tv.nomercy.player.core.plugins.message/Message.copy|copy(kotlin.String;kotlin.Long?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.message/Message.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.message/Message.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.message/Message.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.message/MessageOptions { // tv.nomercy.player.core.plugins.message/MessageOptions|null[0]
+    constructor <init>(kotlin/Long = ...) // tv.nomercy.player.core.plugins.message/MessageOptions.<init>|<init>(kotlin.Long){}[0]
+
+    final val durationMs // tv.nomercy.player.core.plugins.message/MessageOptions.durationMs|{}durationMs[0]
+        final fun <get-durationMs>(): kotlin/Long // tv.nomercy.player.core.plugins.message/MessageOptions.durationMs.<get-durationMs>|<get-durationMs>(){}[0]
+
+    final fun component1(): kotlin/Long // tv.nomercy.player.core.plugins.message/MessageOptions.component1|component1(){}[0]
+    final fun copy(kotlin/Long = ...): tv.nomercy.player.core.plugins.message/MessageOptions // tv.nomercy.player.core.plugins.message/MessageOptions.copy|copy(kotlin.Long){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.message/MessageOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.message/MessageOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.message/MessageOptions.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/AVPlayerAudioBackend : tv.nomercy.player.core.ports/AudioBackend { // tv.nomercy.player.core.ports/AVPlayerAudioBackend|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/AVPlayerAudioBackend.<init>|<init>(){}[0]
 
@@ -5125,6 +5154,34 @@ open class tv.nomercy.player.core.plugins.audio/WaveformVisualization : tv.nomer
     }
 }
 
+open class tv.nomercy.player.core.plugins.message/MessagePlugin : tv.nomercy.player.core.plugin/Plugin<tv.nomercy.player.core.plugins.message/MessageOptions> { // tv.nomercy.player.core.plugins.message/MessagePlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.plugins.message/MessageOptions = ...) // tv.nomercy.player.core.plugins.message/MessagePlugin.<init>|<init>(tv.nomercy.player.core.plugins.message.MessageOptions){}[0]
+
+    final val persistent // tv.nomercy.player.core.plugins.message/MessagePlugin.persistent|{}persistent[0]
+        final fun <get-persistent>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/Map<kotlin/String, kotlin/String>> // tv.nomercy.player.core.plugins.message/MessagePlugin.persistent.<get-persistent>|<get-persistent>(){}[0]
+    final val toast // tv.nomercy.player.core.plugins.message/MessagePlugin.toast|{}toast[0]
+        final fun <get-toast>(): kotlinx.coroutines.flow/StateFlow<kotlin/String?> // tv.nomercy.player.core.plugins.message/MessagePlugin.toast.<get-toast>|<get-toast>(){}[0]
+    open val manifest // tv.nomercy.player.core.plugins.message/MessagePlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.message/MessagePlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+    open val options // tv.nomercy.player.core.plugins.message/MessagePlugin.options|{}options[0]
+        open fun <get-options>(): tv.nomercy.player.core.plugins.message/MessageOptions // tv.nomercy.player.core.plugins.message/MessagePlugin.options.<get-options>|<get-options>(){}[0]
+
+    final fun clear() // tv.nomercy.player.core.plugins.message/MessagePlugin.clear|clear(){}[0]
+    final fun hide() // tv.nomercy.player.core.plugins.message/MessagePlugin.hide|hide(){}[0]
+    final fun queue(kotlin.collections/List<tv.nomercy.player.core.plugins.message/Message>) // tv.nomercy.player.core.plugins.message/MessagePlugin.queue|queue(kotlin.collections.List<tv.nomercy.player.core.plugins.message.Message>){}[0]
+    final fun removePersistent(kotlin/String) // tv.nomercy.player.core.plugins.message/MessagePlugin.removePersistent|removePersistent(kotlin.String){}[0]
+    final fun show(kotlin/String, kotlin/Long = ...) // tv.nomercy.player.core.plugins.message/MessagePlugin.show|show(kotlin.String;kotlin.Long){}[0]
+    final fun showPersistent(kotlin/String, kotlin/String) // tv.nomercy.player.core.plugins.message/MessagePlugin.showPersistent|showPersistent(kotlin.String;kotlin.String){}[0]
+    open fun dispose() // tv.nomercy.player.core.plugins.message/MessagePlugin.dispose|dispose(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.message/MessagePlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugins.message/MessagePlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.message/MessagePlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.message/MessagePlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.message/MessagePlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 open class tv.nomercy.player.core.ports/NoSystemTransport : tv.nomercy.player.core.ports/SystemTransport { // tv.nomercy.player.core.ports/NoSystemTransport|null[0]
     constructor <init>() // tv.nomercy.player.core.ports/NoSystemTransport.<init>|<init>(){}[0]
 
@@ -5861,6 +5918,8 @@ final const val tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH // tv.nomercy.playe
     final fun <get-DEFAULT_BANDWIDTH>(): kotlin/Double // tv.nomercy.player.core.dsp/DEFAULT_BANDWIDTH.<get-DEFAULT_BANDWIDTH>|<get-DEFAULT_BANDWIDTH>(){}[0]
 final const val tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS|{}CHAPTER_GAP_EPSILON_SECONDS[0]
     final fun <get-CHAPTER_GAP_EPSILON_SECONDS>(): kotlin/Double // tv.nomercy.player.core.media/CHAPTER_GAP_EPSILON_SECONDS.<get-CHAPTER_GAP_EPSILON_SECONDS>|<get-CHAPTER_GAP_EPSILON_SECONDS>(){}[0]
+final const val tv.nomercy.player.core.plugins.message/DEFAULT_MESSAGE_MS // tv.nomercy.player.core.plugins.message/DEFAULT_MESSAGE_MS|{}DEFAULT_MESSAGE_MS[0]
+    final fun <get-DEFAULT_MESSAGE_MS>(): kotlin/Long // tv.nomercy.player.core.plugins.message/DEFAULT_MESSAGE_MS.<get-DEFAULT_MESSAGE_MS>|<get-DEFAULT_MESSAGE_MS>(){}[0]
 final const val tv.nomercy.player.core.ports/BYTES_PER_MB // tv.nomercy.player.core.ports/BYTES_PER_MB|{}BYTES_PER_MB[0]
     final fun <get-BYTES_PER_MB>(): kotlin/Int // tv.nomercy.player.core.ports/BYTES_PER_MB.<get-BYTES_PER_MB>|<get-BYTES_PER_MB>(){}[0]
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]

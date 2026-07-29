@@ -3659,6 +3659,68 @@ public final class tv/nomercy/player/core/plugins/audio/WaveformVisualization$Ma
 	public fun getVersion ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/message/Message {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Long;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Long;)Ltv/nomercy/player/core/plugins/message/Message;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/message/Message;Ljava/lang/String;Ljava/lang/Long;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/message/Message;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationMs ()Ljava/lang/Long;
+	public final fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/message/MessageOptions {
+	public fun <init> ()V
+	public fun <init> (J)V
+	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()J
+	public final fun copy (J)Ltv/nomercy/player/core/plugins/message/MessageOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/message/MessageOptions;JILjava/lang/Object;)Ltv/nomercy/player/core/plugins/message/MessageOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationMs ()J
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class tv/nomercy/player/core/plugins/message/MessagePlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/message/MessagePlugin$Manifest;
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/plugins/message/MessageOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugins/message/MessageOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clear ()V
+	public fun dispose ()V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public synthetic fun getOptions ()Ljava/lang/Object;
+	public fun getOptions ()Ltv/nomercy/player/core/plugins/message/MessageOptions;
+	public final fun getPersistent ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getToast ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun hide ()V
+	public final fun queue (Ljava/util/List;)V
+	public final fun removePersistent (Ljava/lang/String;)V
+	public final fun show (Ljava/lang/String;J)V
+	public static synthetic fun show$default (Ltv/nomercy/player/core/plugins/message/MessagePlugin;Ljava/lang/String;JILjava/lang/Object;)V
+	public final fun showPersistent (Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class tv/nomercy/player/core/plugins/message/MessagePlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/message/MessagePluginKt {
+	public static final field DEFAULT_MESSAGE_MS J
+}
+
 public final class tv/nomercy/player/core/ports/AlwaysVisible : tv/nomercy/player/core/ports/VisibilityMonitor {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/AlwaysVisible;
 	public fun isVisible ()Z
