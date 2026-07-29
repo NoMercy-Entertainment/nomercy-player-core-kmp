@@ -3419,6 +3419,38 @@ final class tv.nomercy.player.core.media/ChapterTrack { // tv.nomercy.player.cor
     }
 }
 
+final class tv.nomercy.player.core.media/CueCrossing { // tv.nomercy.player.core.media/CueCrossing|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ..., kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ...) // tv.nomercy.player.core.media/CueCrossing.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>;kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
+
+    final val changed // tv.nomercy.player.core.media/CueCrossing.changed|{}changed[0]
+        final fun <get-changed>(): kotlin/Boolean // tv.nomercy.player.core.media/CueCrossing.changed.<get-changed>|<get-changed>(){}[0]
+    final val entered // tv.nomercy.player.core.media/CueCrossing.entered|{}entered[0]
+        final fun <get-entered>(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.entered.<get-entered>|<get-entered>(){}[0]
+    final val exited // tv.nomercy.player.core.media/CueCrossing.exited|{}exited[0]
+        final fun <get-exited>(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.exited.<get-exited>|<get-exited>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ..., kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ...): tv.nomercy.player.core.media/CueCrossing // tv.nomercy.player.core.media/CueCrossing.copy|copy(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>;kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/CueCrossing.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/CueCrossing.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/CueCrossing.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.media/CueTracker { // tv.nomercy.player.core.media/CueTracker|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ...) // tv.nomercy.player.core.media/CueTracker.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
+
+    final val active // tv.nomercy.player.core.media/CueTracker.active|{}active[0]
+        final fun <get-active>(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueTracker.active.<get-active>|<get-active>(){}[0]
+    final val line // tv.nomercy.player.core.media/CueTracker.line|{}line[0]
+        final fun <get-line>(): tv.nomercy.player.core.events/CueEvent? // tv.nomercy.player.core.media/CueTracker.line.<get-line>|<get-line>(){}[0]
+
+    final fun advanceTo(kotlin/Double): tv.nomercy.player.core.media/CueCrossing // tv.nomercy.player.core.media/CueTracker.advanceTo|advanceTo(kotlin.Double){}[0]
+    final fun cues(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueTracker.cues|cues(){}[0]
+    final fun load(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent>) // tv.nomercy.player.core.media/CueTracker.load|load(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
+    final fun reset() // tv.nomercy.player.core.media/CueTracker.reset|reset(){}[0]
+}
+
 final class tv.nomercy.player.core.media/MediaItem : tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/MediaItem|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.media/MediaItem.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?){}[0]
 
