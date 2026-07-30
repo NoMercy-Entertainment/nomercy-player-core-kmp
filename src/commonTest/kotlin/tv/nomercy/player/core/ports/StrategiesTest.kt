@@ -168,13 +168,51 @@ class StrategiesTest {
     }
 
     @Test
-    fun linearBackoffScalesWithTheAttemptAndNoBackoffIsImmediate() {
+    fun linearBackoffScalesWithTheAttempt() {
         val linear = RetryConfig(attempts = 5, backoff = Backoff.LINEAR, baseMs = 200, maxMs = 5_000)
 
         assertEquals(200, linear.delayMs(1))
         assertEquals(600, linear.delayMs(3))
-        assertEquals(0, linear.delayMs(0))
-        assertEquals(0, RetryConfig(attempts = 3).delayMs(2))
+        assertEquals(0, linear.delayMs(0), "there is no retry before the first one")
+    }
+
+    @Test
+    fun aConfigThatOnlySaysHowManyTimesStillWaits() {
+        // RetryConfig(attempts = 3) returned 0, 0, 0: three INSTANT retries where
+        // the web waits 500, 1000, 1500. Against a self-hosted box on a home
+        // connection that is a retry storm, and it was reachable by writing the
+        // one field the type requires.
+        val bare = RetryConfig(attempts = 3)
+
+        assertEquals(500, bare.delayMs(1))
+        assertEquals(1_000, bare.delayMs(2))
+        assertEquals(1_500, bare.delayMs(3))
+    }
+
+    @Test
+    fun anUnsetCapIsThirtySecondsRatherThanNone() {
+        // The web's computeBackoff caps at 30s when maxMs is absent. Uncapped, an
+        // exponential config with no cap reaches days.
+        assertEquals(30_000, RetryConfig(attempts = 40, backoff = Backoff.EXPONENTIAL).delayMs(20))
+    }
+
+    @Test
+    fun immediateRetryIsSomethingAConfigSaysRatherThanForgetsToSay() {
+        // Zero base is the spelling for "retry now", and it is a decision on the
+        // page instead of a field nobody filled in.
+        assertEquals(0, RetryConfig(attempts = 3, baseMs = 0).delayMs(1))
+        assertEquals(0, RetryConfig(attempts = 3, baseMs = 0).delayMs(5))
+    }
+
+    @Test
+    fun theBuiltInTableWaitsWhatTheWebTableWaits() {
+        // Every entry that retries, at its first retry, next to the web's
+        // computeBackoff answer for the same entry.
+        assertEquals(500, DEFAULT_RETRY_POLICY.resolve("core:network/timeout").delayMs(1))
+        assertEquals(500, DEFAULT_RETRY_POLICY.resolve("core:network/server-error").delayMs(1))
+        assertEquals(200, DEFAULT_RETRY_POLICY.resolve("core:stream/fragment-failed").delayMs(1))
+        assertEquals(1_000, DEFAULT_RETRY_POLICY.resolve("media/network").delayMs(1))
+        assertEquals(500, DEFAULT_RETRY_POLICY.resolve("503").delayMs(1))
     }
 
     @Test

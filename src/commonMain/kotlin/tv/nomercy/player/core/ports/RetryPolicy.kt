@@ -14,6 +14,11 @@ import tv.nomercy.player.core.errors.CoreErrorCodes
 // doublings of a one-second base is already twelve days.
 private const val MAX_DOUBLINGS = 30
 
+// The web's computeBackoff defaults, kept identical so a config written against
+// one player waits the same on the other.
+private const val DEFAULT_BASE_MS = 500L
+private const val DEFAULT_MAX_MS = 30_000L
+
 public enum class Backoff(public val wire: String) {
     LINEAR("linear"),
     EXPONENTIAL("exponential"),
@@ -38,18 +43,29 @@ public data class RetryConfig(
 // prefix, an HTTP range, or "*".
 public typealias RetryPolicy = Map<String, RetryConfig>
 
-// Delay before the attempt-th retry, counting from 1. Zero when the config has
-// no backoff, which means retry immediately.
+// Delay before the attempt-th retry, counting from 1.
+//
+// The defaults are part of the answer, not padding: an unset baseMs is 500ms, an
+// unset maxMs is thirty seconds, and an unset backoff is LINEAR. That is the
+// web's computeBackoff, and this returned zero for all three instead — so
+// RetryConfig(attempts = 3) advised three INSTANT retries where the web waits
+// 500, 1000, 1500. Against a self-hosted box on a home connection that is a
+// retry storm, and the only reason the built-in table escaped it is that every
+// entry in it sets baseMs by hand.
+//
+// Immediate retry is spelled baseMs = 0, which is a decision somebody made
+// rather than a field nobody filled in. The one retry the web performs with no
+// delay is the 401 refresh, and it passes zero at its own call site — it never
+// asks a config what to wait, and neither should a host wiring that path here.
 public fun RetryConfig.delayMs(attempt: Int): Long {
     if (attempt < 1) return 0L
-    val base: Long = baseMs ?: return 0L
+    val base: Long = baseMs ?: DEFAULT_BASE_MS
     val doublings: Int = (attempt - 1).coerceAtMost(MAX_DOUBLINGS)
     val raw: Long = when (backoff) {
         Backoff.EXPONENTIAL -> base shl doublings
-        Backoff.LINEAR -> base * attempt
-        null -> 0L
+        Backoff.LINEAR, null -> base * attempt
     }
-    return raw.coerceAtMost(maxMs ?: raw)
+    return raw.coerceAtMost(maxMs ?: DEFAULT_MAX_MS)
 }
 
 // Most specific wins: the exact code, then its category, then the HTTP range,
