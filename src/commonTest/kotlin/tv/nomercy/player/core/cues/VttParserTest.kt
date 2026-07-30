@@ -38,6 +38,11 @@ thumbs.webp#xywh=0,0,320,178
 thumbs.webp#xywh=320,0,320,178
 """.trimIndent()
 
+// A single-cue file, so a test about ONE cue body does not restate the format.
+private fun oneCue(body: String): String = "WEBVTT\n\n00:00:00.000 --> 00:00:05.000\n$body"
+
+private const val CRLF = "\r\n"
+
 // One parser for a format three hand-rolled readers each understood slightly
 // differently. Chapters, thumbnails and subtitles are all WebVTT, and three
 // readers of one format is three chances to disagree about it.
@@ -151,12 +156,68 @@ class VttParserTest {
     }
 
     @Test
-    fun aRelativeSheetIsResolvedAgainstItsBase() {
-        // The sheet and the vtt are generated together and sit in the same
-        // directory, so the cue names it relatively.
-        val sprites: List<SpriteCue> = parseVttSprite(SPRITES, baseUrl = "https://server.test/media/previews")
+    fun aRelativeSheetIsResolvedAgainstTheVttsOwnDirectory() {
+        // `baseUrl` is the URL of the VTT FILE, which is what loadSpriteSet hands
+        // over. This test used to pass a bare directory, so it agreed with an
+        // implementation that appended to whatever it was given — and the real
+        // caller passes the file, which resolved every sheet to
+        // `.../sprite.vtt/thumbs.webp`. A 404, and no thumbnail could ever paint.
+        val sprites: List<SpriteCue> = parseVttSprite(
+            SPRITES,
+            baseUrl = "https://server.test/media/previews/sprite.vtt",
+        )
 
         assertEquals("https://server.test/media/previews/thumbs.webp", sprites[0].url)
+    }
+
+    @Test
+    fun aRootRelativeSheetResolvesAgainstTheOriginNotTheDirectory() {
+        val sprites: List<SpriteCue> = parseVttSprite(
+            SPRITES.replace("thumbs.webp", "/shared/thumbs.webp"),
+            baseUrl = "https://server.test/media/previews/sprite.vtt",
+        )
+
+        assertEquals("https://server.test/shared/thumbs.webp", sprites[0].url)
+    }
+
+    @Test
+    fun aCrlfFileIsStillABlockPerCue() {
+        // Most encoders emit CRLF. The block separator is two newlines, so a
+        // carriage-return pair never matched it: the whole file arrived as ONE
+        // block and the first arrow in it produced a single cue whose body was
+        // the rest of the document. Subtitles became one cue holding the file.
+        val crlf: String = listOf(
+            "WEBVTT",
+            "",
+            "00:00:01.000 --> 00:00:02.000",
+            "First",
+            "",
+            "00:00:03.000 --> 00:00:04.000",
+            "Second",
+        ).joinToString(CRLF)
+
+        val cues: List<VttCue> = parseVtt(crlf)
+
+        assertEquals(2, cues.size)
+        assertEquals("First", cues[0].body)
+        assertEquals("Second", cues[1].body)
+    }
+
+    @Test
+    fun aBodyThatIsNotJustAReferenceIsNotASprite() {
+        // Anchored on purpose. Searching for the fragment and splitting what came
+        // after it accepted a subtitle that happens to mention a rectangle, and
+        // accepted a negative width — a sprite that draws nothing, positioned
+        // where nothing else agrees it is.
+        val trailing: List<SpriteCue> = parseVttSprite(
+            oneCue("thumbs.webp#xywh=0,0,320,178 and more"),
+        )
+        val negative: List<SpriteCue> = parseVttSprite(
+            oneCue("thumbs.webp#xywh=0,0,-320,178"),
+        )
+
+        assertEquals(0, trailing.size)
+        assertEquals(0, negative.size)
     }
 
     @Test

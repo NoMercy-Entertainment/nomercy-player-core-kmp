@@ -70,7 +70,22 @@ public fun parseVtt(text: String): List<VttCue> =
     // Blocks separated by blank lines, which is the file's own structure. A
     // line-by-line state machine has to guess whether a line is a cue id, a
     // timing or body text; the blank line says so.
-    text.split(BLOCK_SEPARATOR).mapNotNull(::parseBlock)
+    normalise(text).split(BLOCK_SEPARATOR).mapNotNull(::parseBlock)
+
+// CRLF, which the format allows and this did not survive.
+//
+// The block separator is two newlines. A CRLF file separates its blocks with
+// `\r\n\r\n`, so the split never matched, the whole file arrived as ONE block,
+// and the first arrow in it produced a single cue whose body was the rest of the
+// document. Subtitles became one cue holding the entire file; thumbnails came
+// back empty, because the sprite rectangle then had far more than four numbers
+// in it. Most encoders emit CRLF, so this was the common case, not the edge.
+//
+// The BOM strip is alignment with the web parser, not a fix — a BOM rides on the
+// `WEBVTT` header, and this reads the header as "a block with no arrow" rather
+// than by name, so it was already skipped either way.
+private fun normalise(text: String): String =
+    text.removePrefix(BOM).replace("\r\n", "\n").replace('\r', '\n')
 
 // One block, or null when it is not a cue.
 //
@@ -115,41 +130,53 @@ public fun parseVttSprite(text: String, baseUrl: String? = null): List<SpriteCue
     parseVtt(text).mapNotNull { spriteFrom(it, baseUrl) }
 
 private fun spriteFrom(cue: VttCue, baseUrl: String?): SpriteCue? {
-    val fragmentAt: Int = cue.body.indexOf(FRAGMENT)
-    if (fragmentAt < 0) return null
-
-    val numbers: List<Int> = cue.body.substring(fragmentAt + FRAGMENT.length)
-        .split(',')
-        .mapNotNull { it.trim().toIntOrNull() }
-    // Three numbers is not a rectangle, and defaulting the fourth puts a
-    // thumbnail somewhere it is not.
-    if (numbers.size != RECT_FIELDS) return null
+    // Anchored, and the whole body has to be the reference. Searching for the
+    // fragment and splitting what followed accepted a cue with trailing text
+    // after the rectangle, and accepted a negative width or height — neither of
+    // which is a sprite, and both of which then drew nothing at a position
+    // nothing else agreed with.
+    val fields = SPRITE_FRAGMENT.matchEntire(cue.body.trim())?.groupValues ?: return null
 
     return SpriteCue(
         start = cue.start,
         end = cue.end,
-        url = resolveAgainst(cue.body.take(fragmentAt), baseUrl),
-        x = numbers[0],
-        y = numbers[1],
-        width = numbers[2],
-        height = numbers[3],
+        url = resolveAgainst(fields[1], baseUrl),
+        x = fields[2].toInt(),
+        y = fields[3].toInt(),
+        width = fields[4].toInt(),
+        height = fields[5].toInt(),
     )
 }
 
-// The sheet is usually named relative to the vtt that describes it, because the
-// two are generated together and sit in the same directory.
+// The sheet is named relative to the vtt that describes it, because the two are
+// generated together and sit in the same directory.
+//
+// `baseUrl` is the URL of the VTT FILE, so the directory is everything up to its
+// last slash. This appended to the whole thing, which resolved every relative
+// sheet to `.../sprite.vtt/sprite.webp` — a 404, so the scrub preview could not
+// have painted a frame no matter what else was right.
 private fun resolveAgainst(path: String, baseUrl: String?): String = when {
     baseUrl.isNullOrEmpty() -> path
     ABSOLUTE.containsMatchIn(path) -> path
-    else -> baseUrl.trimEnd('/') + "/" + path.trimStart('/')
+    // A root-relative sheet resolves against the ORIGIN, not the directory.
+    path.startsWith('/') -> (ORIGIN.find(baseUrl)?.value ?: "") + path
+    else -> directoryOf(baseUrl) + path
 }
 
-private val ABSOLUTE = Regex("""^[a-zA-Z][a-zA-Z0-9+\-.]*:""")
+// Everything up to and including the base's last slash. A base with no slash at
+// all has no directory to resolve against, so the path stands alone.
+private fun directoryOf(baseUrl: String): String =
+    if (baseUrl.contains('/')) baseUrl.substringBeforeLast('/') + "/" else ""
+
+// Only http and https, matching the web. Treating any scheme as absolute meant a
+// path the web would have joined to the base was left alone instead.
+private val ABSOLUTE = Regex("""^https?://""")
+private val ORIGIN = Regex("""^https?://[^/]+""")
+private val SPRITE_FRAGMENT = Regex("""([^#]+)#xywh=(-?\d+),(-?\d+),(\d+),(\d+)""")
 
 private const val ARROW = "-->"
-private const val FRAGMENT = "#xywh="
+private const val BOM = "﻿"
 private const val BLOCK_SEPARATOR = "\n\n"
-private const val RECT_FIELDS = 4
 private const val MAX_TIME_PARTS = 3
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3_600
