@@ -269,4 +269,34 @@ class VttParserTest {
 
         assertEquals(1, parseVttSprite(broken).size)
     }
+
+    @Test
+    fun subtitleMarkupIsTakenOutOfTheText() {
+        // WebVTT permits `<i>`, `<b>`, `<c.loud>` and `<v Speaker>` inside a cue.
+        // Drawn from the raw body, the viewer reads the angle brackets.
+        assertEquals(
+            "Hello there",
+            parseVttSubtitles(oneCue("<i>Hello</i> <c.loud>there</c>")).single().body,
+        )
+        assertEquals(
+            "Bob speaking",
+            parseVttSubtitles(oneCue("<v Bob>Bob speaking")).single().body,
+        )
+    }
+
+    @Test
+    fun subtitleTimingIsTheSameTimingAsEveryOtherCue() {
+        // A wrapper, not a second reader of the format. A subtitle that landed on
+        // a different second than the same file read as chapters would mean two
+        // parsers had disagreed about WebVTT.
+        assertEquals(
+            parseVtt(CHAPTERS).map { it.start to it.end },
+            parseVttSubtitles(CHAPTERS).map { it.start to it.end },
+        )
+    }
+
+    @Test
+    fun aSubtitleWithNoMarkupIsUnchanged() {
+        assertEquals("Plain line", parseVttSubtitles(oneCue("Plain line")).single().body)
+    }
 }

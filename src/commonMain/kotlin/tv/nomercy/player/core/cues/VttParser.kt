@@ -72,6 +72,19 @@ public fun parseVtt(text: String): List<VttCue> =
     // timing or body text; the blank line says so.
     normalise(text).split(BLOCK_SEPARATOR).mapNotNull(::parseBlock)
 
+// The same cues, with the inline markup taken out.
+//
+// A wrapper rather than a second parser: WebVTT permits `<i>`, `<b>`, `<c.loud>`
+// and `<v Speaker>` inside a cue, and a subtitle drawn from the raw body shows
+// the angle brackets to the viewer. Everything else about reading the file is
+// identical, and two readers of one format is two chances to disagree about it.
+//
+// What this does NOT carry is the cue's positioning — `align`, `line`, `size`
+// ride on the timing line and [VttCue] has nowhere to put them. A renderer that
+// needs them wants tv.nomercy.player.video.subtitles.SubtitleCue, which does.
+public fun parseVttSubtitles(text: String): List<VttCue> =
+    parseVtt(text).map { it.copy(body = it.body.replace(INLINE_TAG, "").trim()) }
+
 // CRLF, which the format allows and this did not survive.
 //
 // The block separator is two newlines. A CRLF file separates its blocks with
@@ -178,6 +191,7 @@ private fun directoryOf(baseUrl: String): String =
 
 // Only http and https, matching the web. Treating any scheme as absolute meant a
 // path the web would have joined to the base was left alone instead.
+private val INLINE_TAG = Regex("<[^>]+>")
 private val ABSOLUTE = Regex("""^https?://""")
 private val ORIGIN = Regex("""^https?://[^/]+""")
 private val SPRITE_FRAGMENT = Regex("""([^#]+)#xywh=(-?\d+),(-?\d+),(\d+),(\d+)""")

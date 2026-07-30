@@ -14,6 +14,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import tv.nomercy.player.core.KIT_VERSION
+import tv.nomercy.player.core.cues.registerBuiltIns
 import tv.nomercy.player.core.devtools.EventFirehose
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
@@ -1065,7 +1066,10 @@ public open class ComposedPlayer(
     public open fun resolveCueParser(url: String, contentType: String? = null): CueParser? =
         cueParsers.resolve(url, contentType)
 
-    public val cueParsers: CueParserRegistry = CueParserRegistry()
+    // Seeded with LRC, subtitle VTT and sprite VTT. The web registers those at
+    // setup; here they arrive with the player, so resolving one does not depend
+    // on how far through its lifecycle it is.
+    public val cueParsers: CueParserRegistry = CueParserRegistry().registerBuiltIns()
 
     // ── Stream factories ─────────────────────────────────────────────────────
 
