@@ -549,6 +549,17 @@ final enum class tv.nomercy.player.core.ports/FormFactor : kotlin/Enum<tv.nomerc
     final fun values(): kotlin/Array<tv.nomercy.player.core.ports/FormFactor> // tv.nomercy.player.core.ports/FormFactor.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.ports/HdrOnSdrFallback : kotlin/Enum<tv.nomercy.player.core.ports/HdrOnSdrFallback> { // tv.nomercy.player.core.ports/HdrOnSdrFallback|null[0]
+    enum entry Play // tv.nomercy.player.core.ports/HdrOnSdrFallback.Play|null[0]
+    enum entry Refuse // tv.nomercy.player.core.ports/HdrOnSdrFallback.Refuse|null[0]
+
+    final val entries // tv.nomercy.player.core.ports/HdrOnSdrFallback.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.ports/HdrOnSdrFallback> // tv.nomercy.player.core.ports/HdrOnSdrFallback.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.ports/HdrOnSdrFallback // tv.nomercy.player.core.ports/HdrOnSdrFallback.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.ports/HdrOnSdrFallback> // tv.nomercy.player.core.ports/HdrOnSdrFallback.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.ports/NetworkType : kotlin/Enum<tv.nomercy.player.core.ports/NetworkType> { // tv.nomercy.player.core.ports/NetworkType|null[0]
     enum entry CELLULAR // tv.nomercy.player.core.ports/NetworkType.CELLULAR|null[0]
     enum entry ETHERNET // tv.nomercy.player.core.ports/NetworkType.ETHERNET|null[0]
@@ -750,6 +761,8 @@ abstract interface tv.nomercy.player.core.device/DeviceCapabilities { // tv.nome
         abstract fun <get-hasDpad>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasDpad.<get-hasDpad>|<get-hasDpad>(){}[0]
     abstract val hasHardwareVolumeKeys // tv.nomercy.player.core.device/DeviceCapabilities.hasHardwareVolumeKeys|{}hasHardwareVolumeKeys[0]
         abstract fun <get-hasHardwareVolumeKeys>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasHardwareVolumeKeys.<get-hasHardwareVolumeKeys>|<get-hasHardwareVolumeKeys>(){}[0]
+    abstract val hasHdrDisplay // tv.nomercy.player.core.device/DeviceCapabilities.hasHdrDisplay|{}hasHdrDisplay[0]
+        abstract fun <get-hasHdrDisplay>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasHdrDisplay.<get-hasHdrDisplay>|<get-hasHdrDisplay>(){}[0]
     abstract val hasPointer // tv.nomercy.player.core.device/DeviceCapabilities.hasPointer|{}hasPointer[0]
         abstract fun <get-hasPointer>(): kotlin/Boolean // tv.nomercy.player.core.device/DeviceCapabilities.hasPointer.<get-hasPointer>|<get-hasPointer>(){}[0]
     abstract val hasTouch // tv.nomercy.player.core.device/DeviceCapabilities.hasTouch|{}hasTouch[0]
@@ -1158,6 +1171,45 @@ sealed interface tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nome
         final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // tv.nomercy.player.core.ports/ExternalPlaybackState.Unsupported.toString|toString(){}[0]
+    }
+}
+
+sealed interface tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player.core.ports/HdrDecision|null[0]
+    final class CapTo : tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player.core.ports/HdrDecision.CapTo|null[0]
+        constructor <init>(tv.nomercy.player.core.ports/QualityLevel) // tv.nomercy.player.core.ports/HdrDecision.CapTo.<init>|<init>(tv.nomercy.player.core.ports.QualityLevel){}[0]
+
+        final val level // tv.nomercy.player.core.ports/HdrDecision.CapTo.level|{}level[0]
+            final fun <get-level>(): tv.nomercy.player.core.ports/QualityLevel // tv.nomercy.player.core.ports/HdrDecision.CapTo.level.<get-level>|<get-level>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.ports/QualityLevel // tv.nomercy.player.core.ports/HdrDecision.CapTo.component1|component1(){}[0]
+        final fun copy(tv.nomercy.player.core.ports/QualityLevel = ...): tv.nomercy.player.core.ports/HdrDecision.CapTo // tv.nomercy.player.core.ports/HdrDecision.CapTo.copy|copy(tv.nomercy.player.core.ports.QualityLevel){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/HdrDecision.CapTo.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/HdrDecision.CapTo.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/HdrDecision.CapTo.toString|toString(){}[0]
+    }
+
+    final object AsIs : tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player.core.ports/HdrDecision.AsIs|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/HdrDecision.AsIs.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/HdrDecision.AsIs.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/HdrDecision.AsIs.toString|toString(){}[0]
+    }
+
+    final object PlayUnconverted : tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player.core.ports/HdrDecision.PlayUnconverted|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/HdrDecision.PlayUnconverted.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/HdrDecision.PlayUnconverted.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/HdrDecision.PlayUnconverted.toString|toString(){}[0]
+    }
+
+    final object Refuse : tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player.core.ports/HdrDecision.Refuse|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/HdrDecision.Refuse.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/HdrDecision.Refuse.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/HdrDecision.Refuse.toString|toString(){}[0]
+    }
+
+    final object ToneMap : tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player.core.ports/HdrDecision.ToneMap|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/HdrDecision.ToneMap.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/HdrDecision.ToneMap.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.ports/HdrDecision.ToneMap.toString|toString(){}[0]
     }
 }
 
@@ -6133,6 +6185,7 @@ final fun tv.nomercy.player.core.ports/defaultPlatform(): tv.nomercy.player.core
 final fun tv.nomercy.player.core.ports/defaultStorage(kotlin/String): tv.nomercy.player.core.ports/Storage // tv.nomercy.player.core.ports/defaultStorage|defaultStorage(kotlin.String){}[0]
 final fun tv.nomercy.player.core.ports/defaultSystemTransport(): tv.nomercy.player.core.ports/SystemTransport // tv.nomercy.player.core.ports/defaultSystemTransport|defaultSystemTransport(){}[0]
 final fun tv.nomercy.player.core.ports/displayLanguage(kotlin/String): kotlin/String // tv.nomercy.player.core.ports/displayLanguage|displayLanguage(kotlin.String){}[0]
+final fun tv.nomercy.player.core.ports/hdrDecision(kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>, kotlin/Boolean, kotlin/Boolean, tv.nomercy.player.core.ports/HdrOnSdrFallback = ...): tv.nomercy.player.core.ports/HdrDecision // tv.nomercy.player.core.ports/hdrDecision|hdrDecision(kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.ports.HdrOnSdrFallback){}[0]
 final fun tv.nomercy.player.core.ports/labelsNeedQualifier(kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.ports/labelsNeedQualifier|labelsNeedQualifier(kotlin.collections.List<kotlin.String>){}[0]
 
 // Targets: [ios]

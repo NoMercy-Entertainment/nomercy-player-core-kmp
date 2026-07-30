@@ -22,6 +22,10 @@ internal object DesktopCapabilities : DeviceCapabilities {
     override val hasTouch: Boolean = false
     override val hasPointer: Boolean = true
     override val hasHardwareVolumeKeys: Boolean = false
+
+    // No portable way to ask a desktop panel from the JVM: it is per-monitor, and a
+    // window can be dragged between an HDR one and an SDR one mid-playback.
+    override val hasHdrDisplay: Boolean = false
 }
 
 public actual fun platformDeviceCapabilities(context: PlatformContext): DeviceCapabilities =

@@ -30,6 +30,9 @@ internal class AppleTouchCapabilities(override val formFactor: FormFactor) : Dev
     override val hasPointer: Boolean = false
 
     override val hasHardwareVolumeKeys: Boolean = true
+
+    // UIScreen.potentialEDRHeadroom answers this properly. Until it is read, false.
+    override val hasHdrDisplay: Boolean = false
 }
 
 public actual fun platformDeviceCapabilities(context: PlatformContext): DeviceCapabilities =

@@ -24,6 +24,10 @@ internal object AppleTvCapabilities : DeviceCapabilities {
     override val hasTouch: Boolean = false
     override val hasPointer: Boolean = false
     override val hasHardwareVolumeKeys: Boolean = false
+
+    // AVDisplayCriteria knows what the attached television negotiated. Until it is
+    // read, false — an Apple TV plugged into an SDR set must not claim otherwise.
+    override val hasHdrDisplay: Boolean = false
 }
 
 public actual fun platformDeviceCapabilities(context: PlatformContext): DeviceCapabilities =

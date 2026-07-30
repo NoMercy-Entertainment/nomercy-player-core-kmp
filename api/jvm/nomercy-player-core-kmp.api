@@ -575,6 +575,7 @@ public abstract interface class tv/nomercy/player/core/device/DeviceCapabilities
 	public abstract fun getFormFactor ()Ltv/nomercy/player/core/device/FormFactor;
 	public abstract fun getHasDpad ()Z
 	public abstract fun getHasHardwareVolumeKeys ()Z
+	public abstract fun getHasHdrDisplay ()Z
 	public abstract fun getHasPointer ()Z
 	public abstract fun getHasTouch ()Z
 	public fun getPrefersFocusNavigation ()Z
@@ -4409,6 +4410,61 @@ public final class tv/nomercy/player/core/ports/HdrAbrConstraint {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/HdrAbrConstraint;
 	public final fun abrCeiling (Ljava/util/List;Z)Ltv/nomercy/player/core/ports/QualityLevel;
 	public final fun isUnplayable (Ljava/util/List;Z)Z
+}
+
+public abstract interface class tv/nomercy/player/core/ports/HdrDecision {
+}
+
+public final class tv/nomercy/player/core/ports/HdrDecision$AsIs : tv/nomercy/player/core/ports/HdrDecision {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/HdrDecision$AsIs;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/HdrDecision$CapTo : tv/nomercy/player/core/ports/HdrDecision {
+	public fun <init> (Ltv/nomercy/player/core/ports/QualityLevel;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public final fun copy (Ltv/nomercy/player/core/ports/QualityLevel;)Ltv/nomercy/player/core/ports/HdrDecision$CapTo;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/HdrDecision$CapTo;Ltv/nomercy/player/core/ports/QualityLevel;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/HdrDecision$CapTo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLevel ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/HdrDecision$PlayUnconverted : tv/nomercy/player/core/ports/HdrDecision {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/HdrDecision$PlayUnconverted;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/HdrDecision$Refuse : tv/nomercy/player/core/ports/HdrDecision {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/HdrDecision$Refuse;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/HdrDecision$ToneMap : tv/nomercy/player/core/ports/HdrDecision {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/HdrDecision$ToneMap;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/HdrOnSdrFallback : java/lang/Enum {
+	public static final field Play Ltv/nomercy/player/core/ports/HdrOnSdrFallback;
+	public static final field Refuse Ltv/nomercy/player/core/ports/HdrOnSdrFallback;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/HdrOnSdrFallback;
+	public static fun values ()[Ltv/nomercy/player/core/ports/HdrOnSdrFallback;
+}
+
+public final class tv/nomercy/player/core/ports/HdrPolicyKt {
+	public static final fun hdrDecision (Ljava/util/List;ZZLtv/nomercy/player/core/ports/HdrOnSdrFallback;)Ltv/nomercy/player/core/ports/HdrDecision;
+	public static synthetic fun hdrDecision$default (Ljava/util/List;ZZLtv/nomercy/player/core/ports/HdrOnSdrFallback;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/HdrDecision;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/IdGenerator {

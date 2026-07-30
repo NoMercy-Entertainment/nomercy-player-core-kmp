@@ -25,4 +25,5 @@ internal data class FakeDeviceCapabilities(
     override val hasTouch: Boolean = formFactor == FormFactor.Phone || formFactor == FormFactor.Tablet,
     override val hasPointer: Boolean = formFactor == FormFactor.Desktop,
     override val hasHardwareVolumeKeys: Boolean = formFactor != FormFactor.Tv,
+    override val hasHdrDisplay: Boolean = false,
 ) : DeviceCapabilities

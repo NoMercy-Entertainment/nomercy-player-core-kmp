@@ -36,6 +36,19 @@ public interface DeviceCapabilities {
     // it never receives has drawn a control that does nothing.
     public val hasHardwareVolumeKeys: Boolean
 
+    /**
+     * Whether the attached screen can actually show HDR.
+     *
+     * The one input hdrDecision needs and had nowhere to get. Absent it, HDR played
+     * on an SDR panel unchallenged: nothing capped the ladder and nothing converted,
+     * and a viewer with good bandwidth got the WORST picture because adaptation
+     * climbs into the HDR rungs on its own.
+     *
+     * Conservative when unknown. SDR on an HDR panel is a correct-looking picture one
+     * rung lower; HDR on an SDR panel is the washed-out one that was reported.
+     */
+    public val hasHdrDisplay: Boolean
+
     // Whether chrome should be driven by moving a highlight rather than by
     // touching where things are.
     //

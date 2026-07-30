@@ -58,6 +58,11 @@ internal class AndroidCapabilities(context: Context) : DeviceCapabilities {
     // have handled it, against a control that visibly does nothing.
     override val hasHardwareVolumeKeys: Boolean = !television
 
+    // Display.getHdrCapabilities is the real answer and needs a Display, which this
+    // does not hold. False until it does, so a television reports SDR rather than
+    // claiming HDR it may not have.
+    override val hasHdrDisplay: Boolean = false
+
     private companion object {
         // Declared by set-top boxes that report no television UI mode. Not in
         // the platform constants until a later API level than this library
