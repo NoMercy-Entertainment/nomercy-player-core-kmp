@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.player
 
+import tv.nomercy.player.core.ports.HdrOnSdrFallback
+
 // What to do about the screen blanking during playback.
 public enum class WakeLockPolicy(override val token: String) : TokenEnum {
     AUTO("auto"),
@@ -59,4 +61,10 @@ public data class PlayerConfig(
     val controls: Boolean = false,
     val wakeLock: WakeLockPolicy = WakeLockPolicy.AUTO,
     val onOffline: OfflinePolicy = OfflinePolicy.CONTINUE_BUFFERED,
+
+    // What to do when HDR content meets an SDR screen and the engine cannot
+    // convert it. Play by default: a washed-out picture is a picture, and a
+    // library that refused by default would turn a colour problem into a black
+    // screen for consumers who never thought about dynamic range at all.
+    val hdrOnSdr: HdrOnSdrFallback = HdrOnSdrFallback.Play,
 )

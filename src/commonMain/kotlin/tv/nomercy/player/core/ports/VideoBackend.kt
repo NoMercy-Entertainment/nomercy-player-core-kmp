@@ -14,6 +14,11 @@ package tv.nomercy.player.core.ports
 // ladder is filtered by device capability before a viewer sees it, so an index
 // means something different to the engine than to the list on screen — which is
 // how "switch to 1080p" ends up playing 480p.
+// Tracks, a ladder and a dynamic-range decision is what a video engine has to
+// answer. Splitting the interface to satisfy a threshold would put half of one
+// engine's contract behind a second type every implementor has to find, and the
+// dynamic-range members are only meaningful next to the ladder they constrain.
+@Suppress("ComplexInterface")
 public interface VideoBackend : MediaBackend {
     public fun audioTracks(): List<AudioTrack>
     public fun audioTrack(): AudioTrack?
@@ -33,6 +38,30 @@ public interface VideoBackend : MediaBackend {
     // pins one variant, and QualityMatcher is the only thing that turns it into
     // whatever number this engine calls it.
     public fun quality(level: QualityLevel?)
+
+    /**
+     * Whether THIS engine on THIS platform can convert HDR to SDR as it decodes.
+     *
+     * Not a platform constant: the same device answers differently by codec, by
+     * decoder and by API level, which is why it is asked of the engine rather than
+     * looked up from the form factor.
+     *
+     * False by default so an engine that has not answered cannot claim a
+     * conversion it will not perform — [hdrDecision] then falls through to the
+     * consumer's [HdrOnSdrFallback] instead of promising a picture nothing fixes.
+     */
+    public val canToneMapHdrToSdr: Boolean get() = false
+
+    /**
+     * What this engine should do when HDR meets an SDR screen and nothing can
+     * convert it.
+     *
+     * A no-op by default, so an engine with no dynamic-range decision to make is
+     * not forced to pretend it has one. The value comes from the consumer through
+     * PlayerConfig.hdrOnSdr, because both answers are defensible and the library
+     * is not the one who has to explain either to a viewer.
+     */
+    public fun hdrOnSdrFallback(fallback: HdrOnSdrFallback) {}
 }
 
 // An audio engine is a media engine that can also play two things at once,

@@ -11,6 +11,7 @@ package tv.nomercy.player.core.device
 import platform.UIKit.UIDevice
 import platform.UIKit.UIUserInterfaceIdiomPad
 import tv.nomercy.player.core.ports.PlatformContext
+import tv.nomercy.player.core.ports.appleDisplayIsHdr
 
 // An iPhone or an iPad. Both are touch, neither has a remote.
 //
@@ -31,8 +32,9 @@ internal class AppleTouchCapabilities(override val formFactor: FormFactor) : Dev
 
     override val hasHardwareVolumeKeys: Boolean = true
 
-    // UIScreen.potentialEDRHeadroom answers this properly. Until it is read, false.
-    override val hasHdrDisplay: Boolean = false
+    // The same probe the playback path uses, so the capability a chrome reads and
+    // the capability a backend decides on cannot disagree about one screen.
+    override val hasHdrDisplay: Boolean = appleDisplayIsHdr()
 }
 
 public actual fun platformDeviceCapabilities(context: PlatformContext): DeviceCapabilities =

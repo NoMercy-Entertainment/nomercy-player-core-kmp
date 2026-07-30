@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.device
 
 import tv.nomercy.player.core.ports.PlatformContext
+import tv.nomercy.player.core.ports.desktopDisplayIsHdr
 
 // A desktop: a pointer and a keyboard.
 //
@@ -23,9 +24,9 @@ internal object DesktopCapabilities : DeviceCapabilities {
     override val hasPointer: Boolean = true
     override val hasHardwareVolumeKeys: Boolean = false
 
-    // No portable way to ask a desktop panel from the JVM: it is per-monitor, and a
-    // window can be dragged between an HDR one and an SDR one mid-playback.
-    override val hasHdrDisplay: Boolean = false
+    // The same probe the playback path uses. It answers false on every machine,
+    // and desktopDisplayIsHdr says which JDK APIs were checked to conclude that.
+    override val hasHdrDisplay: Boolean = desktopDisplayIsHdr()
 }
 
 public actual fun platformDeviceCapabilities(context: PlatformContext): DeviceCapabilities =

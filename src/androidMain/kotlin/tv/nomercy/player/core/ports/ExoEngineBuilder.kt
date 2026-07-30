@@ -56,7 +56,7 @@ internal fun buildEngine(
     // inserting a processor into a video sink to change nothing would cost a
     // pass over every sample for no reason.
     processor: BiquadEqAudioProcessor? = null,
-): ExoPlayer {
+): ExoEngine {
     val budget: BufferConfig = bufferConfigForDevice(context)
     val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
         AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
@@ -81,7 +81,7 @@ internal fun buildEngine(
         .setAudioOffloadPreferences(offloadFor(renderers))
         .build()
 
-    return ExoPlayer.Builder(context)
+    val player: ExoPlayer = ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())
         .setRenderersFactory(renderers)
         .setTrackSelector(selector)
@@ -107,6 +107,8 @@ internal fun buildEngine(
             true,
         )
         .build()
+
+    return ExoEngine(player = player, renderers = renderers)
 }
 
 // The renderers factory with the equaliser spliced into its sink.

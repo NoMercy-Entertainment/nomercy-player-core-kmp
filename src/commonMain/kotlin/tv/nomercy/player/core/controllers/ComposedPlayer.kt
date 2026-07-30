@@ -273,6 +273,11 @@ public open class ComposedPlayer(
         configuredImageBaseUrl = config.baseImageUrl
         configuration = config
         activity = ActivityController(context, playerScope, config.inactivityMs)
+        // Pushed rather than read back from options() when the engine needs it: the
+        // decision is taken on a tracks change, which can arrive before anything
+        // would have thought to ask, and a backend holding the answer cannot be
+        // caught mid-load without one.
+        video?.hdrOnSdrFallback(config.hdrOnSdr)
         lifecycle.setup(config)
 
         // Controls start visible: the viewer just started a player, which is

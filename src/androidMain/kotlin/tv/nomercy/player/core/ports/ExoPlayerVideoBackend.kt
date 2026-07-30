@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.ports
 
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.media3.common.MediaItem
@@ -28,6 +29,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import tv.nomercy.player.core.errors.CoreErrorCodes
 
 private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
@@ -116,6 +118,8 @@ public class ExoPlayerVideoBackend(
     // only the host knows when it has.
     public var videoSurfaceAttached: Boolean = false
 
+    private val engine: ExoEngine = buildEngine(context, authHeaders, trackSelector, equaliser)
+
     // Public because video has to be drawn somewhere and only the caller knows
     // where. A PlayerView is handed the engine, not a frame buffer, so a backend
     // that kept this private could decode a film and show no one. Nothing above
@@ -123,7 +127,7 @@ public class ExoPlayerVideoBackend(
     // and this is the render target alone.
     //
     // Main thread, like everything else Media3 owns.
-    public val exoPlayer: ExoPlayer = buildEngine(context, authHeaders, trackSelector, equaliser)
+    public val exoPlayer: ExoPlayer = engine.player
 
     private val player: ExoPlayer = exoPlayer
 
@@ -131,6 +135,23 @@ public class ExoPlayerVideoBackend(
     // asking the DisplayManager on every tracks change would be a binder call
     // per manifest refresh.
     private val displayIsHdr: Boolean = androidDisplayIsHdr(context)
+
+    // Android 12 gave MediaCodec a colour-transfer request, and below it there is
+    // no way to ask a decoder for a converted picture at all. Reported rather than
+    // assumed so hdrDecision falls through to the consumer's fallback on an older
+    // device instead of promising a conversion nothing performs.
+    override val canToneMapHdrToSdr: Boolean =
+        Build.VERSION.SDK_INT >= ToneMappingCodecAdapterFactory.MIN_SDK
+
+    private var hdrFallback: HdrOnSdrFallback = HdrOnSdrFallback.Play
+
+    override fun hdrOnSdrFallback(fallback: HdrOnSdrFallback) {
+        hdrFallback = fallback
+    }
+
+    // Latched per item, so a refusal is reported once rather than on every tracks
+    // change for the rest of the film.
+    private var refusedAsUnplayable: Boolean = false
 
     // Media3 has no periodic time callback: it expects the UI to poll on its own
     // frame loop. A backend has no frame loop, so it polls at the rate a
@@ -200,7 +221,7 @@ public class ExoPlayerVideoBackend(
             // incomplete.
             override fun onEvents(player: Player, events: Player.Events) {
                 refreshCache()
-                applyHdrCeiling()
+                applyHdrDecision()
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -226,7 +247,13 @@ public class ExoPlayerVideoBackend(
     // untouched on a direct MP4, and it breaks HLS over TS — so a player that
     // decided once at construction would be wrong for half a library.
     private fun applyTunneling(url: String) {
-        val wanted: Boolean = videoSurfaceAttached && TunnelingRule.shouldTunnel(
+        // Never alongside a tone-map request. Tunneling exists to hand HDR frames
+        // to the display pipeline untouched, which is the opposite of asking the
+        // decoder to convert them — and a tunneled decoder ignores the colour
+        // transfer request, so the two together would report a conversion and show
+        // the washed-out picture anyway.
+        val wanted: Boolean = !engine.renderers.requestSdrToneMap &&
+            videoSurfaceAttached && TunnelingRule.shouldTunnel(
             isTv = isTvDevice,
             sourceIsHls = url.substringBefore('?').endsWith(".m3u8", ignoreCase = true),
             refusedByAudioSink = tunnelingRefusedByAudioSink,
@@ -258,6 +285,13 @@ public class ExoPlayerVideoBackend(
     override suspend fun load(url: String, opts: LoadOptions): Unit = onMain {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
+        refusedAsUnplayable = false
+        // Armed BEFORE prepare, because a codec reads its colour-transfer request
+        // when it is configured and the ladder is not known until after. Arming it
+        // on an SDR display costs nothing on SDR content: the factory only asks
+        // when the format actually reaching the decoder carries an HDR transfer,
+        // which is precisely the case CapTo has already ruled out.
+        engine.renderers.requestSdrToneMap = !displayIsHdr && canToneMapHdrToSdr
         applyTunneling(url)
         player.setMediaItem(MediaItem.fromUri(url))
         // prepare, not play: starting is a separate decision above, and an
@@ -372,16 +406,52 @@ public class ExoPlayerVideoBackend(
     // themselves would be the player arguing with them.
     private var pinnedByCaller: Boolean = false
 
-    // The HDR ceiling, reapplied whenever the ladder changes.
+    // What to do about this item's dynamic range on this screen, reapplied
+    // whenever the ladder changes.
     //
-    // Not applied once at load: a live manifest gains and loses rungs, and a cap
-    // computed against the first ladder stops matching the second. It is
+    // Not decided once at load: a live manifest gains and loses rungs, and a
+    // decision taken against the first ladder stops matching the second. It is
     // recomputed on every tracks change, which is the same callback the cache
     // refreshes from.
-    private fun applyHdrCeiling() {
-        if (pinnedByCaller) return
-        val ceiling: QualityLevel = HdrAbrConstraint.abrCeiling(cachedQualityLevels, displayIsHdr) ?: return
-        pinQuality(ceiling)
+    private fun applyHdrDecision() {
+        when (val decision: HdrDecision = hdrDecision(
+            levels = cachedQualityLevels,
+            displayHdr = displayIsHdr,
+            backendCanToneMap = canToneMapHdrToSdr,
+            fallback = hdrFallback,
+        )) {
+            // An HDR screen, or nothing HDR to worry about. Any request left over
+            // from a previous item is dropped rather than carried into this one.
+            HdrDecision.AsIs -> engine.renderers.requestSdrToneMap = false
+
+            // A rung the viewer chose themselves outranks the ceiling: a cap is a
+            // constraint on automatic behaviour, and overriding an explicit choice
+            // would be the player arguing with them.
+            is HdrDecision.CapTo -> if (!pinnedByCaller) pinQuality(decision.level)
+
+            // Idempotent — load already armed it. Re-armed here because a live
+            // manifest can lose its last SDR rung mid-playback, and the request
+            // then applies at the next codec configuration.
+            HdrDecision.ToneMap -> engine.renderers.requestSdrToneMap = true
+
+            // The consumer asked for a picture over no picture, and this is the
+            // one branch where the colours are knowingly wrong.
+            HdrDecision.PlayUnconverted -> Unit
+
+            HdrDecision.Refuse -> refuseAsUnplayable()
+        }
+    }
+
+    // No SDR rung, no conversion, and a consumer who chose not to show it wrong.
+    //
+    // Stopped as well as reported, because an error nothing acts on would leave
+    // the washed-out picture on screen next to a message saying it cannot be
+    // shown.
+    private fun refuseAsUnplayable() {
+        if (refusedAsUnplayable) return
+        refusedAsUnplayable = true
+        player.stop()
+        bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.HDR_UNPLAYABLE)
     }
 
     override fun quality(level: QualityLevel?): Unit = fireAndForget {
@@ -391,7 +461,7 @@ public class ExoPlayerVideoBackend(
         // Lifting a pin hands the rung back to adaptation, which is exactly when
         // the display constraint has to come back — otherwise "automatic" means
         // "automatic, including into HDR this screen cannot show".
-        if (level == null) applyHdrCeiling()
+        if (level == null) applyHdrDecision()
     }
 
     private fun pinQuality(level: QualityLevel) = fireAndForget {

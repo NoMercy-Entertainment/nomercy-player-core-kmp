@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.device
 
 import tv.nomercy.player.core.ports.PlatformContext
+import tv.nomercy.player.core.ports.appleDisplayIsHdr
 
 // An Apple TV, which is only ever one thing.
 //
@@ -25,9 +26,13 @@ internal object AppleTvCapabilities : DeviceCapabilities {
     override val hasPointer: Boolean = false
     override val hasHardwareVolumeKeys: Boolean = false
 
-    // AVDisplayCriteria knows what the attached television negotiated. Until it is
-    // read, false — an Apple TV plugged into an SDR set must not claim otherwise.
-    override val hasHdrDisplay: Boolean = false
+    // The same probe the playback path uses, so the capability a chrome reads and
+    // the capability a backend decides on cannot disagree about one television.
+    //
+    // Deferred rather than computed when this object initialises: an object's
+    // initialiser runs on whichever thread first touches it, and UIScreen is the
+    // main thread's to answer.
+    override val hasHdrDisplay: Boolean by lazy { appleDisplayIsHdr() }
 }
 
 public actual fun platformDeviceCapabilities(context: PlatformContext): DeviceCapabilities =

@@ -13,6 +13,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import tv.nomercy.player.core.ports.PlatformContext
+import tv.nomercy.player.core.ports.androidDisplayIsHdr
 
 // Android, which is every one of these shapes and will not say which.
 //
@@ -58,10 +59,9 @@ internal class AndroidCapabilities(context: Context) : DeviceCapabilities {
     // have handled it, against a control that visibly does nothing.
     override val hasHardwareVolumeKeys: Boolean = !television
 
-    // Display.getHdrCapabilities is the real answer and needs a Display, which this
-    // does not hold. False until it does, so a television reports SDR rather than
-    // claiming HDR it may not have.
-    override val hasHdrDisplay: Boolean = false
+    // The same probe the playback path uses, so the capability a chrome reads and
+    // the capability a backend decides on cannot disagree about one panel.
+    override val hasHdrDisplay: Boolean = androidDisplayIsHdr(context)
 
     private companion object {
         // Declared by set-top boxes that report no television UI mode. Not in

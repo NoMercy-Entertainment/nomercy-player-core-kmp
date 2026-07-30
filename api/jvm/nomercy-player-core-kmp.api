@@ -966,6 +966,7 @@ public final class tv/nomercy/player/core/errors/CoreErrorCodes {
 	public static final field DISPOSED Ljava/lang/String;
 	public static final field FORBIDDEN Ljava/lang/String;
 	public static final field FRAGMENT_FAILED Ljava/lang/String;
+	public static final field HDR_UNPLAYABLE Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/errors/CoreErrorCodes;
 	public static final field NETWORK_TIMEOUT Ljava/lang/String;
 	public static final field NOT_READY Ljava/lang/String;
@@ -3077,8 +3078,8 @@ public final class tv/nomercy/player/core/player/Player$DefaultImpls {
 
 public final class tv/nomercy/player/core/player/PlayerConfig {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()D
 	public final fun component11 ()D
@@ -3089,6 +3090,7 @@ public final class tv/nomercy/player/core/player/PlayerConfig {
 	public final fun component16 ()Z
 	public final fun component17 ()Ltv/nomercy/player/core/player/WakeLockPolicy;
 	public final fun component18 ()Ltv/nomercy/player/core/player/OfflinePolicy;
+	public final fun component19 ()Ltv/nomercy/player/core/ports/HdrOnSdrFallback;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()I
@@ -3097,8 +3099,8 @@ public final class tv/nomercy/player/core/player/PlayerConfig {
 	public final fun component7 ()J
 	public final fun component8 ()J
 	public final fun component9 ()J
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;)Ltv/nomercy/player/core/player/PlayerConfig;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/player/PlayerConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;ILjava/lang/Object;)Ltv/nomercy/player/core/player/PlayerConfig;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)Ltv/nomercy/player/core/player/PlayerConfig;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/player/PlayerConfig;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IJJJJJDDDDZZZLtv/nomercy/player/core/player/WakeLockPolicy;Ltv/nomercy/player/core/player/OfflinePolicy;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;ILjava/lang/Object;)Ltv/nomercy/player/core/player/PlayerConfig;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBaseImageUrl ()Ljava/lang/String;
 	public final fun getBaseUrl ()Ljava/lang/String;
@@ -3108,6 +3110,7 @@ public final class tv/nomercy/player/core/player/PlayerConfig {
 	public final fun getCrossfadeLeadSeconds ()D
 	public final fun getCrossfadeTailSeconds ()D
 	public final fun getDefaultVolume ()I
+	public final fun getHdrOnSdr ()Ltv/nomercy/player/core/ports/HdrOnSdrFallback;
 	public final fun getInactivityMs ()J
 	public final fun getItemEndingSoonThreshold ()D
 	public final fun getLanguage ()Ljava/lang/String;
@@ -4215,6 +4218,10 @@ public final class tv/nomercy/player/core/ports/DefaultPreloadStrategy : tv/nome
 	public fun shouldPreload (Ltv/nomercy/player/core/ports/PreloadContext;)Z
 }
 
+public final class tv/nomercy/player/core/ports/DesktopDisplayKt {
+	public static final fun desktopDisplayIsHdr ()Z
+}
+
 public final class tv/nomercy/player/core/ports/DesktopFamily : java/lang/Enum {
 	public static final field Companion Ltv/nomercy/player/core/ports/DesktopFamily$Companion;
 	public static final field LINUX Ltv/nomercy/player/core/ports/DesktopFamily;
@@ -5211,6 +5218,8 @@ public abstract interface class tv/nomercy/player/core/ports/VideoBackend : tv/n
 	public abstract fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public abstract fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
 	public abstract fun audioTracks ()Ljava/util/List;
+	public fun getCanToneMapHdrToSdr ()Z
+	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public abstract fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public abstract fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public abstract fun qualityLevels ()Ljava/util/List;
@@ -5221,6 +5230,8 @@ public abstract interface class tv/nomercy/player/core/ports/VideoBackend : tv/n
 
 public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
+	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
+	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
 }
 
@@ -5290,8 +5301,10 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
+	public fun getCanToneMapHdrToSdr ()Z
 	public final fun getEmbeddedPlayer ()Luk/co/caprica/vlcj/player/embedded/EmbeddedMediaPlayer;
 	public final fun getPlayableLadder ()Ljava/util/Collection;
+	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V

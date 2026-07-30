@@ -26,6 +26,7 @@ import platform.AVFoundation.preferredPeakBitRate
 import platform.AVFoundation.presentationSize
 import platform.AVFoundation.selectMediaOption
 import kotlin.concurrent.Volatile
+import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.media.QualityDescriptor
 import platform.AVFoundation.AVAsset
 import platform.AVFoundation.hasMediaCharacteristic
@@ -152,6 +153,7 @@ public class AVPlayerVideoBackend : VideoBackend {
     override suspend fun load(url: String, opts: LoadOptions) {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
+        refusedAsUnplayable = false
 
         // The asset is loaded before the item is built, rather than after.
         //
@@ -444,6 +446,55 @@ public class AVPlayerVideoBackend : VideoBackend {
         if (cachedState == BackendState.IDLE) cachedState = BackendState.READY
         bus.emit(CanonicalBackendEvent.LOADED_METADATA)
         bus.emit(CanonicalBackendEvent.CAN_PLAY)
+        // Once the item is ready, which is the first moment presentationSize and
+        // the access log answer anything and there is a rendition to decide about.
+        applyHdrDecision()
+    }
+
+    // AVFoundation converts HDR for an SDR screen in the display pipeline rather
+    // than on request: EDR compositing maps highlights into the headroom the panel
+    // actually has, which is why appleDisplayIsHdr reads that headroom to answer
+    // the other half of this. There is no per-item switch to set and none needed —
+    // AVPlayerItem.videoComposition, the one API that could force BT.709 output,
+    // is not honoured for HLS at all, and HLS is what NoMercy serves.
+    //
+    // So ToneMap here means "proceed, the platform converts" rather than "convert",
+    // and reporting true is what stops the decision falling through to a refusal
+    // for a picture the system would have shown correctly.
+    override val canToneMapHdrToSdr: Boolean = true
+
+    private var hdrFallback: HdrOnSdrFallback = HdrOnSdrFallback.Play
+
+    override fun hdrOnSdrFallback(fallback: HdrOnSdrFallback) {
+        hdrFallback = fallback
+    }
+
+    private var refusedAsUnplayable: Boolean = false
+
+    private fun applyHdrDecision() {
+        when (val decision: HdrDecision = hdrDecision(
+            levels = qualityLevels(),
+            displayHdr = appleDisplayIsHdr(),
+            backendCanToneMap = canToneMapHdrToSdr,
+            fallback = hdrFallback,
+        )) {
+            HdrDecision.AsIs -> Unit
+            is HdrDecision.CapTo -> quality(decision.level)
+            HdrDecision.ToneMap -> Unit
+            // Unreachable while canToneMapHdrToSdr is true, and named rather than
+            // folded into an else so it stops compiling the day that changes.
+            HdrDecision.PlayUnconverted -> Unit
+            HdrDecision.Refuse -> refuseAsUnplayable()
+        }
+    }
+
+    // Stopped as well as reported: an error nothing acts on would leave the
+    // washed-out picture on screen next to a message saying it cannot be shown.
+    private fun refuseAsUnplayable() {
+        if (refusedAsUnplayable) return
+        refusedAsUnplayable = true
+        player.pause()
+        bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.HDR_UNPLAYABLE)
     }
 
     private fun reportTimeControlChanges() {

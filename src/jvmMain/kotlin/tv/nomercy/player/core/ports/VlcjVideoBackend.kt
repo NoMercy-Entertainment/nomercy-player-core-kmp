@@ -10,6 +10,7 @@ package tv.nomercy.player.core.ports
 
 import java.io.File
 import java.net.URI
+import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.media.QualityDescriptor
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 import uk.co.caprica.vlcj.player.base.MediaPlayer
@@ -144,10 +145,67 @@ public class VlcjVideoBackend private constructor(
         announcedReadable = true
         bus.emit(CanonicalBackendEvent.LOADED_METADATA)
         bus.emit(CanonicalBackendEvent.CAN_PLAY)
+        // Once the container has been read, which is the first moment there is a
+        // ladder to decide about.
+        applyHdrDecision()
+    }
+
+    // Whether libVLC can be asked to convert HDR as it decodes.
+    //
+    // False, and the blocker is not the vout. libVLC does tone-map — its libplacebo
+    // converter takes --tone-mapping, and the installed build offers Hable through
+    // to hard clip — but that is the SECOND half of the problem. The first half is
+    // that nothing here can identify an HDR rung to convert: vlcj 4.11's
+    // VideoTrackInfo exposes width, height, aspect, frame rate, orientation and
+    // projection, and no colour primaries and no transfer function, because
+    // libVLC 3.x's video track struct does not carry them. So VlcTrackMapper
+    // reports SDR for every track, honestly, and hdrDecision can only ever answer
+    // AsIs on this platform.
+    //
+    // Reporting true and passing a tone-map option would therefore claim a
+    // conversion that never runs, on content never recognised as needing it. It
+    // becomes answerable when vlcj binds libVLC 4's track colour fields; until
+    // then the fallback decides, which is what a backend that cannot convert owes
+    // the caller.
+    override val canToneMapHdrToSdr: Boolean = false
+
+    private var hdrFallback: HdrOnSdrFallback = HdrOnSdrFallback.Play
+
+    override fun hdrOnSdrFallback(fallback: HdrOnSdrFallback) {
+        hdrFallback = fallback
+    }
+
+    private var refusedAsUnplayable: Boolean = false
+
+    private fun applyHdrDecision() {
+        when (val decision: HdrDecision = hdrDecision(
+            levels = qualityLevels(),
+            displayHdr = desktopDisplayIsHdr(),
+            backendCanToneMap = canToneMapHdrToSdr,
+            fallback = hdrFallback,
+        )) {
+            HdrDecision.AsIs -> Unit
+            is HdrDecision.CapTo -> quality(decision.level)
+            // Unreachable while canToneMapHdrToSdr is false, and named rather than
+            // folded into an else so it stops compiling the day that changes.
+            HdrDecision.ToneMap -> Unit
+            HdrDecision.PlayUnconverted -> Unit
+            HdrDecision.Refuse -> refuseAsUnplayable()
+        }
+    }
+
+    // Stopped as well as reported: an error nothing acts on would leave the
+    // washed-out picture on screen next to a message saying it cannot be shown.
+    private fun refuseAsUnplayable() {
+        if (refusedAsUnplayable) return
+        refusedAsUnplayable = true
+        player.controls().stop()
+        bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.HDR_UNPLAYABLE)
     }
 
     override suspend fun load(url: String, opts: LoadOptions) {
         announcedReadable = false
+        refusedAsUnplayable = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused

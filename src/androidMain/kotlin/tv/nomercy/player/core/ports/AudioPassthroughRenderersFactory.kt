@@ -16,6 +16,7 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.audio.AudioCapabilities
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
+import androidx.media3.exoplayer.mediacodec.MediaCodecAdapter
 
 // Renderers wired so an AVR receives the bitstream a disc would have carried.
 //
@@ -44,6 +45,25 @@ public open class AudioPassthroughRenderersFactory protected constructor(
 ) : DefaultRenderersFactory(context) {
 
     private val capabilities: AudioCapabilities = AudioCapabilities.getCapabilities(context)
+
+    private val codecAdapters: ToneMappingCodecAdapterFactory = ToneMappingCodecAdapterFactory(context)
+
+    // Whether the video decoder is being asked to hand back SDR frames.
+    //
+    // Lives on the renderers factory because that is the only object still
+    // reachable once the engine is built: Media3 verifies the calling thread on
+    // every player setter, and the codec adapter factory is consulted per codec
+    // configuration rather than once, so flipping this is what makes the decision
+    // apply to the next item without rebuilding the engine.
+    public var requestSdrToneMap: Boolean
+        get() = codecAdapters.toneMapToSdr
+        set(value) {
+            codecAdapters.toneMapToSdr = value
+        }
+
+    // The seam the tone-map request rides in on. DefaultRenderersFactory hands
+    // whatever this returns to MediaCodecVideoRenderer.Builder.
+    protected override fun getCodecAdapterFactory(): MediaCodecAdapter.Factory = codecAdapters
 
     // Whether to ask the track selector for offload as well. Passthrough is two
     // halves — the sink must not up-convert, and the selector must request that
