@@ -944,6 +944,10 @@ public final class tv/nomercy/player/core/dsp/HannWindow {
 	public final fun apply ([D)[D
 }
 
+public final class tv/nomercy/player/core/dsp/VolumeCurveKt {
+	public static final fun perceptualGain (F)F
+}
+
 public class tv/nomercy/player/core/errors/AuthError : tv/nomercy/player/core/errors/NetworkError {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/ErrorScope;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/String;Ljava/lang/Throwable;Ljava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -2942,6 +2946,7 @@ public final class tv/nomercy/player/core/player/ActionOptions {
 
 public final class tv/nomercy/player/core/player/ActionSource {
 	public static final field INSTANCE Ltv/nomercy/player/core/player/ActionSource;
+	public static final field PLATFORM Ljava/lang/String;
 	public static final field PLUGIN Ljava/lang/String;
 	public static final field REMOTE Ljava/lang/String;
 	public static final field USER Ljava/lang/String;

@@ -204,6 +204,31 @@ class VttParserTest {
     }
 
     @Test
+    fun aSeparatorLineHoldingASpaceStillSeparates() {
+        // The same shape as the CRLF failure above and a separate cause. A blank
+        // line that carries a space or a tab is not "\n\n", so the split did not
+        // match it: two cues merged into one whose body held the second cue's
+        // timing line as text, and the second cue was gone. Editors and hand-
+        // written files produce these constantly, and the web parser blanks such
+        // lines before splitting for exactly this reason.
+        val padded: String = listOf(
+            "WEBVTT",
+            " ",
+            "00:00:01.000 --> 00:00:02.000",
+            "First",
+            "\t",
+            "00:00:03.000 --> 00:00:04.000",
+            "Second",
+        ).joinToString("\n")
+
+        val cues: List<VttCue> = parseVtt(padded)
+
+        assertEquals(2, cues.size)
+        assertEquals("First", cues[0].body)
+        assertEquals("Second", cues[1].body)
+    }
+
+    @Test
     fun aBodyThatIsNotJustAReferenceIsNotASprite() {
         // Anchored on purpose. Searching for the fragment and splitting what came
         // after it accepted a subtitle that happens to mention a rectangle, and

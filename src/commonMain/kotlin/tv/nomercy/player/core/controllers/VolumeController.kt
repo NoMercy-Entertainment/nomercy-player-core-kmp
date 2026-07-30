@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.controllers
 
+import tv.nomercy.player.core.dsp.perceptualGain
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.MuteChange
 import tv.nomercy.player.core.events.PreventedAction
@@ -21,10 +22,16 @@ private const val DEFAULT_STEP = 5
 
 // Volume and mute.
 //
-// The public scale is 0..100 and the engine's is 0..1; the division happens
-// here, once, so no engine has to know about both. Whether that maps to a
-// perceptual curve is the engine's business — the number here is the one the
-// viewer set.
+// The public scale is 0..100 and the engine's is 0..1; the conversion happens
+// here, once, so no engine has to know about both. The taper happens here too.
+//
+// It was left to the engines, and no engine did it: Media3, AVPlayer and libVLC
+// each got the slider's raw position, so the same position was audibly louder
+// here than on the web — most visibly when a Connect handover moves playback
+// between the two mid-session. It is also the only seam a test can observe, since
+// every engine's getter answers with the last value it was handed rather than
+// with what its own mixer holds. So an engine here is given amplitude, and the
+// position it came from stays in this controller.
 public class VolumeController(private val ctx: PlayerContext) {
 
     // Zero while muted, whatever level is stored. A slider bound to this shows
@@ -32,8 +39,7 @@ public class VolumeController(private val ctx: PlayerContext) {
     public fun volume(): Int = if (ctx.volumeState == VolumeState.MUTED) MIN_VOLUME else ctx.internalVolume
 
     public suspend fun volume(level: Int, opts: ActionOptions = ActionOptions()) {
-        val target: Int = level.coerceIn(MIN_VOLUME, MAX_VOLUME)
-        val outcome = ctx.dispatchBefore(CoreEvents.BeforeVolume, VolumeChange(target))
+        val outcome = ctx.dispatchBefore(CoreEvents.BeforeVolume, VolumeChange(level.coerceIn(MIN_VOLUME, MAX_VOLUME)))
         if (outcome.prevented) {
             ctx.emit(CoreEvents.VolumePrevented, PreventedAction(outcome.reason, opts.source))
             return
@@ -66,12 +72,25 @@ public class VolumeController(private val ctx: PlayerContext) {
         volume(ctx.internalVolume - step, opts)
     }
 
+    // Clamped here rather than at the entry point, because a listener redirecting
+    // the level is a level that has not been clamped yet. Only the entry was, so
+    // a plugin answering the before-event with 500 sent the engine five times
+    // full scale.
     private fun applyVolume(level: Int) {
-        ctx.internalVolume = level
-        ctx.volumeBeforeMute = level
-        ctx.emit(CoreEvents.Volume, VolumeChange(level))
-        ctx.backend?.volume(level.toFloat() / MAX_VOLUME)
+        val target: Int = level.coerceIn(MIN_VOLUME, MAX_VOLUME)
+        ctx.internalVolume = target
+
+        // Only while it is being heard. A level arriving during a mute — a
+        // hardware key, a chrome writing 0 — was overwriting the level to come
+        // back to, so unmuting restored the silence instead of the music and the
+        // viewer's only way out was to find the slider with nothing to aim by.
+        if (ctx.volumeState != VolumeState.MUTED) ctx.volumeBeforeMute = target
+
+        ctx.emit(CoreEvents.Volume, VolumeChange(target))
+        ctx.backend?.volume(engineGain(target))
     }
+
+    private fun engineGain(level: Int): Float = perceptualGain(level.toFloat() / MAX_VOLUME)
 
     // Muting something already muted is not an event. A chrome that redraws on
     // mute would otherwise flicker every time a keyboard shortcut repeated.
@@ -93,7 +112,7 @@ public class VolumeController(private val ctx: PlayerContext) {
             ctx.volumeState = VolumeState.UNMUTED
             ctx.internalVolume = ctx.volumeBeforeMute
             ctx.backend?.unmute()
-            ctx.backend?.volume(ctx.internalVolume.toFloat() / MAX_VOLUME)
+            ctx.backend?.volume(engineGain(ctx.internalVolume))
         }
         ctx.emit(CoreEvents.Mute, MuteChange(muted))
     }

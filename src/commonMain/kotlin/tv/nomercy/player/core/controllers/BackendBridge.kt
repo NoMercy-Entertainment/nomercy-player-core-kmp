@@ -10,9 +10,11 @@ package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.PlaySource
 import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
+import tv.nomercy.player.core.player.ActionSource
 import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
@@ -61,9 +63,17 @@ public class BackendBridge(private val ctx: PlayerContext) {
             }
         }
 
-        listen(backend, CanonicalBackendEvent.PAUSE) {
-            ctx.playState = PlayState.PAUSED
-        }
+        // A stop the player did not ask for.
+        //
+        // Audio focus going to a call, headphones coming out, a media key the
+        // engine handled itself. The field was written and nothing was told, so
+        // every consumer went on showing playing: the chrome's button, the
+        // notification mirroring it, and the other devices on the account.
+        listen(backend, CanonicalBackendEvent.PAUSE) { announcePause() }
+
+        // The other half of the same bridge, for a start the player did not ask
+        // for — focus coming back, or that same media key.
+        listen(backend, CanonicalBackendEvent.PLAY) { announcePlay() }
 
         attachStreamFailures(backend)
 
@@ -71,6 +81,10 @@ public class BackendBridge(private val ctx: PlayerContext) {
             ctx.bufferState = BufferState.LOADING
             // A new item has its own first frame.
             announcedFirstFrame = false
+            // Nothing comes out while a source loads, so a state still saying
+            // playing is a state that is lying. A toggle bound to it spent the
+            // viewer's first press pausing a silent player.
+            announcePause()
         }
 
         listen(backend, CanonicalBackendEvent.ENDED) {
@@ -181,6 +195,29 @@ public class BackendBridge(private val ctx: PlayerContext) {
         listen(backend, CanonicalBackendEvent.STREAM_ERROR) {
             ctx.emit(CoreEvents.StreamError, StreamError(details = it?.toString() ?: "", fatal = true))
         }
+    }
+
+    // Only when it was not already going. An engine repeats itself and a chrome
+    // that redraws on every repeat flickers for nothing.
+    private fun announcePlay() {
+        if (ctx.playState == PlayState.PLAYING) return
+
+        ctx.playState = PlayState.PLAYING
+        ctx.emit(CoreEvents.Play, PlaySource(ActionSource.PLATFORM))
+    }
+
+    // Only when it was going, and only when it is not just the item finishing.
+    //
+    // Every engine stops its clock at the end, so a pause always rides along with
+    // the ending; announcing that one would have a chrome show a paused player for
+    // the instant before it shows a finished one. The web player suppresses it the
+    // same way, reading the element's own ended flag.
+    private fun announcePause() {
+        if (ctx.playState != PlayState.PLAYING) return
+        if (ctx.phase == PlayerPhase.ENDED) return
+
+        ctx.playState = PlayState.PAUSED
+        ctx.emit(CoreEvents.Pause, PlaySource(ActionSource.PLATFORM))
     }
 
     private fun listen(backend: MediaBackend, event: String, handler: (Any?) -> Unit) {

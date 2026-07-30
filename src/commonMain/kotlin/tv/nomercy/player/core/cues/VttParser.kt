@@ -81,11 +81,19 @@ public fun parseVtt(text: String): List<VttCue> =
 // back empty, because the sprite rectangle then had far more than four numbers
 // in it. Most encoders emit CRLF, so this was the common case, not the edge.
 //
+// A separator line carrying a space or a tab is the same failure from a second
+// direction, and it survived the CRLF fix because line endings were not what was
+// wrong with it. Such a line is emptied before the split so it separates like
+// the blank line it was meant to be — the web parser does this, and the defect it
+// closed there is on record.
+//
 // The BOM strip is alignment with the web parser, not a fix — a BOM rides on the
 // `WEBVTT` header, and this reads the header as "a block with no arrow" rather
 // than by name, so it was already skipped either way.
-private fun normalise(text: String): String =
-    text.removePrefix(BOM).replace("\r\n", "\n").replace('\r', '\n')
+private fun normalise(text: String): String {
+    val unified: String = text.removePrefix(BOM).replace("\r\n", "\n").replace('\r', '\n')
+    return BLANK_LINE.replace(unified, "")
+}
 
 // One block, or null when it is not a cue.
 //
@@ -176,7 +184,12 @@ private val SPRITE_FRAGMENT = Regex("""([^#]+)#xywh=(-?\d+),(-?\d+),(\d+),(\d+)"
 
 private const val ARROW = "-->"
 private const val BOM = "﻿"
-private const val BLOCK_SEPARATOR = "\n\n"
+
+// Two or more, so three blank lines between cues do not produce an empty block
+// the rest of this has to recognise as "not a cue".
+private val BLOCK_SEPARATOR = Regex("\n{2,}")
+
+private val BLANK_LINE = Regex("""^[ \t]+$""", RegexOption.MULTILINE)
 private const val MAX_TIME_PARTS = 3
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3_600
