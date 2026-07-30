@@ -56,6 +56,17 @@ public class StateController(
         ctx.on(CoreEvents.Seek) { recompute() }
         ctx.on(CoreEvents.Seeked) { recompute() }
         ctx.on(CoreEvents.Time) { recompute() }
+        // The length of the item, which was the field this list forgot — exactly
+        // the failure the note above describes. BackendBridge learns it from
+        // `loadedmetadata` and announces it, and nothing recomputed, so the flow
+        // reported a duration of zero for an item that was loaded and not yet
+        // playing. A chrome projecting from the flow then had no length to divide
+        // by: the bar drew no progress, chapter markers computed against zero and
+        // came out empty, and a scrubber mapped every position on the strip to the
+        // start of the film. It corrected itself on the first play or time tick,
+        // which is why it survived — the broken window is the one before a viewer
+        // has pressed anything, and scrubbing before playing is a thing people do.
+        ctx.on(CoreEvents.Duration) { recompute() }
         ctx.on(CoreEvents.Item) { recompute() }
         ctx.on(CoreEvents.Queue) { recompute() }
         ctx.on(CoreEvents.Repeat) { recompute() }

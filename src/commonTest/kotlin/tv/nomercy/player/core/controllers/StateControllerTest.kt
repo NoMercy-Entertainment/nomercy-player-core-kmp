@@ -19,6 +19,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+private const val LENGTH_SECONDS = 1435.0
+
 class StateControllerTest {
 
     private class StateRig {
@@ -60,6 +62,23 @@ class StateControllerTest {
         rig.transport.play()
 
         assertEquals(PlayState.PLAYING, rig.state.stateFlow.value.playState)
+    }
+
+    @Test
+    fun theFlowCarriesTheItemsLengthBeforeAnythingHasBeenPlayed() = runTest {
+        // `loadedmetadata` is where the length arrives, and it arrives before a
+        // viewer has pressed anything. The flow left it at zero until the first
+        // play or time tick, so a chrome reading the flow had nothing to divide by
+        // in the one window where a viewer is most likely to scrub: bar empty,
+        // chapter markers computed against zero, and every position on the strip
+        // seeking to the start.
+        val rig = StateRig().ready()
+        rig.queue.queue(items("a"))
+
+        rig.ctx.internalDuration = LENGTH_SECONDS
+        rig.ctx.emit(CoreEvents.Duration, LENGTH_SECONDS)
+
+        assertEquals(LENGTH_SECONDS, rig.state.stateFlow.value.duration)
     }
 
     @Test
