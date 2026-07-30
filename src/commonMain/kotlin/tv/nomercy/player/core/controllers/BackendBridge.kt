@@ -8,9 +8,14 @@
 
 package tv.nomercy.player.core.controllers
 
+import tv.nomercy.player.core.errors.ErrorCode
+import tv.nomercy.player.core.errors.ErrorScope
+import tv.nomercy.player.core.errors.Severity
+import tv.nomercy.player.core.events.BackendErrorPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PlaySource
+import tv.nomercy.player.core.events.PlayerErrorEvent
 import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
@@ -22,6 +27,13 @@ import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.core.ports.MediaBackend
 
 private const val PERCENT = 100.0
+
+// What the web calls an element error it cannot map to anything more specific,
+// and already a key in DEFAULT_RETRY_POLICY here — where it is not retried,
+// because an engine that could not decode a source will not decode it twice.
+private const val UNCLASSIFIED_ENGINE_FAILURE = "media/decode-fatal-all"
+
+private const val UNKNOWN_ENGINE = "unknown"
 
 // What the engine says, turned into what the player says.
 //
@@ -195,6 +207,49 @@ public class BackendBridge(private val ctx: PlayerContext) {
         listen(backend, CanonicalBackendEvent.STREAM_ERROR) {
             ctx.emit(CoreEvents.StreamError, StreamError(details = it?.toString() ?: "", fatal = true))
         }
+
+        listen(backend, CanonicalBackendEvent.ERROR) { announceFailure(backend, it) }
+    }
+
+    // The engine's own failure, which was the one name in the vocabulary nothing
+    // listened for.
+    //
+    // Nine emit sites across the three engines announced into nothing: a decode
+    // that failed, a source AVFoundation refused, libVLC giving up — and the
+    // HDR-unplayable refusal, which exists to stop playback and tell the viewer
+    // why, and was doing neither.
+    //
+    // Both events, because they answer different questions. backend:error carries
+    // what the engine said and which engine said it, for a support log; error is
+    // the one surface a consumer subscribes to in order to know something went
+    // wrong, and it should not have to enumerate every specific failure first.
+    private fun announceFailure(backend: MediaBackend, reported: Any?) {
+        val engineWord: String? = reported?.toString()?.takeIf { it.isNotBlank() }
+
+        // Only a code that is one. Media3 reports its own name for a failure and
+        // the other two report nothing at all; passing either through as a code
+        // would put an identifier in a dashboard that no dashboard groups.
+        val code: String = engineWord
+            ?.takeIf { ErrorCode.parseOrNull(it) != null }
+            ?: UNCLASSIFIED_ENGINE_FAILURE
+
+        // The reference derives this from the engine's state, where an engine in
+        // error is not an engine that is buffering. It is stored here, so without
+        // this a spinner keeps turning on top of an item that already failed.
+        ctx.bufferState = BufferState.IDLE
+
+        val kind: String = backend::class.simpleName ?: UNKNOWN_ENGINE
+        ctx.emit(CoreEvents.BackendError, BackendErrorPayload(error = engineWord, kind = kind))
+        ctx.emit(
+            CoreEvents.Error,
+            PlayerErrorEvent(
+                code = code,
+                message = engineWord ?: "the engine reported a failure and did not say which",
+                severity = Severity.ERROR,
+                scope = ErrorScope.backend(kind),
+                context = mapOf("engine" to kind, "reported" to engineWord),
+            ),
+        )
     }
 
     // Only when it was not already going. An engine repeats itself and a chrome

@@ -9,14 +9,19 @@
 package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.test.runTest
+import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.events.BackendErrorPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.PlaySource
+import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.testing.FakeMediaBackend
 import tv.nomercy.player.testing.TestItem
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 // A stop the player did not ask for.
 //
@@ -96,6 +101,63 @@ class EnginePlayStateBridgeTest {
 
         assertEquals(1, plays.size, "announced when it starts, not on every repeat")
         assertEquals(PlayState.PLAYING, player.playState())
+    }
+
+    @Test
+    fun anEngineFailureReachesTheOneSurfaceAConsumerListensOn() = runTest {
+        val (player, backend) = playing()
+        val failures: MutableList<PlayerErrorEvent> = mutableListOf()
+        val raw: MutableList<BackendErrorPayload> = mutableListOf()
+        player.on(CoreEvents.Error) { failures += it }
+        player.on(CoreEvents.BackendError) { raw += it }
+
+        // The refusal three engines emit when HDR content meets a screen that
+        // cannot show it and nothing can convert it. It exists to stop playback
+        // and say why, and it was announced into nothing: the canonical error was
+        // the one name in the vocabulary with no handler, from nine emit sites.
+        backend.fire(CanonicalBackendEvent.ERROR, CoreErrorCodes.HDR_UNPLAYABLE)
+
+        assertEquals(CoreErrorCodes.HDR_UNPLAYABLE, failures.single().code)
+        assertEquals(CoreErrorCodes.HDR_UNPLAYABLE, raw.single().error)
+        assertEquals("FakeMediaBackend", raw.single().kind, "which engine failed is worth a support log")
+    }
+
+    @Test
+    fun anEngineFailureWithNoCodeIsNotDressedUpAsOne() = runTest {
+        val (player, backend) = playing()
+        val failures: MutableList<PlayerErrorEvent> = mutableListOf()
+        player.on(CoreEvents.Error) { failures += it }
+
+        // AVFoundation and libVLC report a failure without one. Media3 reports its
+        // own name for it, which is not a code in this scheme either — treating
+        // either as one would put a code in a dashboard that no dashboard knows.
+        backend.fire(CanonicalBackendEvent.ERROR, "ERROR_CODE_DECODING_FAILED")
+
+        val reported: PlayerErrorEvent = failures.single()
+        assertEquals(
+            "media/decode-fatal-all",
+            reported.code,
+            "the web's default for an element error it cannot classify",
+        )
+        assertTrue(
+            reported.context.values.any { it == "ERROR_CODE_DECODING_FAILED" },
+            "the engine's own word for it is kept, as context rather than as the code",
+        )
+    }
+
+    @Test
+    fun aFailureTakesTheSpinnerDownWithIt() = runTest {
+        val (player, backend) = playing()
+        backend.fire(CanonicalBackendEvent.WAITING)
+        assertEquals(BufferState.STALLED, player.bufferState())
+
+        backend.fire(CanonicalBackendEvent.ERROR)
+
+        // The reference derives this from the engine's state, and an engine in
+        // error is not an engine that is buffering. Stored rather than derived
+        // here, so it stayed STALLED and left a spinner turning on top of an item
+        // that had already failed.
+        assertEquals(BufferState.IDLE, player.bufferState())
     }
 
     @Test
