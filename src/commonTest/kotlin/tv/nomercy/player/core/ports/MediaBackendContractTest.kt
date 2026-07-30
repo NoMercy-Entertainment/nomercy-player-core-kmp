@@ -18,7 +18,7 @@ private const val TRACK_DURATION_SECONDS = 100.0
 
 // Small enough to read, complete enough to prove the contract is implementable
 // without an engine. The real ones wrap ExoPlayer, AVPlayer and VLCJ.
-private class FakeAudioBackend : AudioBackend {
+private open class FakeAudioBackend : AudioBackend {
     private var backendState: BackendState = BackendState.IDLE
     private var position: Double = 0.0
     private var level: Float = 1.0f
@@ -79,7 +79,9 @@ private class FakeAudioBackend : AudioBackend {
         level = levelBeforeMute
     }
 
-    override fun buffered(): Double = position + 10.0
+    // buffered() is deliberately not overridden: the fake reports no ranges, and
+    // taking the interface default is what makes the subclass below able to
+    // prove the default answers for an engine that reports only ranges.
 
     override fun playbackRate(): Double = rate
 
@@ -118,7 +120,52 @@ private class FakeAudioBackend : AudioBackend {
     }
 }
 
+// An engine that reports where its data is and nothing else, which is the Apple
+// backend's shape. It must not have to know how a frontier is derived from that.
+private class RangeReportingBackend(
+    private val ranges: List<TimeRange>,
+) : FakeAudioBackend() {
+    override fun bufferedRanges(): List<TimeRange> = ranges
+}
+
 class MediaBackendContractTest {
+
+    // The revert-proof for the Apple backend's own override, which took the
+    // furthest end out of every range and so read the list below as 3600.
+    //
+    // Asserted through buffered() rather than through bufferedFrontier(), because
+    // what broke was not the walk — it was an engine answering without it. A test
+    // on the walk alone stays green while a backend routes around it.
+    @Test
+    fun anEngineThatReportsRangesGetsTheFrontierWithoutImplementingTheWalk() {
+        val backend: MediaBackend = RangeReportingBackend(BufferedFrontierTest.SPLIT)
+
+        backend.currentTime(5.0)
+
+        assertEquals(90.0, backend.buffered())
+    }
+
+    @Test
+    fun theFrontierIsAbsoluteRatherThanADurationAheadOfThePlayhead() {
+        // 90, not 85. The doc said "how far ahead of the playhead" for a while
+        // and every consumer divided by duration to draw a bar, which only works
+        // if the number is a position on the same timeline.
+        val backend: MediaBackend = RangeReportingBackend(BufferedFrontierTest.SPLIT)
+
+        backend.currentTime(5.0)
+
+        assertEquals(90.0, backend.buffered())
+        assertTrue(backend.buffered() > backend.currentTime())
+    }
+
+    @Test
+    fun anEngineInAHoleReportsNoBufferAheadRatherThanTheFurthestEnd() {
+        val backend: MediaBackend = RangeReportingBackend(BufferedFrontierTest.SPLIT)
+
+        backend.currentTime(2000.0)
+
+        assertEquals(2000.0, backend.buffered())
+    }
 
     @Test
     fun transportMovesTheBackendThroughItsStates() = runTest {

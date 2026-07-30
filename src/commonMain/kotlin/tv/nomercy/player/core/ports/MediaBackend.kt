@@ -38,9 +38,23 @@ public interface MediaBackend {
     public fun mute()
     public fun unmute()
 
-    // How far ahead of the playhead the engine has data, in seconds. What a
-    // scrubber draws its buffered bar from.
-    public fun buffered(): Double
+    // The absolute timeline position, in seconds, that buffered data reaches.
+    //
+    // The same frame of reference currentTime() and duration() use, which is
+    // what lets a scrubber draw its buffered bar as buffered() / duration().
+    // NOT how far ahead of the playhead the data goes: the doc said that for a
+    // while and no implementation ever agreed with it, so a reader had two
+    // contradictory sources and picked whichever they read first.
+    //
+    // Contiguous from the playhead, and the default is the walk that makes it
+    // so. An engine that reports ranges gets the frontier right by reporting
+    // them: the walk is written once rather than per engine, which is how the
+    // Apple backend came to answer 3600 for a list the other two read as 5.
+    //
+    // Overridden by an engine that reports a frontier of its own and no ranges
+    // — Media3 and libVLC both do — because the default would read their empty
+    // range list as nothing buffered.
+    public fun buffered(): Double = bufferedFrontier(bufferedRanges(), currentTime())
 
     // Where data actually is, and where the playhead may go.
     //

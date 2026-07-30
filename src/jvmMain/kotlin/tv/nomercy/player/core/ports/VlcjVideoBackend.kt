@@ -380,9 +380,15 @@ public class VlcjVideoBackend private constructor(
         player.audio().isMute = false
     }
 
-    // libVLC exposes cache fullness as a percentage rather than a buffered
-    // range, so the honest answer is how far ahead of the playhead it claims to
-    // be, and zero when it will not say.
+    // The playhead, which as an absolute frontier says "nothing buffered ahead
+    // of here" — the same answer the web player gives while a seek into
+    // unbuffered territory is being served.
+    //
+    // Overridden rather than left to MediaBackend's default because libVLC
+    // reports no ranges at all: it exposes cache fullness as a percentage, and a
+    // percentage cannot say WHERE the data is. The default would read the empty
+    // range list as nothing buffered and put the bar back at zero, which is a
+    // stronger claim than an engine that will not say has earned.
     override fun buffered(): Double = currentTime()
 
     override fun playbackRate(): Double = player.status().rate().toDouble()

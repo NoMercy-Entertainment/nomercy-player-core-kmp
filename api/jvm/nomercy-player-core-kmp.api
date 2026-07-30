@@ -37,6 +37,8 @@ public final class tv/nomercy/player/core/cast/HandoffResult$Unsupported : tv/no
 }
 
 public final class tv/nomercy/player/core/chapters/ChapterController {
+	public static final field Companion Ltv/nomercy/player/core/chapters/ChapterController$Companion;
+	public static final field DEFAULT_FILLER_TITLE Ljava/lang/String;
 	public fun <init> ()V
 	public fun <init> (Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -44,6 +46,9 @@ public final class tv/nomercy/player/core/chapters/ChapterController {
 	public final fun clear ()V
 	public final fun durationChanged (D)Z
 	public final fun ingest (Ljava/util/List;)Z
+}
+
+public final class tv/nomercy/player/core/chapters/ChapterController$Companion {
 }
 
 public final class tv/nomercy/player/core/controllers/ActivityController {
@@ -3974,6 +3979,7 @@ public abstract interface class tv/nomercy/player/core/ports/AudioBackend : tv/n
 
 public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun audioGraph (Ltv/nomercy/player/core/ports/AudioBackend;)Ltv/nomercy/player/core/ports/AudioDspGraph;
+	public static fun buffered (Ltv/nomercy/player/core/ports/AudioBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 }
@@ -4149,6 +4155,10 @@ public final class tv/nomercy/player/core/ports/BufferConfig {
 
 public final class tv/nomercy/player/core/ports/BufferConfigKt {
 	public static final field BYTES_PER_MB I
+}
+
+public final class tv/nomercy/player/core/ports/BufferedFrontierKt {
+	public static final fun bufferedFrontier (Ljava/util/List;D)D
 }
 
 public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
@@ -4583,7 +4593,7 @@ public abstract interface class tv/nomercy/player/core/ports/Logger {
 }
 
 public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
-	public abstract fun buffered ()D
+	public fun buffered ()D
 	public fun bufferedRanges ()Ljava/util/List;
 	public abstract fun currentTime ()D
 	public abstract fun currentTime (D)V
@@ -4606,6 +4616,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 }
 
 public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
+	public static fun buffered (Ltv/nomercy/player/core/ports/MediaBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
@@ -5303,6 +5314,7 @@ public abstract interface class tv/nomercy/player/core/ports/VideoBackend : tv/n
 }
 
 public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
+	public static fun buffered (Ltv/nomercy/player/core/ports/VideoBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
 	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V

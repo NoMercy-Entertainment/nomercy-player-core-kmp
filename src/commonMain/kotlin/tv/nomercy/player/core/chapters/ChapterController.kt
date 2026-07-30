@@ -29,6 +29,16 @@ public class ChapterController(
     private val makeFillerTitle: () -> String = { DEFAULT_FILLER_TITLE },
 ) {
 
+    public companion object {
+        // Named rather than left to the caller, because every caller would pick
+        // a different word for the same thing and a viewer would see two.
+        //
+        // Public because the player needs the same word: it asks the host's
+        // translator first, and a host without a table has to land here rather
+        // than on a second spelling of it.
+        public const val DEFAULT_FILLER_TITLE: String = "Chapter"
+    }
+
     // What the source actually gave, before any filling. Kept so a duration
     // change re-derives rather than filling an already-filled list.
     private var source: List<Chapter> = emptyList()
@@ -99,7 +109,3 @@ public class ChapterController(
         return changed
     }
 }
-
-// Named rather than left to the caller, because every caller would pick a
-// different word for the same thing and a viewer would see two.
-private const val DEFAULT_FILLER_TITLE = "Chapter"

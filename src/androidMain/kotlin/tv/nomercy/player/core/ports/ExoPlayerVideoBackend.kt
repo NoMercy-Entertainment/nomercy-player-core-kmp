@@ -355,6 +355,11 @@ public class ExoPlayerVideoBackend(
 
     @Volatile private var pendingVolume: Float? = null
 
+    // Media3's own frontier, which is already absolute and already contiguous
+    // from the playhead — it stops at the first hole, so it needs no walk.
+    // Overridden rather than left to MediaBackend's default for that reason:
+    // this engine reports no ranges, and the default would read the empty list
+    // as nothing buffered.
     override fun buffered(): Double = cachedBuffered
 
     override fun playbackRate(): Double = cachedRate

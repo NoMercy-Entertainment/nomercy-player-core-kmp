@@ -38,6 +38,8 @@ import tv.nomercy.player.core.events.PlaylistResolvingPayload
 import tv.nomercy.player.core.events.TimeState
 import tv.nomercy.player.core.events.PlaybackMetrics
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.chapters.ChapterController
+import tv.nomercy.player.core.events.ChaptersPayload
 import tv.nomercy.player.core.media.Chapter
 import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
@@ -120,6 +122,11 @@ import tv.nomercy.player.core.ports.Translator
 // Ten seconds, which is what every player's skip button does and what a viewer
 // expects without being told.
 private const val SKIP_SECONDS = 10.0
+
+// The word on a chapter the player invented to cover an unlabelled run-up. The
+// web resolves the same key for the same filler, so the two read the same in
+// every language a host has a table for.
+private const val CHAPTER_FILLER_KEY = "core.chapters.untitled"
 
 // Every 2xx. A playlist behind a redirect the fetcher already followed arrives
 // as a 200; anything else did not arrive.
@@ -264,6 +271,18 @@ public open class ComposedPlayer(
         // film: the countdown expired harmlessly while paused, and nothing
         // would arm it again.
         context.on(CoreEvents.Play) { activity.onPlaybackResumed() }
+
+        // The other half of the chapter seam. Chapters routinely resolve before
+        // the engine has read a duration, and there is no end to fill up to until
+        // it does — so the run-up filler cannot exist yet at ingest and has to be
+        // derived again once a length lands or is corrected.
+        //
+        // Only on a change, unlike ingest. Duration arrives on every item and can
+        // be re-reported for the same one, and announcing an unchanged list each
+        // time would rebuild every chapter menu on a tick that moved nothing.
+        context.on(CoreEvents.Duration) { seconds ->
+            if (chapterController.durationChanged(seconds)) publishChapters()
+        }
     }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
@@ -677,8 +696,28 @@ public open class ComposedPlayer(
     // the first.
     public open fun chapters(): List<Chapter> = chapterTrack.chapters
 
+    // Through the controller, which is the seam that fills the run-up to the
+    // first chapter and re-fills it when a duration arrives.
+    //
+    // This built a ChapterTrack straight from the list, and the controller was
+    // reachable from nothing but its own test. A scan starting its first chapter
+    // partway in left the opening minutes inside no chapter at all: chapter() was
+    // null over a cold open, a chrome showing the current title showed nothing,
+    // and the whole of the web's gap-fill had no way in.
     public open fun chapters(list: List<Chapter>) {
-        chapterTrack = ChapterTrack(list)
+        chapterController.ingest(list)
+        publishChapters()
+    }
+
+    // Always announced, even when the list is identical to the one before it.
+    //
+    // "Chapters became available" rather than "the list changed": an item
+    // reloaded after an error resolves the same chapters it had, and a chrome
+    // that cleared its menu on the error would never get them back if an
+    // identical list were treated as nothing to say. The web's `alwaysEmit`.
+    private fun publishChapters() {
+        chapterTrack = ChapterTrack(chapterController.chapters())
+        context.emit(CoreEvents.Chapters, ChaptersPayload(chapterTrack.chapters))
     }
 
     public open fun chapter(): Chapter? = chapterTrack.at(time())
@@ -702,6 +741,25 @@ public open class ComposedPlayer(
     }
 
     private var chapterTrack: ChapterTrack = ChapterTrack(emptyList())
+
+    // Resolved per call rather than captured once, so a player whose language
+    // changes after the chapters arrived re-fills into the new language on the
+    // next duration tick rather than keeping the old word.
+    private val chapterController: ChapterController = ChapterController(::chapterFillerTitle)
+
+    // The host's word for an invented chapter, and the kit's when it has none.
+    //
+    // t() answers with the key itself when nothing translated it. That is right
+    // for a tooltip, where a developer should see the wiring is missing, and
+    // wrong for a chapter title, where a viewer would read
+    // 'core.chapters.untitled' in their menu. Native core ships no table of its
+    // own the way the web kit does, so the unresolved case is the ordinary one
+    // here rather than a misconfiguration.
+    private fun chapterFillerTitle(): String {
+        val translated: String = t(CHAPTER_FILLER_KEY)
+
+        return if (translated == CHAPTER_FILLER_KEY) ChapterController.DEFAULT_FILLER_TITLE else translated
+    }
 
     // Skip, clamped at both ends. A rewind landing at a negative position makes
     // one engine seek to the start and another refuse.

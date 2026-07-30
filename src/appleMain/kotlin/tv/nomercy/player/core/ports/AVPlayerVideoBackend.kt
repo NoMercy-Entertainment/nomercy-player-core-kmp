@@ -223,12 +223,14 @@ public class AVPlayerVideoBackend : VideoBackend {
         player.muted = false
     }
 
-    // The furthest point data reaches, out of the ranges below.
+    // buffered() is deliberately NOT overridden here. This engine reports
+    // ranges, so MediaBackend's default walks them from the playhead and gets
+    // the answer the web player gives.
     //
-    // AVPlayer exposes loaded ranges on the item rather than the player, and
-    // before an item exists there is nothing loaded. Falls back to the position,
-    // which is the honest floor rather than a guess at how far ahead it read.
-    override fun buffered(): Double = bufferedRanges().maxOfOrNull { it.end } ?: cachedTime
+    // It was overridden, with the furthest end out of every range. That reads
+    // the same as the walk right up to the case the walk exists for: a seek back
+    // an hour leaves [0, 90] and [3500, 3600] with the playhead at 5, and the
+    // furthest end says the buffer reaches 3600 over a stretch holding none.
 
     // AVFoundation is the one engine that reports both of these directly, so
     // these are the real thing rather than a frontier restated as a range.

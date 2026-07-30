@@ -934,7 +934,6 @@ abstract interface tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.co
 }
 
 abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.core.ports/MediaBackend|null[0]
-    abstract fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.buffered|buffered(){}[0]
     abstract fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.currentTime|currentTime(){}[0]
     abstract fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.currentTime|currentTime(kotlin.Double){}[0]
     abstract fun duration(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.duration|duration(){}[0]
@@ -951,6 +950,7 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     abstract fun volume(kotlin/Float) // tv.nomercy.player.core.ports/MediaBackend.volume|volume(kotlin.Float){}[0]
     abstract suspend fun load(kotlin/String, tv.nomercy.player.core.ports/LoadOptions = ...) // tv.nomercy.player.core.ports/MediaBackend.load|load(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
     abstract suspend fun play() // tv.nomercy.player.core.ports/MediaBackend.play|play(){}[0]
+    open fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.buffered|buffered(){}[0]
     open fun bufferedRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.bufferedRanges|bufferedRanges(){}[0]
     open fun seekableRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.seekableRanges|seekableRanges(){}[0]
 }
@@ -1496,6 +1496,11 @@ final class tv.nomercy.player.core.chapters/ChapterController { // tv.nomercy.pl
     final fun clear() // tv.nomercy.player.core.chapters/ChapterController.clear|clear(){}[0]
     final fun durationChanged(kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.chapters/ChapterController.durationChanged|durationChanged(kotlin.Double){}[0]
     final fun ingest(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>): kotlin/Boolean // tv.nomercy.player.core.chapters/ChapterController.ingest|ingest(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>){}[0]
+
+    final object Companion { // tv.nomercy.player.core.chapters/ChapterController.Companion|null[0]
+        final const val DEFAULT_FILLER_TITLE // tv.nomercy.player.core.chapters/ChapterController.Companion.DEFAULT_FILLER_TITLE|{}DEFAULT_FILLER_TITLE[0]
+            final fun <get-DEFAULT_FILLER_TITLE>(): kotlin/String // tv.nomercy.player.core.chapters/ChapterController.Companion.DEFAULT_FILLER_TITLE.<get-DEFAULT_FILLER_TITLE>|<get-DEFAULT_FILLER_TITLE>(){}[0]
+    }
 }
 
 final class tv.nomercy.player.core.controllers/ActivityController { // tv.nomercy.player.core.controllers/ActivityController|null[0]
@@ -4069,7 +4074,6 @@ final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.playe
     final fun audioTrack(): tv.nomercy.player.core.ports/AudioTrack? // tv.nomercy.player.core.ports/AVPlayerVideoBackend.audioTrack|audioTrack(){}[0]
     final fun audioTrack(tv.nomercy.player.core.ports/AudioTrack) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.audioTrack|audioTrack(tv.nomercy.player.core.ports.AudioTrack){}[0]
     final fun audioTracks(): kotlin.collections/List<tv.nomercy.player.core.ports/AudioTrack> // tv.nomercy.player.core.ports/AVPlayerVideoBackend.audioTracks|audioTracks(){}[0]
-    final fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.buffered|buffered(){}[0]
     final fun bufferedRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/AVPlayerVideoBackend.bufferedRanges|bufferedRanges(){}[0]
     final fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/AVPlayerVideoBackend.currentTime|currentTime(){}[0]
     final fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/AVPlayerVideoBackend.currentTime|currentTime(kotlin.Double){}[0]
@@ -6267,6 +6271,7 @@ final fun tv.nomercy.player.core.input/keyCombo(kotlin/String, kotlin/Boolean = 
 final fun tv.nomercy.player.core.input/namedKey(kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/namedKey|namedKey(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
 final fun tv.nomercy.player.core.media/fillChapterGaps(kotlin.collections/List<tv.nomercy.player.core.media/Chapter>, kotlin/Double, kotlin/Function0<kotlin/String>): tv.nomercy.player.core.media/ChapterGapFill // tv.nomercy.player.core.media/fillChapterGaps|fillChapterGaps(kotlin.collections.List<tv.nomercy.player.core.media.Chapter>;kotlin.Double;kotlin.Function0<kotlin.String>){}[0]
 final fun tv.nomercy.player.core.ports/appleDisplayIsHdr(): kotlin/Boolean // tv.nomercy.player.core.ports/appleDisplayIsHdr|appleDisplayIsHdr(){}[0]
+final fun tv.nomercy.player.core.ports/bufferedFrontier(kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange>, kotlin/Double): kotlin/Double // tv.nomercy.player.core.ports/bufferedFrontier|bufferedFrontier(kotlin.collections.List<tv.nomercy.player.core.ports.TimeRange>;kotlin.Double){}[0]
 final fun tv.nomercy.player.core.ports/currentDevice(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/currentDevice|currentDevice(){}[0]
 final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.ports/Clock // tv.nomercy.player.core.ports/defaultClock|defaultClock(){}[0]
 final fun tv.nomercy.player.core.ports/defaultIdGenerator(): tv.nomercy.player.core.ports/IdGenerator // tv.nomercy.player.core.ports/defaultIdGenerator|defaultIdGenerator(){}[0]
