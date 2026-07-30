@@ -42,6 +42,7 @@ import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.media.TitleTokens
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.ActionSource
 import tv.nomercy.player.core.player.AudioTrackState
 import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.CastState
@@ -398,7 +399,11 @@ public open class ComposedPlayer(
     // a second apart is the audible failure of getting this order wrong.
     private suspend fun handOff(sender: CastSender, target: CastTarget): Boolean {
         castState(CastState.CONNECTING)
-        transport.pause()
+        // Named, because this one knows the answer. An unsourced pause reaches a
+        // listener as PlaySource(source=null), which reads as "nobody knows who
+        // asked" — and a plugin dimming a lamp on a viewer's pause would dim it
+        // for a handoff to the television, which is the opposite of the intent.
+        transport.pause(ActionOptions(source = ActionSource.PLATFORM))
 
         val accepted: Boolean = sender.transfer(target, item(), time())
         castState(if (accepted) CastState.CONNECTED else CastState.AVAILABLE)

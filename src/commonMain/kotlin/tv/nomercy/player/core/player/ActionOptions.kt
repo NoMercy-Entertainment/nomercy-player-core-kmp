@@ -26,4 +26,10 @@ public object ActionSource {
     public const val USER: String = "user"
     public const val REMOTE: String = "remote"
     public const val PLUGIN: String = "plugin"
+
+    // The library acting on its own behalf, for the transport calls no viewer
+    // made: the pause before a cast handoff, an engine that stopped itself, and
+    // the reference's pause-when-hidden and offline policies. The web spells it
+    // exactly this way, so a listener filtering on it works on both.
+    public const val PLATFORM: String = "platform"
 }

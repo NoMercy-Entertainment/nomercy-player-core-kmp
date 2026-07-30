@@ -10,6 +10,7 @@ package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.TimeUpdate
 import tv.nomercy.player.core.player.PlayerPhase
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -195,6 +196,23 @@ class TimeControllerTest {
         rig.time.checkItemEndingSoon(95.0, 100.0)
 
         assertEquals(2, fires)
+    }
+
+    @Test
+    fun theEnginesOwnTickIsWhatFiresEndingSoon() = runTest {
+        // The check existed, was tested, and nothing in the player called it, so
+        // itemEndingSoon never fired outside its own test — and the auto-advance
+        // window, the preload head start and an "up next" card all wait on it.
+        // Driven through the event the engine's tick actually produces rather
+        // than by calling the check, which is what the gap was.
+        val rig = TimeRig()
+        rig.queue.queue(items("a"))
+        var fires = 0
+        rig.ctx.on(CoreEvents.ItemEndingSoon) { fires += 1 }
+
+        rig.ctx.emit(CoreEvents.Time, TimeUpdate(time = 95.0, duration = 100.0, percentage = 95.0))
+
+        assertEquals(1, fires)
     }
 
     @Test

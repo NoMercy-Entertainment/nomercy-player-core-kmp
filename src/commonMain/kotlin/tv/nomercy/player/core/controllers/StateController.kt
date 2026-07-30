@@ -133,6 +133,13 @@ public class StateController(
             time = ctx.internalCurrentTime,
             duration = ctx.internalDuration,
             buffered = time.buffered(),
+            // Why the picture is not moving, which is a different question from
+            // how much of it has arrived — and the second field this snapshot
+            // declared and never filled in. PlayerState carried the default for
+            // every player that has ever run, so ChromeStateAdapter's `buffering`
+            // flag was false through every stall there has been: the spinner it
+            // drives could not appear, whatever the connection did.
+            bufferState = ctx.bufferState,
             volume = if (muted) MUTED_LEVEL else ctx.internalVolume,
             muted = muted,
             volumeState = ctx.volumeState,

@@ -77,6 +77,22 @@ class CastHandoffTest {
     }
 
     @Test
+    fun theHandoffPauseSaysWhoAskedForIt() = runTest {
+        // PlaySource(source=null) reaches a listener as "nobody knows who asked",
+        // and this caller knows: the library paused so the television could pick
+        // the film up. A plugin dimming a lamp on a viewer's pause would dim it
+        // for a handoff to the next room without this.
+        val sender = RecordingSender()
+        val (player, _) = playingAt(100.0, sender)
+        val sources: MutableList<String?> = mutableListOf()
+        player.on(CoreEvents.Pause) { sources += it.source }
+
+        player.transferTo(LIVING_ROOM)
+
+        assertEquals(listOf<String?>("platform"), sources)
+    }
+
+    @Test
     fun playbackStopsHereBeforeItStartsThere() = runTest {
         // Two devices playing the same thing a second apart is the audible
         // failure of getting this order wrong.

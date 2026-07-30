@@ -5863,6 +5863,8 @@ final object tv.nomercy.player.core.media/TitleTokens { // tv.nomercy.player.cor
 }
 
 final object tv.nomercy.player.core.player/ActionSource { // tv.nomercy.player.core.player/ActionSource|null[0]
+    final const val PLATFORM // tv.nomercy.player.core.player/ActionSource.PLATFORM|{}PLATFORM[0]
+        final fun <get-PLATFORM>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.PLATFORM.<get-PLATFORM>|<get-PLATFORM>(){}[0]
     final const val PLUGIN // tv.nomercy.player.core.player/ActionSource.PLUGIN|{}PLUGIN[0]
         final fun <get-PLUGIN>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.PLUGIN.<get-PLUGIN>|<get-PLUGIN>(){}[0]
     final const val REMOTE // tv.nomercy.player.core.player/ActionSource.REMOTE|{}REMOTE[0]

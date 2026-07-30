@@ -40,6 +40,17 @@ public class TimeController(
     private val transport: TransportController,
 ) {
 
+    init {
+        // Watched here rather than left to a caller, because nothing was calling
+        // it. checkItemEndingSoon was written, tested and reachable from nowhere
+        // but its own test, so `itemEndingSoon` never fired in a real player on
+        // any platform — and everything downstream of it is silently idle:
+        // AutoAdvancePlugin's hand-off window, the preload strategy's head start,
+        // a chrome's "up next" card. The reference calls the same check from its
+        // timeupdate handler, which is this event.
+        ctx.on(CoreEvents.Time) { checkItemEndingSoon(it.time, it.duration) }
+    }
+
     public fun time(): Double = ctx.internalCurrentTime
 
     public suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()) {

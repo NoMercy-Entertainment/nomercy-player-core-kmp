@@ -133,6 +133,36 @@ class ProgressAndBufferStateTest {
     }
 
     @Test
+    fun aPositionThatKeepsAdvancingClearsAStallTheEngineNeverTakesBack() = runTest {
+        // The desktop engine's stall, measured rather than imagined. libVLC
+        // announces canplay once per item and re-announces playing only on a
+        // state change, so after a stall at an HLS rendition switch neither of
+        // the two events that could clear one ever arrives again — the only
+        // thing still coming is the position, several times a second. Left as
+        // it was, bufferState stayed STALLED for the remaining eighty seconds
+        // of a film playing at full rate.
+        val (player, backend) = playing()
+        backend.fire(CanonicalBackendEvent.WAITING)
+
+        backend.tick(position = 12.0, total = 100.0)
+
+        assertEquals(BufferState.IDLE, player.bufferState())
+    }
+
+    @Test
+    fun theSnapshotCarriesTheBufferStateSoAChromeCanDrawItsSpinner() = runTest {
+        // PlayerState declared the field and StateController never filled it in,
+        // so every snapshot ever taken reported the default. ChromeStateAdapter
+        // reads it as its `buffering` flag, which means the spinner could not
+        // appear through any stall there has ever been.
+        val (player, backend) = playing()
+
+        backend.fire(CanonicalBackendEvent.WAITING)
+
+        assertEquals(BufferState.STALLED, player.state().bufferState)
+    }
+
+    @Test
     fun anExplicitStallIsAStallWheneverItArrives() = runTest {
         val backend = FakeMediaBackend()
         val player = ComposedPlayer(backend = backend)

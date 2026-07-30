@@ -110,6 +110,20 @@ public class BackendBridge(private val ctx: PlayerContext) {
             val duration: Double = backend.duration()
             ctx.internalCurrentTime = time
             if (duration > 0.0) ctx.internalDuration = duration
+
+            // A position that advances is the engine saying it is being fed, so
+            // it is also the end of a stall.
+            //
+            // Clearing one on `canplay` alone is a rule borrowed from a media
+            // element, which re-fires canplay after every stall. VlcjVideoBackend
+            // announces it once per item on purpose — twice would make anything
+            // counting loads count two — and libVLC re-announces `playing` only
+            // on a state change, so on the desktop neither event that could clear
+            // a stall ever arrives again. Measured against the real engine: a
+            // stall at the first HLS rendition switch left bufferState STALLED for
+            // the remaining eighty seconds of a film playing at full rate.
+            if (ctx.bufferState == BufferState.STALLED) ctx.bufferState = BufferState.IDLE
+
             val percentage: Double = if (duration <= 0.0) 0.0 else time / duration * PERCENT
 
             // Two events for one engine tick, in the web's order. progress is
