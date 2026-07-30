@@ -172,11 +172,13 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
 	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeVideoBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
 	public final fun getAudio ()Ljava/util/List;
+	public fun getCanToneMapHdrToSdr ()Z
 	public final fun getLevels ()Ljava/util/List;
 	public final fun getPauseCount ()I
 	public final fun getPlayCount ()I
 	public final fun getSeekedTo ()Ljava/util/List;
 	public final fun getSubtitleTracks ()Ljava/util/List;
+	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -197,6 +199,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public fun subtitleTrack (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public fun subtitleTracks ()Ljava/util/List;
+	public fun surfaceSize (II)V
 	public final fun tick (D)V
 	public fun unmute ()V
 	public fun volume ()F

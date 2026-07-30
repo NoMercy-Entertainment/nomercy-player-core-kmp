@@ -4889,6 +4889,12 @@ public abstract interface class tv/nomercy/player/core/ports/ShuffleStrategy {
 	public abstract fun order (Ljava/util/List;I)Ljava/util/List;
 }
 
+public final class tv/nomercy/player/core/ports/SizeAbrConstraint {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/SizeAbrConstraint;
+	public final fun abrCeiling (Ljava/util/List;II)Ltv/nomercy/player/core/ports/QualityLevel;
+	public final fun narrower (Ltv/nomercy/player/core/ports/QualityLevel;Ltv/nomercy/player/core/ports/QualityLevel;)Ltv/nomercy/player/core/ports/QualityLevel;
+}
+
 public final class tv/nomercy/player/core/ports/StaticNetworkMonitor : tv/nomercy/player/core/ports/NetworkMonitor {
 	public fun <init> ()V
 	public fun <init> (ZLtv/nomercy/player/core/ports/NetworkType;)V
@@ -5231,6 +5237,7 @@ public abstract interface class tv/nomercy/player/core/ports/VideoBackend : tv/n
 	public abstract fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public abstract fun subtitleTrack (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public abstract fun subtitleTracks ()Ljava/util/List;
+	public fun surfaceSize (II)V
 }
 
 public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
@@ -5238,6 +5245,7 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
+	public static fun surfaceSize (Ltv/nomercy/player/core/ports/VideoBackend;II)V
 }
 
 public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
@@ -5329,6 +5337,7 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public fun subtitleTrack (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public fun subtitleTracks ()Ljava/util/List;
+	public fun surfaceSize (II)V
 	public fun unmute ()V
 	public fun volume ()F
 	public fun volume (F)V

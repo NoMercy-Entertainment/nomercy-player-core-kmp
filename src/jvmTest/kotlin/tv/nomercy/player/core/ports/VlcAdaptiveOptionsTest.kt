@@ -35,13 +35,19 @@ class VlcAdaptiveOptionsTest {
     }
 
     @Test
-    fun bandwidthIsInKilobitsBecauseThatIsWhatLibVlcReads() {
-        // Passing bits reads as a connection a thousand times faster than any
-        // real one, which is the same as no constraint at all — and it fails
-        // silently, because libVLC accepts the number.
+    fun bandwidthIsNotPassedBecauseLibVlcDoesNotReadItHere() {
+        // This asserted the opposite, and the assertion was wrong about libVLC
+        // rather than about the code. Measured against the installed VLC 3.0.23:
+        // --adaptive-bw=800 against a ladder of 743922 and 821147 bps switched onto
+        // the 821 kbps rendition anyway. It is the FIXED-RATE logic's assumed
+        // bandwidth, ignored by the default logic, and documented in KiB/s — so the
+        // value was in the wrong unit for an option that was not being read.
+        //
+        // An option that silently does nothing is worse than no option, because it
+        // reads as a constraint that is in place.
         val options: List<String> = VlcAdaptiveOptions.optionsFor(ladder)
 
-        assertTrue(options.contains(":adaptive-bw=6000"), "bandwidth not in kilobits: $options")
+        assertTrue(options.none { it.startsWith(":adaptive-bw") }, "an inert option came back: $options")
     }
 
     @Test

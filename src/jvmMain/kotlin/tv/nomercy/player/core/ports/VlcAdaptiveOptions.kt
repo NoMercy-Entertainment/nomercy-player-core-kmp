@@ -10,16 +10,29 @@ package tv.nomercy.player.core.ports
 
 import tv.nomercy.player.core.media.QualityDescriptor
 
-// How the desktop narrows a ladder, which is not by rewriting the manifest.
+// The height limit libVLC honours, for a ladder it is opening from its original
+// URL.
 //
-// Android intercepts the playlist because Media3 has no other way to be told
-// which variants exist. libVLC does: its adaptive demuxer takes per-media
-// options, so the constraint is handed to the engine rather than hidden from it
-// by editing what it reads.
+// The second half of the desktop's answer, not the whole of it. The narrowing
+// that CAN express "these exact renditions" is a rewritten master playlist —
+// VlcMasterPlaylist, on the same MasterPlaylistRewriter Android uses — and this
+// is what remains for the cases that cannot be rewritten: a manifest that could
+// not be read, and a caller that supplied a device ladder for a stream this never
+// saw the master of.
 //
-// That is a real divergence and the better answer on this platform. Rewriting a
-// manifest means becoming a parser of record for a format that keeps growing;
-// passing an option means libVLC stays the parser and this stays a caller.
+// Measured against the installed VLC 3.0.23 rather than assumed, because the
+// original version of this file passed two options and only one of them did
+// anything:
+//
+//   --adaptive-maxheight=900 against a ladder of 1920x818 and 3840x1635 never
+//   opened a 3840 rung. It works.
+//
+//   --adaptive-bw=800 against the same ladder switched onto an 821 kbps
+//   rendition on the second segment. It is the assumed bandwidth of the
+//   FIXED-RATE adaptation logic, ignored by the default one, and documented in
+//   KiB/s — so the number here was in the wrong unit for an option that was not
+//   being read. An option that silently does nothing is worse than no option: it
+//   is why capping was believed to be in place.
 public object VlcAdaptiveOptions {
 
     // The options that keep adaptation inside [keep].
@@ -27,23 +40,13 @@ public object VlcAdaptiveOptions {
     // Empty when there is nothing to constrain, because an option that repeats
     // the default still tells libVLC to take a code path it would not otherwise
     // take — and on a demuxer this old, the untaken path is the tested one.
+    //
+    // Height alone. It cannot tell an HDR rendition from an SDR one at the same
+    // resolution, which NoMercy's own ladder has — that case is what the manifest
+    // rewrite exists for.
     public fun optionsFor(keep: Collection<QualityDescriptor>): List<String> {
         if (keep.isEmpty()) return emptyList()
 
-        val tallest: Int = keep.maxOf { it.height }
-        val fastest: Int = keep.maxOf { it.bitrate }
-
-        // Height and bandwidth rather than an explicit variant list: libVLC's
-        // adaptive demuxer has no "these exact renditions" option, and the pair
-        // is what it does understand. A rung above either limit is not selected.
-        return listOf(
-            ":adaptive-maxheight=$tallest",
-            ":adaptive-bw=${fastest / BITS_PER_KILOBIT}",
-        )
+        return listOf(":adaptive-maxheight=${keep.maxOf { it.height }}")
     }
-
-    // libVLC's adaptive-bw is in kilobits per second; the ladder is in bits.
-    // Passing bits would read as a bandwidth a thousand times larger than any
-    // real connection, which is the same as no constraint at all.
-    private const val BITS_PER_KILOBIT = 1_000
 }

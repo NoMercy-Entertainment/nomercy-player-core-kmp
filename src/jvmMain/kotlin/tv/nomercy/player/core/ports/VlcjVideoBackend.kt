@@ -10,6 +10,9 @@ package tv.nomercy.player.core.ports
 
 import java.io.File
 import java.net.URI
+import kotlin.math.abs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.media.QualityDescriptor
 import uk.co.caprica.vlcj.factory.MediaPlayerFactory
@@ -25,7 +28,21 @@ private const val SUBTITLES_DISABLED = -1
 
 // Long enough for a real discovery on a cold filesystem, short enough that a
 // caller waiting on it has not given up.
-private const val PROBE_TIMEOUT_MS = 5_000L
+//
+// It was 5 seconds and that was too short, which is worse than it sounds: a
+// machine with VLC installed answered "not installed", and every test that gates
+// on isAvailable() — the canonical event spine, the crossfade, the track surface,
+// the ladder cap — printed its loud skip and passed without running. A gate that
+// cannot fail is not a gate, and this is how it happened.
+//
+// Measured, twice, in a bare JVM against the installed VLC 3.0.23: 7137ms for the
+// first MediaPlayerFactory in a process, 684ms for the second. The first pays for
+// libVLC indexing its plugin directory because the on-disk plugins.dat is older
+// than the DLLs beside it — libVLC says so on stderr, on every launch, and it is
+// the same 7 seconds a desktop client pays before its first frame. Regenerating
+// that cache with vlc-cache-gen fixes the machine; this number is what makes the
+// answer correct on a machine nobody has fixed.
+private const val PROBE_TIMEOUT_MS = 20_000L
 
 // What an engine nobody has set a volume on is playing at.
 private const val DEFAULT_VOLUME = 1.0f
@@ -75,6 +92,25 @@ public class VlcjVideoBackend private constructor(
     // libVLC's own default and the right one for a caller that has not probed
     // the device.
     public var playableLadder: Collection<QualityDescriptor> = emptyList()
+
+    // How the master playlist gets read. Swapped in tests so the narrowing can be
+    // proven against a manifest without a network, and left alone everywhere else.
+    internal var masterFetch: HlsMasterFetch = JdkHlsMasterFetch
+
+    // The ladder the current item's manifest declared, which is the only place a
+    // desktop can learn it. Empty for a local file or a progressive URL, and then
+    // the container's own tracks are the honest answer.
+    private var manifestLevels: List<QualityLevel> = emptyList()
+
+    // The space the picture is drawn in, as the surface last measured it. Zero
+    // until something reports one, and zero caps nothing.
+    private var surfaceWidthPx: Int = 0
+    private var surfaceHeightPx: Int = 0
+
+    override fun surfaceSize(widthPx: Int, heightPx: Int) {
+        surfaceWidthPx = widthPx
+        surfaceHeightPx = heightPx
+    }
 
     // What the caller asked for, and authoritative once it has.
     //
@@ -145,28 +181,26 @@ public class VlcjVideoBackend private constructor(
         announcedReadable = true
         bus.emit(CanonicalBackendEvent.LOADED_METADATA)
         bus.emit(CanonicalBackendEvent.CAN_PLAY)
-        // Once the container has been read, which is the first moment there is a
-        // ladder to decide about.
-        applyHdrDecision()
     }
 
     // Whether libVLC can be asked to convert HDR as it decodes.
     //
-    // False, and the blocker is not the vout. libVLC does tone-map — its libplacebo
-    // converter takes --tone-mapping, and the installed build offers Hable through
-    // to hard clip — but that is the SECOND half of the problem. The first half is
-    // that nothing here can identify an HDR rung to convert: vlcj 4.11's
-    // VideoTrackInfo exposes width, height, aspect, frame rate, orientation and
-    // projection, and no colour primaries and no transfer function, because
-    // libVLC 3.x's video track struct does not carry them. So VlcTrackMapper
-    // reports SDR for every track, honestly, and hdrDecision can only ever answer
-    // AsIs on this platform.
+    // False, and the reason is the render path rather than the format support.
+    // libVLC 3.0.23 does tone-map: --tone-mapping offers Hable through to hard
+    // clip, measured on the installed build. It belongs to the `gl` and `glwin32`
+    // video outputs, which is where libplacebo's shader chain lives — and this
+    // backend cannot use either. It renders through `vmem`, a callback handing RV32
+    // frames to Skia, because a GL vout on the desktop is a native window that
+    // paints ABOVE everything Compose draws: the picture would cover the transport
+    // bar and no z-ordering would move it. That trade is settled in
+    // ComposeFrameSink and it is not being reopened for this.
     //
-    // Reporting true and passing a tone-map option would therefore claim a
-    // conversion that never runs, on content never recognised as needing it. It
-    // becomes answerable when vlcj binds libVLC 4's track colour fields; until
-    // then the fallback decides, which is what a backend that cannot convert owes
-    // the caller.
+    // So the option exists, the converter exists, and neither is reachable from the
+    // output this player has to use. Reporting true would claim a conversion that
+    // never runs. The rungs ARE identifiable now — the master playlist's
+    // VIDEO-RANGE says so, which is what VlcMasterPlaylist reads — so hdrDecision
+    // answers CapTo rather than AsIs, and capping to a natively-SDR rendition is
+    // the better answer anyway: it costs nothing per frame.
     override val canToneMapHdrToSdr: Boolean = false
 
     private var hdrFallback: HdrOnSdrFallback = HdrOnSdrFallback.Play
@@ -177,20 +211,40 @@ public class VlcjVideoBackend private constructor(
 
     private var refusedAsUnplayable: Boolean = false
 
-    private fun applyHdrDecision() {
-        when (val decision: HdrDecision = hdrDecision(
+    // The one rung adaptation may not exceed, from every constraint that has
+    // something to say about this item on this machine.
+    //
+    // Two ceilings, one answer. The dynamic-range ceiling keeps an SDR screen off
+    // an HDR rendition; the size ceiling keeps a 3840-wide rendition out of a pane
+    // 800 device-pixels tall, which was costing five sixths of the frame rate on
+    // software decode. Neither may overwrite the other, so the narrower wins.
+    private fun abrCeiling(): QualityLevel? = SizeAbrConstraint.narrower(
+        dynamicRangeCeiling(),
+        SizeAbrConstraint.abrCeiling(qualityLevels(), surfaceWidthPx, surfaceHeightPx),
+    )
+
+    // True when the item must not be opened at all.
+    //
+    // Decided before prepare rather than after the first frame. Refusing later
+    // means the washed-out picture has already been on screen next to the message
+    // saying it cannot be shown.
+    private fun refusedBeforeOpening(): Boolean {
+        val decision: HdrDecision = hdrDecision(
             levels = qualityLevels(),
             displayHdr = desktopDisplayIsHdr(),
             backendCanToneMap = canToneMapHdrToSdr,
             fallback = hdrFallback,
-        )) {
-            HdrDecision.AsIs -> Unit
-            is HdrDecision.CapTo -> quality(decision.level)
-            // Unreachable while canToneMapHdrToSdr is false, and named rather than
-            // folded into an else so it stops compiling the day that changes.
-            HdrDecision.ToneMap -> Unit
-            HdrDecision.PlayUnconverted -> Unit
-            HdrDecision.Refuse -> refuseAsUnplayable()
+        )
+        // CapTo and the rest are answered by narrowing the manifest before libVLC
+        // reads it, which is the only place libVLC 3 takes a ladder constraint.
+        // Named individually so a new decision cannot fall through unnoticed.
+        return when (decision) {
+            HdrDecision.Refuse -> { refuseAsUnplayable(); true }
+            HdrDecision.AsIs,
+            HdrDecision.ToneMap,
+            HdrDecision.PlayUnconverted,
+            is HdrDecision.CapTo,
+            -> false
         }
     }
 
@@ -207,6 +261,16 @@ public class VlcjVideoBackend private constructor(
         announcedReadable = false
         refusedAsUnplayable = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
+
+        // Off the caller's thread: this is one small HTTP read, and load() is
+        // called from a UI coroutine.
+        val master: VlcMasterPlaylist? = withContext(Dispatchers.IO) {
+            VlcMasterPlaylist.of(url, opts.headers, masterFetch)
+        }
+        manifestLevels = master?.let { VlcLadderNarrowing.levelsOf(it.ladder) }.orEmpty()
+
+        if (refusedBeforeOpening()) return
+
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.
@@ -218,10 +282,31 @@ public class VlcjVideoBackend private constructor(
         // worth avoiding — a load happens per item, not per frame.
         @Suppress("SpreadOperator")
         player.media().prepare(
-            playableLocation(url),
+            narrowedLocation(master) ?: playableLocation(url),
             *VlcAdaptiveOptions.optionsFor(playableLadder).toTypedArray(),
         )
     }
+
+    // A local playlist offering only the rungs this machine may use, or null to
+    // open the original URL untouched.
+    //
+    // Null covers every case that is not an adaptive stream and every case where
+    // reading or narrowing failed, so a manifest this cannot handle plays exactly
+    // as it did before any of this existed.
+    private fun narrowedLocation(master: VlcMasterPlaylist?): String? {
+        if (master == null) return null
+        return master.narrowedTo(
+            VlcLadderNarrowing.keep(
+                declared = master.ladder,
+                playable = playableLadder,
+                maxHeight = abrCeiling()?.height,
+                sdrOnly = dynamicRangeCeiling() != null,
+            ),
+        )
+    }
+
+    private fun dynamicRangeCeiling(): QualityLevel? =
+        HdrAbrConstraint.abrCeiling(qualityLevels(), desktopDisplayIsHdr())
 
     // libVLC will not open file:/C:/x, which is exactly what File.toURI()
     // produces and therefore what a desktop caller passes without thinking about
@@ -312,10 +397,19 @@ public class VlcjVideoBackend private constructor(
         else -> BackendState.IDLE
     }
 
-    // The container's video tracks. libVLC does not expose an adaptive ladder
-    // for a local file — what it has is what the file has — so this is the
-    // honest answer rather than an empty list pretending there is nothing.
+    // The manifest's ladder where there is one, the container's tracks where
+    // there is not.
+    //
+    // The manifest comes first because libVLC's own answer is not a ladder at all:
+    // its adaptive demuxer exposes the ONE variant it is currently decoding as a
+    // video track, so a four-rung stream read as a single rung — and read as SDR,
+    // because the track struct carries no transfer function. A quality menu built
+    // from that showed one entry and the dynamic-range decision had nothing to
+    // decide about.
     override fun qualityLevels(): List<QualityLevel> =
+        manifestLevels.ifEmpty { containerLevels() }
+
+    private fun containerLevels(): List<QualityLevel> =
         player.media().info()?.videoTracks().orEmpty().map { track ->
             QualityLevel(
                 height = track.height(),
@@ -328,26 +422,52 @@ public class VlcjVideoBackend private constructor(
         }
 
     override fun quality(): QualityLevel? {
+        if (manifestLevels.isNotEmpty()) return decodingRung()
+
         val selected: Int = player.video().track()
         if (selected < 0) return null
 
         val tracks = player.media().info()?.videoTracks().orEmpty()
         val index: Int = tracks.indexOfFirst { it.id() == selected }
-        return qualityLevels().getOrNull(index)
+        return containerLevels().getOrNull(index)
+    }
+
+    // Which declared rung the engine is decoding, matched on height.
+    //
+    // NEAREST height rather than equal. A manifest declares the resolution its
+    // author wrote down and libVLC reports the one the encoder actually produced,
+    // and the two differ: Sintel's 4K variant is declared 3840x1635 and decodes at
+    // 3840x1666. Requiring equality means a menu with nothing selected, on the
+    // rung that is playing.
+    private fun decodingRung(): QualityLevel? {
+        val decoding: Int = player.media().info()?.videoTracks().orEmpty()
+            .firstOrNull()?.height() ?: return null
+        if (decoding <= 0) return null
+        return manifestLevels.minByOrNull { abs(it.height - decoding) }
     }
 
     // Null is libVLC's own choice, which for a container means its default
     // track. A descriptor is matched against the engine's own list, and a rung
     // it no longer has leaves the selection alone rather than picking a
     // neighbour.
+    //
+    // Adaptive streams are not selectable here and this returns without pretending
+    // otherwise. libVLC 3's adaptive demuxer chooses its own representation and
+    // publishes one video track; there is no runtime call that pins a different
+    // one, so the only way to honour a pick is to narrow the manifest and reopen —
+    // which is a reload with a position restore, and it is not this method's job to
+    // do silently. The constraint that a display and a pane impose is applied at
+    // load, where libVLC does take it.
     override fun quality(level: QualityLevel?) {
+        if (manifestLevels.isNotEmpty()) return
+
         val tracks = player.media().info()?.videoTracks().orEmpty()
         if (level == null) {
             tracks.firstOrNull()?.let { player.video().setTrack(it.id()) }
             return
         }
 
-        val index: Int = QualityMatcher.match(level, qualityLevels()) ?: return
+        val index: Int = QualityMatcher.match(level, containerLevels()) ?: return
         tracks.getOrNull(index)?.let { player.video().setTrack(it.id()) }
     }
 

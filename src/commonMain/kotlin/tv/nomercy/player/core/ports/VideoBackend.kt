@@ -62,6 +62,23 @@ public interface VideoBackend : MediaBackend {
      * is not the one who has to explain either to a viewer.
      */
     public fun hdrOnSdrFallback(fallback: HdrOnSdrFallback) {}
+
+    /**
+     * How big the space the picture is drawn in is, in device pixels.
+     *
+     * Told to the engine rather than asked of it, because only the UI layer knows:
+     * an engine that rendered into a buffer has no view to measure and an engine
+     * that rendered into a window is not the one that laid it out. The shipped
+     * surface reports it on every layout pass, so a consumer using the library's
+     * own view has nothing to wire.
+     *
+     * A no-op by default. An engine with no ladder to constrain — a local file, a
+     * stand-in — is not forced to pretend the number means something to it.
+     *
+     * @param widthPx device pixels, not layout units. A pane measured in points on
+     *   a 2x display covers twice as many rungs as its number suggests.
+     */
+    public fun surfaceSize(widthPx: Int, heightPx: Int) {}
 }
 
 // An audio engine is a media engine that can also play two things at once,

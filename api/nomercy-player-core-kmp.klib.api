@@ -1095,6 +1095,7 @@ abstract interface tv.nomercy.player.core.ports/VideoBackend : tv.nomercy.player
     abstract fun subtitleTrack(tv.nomercy.player.core.ports/SubtitleTrack?) // tv.nomercy.player.core.ports/VideoBackend.subtitleTrack|subtitleTrack(tv.nomercy.player.core.ports.SubtitleTrack?){}[0]
     abstract fun subtitleTracks(): kotlin.collections/List<tv.nomercy.player.core.ports/SubtitleTrack> // tv.nomercy.player.core.ports/VideoBackend.subtitleTracks|subtitleTracks(){}[0]
     open fun hdrOnSdrFallback(tv.nomercy.player.core.ports/HdrOnSdrFallback) // tv.nomercy.player.core.ports/VideoBackend.hdrOnSdrFallback|hdrOnSdrFallback(tv.nomercy.player.core.ports.HdrOnSdrFallback){}[0]
+    open fun surfaceSize(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.ports/VideoBackend.surfaceSize|surfaceSize(kotlin.Int;kotlin.Int){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/VisibilityMonitor { // tv.nomercy.player.core.ports/VisibilityMonitor|null[0]
@@ -6086,6 +6087,11 @@ final object tv.nomercy.player.core.ports/PlayerJson { // tv.nomercy.player.core
 
 final object tv.nomercy.player.core.ports/QualityMatcher { // tv.nomercy.player.core.ports/QualityMatcher|null[0]
     final fun match(tv.nomercy.player.core.ports/QualityLevel, kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>): kotlin/Int? // tv.nomercy.player.core.ports/QualityMatcher.match|match(tv.nomercy.player.core.ports.QualityLevel;kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>){}[0]
+}
+
+final object tv.nomercy.player.core.ports/SizeAbrConstraint { // tv.nomercy.player.core.ports/SizeAbrConstraint|null[0]
+    final fun abrCeiling(kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>, kotlin/Int, kotlin/Int): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/SizeAbrConstraint.abrCeiling|abrCeiling(kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>;kotlin.Int;kotlin.Int){}[0]
+    final fun narrower(tv.nomercy.player.core.ports/QualityLevel?, tv.nomercy.player.core.ports/QualityLevel?): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/SizeAbrConstraint.narrower|narrower(tv.nomercy.player.core.ports.QualityLevel?;tv.nomercy.player.core.ports.QualityLevel?){}[0]
 }
 
 final object tv.nomercy.player.core.ports/UnconfiguredPlatform : tv.nomercy.player.core.ports/Platform { // tv.nomercy.player.core.ports/UnconfiguredPlatform|null[0]
