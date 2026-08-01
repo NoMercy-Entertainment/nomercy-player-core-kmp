@@ -27,6 +27,8 @@ import platform.AVFoundation.presentationSize
 import platform.AVFoundation.selectMediaOption
 import kotlin.concurrent.Volatile
 import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.events.SubtitleCue
+import tv.nomercy.player.core.events.SubtitleCueChange
 import tv.nomercy.player.core.media.QualityDescriptor
 import platform.AVFoundation.AVAsset
 import platform.AVFoundation.hasMediaCharacteristic
@@ -154,6 +156,9 @@ public class AVPlayerVideoBackend : VideoBackend {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
         refusedAsUnplayable = false
+        // The previous item's last line, taken off the picture before the next
+        // one's first frame arrives. The web backend does this in unload().
+        announceCues(emptyList())
 
         // The asset is loaded before the item is built, rather than after.
         //
@@ -384,7 +389,22 @@ public class AVPlayerVideoBackend : VideoBackend {
         val option = track?.id?.substringAfter(':')?.toIntOrNull()
             ?.let { group.options.getOrNull(it) as? AVMediaSelectionOption }
         item.selectMediaOption(option, group)
+        // Deselecting produces no further callback — there is no track left to
+        // report an empty cue list — so the picture is cleared here or the last
+        // line stays on it.
+        if (option == null) announceCues(emptyList())
     }
+
+    // The cue channel, written in one place so the language cannot be attached
+    // at one emit site and forgotten at another.
+    private fun announceCues(cues: List<SubtitleCue>) {
+        bus.emit(
+            CanonicalBackendEvent.SUBTITLE_CUE,
+            SubtitleCueChange(cues = cues, language = subtitleTrack()?.language),
+        )
+    }
+
+    private val legible = AVLegibleCues(::announceCues)
 
     private fun groupFor(characteristic: String): AVMediaSelectionGroup? =
         currentAsset()?.mediaSelectionGroupForMediaCharacteristic(characteristic)
@@ -424,7 +444,11 @@ public class AVPlayerVideoBackend : VideoBackend {
             return
         }
         loadedAsset = asset
-        player.replaceCurrentItemWithPlayerItem(AVPlayerItem(asset = asset))
+        val item = AVPlayerItem(asset = asset)
+        // Before the player is given the item, so the first cue of a film that
+        // opens on dialogue is not missed while the output is being attached.
+        legible.attach(item)
+        player.replaceCurrentItemWithPlayerItem(item)
         refreshCache()
         announceReadyOnce()
     }

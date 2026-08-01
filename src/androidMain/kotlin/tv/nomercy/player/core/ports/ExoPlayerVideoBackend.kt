@@ -18,6 +18,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
+import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,8 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.events.SubtitleCue
+import tv.nomercy.player.core.events.SubtitleCueChange
 
 private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
@@ -239,6 +242,20 @@ public class ExoPlayerVideoBackend(
                 if (recoverFromTunnelingRefusal(error)) return
                 bus.emit(CanonicalBackendEvent.ERROR, error.errorCodeName)
             }
+
+            // The cues of whichever text track is selected, as the engine
+            // crosses them. Media3 has decoded and timed them all along; nothing
+            // asked for them, so a viewer who turned subtitles on watched a film
+            // with the track playing and no words on screen.
+            //
+            // Every change, including the empty one. Media3 reports an empty
+            // group at the end of a cue and when the track is deselected, and
+            // that is precisely the signal a renderer needs to wipe what it is
+            // drawing — swallowing it would leave the last line of dialogue on
+            // the picture for the rest of the film.
+            override fun onCues(cueGroup: CueGroup) {
+                announceCues(ExoCueMapper.cuesOf(cueGroup.cues))
+            }
         })
     }
 
@@ -286,6 +303,10 @@ public class ExoPlayerVideoBackend(
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
         refusedAsUnplayable = false
+        // The previous item's last line, taken off the picture before the next
+        // one's first frame arrives. The web backend does this in unload() for
+        // the same reason.
+        announceCues(emptyList())
         // Armed BEFORE prepare, because a codec reads its colour-transfer request
         // when it is configured and the ladder is not known until after. Arming it
         // on an SDR display costs nothing on SDR content: the factory only asks
@@ -519,10 +540,24 @@ public class ExoPlayerVideoBackend(
                 .clearOverridesOfType(C.TRACK_TYPE_TEXT)
                 .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
                 .build()
+            // Said here as well as waited for. Media3 does report an empty group
+            // after a deselection, but not always before the next frame is
+            // drawn, and the gap is the one a viewer notices: captions turned
+            // off with the last line still on the picture.
+            announceCues(emptyList())
         } else {
             selectByTypeOnMain(C.TRACK_TYPE_TEXT, track.id)
         }
         refreshCache()
+    }
+
+    // One place the cue channel is written, so the language always travels with
+    // the cues and cannot be attached at one emit site and forgotten at another.
+    private fun announceCues(cues: List<SubtitleCue>) {
+        bus.emit(
+            CanonicalBackendEvent.SUBTITLE_CUE,
+            SubtitleCueChange(cues = cues, language = cachedSubtitleTrack?.language),
+        )
     }
 
     private fun selectByType(type: Int, id: String): Unit = fireAndForget {

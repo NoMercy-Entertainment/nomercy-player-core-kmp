@@ -41,10 +41,26 @@ public data class CueEvent(
     val text: String? = null,
 )
 
-// The current subtitle cue, or null when none is showing. Distinct from
-// CueEvent: this is state, that is a crossing.
+// What is on screen right now. Distinct from CueEvent: this is state, that is a
+// crossing.
+//
+// A LIST, and the track's language beside it, which is the web's shape. It was
+// one cue and nothing else, and both halves of that were wrong in the same way:
+// a film can have two cues showing at once — a sign at the top of the frame and
+// dialogue at the bottom is the ordinary case, not an edge — and the narrow
+// event could carry only the first, so the second was dropped before any
+// renderer saw it. The cue itself was a [CueEvent], which has a time range and a
+// string and no line, align or size, so everything WebVTT says about WHERE a
+// line goes was lost at this boundary. A producer that had read the positioning
+// out of a .vtt had no way to pass it on and would have had to call the
+// renderer directly, going around the event every other consumer listens to.
+//
+// [language] is the active track's, for a consumer that switches fonts by
+// script or announces the caption language. Null when the producer does not
+// know it.
 public data class SubtitleCueChange(
-    val cue: CueEvent?,
+    val cues: List<SubtitleCue> = emptyList(),
+    val language: String? = null,
 )
 
 // How the consumer wants subtitles drawn. Every field is optional because a

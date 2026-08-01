@@ -30,6 +30,19 @@ public object CanonicalBackendEvent {
     public const val STALLED: String = "stalled"
     public const val PAUSE: String = "pause"
     public const val ENDED: String = "ended"
+
+    // The cues of the selected in-container track, as the engine crosses them.
+    //
+    // The web's IVideoBackend declares exactly this name and every video engine
+    // here can answer it: Media3 through Player.Listener.onCues, AVFoundation
+    // through AVPlayerItemLegibleOutput. It was missing, so a track the engine
+    // was already decoding reached nothing — the renderer subscribed to
+    // CoreEvents.SubtitleCue and no production code path ever emitted one.
+    //
+    // An empty payload is a real report rather than silence: it is how a
+    // renderer is told to wipe what it is drawing when the cue ends, the track
+    // is turned off, or a new source is loaded.
+    public const val SUBTITLE_CUE: String = "subtitleCue"
     public const val ERROR: String = "error"
     public const val STREAM_ERROR: String = "stream:error"
 

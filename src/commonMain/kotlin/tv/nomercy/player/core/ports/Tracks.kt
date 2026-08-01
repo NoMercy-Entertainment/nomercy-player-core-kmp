@@ -52,4 +52,18 @@ public data class SubtitleTrack(
     // Forced subtitles are the ones shown regardless of the caption setting:
     // the alien dialogue in an otherwise English film.
     val forced: Boolean = false,
+    // Where the file is, when this track is a sidecar rather than one the engine
+    // found in the container.
+    //
+    // The web's SubtitleTrack has carried this since v1 and this did not, which
+    // made addSubtitleTrack a list a track could be appended to and nothing
+    // more: the player was handed a name, a language and no way to reach the
+    // bytes, so selecting it asked the engine for a track it had never reported
+    // and the picture stayed blank. A .srt or .vtt sitting beside a film — the
+    // normal case in a NoMercy library — was unreachable by construction.
+    //
+    // Null for an engine-reported track. That is the honest answer: the file is
+    // inside the container the engine already has open, and there is no separate
+    // URL to fetch.
+    val url: String? = null,
 )
