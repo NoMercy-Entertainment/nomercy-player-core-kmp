@@ -8,7 +8,7 @@
 
 package tv.nomercy.player.core.media
 
-import tv.nomercy.player.core.events.CueEvent
+import tv.nomercy.player.core.cues.Cue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
 class CueTrackerTest {
 
     private fun cue(start: Double, end: Double, text: String) =
-        CueEvent(id = text, startTime = start, endTime = end, text = text)
+        Cue(id = text, start = start, end = end, payload = text)
 
     @Test
     fun aPositionInsideACueEntersIt() {
@@ -25,8 +25,8 @@ class CueTrackerTest {
 
         val crossing = tracker.advanceTo(1.0)
 
-        assertEquals(listOf("one"), crossing.entered.map { it.text })
-        assertEquals("one", tracker.line?.text)
+        assertEquals(listOf("one"), crossing.entered.map { it.payload })
+        assertEquals("one", tracker.line?.payload)
     }
 
     // A tracker that reported the same line on every time update would make a
@@ -39,7 +39,7 @@ class CueTrackerTest {
         val crossing = tracker.advanceTo(2.0)
 
         assertTrue(!crossing.changed, "expected no crossing, got $crossing")
-        assertEquals("one", tracker.line?.text)
+        assertEquals("one", tracker.line?.payload)
     }
 
     // A seek can leave one cue and enter another at the same instant, and two
@@ -51,8 +51,8 @@ class CueTrackerTest {
 
         val crossing = tracker.advanceTo(3.0)
 
-        assertEquals(listOf("one"), crossing.exited.map { it.text })
-        assertEquals(listOf("two"), crossing.entered.map { it.text })
+        assertEquals(listOf("one"), crossing.exited.map { it.payload })
+        assertEquals(listOf("two"), crossing.entered.map { it.payload })
     }
 
     // Closed at both ends is the classic way to get a flicker between lines.
@@ -62,7 +62,7 @@ class CueTrackerTest {
 
         tracker.advanceTo(2.0)
 
-        assertEquals(listOf("two"), tracker.active.map { it.text })
+        assertEquals(listOf("two"), tracker.active.map { it.payload })
     }
 
     @Test
@@ -72,7 +72,7 @@ class CueTrackerTest {
 
         val crossing = tracker.advanceTo(9.0)
 
-        assertEquals(listOf("one"), crossing.exited.map { it.text })
+        assertEquals(listOf("one"), crossing.exited.map { it.payload })
         assertNull(tracker.line)
     }
 
@@ -82,7 +82,7 @@ class CueTrackerTest {
     fun cuesOutOfOrderStillReadInOrder() {
         val tracker = CueTracker(listOf(cue(4.0, 6.0, "late"), cue(0.0, 2.0, "early")))
 
-        assertEquals(listOf("early", "late"), tracker.cues().map { it.text })
+        assertEquals(listOf("early", "late"), tracker.cues().map { it.payload })
     }
 
     // Keeping the old set would leave a line from the previous track marked
@@ -95,7 +95,7 @@ class CueTrackerTest {
         tracker.load(listOf(cue(0.0, 5.0, "new")))
         val crossing = tracker.advanceTo(1.0)
 
-        assertEquals(listOf("new"), crossing.entered.map { it.text })
+        assertEquals(listOf("new"), crossing.entered.map { it.payload })
         assertTrue(crossing.exited.isEmpty(), "the old cue is gone, not exited")
     }
 
@@ -105,6 +105,6 @@ class CueTrackerTest {
 
         tracker.advanceTo(1.5)
 
-        assertEquals(listOf("under", "over"), tracker.active.map { it.text })
+        assertEquals(listOf("under", "over"), tracker.active.map { it.payload })
     }
 }

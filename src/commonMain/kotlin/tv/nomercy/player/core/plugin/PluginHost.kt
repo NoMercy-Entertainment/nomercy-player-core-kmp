@@ -13,6 +13,7 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
@@ -29,6 +30,16 @@ import tv.nomercy.player.core.ports.Storage
 // A plugin never holds one of these. It gets the Plugin base's helpers, which
 // scope every call to the plugin's own id and clean up after it. This interface
 // is the contract between the runtime and whoever hosts it.
+//
+// Ten members crosses detekt's stock ComplexInterface threshold, and the fix
+// is not to split this. Every member here is a distinct capability a plugin
+// needs and the runtime must be able to fake in full (see FakePluginHost) —
+// splitting into "PluginHost" plus "PluginCueHost" plus whatever comes next
+// would mean a plugin author importing two or three interfaces to get the one
+// thing this already gives them in one place, and a concrete player
+// implementing two or three where one contract was the point. The width is the
+// design, documented above; ComplexInterface flags width, not a mistake.
+@Suppress("ComplexInterface")
 public interface PluginHost {
     // Root, unscoped. The Plugin base narrows both to the plugin before a
     // plugin author ever sees them.
@@ -48,4 +59,19 @@ public interface PluginHost {
     public fun t(namespacedKey: String, vars: Map<String, String> = emptyMap()): String
 
     public fun report(error: PlayerError)
+
+    // The parser for a subtitle, lyric or sprite url — the host's own registry,
+    // not a second one the plugin keeps to itself.
+    //
+    // A default rather than an addition to every existing implementer's
+    // required surface: FakePluginHost and any other minimal test double keeps
+    // compiling. LyricsPlugin used to default to a private CueParserRegistry
+    // seeded with the built-ins, which read the two formats everybody ships but
+    // could never see a format the HOST had registered — a consumer's own
+    // parser was invisible to a plugin that never asked the host for one. The
+    // web plugin asks `this.player.resolveCueParser(url)`; this is that seam.
+    // Null here, not the built-ins: only a real host (ComposedPlayer) knows
+    // what is actually registered, and a default that guessed would disagree
+    // with it the moment a consumer registered their own.
+    public fun resolveCueParser(url: String, contentType: String? = null): CueParser<*>? = null
 }

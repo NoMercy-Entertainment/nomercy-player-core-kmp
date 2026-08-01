@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import tv.nomercy.player.core.KIT_VERSION
+import tv.nomercy.player.core.cues.registerBuiltIns
 import tv.nomercy.player.core.devtools.EventFirehose
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.BeforeDispatchResult
@@ -32,6 +33,8 @@ import tv.nomercy.player.core.player.SetupState
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginHost
 import tv.nomercy.player.core.plugin.PluginRegistry
+import tv.nomercy.player.core.ports.CueParser
+import tv.nomercy.player.core.ports.CueParserRegistry
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
@@ -89,6 +92,13 @@ public class FakePlayer(
     // Every error the host was handed, in order. A plugin that reports a
     // problem instead of throwing is otherwise invisible to a test.
     public val reportedErrors: MutableList<PlayerError> = mutableListOf()
+
+    // Seeded the way ComposedPlayer seeds its own: a plugin resolving `.lrc` or
+    // `.vtt` through this host gets the same answer it would from a real
+    // player, and a test can register its own parser the same way a consumer
+    // would — proving the host's registry, not a plugin's private copy of one,
+    // is what a plugin actually sees.
+    public val cueParsers: CueParserRegistry = CueParserRegistry().registerBuiltIns()
 
     // Translations a test seeded, by already-namespaced key.
     public val translations: MutableMap<String, String> = mutableMapOf()
@@ -216,4 +226,7 @@ public class FakePlayer(
     override fun report(error: PlayerError) {
         reportedErrors += error
     }
+
+    override fun resolveCueParser(url: String, contentType: String?): CueParser<*>? =
+        cueParsers.resolve(url, contentType)
 }

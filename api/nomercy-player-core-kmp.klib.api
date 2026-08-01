@@ -754,6 +754,14 @@ abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.player/Player { // t
     abstract fun time(kotlin/Double) // tv.nomercy.player.core.player/Player.time|time(kotlin.Double){}[0]
 }
 
+abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player.core.ports/CueParser|null[0]
+    abstract val id // tv.nomercy.player.core.ports/CueParser.id|{}id[0]
+        abstract fun <get-id>(): kotlin/String // tv.nomercy.player.core.ports/CueParser.id.<get-id>|<get-id>(){}[0]
+
+    abstract fun canParse(kotlin/String, kotlin/String? = ...): kotlin/Boolean // tv.nomercy.player.core.ports/CueParser.canParse|canParse(kotlin.String;kotlin.String?){}[0]
+    abstract fun parse(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.ports/CueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
+}
+
 abstract interface tv.nomercy.player.core.device/DeviceCapabilities { // tv.nomercy.player.core.device/DeviceCapabilities|null[0]
     abstract val formFactor // tv.nomercy.player.core.device/DeviceCapabilities.formFactor|{}formFactor[0]
         abstract fun <get-formFactor>(): tv.nomercy.player.core.device/FormFactor // tv.nomercy.player.core.device/DeviceCapabilities.formFactor.<get-formFactor>|<get-formFactor>(){}[0]
@@ -824,6 +832,7 @@ abstract interface tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.play
     abstract fun websocket(kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions): tv.nomercy.player.core.ports/RealtimeChannel // tv.nomercy.player.core.plugin/PluginHost.websocket|websocket(kotlin.String;tv.nomercy.player.core.ports.RealtimeFactoryOptions){}[0]
     abstract suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.plugin/PluginHost.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
     abstract suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.plugin/PluginHost.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+    open fun resolveCueParser(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.core.plugin/PluginHost.resolveCueParser|resolveCueParser(kotlin.String;kotlin.String?){}[0]
 }
 
 abstract interface tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugin/PluginManifest|null[0]
@@ -885,14 +894,6 @@ abstract interface tv.nomercy.player.core.ports/CastSender { // tv.nomercy.playe
 
 abstract interface tv.nomercy.player.core.ports/Clock { // tv.nomercy.player.core.ports/Clock|null[0]
     abstract fun now(): kotlin/Long // tv.nomercy.player.core.ports/Clock.now|now(){}[0]
-}
-
-abstract interface tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player.core.ports/CueParser|null[0]
-    abstract val id // tv.nomercy.player.core.ports/CueParser.id|{}id[0]
-        abstract fun <get-id>(): kotlin/String // tv.nomercy.player.core.ports/CueParser.id.<get-id>|<get-id>(){}[0]
-
-    abstract fun canParse(kotlin/String, kotlin/String? = ...): kotlin/Boolean // tv.nomercy.player.core.ports/CueParser.canParse|canParse(kotlin.String;kotlin.String?){}[0]
-    abstract fun parse(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.ports/CueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/ExternalPlayback { // tv.nomercy.player.core.ports/ExternalPlayback|null[0]
@@ -1256,6 +1257,7 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
     final fun interval(kotlin/Long, kotlin/Function0<kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/Plugin.interval|interval(kotlin.Long;kotlin.Function0<kotlin.Unit>){}[0]
     final fun launch(kotlin.coroutines/SuspendFunction1<kotlinx.coroutines/CoroutineScope, kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/Plugin.launch|launch(kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope,kotlin.Unit>){}[0]
     final fun report(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...) // tv.nomercy.player.core.plugin/Plugin.report|report(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+    final fun resolveCueParser(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.core.plugin/Plugin.resolveCueParser|resolveCueParser(kotlin.String;kotlin.String?){}[0]
     final fun t(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String> = ...): kotlin/String // tv.nomercy.player.core.plugin/Plugin.t|t(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
     final fun throwError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): kotlin/Nothing // tv.nomercy.player.core.plugin/Plugin.throwError|throwError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
     final fun timeout(kotlin/Long, kotlin/Function0<kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/Plugin.timeout|timeout(kotlin.Long;kotlin.Function0<kotlin.Unit>){}[0]
@@ -1284,6 +1286,28 @@ abstract class tv.nomercy.player.core.plugins.audio/VisualizationPlugin : tv.nom
         final val version // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.Manifest.version|{}version[0]
             final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
     }
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.cues/Cue { // tv.nomercy.player.core.cues/Cue|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, #A, kotlin/String? = ...) // tv.nomercy.player.core.cues/Cue.<init>|<init>(kotlin.Double;kotlin.Double;1:0;kotlin.String?){}[0]
+
+    final val end // tv.nomercy.player.core.cues/Cue.end|{}end[0]
+        final fun <get-end>(): kotlin/Double // tv.nomercy.player.core.cues/Cue.end.<get-end>|<get-end>(){}[0]
+    final val id // tv.nomercy.player.core.cues/Cue.id|{}id[0]
+        final fun <get-id>(): kotlin/String? // tv.nomercy.player.core.cues/Cue.id.<get-id>|<get-id>(){}[0]
+    final val payload // tv.nomercy.player.core.cues/Cue.payload|{}payload[0]
+        final fun <get-payload>(): #A // tv.nomercy.player.core.cues/Cue.payload.<get-payload>|<get-payload>(){}[0]
+    final val start // tv.nomercy.player.core.cues/Cue.start|{}start[0]
+        final fun <get-start>(): kotlin/Double // tv.nomercy.player.core.cues/Cue.start.<get-start>|<get-start>(){}[0]
+
+    final fun component1(): kotlin/Double // tv.nomercy.player.core.cues/Cue.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // tv.nomercy.player.core.cues/Cue.component2|component2(){}[0]
+    final fun component3(): #A // tv.nomercy.player.core.cues/Cue.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // tv.nomercy.player.core.cues/Cue.component4|component4(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., #A = ..., kotlin/String? = ...): tv.nomercy.player.core.cues/Cue<#A> // tv.nomercy.player.core.cues/Cue.copy|copy(kotlin.Double;kotlin.Double;1:0;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cues/Cue.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cues/Cue.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.cues/Cue.toString|toString(){}[0]
 }
 
 final class <#A: kotlin/Any?> tv.nomercy.player.core.events/BeforeDispatchResult { // tv.nomercy.player.core.events/BeforeDispatchResult|null[0]
@@ -1350,6 +1374,38 @@ final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventKey { // tv.nom
 
     final val name // tv.nomercy.player.core.events/EventKey.name|{}name[0]
         final fun <get-name>(): kotlin/String // tv.nomercy.player.core.events/EventKey.name.<get-name>|<get-name>(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/CueCrossing { // tv.nomercy.player.core.media/CueCrossing|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> = ..., kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> = ...) // tv.nomercy.player.core.media/CueCrossing.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.cues.Cue<1:0>>;kotlin.collections.List<tv.nomercy.player.core.cues.Cue<1:0>>){}[0]
+
+    final val changed // tv.nomercy.player.core.media/CueCrossing.changed|{}changed[0]
+        final fun <get-changed>(): kotlin/Boolean // tv.nomercy.player.core.media/CueCrossing.changed.<get-changed>|<get-changed>(){}[0]
+    final val entered // tv.nomercy.player.core.media/CueCrossing.entered|{}entered[0]
+        final fun <get-entered>(): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.media/CueCrossing.entered.<get-entered>|<get-entered>(){}[0]
+    final val exited // tv.nomercy.player.core.media/CueCrossing.exited|{}exited[0]
+        final fun <get-exited>(): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.media/CueCrossing.exited.<get-exited>|<get-exited>(){}[0]
+
+    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.media/CueCrossing.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.media/CueCrossing.component2|component2(){}[0]
+    final fun copy(kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> = ..., kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> = ...): tv.nomercy.player.core.media/CueCrossing<#A> // tv.nomercy.player.core.media/CueCrossing.copy|copy(kotlin.collections.List<tv.nomercy.player.core.cues.Cue<1:0>>;kotlin.collections.List<tv.nomercy.player.core.cues.Cue<1:0>>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/CueCrossing.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/CueCrossing.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.media/CueCrossing.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.media/CueTracker { // tv.nomercy.player.core.media/CueTracker|null[0]
+    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> = ...) // tv.nomercy.player.core.media/CueTracker.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.cues.Cue<1:0>>){}[0]
+
+    final val active // tv.nomercy.player.core.media/CueTracker.active|{}active[0]
+        final fun <get-active>(): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.media/CueTracker.active.<get-active>|<get-active>(){}[0]
+    final val line // tv.nomercy.player.core.media/CueTracker.line|{}line[0]
+        final fun <get-line>(): tv.nomercy.player.core.cues/Cue<#A>? // tv.nomercy.player.core.media/CueTracker.line.<get-line>|<get-line>(){}[0]
+
+    final fun advanceTo(kotlin/Double): tv.nomercy.player.core.media/CueCrossing<#A> // tv.nomercy.player.core.media/CueTracker.advanceTo|advanceTo(kotlin.Double){}[0]
+    final fun cues(): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.media/CueTracker.cues|cues(){}[0]
+    final fun load(kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>>) // tv.nomercy.player.core.media/CueTracker.load|load(kotlin.collections.List<tv.nomercy.player.core.cues.Cue<1:0>>){}[0]
+    final fun reset() // tv.nomercy.player.core.media/CueTracker.reset|reset(){}[0]
 }
 
 final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListAppend { // tv.nomercy.player.core.media/MediaListAppend|null[0]
@@ -1708,6 +1764,22 @@ final class tv.nomercy.player.core.cues/LrcCue { // tv.nomercy.player.core.cues/
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/LrcCue.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.cues/LrcPayload { // tv.nomercy.player.core.cues/LrcPayload|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/List<tv.nomercy.player.core.cues/LrcWord> = ...) // tv.nomercy.player.core.cues/LrcPayload.<init>|<init>(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.cues.LrcWord>){}[0]
+
+    final val text // tv.nomercy.player.core.cues/LrcPayload.text|{}text[0]
+        final fun <get-text>(): kotlin/String // tv.nomercy.player.core.cues/LrcPayload.text.<get-text>|<get-text>(){}[0]
+    final val words // tv.nomercy.player.core.cues/LrcPayload.words|{}words[0]
+        final fun <get-words>(): kotlin.collections/List<tv.nomercy.player.core.cues/LrcWord> // tv.nomercy.player.core.cues/LrcPayload.words.<get-words>|<get-words>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.cues/LrcPayload.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<tv.nomercy.player.core.cues/LrcWord> // tv.nomercy.player.core.cues/LrcPayload.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/List<tv.nomercy.player.core.cues/LrcWord> = ...): tv.nomercy.player.core.cues/LrcPayload // tv.nomercy.player.core.cues/LrcPayload.copy|copy(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.cues.LrcWord>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cues/LrcPayload.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cues/LrcPayload.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.cues/LrcPayload.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.cues/LrcWord { // tv.nomercy.player.core.cues/LrcWord|null[0]
     constructor <init>(kotlin/Double, kotlin/String) // tv.nomercy.player.core.cues/LrcWord.<init>|<init>(kotlin.Double;kotlin.String){}[0]
 
@@ -1756,22 +1828,91 @@ final class tv.nomercy.player.core.cues/SpriteCue { // tv.nomercy.player.core.cu
 }
 
 final class tv.nomercy.player.core.cues/VttCue { // tv.nomercy.player.core.cues/VttCue|null[0]
-    constructor <init>(kotlin/Double, kotlin/Double, kotlin/String) // tv.nomercy.player.core.cues/VttCue.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.String){}[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/String, tv.nomercy.player.core.cues/VttCueSettings = ...) // tv.nomercy.player.core.cues/VttCue.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.String;tv.nomercy.player.core.cues.VttCueSettings){}[0]
 
     final val body // tv.nomercy.player.core.cues/VttCue.body|{}body[0]
         final fun <get-body>(): kotlin/String // tv.nomercy.player.core.cues/VttCue.body.<get-body>|<get-body>(){}[0]
     final val end // tv.nomercy.player.core.cues/VttCue.end|{}end[0]
         final fun <get-end>(): kotlin/Double // tv.nomercy.player.core.cues/VttCue.end.<get-end>|<get-end>(){}[0]
+    final val settings // tv.nomercy.player.core.cues/VttCue.settings|{}settings[0]
+        final fun <get-settings>(): tv.nomercy.player.core.cues/VttCueSettings // tv.nomercy.player.core.cues/VttCue.settings.<get-settings>|<get-settings>(){}[0]
     final val start // tv.nomercy.player.core.cues/VttCue.start|{}start[0]
         final fun <get-start>(): kotlin/Double // tv.nomercy.player.core.cues/VttCue.start.<get-start>|<get-start>(){}[0]
 
     final fun component1(): kotlin/Double // tv.nomercy.player.core.cues/VttCue.component1|component1(){}[0]
     final fun component2(): kotlin/Double // tv.nomercy.player.core.cues/VttCue.component2|component2(){}[0]
     final fun component3(): kotlin/String // tv.nomercy.player.core.cues/VttCue.component3|component3(){}[0]
-    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/String = ...): tv.nomercy.player.core.cues/VttCue // tv.nomercy.player.core.cues/VttCue.copy|copy(kotlin.Double;kotlin.Double;kotlin.String){}[0]
+    final fun component4(): tv.nomercy.player.core.cues/VttCueSettings // tv.nomercy.player.core.cues/VttCue.component4|component4(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/String = ..., tv.nomercy.player.core.cues/VttCueSettings = ...): tv.nomercy.player.core.cues/VttCue // tv.nomercy.player.core.cues/VttCue.copy|copy(kotlin.Double;kotlin.Double;kotlin.String;tv.nomercy.player.core.cues.VttCueSettings){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cues/VttCue.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cues/VttCue.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttCue.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.cues/VttCueSettings { // tv.nomercy.player.core.cues/VttCueSettings|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/Int? = ..., kotlin/Int? = ...) // tv.nomercy.player.core.cues/VttCueSettings.<init>|<init>(kotlin.String?;kotlin.Int?;kotlin.Int?){}[0]
+
+    final val alignment // tv.nomercy.player.core.cues/VttCueSettings.alignment|{}alignment[0]
+        final fun <get-alignment>(): kotlin/String? // tv.nomercy.player.core.cues/VttCueSettings.alignment.<get-alignment>|<get-alignment>(){}[0]
+    final val linePosition // tv.nomercy.player.core.cues/VttCueSettings.linePosition|{}linePosition[0]
+        final fun <get-linePosition>(): kotlin/Int? // tv.nomercy.player.core.cues/VttCueSettings.linePosition.<get-linePosition>|<get-linePosition>(){}[0]
+    final val size // tv.nomercy.player.core.cues/VttCueSettings.size|{}size[0]
+        final fun <get-size>(): kotlin/Int? // tv.nomercy.player.core.cues/VttCueSettings.size.<get-size>|<get-size>(){}[0]
+
+    final fun component1(): kotlin/String? // tv.nomercy.player.core.cues/VttCueSettings.component1|component1(){}[0]
+    final fun component2(): kotlin/Int? // tv.nomercy.player.core.cues/VttCueSettings.component2|component2(){}[0]
+    final fun component3(): kotlin/Int? // tv.nomercy.player.core.cues/VttCueSettings.component3|component3(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/Int? = ..., kotlin/Int? = ...): tv.nomercy.player.core.cues/VttCueSettings // tv.nomercy.player.core.cues/VttCueSettings.copy|copy(kotlin.String?;kotlin.Int?;kotlin.Int?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cues/VttCueSettings.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cues/VttCueSettings.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttCueSettings.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.cues/VttSpritePayload { // tv.nomercy.player.core.cues/VttSpritePayload|null[0]
+    constructor <init>(kotlin/String, kotlin/Int, kotlin/Int, kotlin/Int, kotlin/Int) // tv.nomercy.player.core.cues/VttSpritePayload.<init>|<init>(kotlin.String;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+
+    final val h // tv.nomercy.player.core.cues/VttSpritePayload.h|{}h[0]
+        final fun <get-h>(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.h.<get-h>|<get-h>(){}[0]
+    final val url // tv.nomercy.player.core.cues/VttSpritePayload.url|{}url[0]
+        final fun <get-url>(): kotlin/String // tv.nomercy.player.core.cues/VttSpritePayload.url.<get-url>|<get-url>(){}[0]
+    final val w // tv.nomercy.player.core.cues/VttSpritePayload.w|{}w[0]
+        final fun <get-w>(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.w.<get-w>|<get-w>(){}[0]
+    final val x // tv.nomercy.player.core.cues/VttSpritePayload.x|{}x[0]
+        final fun <get-x>(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.x.<get-x>|<get-x>(){}[0]
+    final val y // tv.nomercy.player.core.cues/VttSpritePayload.y|{}y[0]
+        final fun <get-y>(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.y.<get-y>|<get-y>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.cues/VttSpritePayload.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.component2|component2(){}[0]
+    final fun component3(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.component3|component3(){}[0]
+    final fun component4(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.component4|component4(){}[0]
+    final fun component5(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int = ...): tv.nomercy.player.core.cues/VttSpritePayload // tv.nomercy.player.core.cues/VttSpritePayload.copy|copy(kotlin.String;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cues/VttSpritePayload.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cues/VttSpritePayload.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttSpritePayload.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.cues/VttSubtitlePayload { // tv.nomercy.player.core.cues/VttSubtitlePayload|null[0]
+    constructor <init>(kotlin/String, kotlin/String? = ..., kotlin/Int? = ..., kotlin/Int? = ...) // tv.nomercy.player.core.cues/VttSubtitlePayload.<init>|<init>(kotlin.String;kotlin.String?;kotlin.Int?;kotlin.Int?){}[0]
+
+    final val alignment // tv.nomercy.player.core.cues/VttSubtitlePayload.alignment|{}alignment[0]
+        final fun <get-alignment>(): kotlin/String? // tv.nomercy.player.core.cues/VttSubtitlePayload.alignment.<get-alignment>|<get-alignment>(){}[0]
+    final val linePosition // tv.nomercy.player.core.cues/VttSubtitlePayload.linePosition|{}linePosition[0]
+        final fun <get-linePosition>(): kotlin/Int? // tv.nomercy.player.core.cues/VttSubtitlePayload.linePosition.<get-linePosition>|<get-linePosition>(){}[0]
+    final val size // tv.nomercy.player.core.cues/VttSubtitlePayload.size|{}size[0]
+        final fun <get-size>(): kotlin/Int? // tv.nomercy.player.core.cues/VttSubtitlePayload.size.<get-size>|<get-size>(){}[0]
+    final val text // tv.nomercy.player.core.cues/VttSubtitlePayload.text|{}text[0]
+        final fun <get-text>(): kotlin/String // tv.nomercy.player.core.cues/VttSubtitlePayload.text.<get-text>|<get-text>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.cues/VttSubtitlePayload.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tv.nomercy.player.core.cues/VttSubtitlePayload.component2|component2(){}[0]
+    final fun component3(): kotlin/Int? // tv.nomercy.player.core.cues/VttSubtitlePayload.component3|component3(){}[0]
+    final fun component4(): kotlin/Int? // tv.nomercy.player.core.cues/VttSubtitlePayload.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ..., kotlin/Int? = ..., kotlin/Int? = ...): tv.nomercy.player.core.cues/VttSubtitlePayload // tv.nomercy.player.core.cues/VttSubtitlePayload.copy|copy(kotlin.String;kotlin.String?;kotlin.Int?;kotlin.Int?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.cues/VttSubtitlePayload.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.cues/VttSubtitlePayload.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttSubtitlePayload.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.device/SafeAreaInsets { // tv.nomercy.player.core.device/SafeAreaInsets|null[0]
@@ -3528,38 +3669,6 @@ final class tv.nomercy.player.core.media/ChapterTrack { // tv.nomercy.player.cor
     }
 }
 
-final class tv.nomercy.player.core.media/CueCrossing { // tv.nomercy.player.core.media/CueCrossing|null[0]
-    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ..., kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ...) // tv.nomercy.player.core.media/CueCrossing.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>;kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
-
-    final val changed // tv.nomercy.player.core.media/CueCrossing.changed|{}changed[0]
-        final fun <get-changed>(): kotlin/Boolean // tv.nomercy.player.core.media/CueCrossing.changed.<get-changed>|<get-changed>(){}[0]
-    final val entered // tv.nomercy.player.core.media/CueCrossing.entered|{}entered[0]
-        final fun <get-entered>(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.entered.<get-entered>|<get-entered>(){}[0]
-    final val exited // tv.nomercy.player.core.media/CueCrossing.exited|{}exited[0]
-        final fun <get-exited>(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.exited.<get-exited>|<get-exited>(){}[0]
-
-    final fun component1(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.component1|component1(){}[0]
-    final fun component2(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueCrossing.component2|component2(){}[0]
-    final fun copy(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ..., kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ...): tv.nomercy.player.core.media/CueCrossing // tv.nomercy.player.core.media/CueCrossing.copy|copy(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>;kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/CueCrossing.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/CueCrossing.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // tv.nomercy.player.core.media/CueCrossing.toString|toString(){}[0]
-}
-
-final class tv.nomercy.player.core.media/CueTracker { // tv.nomercy.player.core.media/CueTracker|null[0]
-    constructor <init>(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> = ...) // tv.nomercy.player.core.media/CueTracker.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
-
-    final val active // tv.nomercy.player.core.media/CueTracker.active|{}active[0]
-        final fun <get-active>(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueTracker.active.<get-active>|<get-active>(){}[0]
-    final val line // tv.nomercy.player.core.media/CueTracker.line|{}line[0]
-        final fun <get-line>(): tv.nomercy.player.core.events/CueEvent? // tv.nomercy.player.core.media/CueTracker.line.<get-line>|<get-line>(){}[0]
-
-    final fun advanceTo(kotlin/Double): tv.nomercy.player.core.media/CueCrossing // tv.nomercy.player.core.media/CueTracker.advanceTo|advanceTo(kotlin.Double){}[0]
-    final fun cues(): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.media/CueTracker.cues|cues(){}[0]
-    final fun load(kotlin.collections/List<tv.nomercy.player.core.events/CueEvent>) // tv.nomercy.player.core.media/CueTracker.load|load(kotlin.collections.List<tv.nomercy.player.core.events.CueEvent>){}[0]
-    final fun reset() // tv.nomercy.player.core.media/CueTracker.reset|reset(){}[0]
-}
-
 final class tv.nomercy.player.core.media/MediaItem : tv.nomercy.player.core.media/PlaylistItem { // tv.nomercy.player.core.media/MediaItem|null[0]
     constructor <init>(kotlin/String, kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.media/MediaItem.<init>|<init>(kotlin.String;kotlin.String;kotlin.String?){}[0]
 
@@ -4223,10 +4332,10 @@ final class tv.nomercy.player.core.ports/CueParserRegistry { // tv.nomercy.playe
     constructor <init>() // tv.nomercy.player.core.ports/CueParserRegistry.<init>|<init>(){}[0]
 
     final fun dispose() // tv.nomercy.player.core.ports/CueParserRegistry.dispose|dispose(){}[0]
-    final fun findById(kotlin/String): tv.nomercy.player.core.ports/CueParser? // tv.nomercy.player.core.ports/CueParserRegistry.findById|findById(kotlin.String){}[0]
+    final fun findById(kotlin/String): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.core.ports/CueParserRegistry.findById|findById(kotlin.String){}[0]
     final fun list(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.ports/CueParserRegistry.list|list(){}[0]
-    final fun register(tv.nomercy.player.core.ports/CueParser, kotlin/Boolean = ...) // tv.nomercy.player.core.ports/CueParserRegistry.register|register(tv.nomercy.player.core.ports.CueParser;kotlin.Boolean){}[0]
-    final fun resolve(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/CueParser? // tv.nomercy.player.core.ports/CueParserRegistry.resolve|resolve(kotlin.String;kotlin.String?){}[0]
+    final fun register(tv.nomercy.player.core.ports/CueParser<*>, kotlin/Boolean = ...) // tv.nomercy.player.core.ports/CueParserRegistry.register|register(tv.nomercy.player.core.ports.CueParser<*>;kotlin.Boolean){}[0]
+    final fun resolve(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.core.ports/CueParserRegistry.resolve|resolve(kotlin.String;kotlin.String?){}[0]
     final fun unregister(kotlin/String) // tv.nomercy.player.core.ports/CueParserRegistry.unregister|unregister(kotlin.String){}[0]
 }
 
@@ -5034,7 +5143,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun ready(): kotlinx.coroutines/Deferred<kotlin/Unit> // tv.nomercy.player.core.controllers/ComposedPlayer.ready|ready(){}[0]
     open fun recordMetric(kotlin/String, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(kotlin.String;kotlin.Double){}[0]
     open fun recordMetric(tv.nomercy.player.core.controllers/Metric, kotlin/Double) // tv.nomercy.player.core.controllers/ComposedPlayer.recordMetric|recordMetric(tv.nomercy.player.core.controllers.Metric;kotlin.Double){}[0]
-    open fun registerCueParser(tv.nomercy.player.core.ports/CueParser, kotlin/Boolean = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.registerCueParser|registerCueParser(tv.nomercy.player.core.ports.CueParser;kotlin.Boolean){}[0]
+    open fun registerCueParser(tv.nomercy.player.core.ports/CueParser<*>, kotlin/Boolean = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.registerCueParser|registerCueParser(tv.nomercy.player.core.ports.CueParser<*>;kotlin.Boolean){}[0]
     open fun registerStream(tv.nomercy.player.core.ports/StreamFactory, kotlin/Boolean = ...): tv.nomercy.player.core.controllers/ComposedPlayer // tv.nomercy.player.core.controllers/ComposedPlayer.registerStream|registerStream(tv.nomercy.player.core.ports.StreamFactory;kotlin.Boolean){}[0]
     open fun registerTitleTokens(kotlin.collections/Map<kotlin/String, kotlin/String>) // tv.nomercy.player.core.controllers/ComposedPlayer.registerTitleTokens|registerTitleTokens(kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
     open fun removePlugin(tv.nomercy.player.core.plugin/Plugin<*>) // tv.nomercy.player.core.controllers/ComposedPlayer.removePlugin|removePlugin(tv.nomercy.player.core.plugin.Plugin<*>){}[0]
@@ -5042,7 +5151,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun removeTranslations(kotlin/String, kotlin/String? = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.removeTranslations|removeTranslations(kotlin.String;kotlin.String?){}[0]
     open fun repeatState(): tv.nomercy.player.core.player/RepeatState // tv.nomercy.player.core.controllers/ComposedPlayer.repeatState|repeatState(){}[0]
     open fun report(tv.nomercy.player.core.errors/PlayerError) // tv.nomercy.player.core.controllers/ComposedPlayer.report|report(tv.nomercy.player.core.errors.PlayerError){}[0]
-    open fun resolveCueParser(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/CueParser? // tv.nomercy.player.core.controllers/ComposedPlayer.resolveCueParser|resolveCueParser(kotlin.String;kotlin.String?){}[0]
+    open fun resolveCueParser(kotlin/String, kotlin/String?): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.core.controllers/ComposedPlayer.resolveCueParser|resolveCueParser(kotlin.String;kotlin.String?){}[0]
     open fun seekToIndex(kotlin/Int) // tv.nomercy.player.core.controllers/ComposedPlayer.seekToIndex|seekToIndex(kotlin.Int){}[0]
     open fun seekable(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.controllers/ComposedPlayer.seekable|seekable(){}[0]
     open fun setPreloadStrategy(tv.nomercy.player.core.ports/PreloadStrategy) // tv.nomercy.player.core.controllers/ComposedPlayer.setPreloadStrategy|setPreloadStrategy(tv.nomercy.player.core.ports.PreloadStrategy){}[0]
@@ -5447,28 +5556,28 @@ final object tv.nomercy.player.core.cues/ChapterCues { // tv.nomercy.player.core
     final fun parse(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.media/Chapter> // tv.nomercy.player.core.cues/ChapterCues.parse|parse(kotlin.String){}[0]
 }
 
-final object tv.nomercy.player.core.cues/LrcCueParser : tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player.core.cues/LrcCueParser|null[0]
+final object tv.nomercy.player.core.cues/LrcCueParser : tv.nomercy.player.core.ports/CueParser<tv.nomercy.player.core.cues/LrcPayload> { // tv.nomercy.player.core.cues/LrcCueParser|null[0]
     final val id // tv.nomercy.player.core.cues/LrcCueParser.id|{}id[0]
         final fun <get-id>(): kotlin/String // tv.nomercy.player.core.cues/LrcCueParser.id.<get-id>|<get-id>(){}[0]
 
     final fun canParse(kotlin/String, kotlin/String?): kotlin/Boolean // tv.nomercy.player.core.cues/LrcCueParser.canParse|canParse(kotlin.String;kotlin.String?){}[0]
-    final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.cues/LrcCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
+    final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<tv.nomercy.player.core.cues/LrcPayload>> // tv.nomercy.player.core.cues/LrcCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
-final object tv.nomercy.player.core.cues/SpriteVttCueParser : tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player.core.cues/SpriteVttCueParser|null[0]
+final object tv.nomercy.player.core.cues/SpriteVttCueParser : tv.nomercy.player.core.ports/CueParser<tv.nomercy.player.core.cues/VttSpritePayload> { // tv.nomercy.player.core.cues/SpriteVttCueParser|null[0]
     final val id // tv.nomercy.player.core.cues/SpriteVttCueParser.id|{}id[0]
         final fun <get-id>(): kotlin/String // tv.nomercy.player.core.cues/SpriteVttCueParser.id.<get-id>|<get-id>(){}[0]
 
     final fun canParse(kotlin/String, kotlin/String?): kotlin/Boolean // tv.nomercy.player.core.cues/SpriteVttCueParser.canParse|canParse(kotlin.String;kotlin.String?){}[0]
-    final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.cues/SpriteVttCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
+    final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<tv.nomercy.player.core.cues/VttSpritePayload>> // tv.nomercy.player.core.cues/SpriteVttCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
-final object tv.nomercy.player.core.cues/VttSubtitleCueParser : tv.nomercy.player.core.ports/CueParser { // tv.nomercy.player.core.cues/VttSubtitleCueParser|null[0]
+final object tv.nomercy.player.core.cues/VttSubtitleCueParser : tv.nomercy.player.core.ports/CueParser<tv.nomercy.player.core.cues/VttSubtitlePayload> { // tv.nomercy.player.core.cues/VttSubtitleCueParser|null[0]
     final val id // tv.nomercy.player.core.cues/VttSubtitleCueParser.id|{}id[0]
         final fun <get-id>(): kotlin/String // tv.nomercy.player.core.cues/VttSubtitleCueParser.id.<get-id>|<get-id>(){}[0]
 
     final fun canParse(kotlin/String, kotlin/String?): kotlin/Boolean // tv.nomercy.player.core.cues/VttSubtitleCueParser.canParse|canParse(kotlin.String;kotlin.String?){}[0]
-    final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.events/CueEvent> // tv.nomercy.player.core.cues/VttSubtitleCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
+    final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<tv.nomercy.player.core.cues/VttSubtitlePayload>> // tv.nomercy.player.core.cues/VttSubtitleCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
 final object tv.nomercy.player.core.drm/ClearOnly : tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/ClearOnly|null[0]
@@ -6240,7 +6349,7 @@ final const val tv.nomercy.player.core/KIT_VERSION // tv.nomercy.player.core/KIT
     final fun <get-KIT_VERSION>(): kotlin/String // tv.nomercy.player.core/KIT_VERSION.<get-KIT_VERSION>|<get-KIT_VERSION>(){}[0]
 
 final val tv.nomercy.player.core.cues/builtInCueParsers // tv.nomercy.player.core.cues/builtInCueParsers|{}builtInCueParsers[0]
-    final fun <get-builtInCueParsers>(): kotlin.collections/List<tv.nomercy.player.core.ports/CueParser> // tv.nomercy.player.core.cues/builtInCueParsers.<get-builtInCueParsers>|<get-builtInCueParsers>(){}[0]
+    final fun <get-builtInCueParsers>(): kotlin.collections/List<tv.nomercy.player.core.ports/CueParser<*>> // tv.nomercy.player.core.cues/builtInCueParsers.<get-builtInCueParsers>|<get-builtInCueParsers>(){}[0]
 final val tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN // tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN|{}DEFAULT_TV_OVERSCAN[0]
     final fun <get-DEFAULT_TV_OVERSCAN>(): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN.<get-DEFAULT_TV_OVERSCAN>|<get-DEFAULT_TV_OVERSCAN>(){}[0]
 final val tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY // tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY|{}DEFAULT_RETRY_POLICY[0]

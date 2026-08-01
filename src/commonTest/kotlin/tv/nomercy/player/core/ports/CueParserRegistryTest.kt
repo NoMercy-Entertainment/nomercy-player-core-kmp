@@ -8,7 +8,7 @@
 
 package tv.nomercy.player.core.ports
 
-import tv.nomercy.player.core.events.CueEvent
+import tv.nomercy.player.core.cues.Cue
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -20,11 +20,11 @@ private class ExtensionParser(
     override val id: String,
     private val extension: String,
     private val label: String = id,
-) : CueParser {
+) : CueParser<String> {
     override fun canParse(url: String, contentType: String?): Boolean = url.endsWith(extension)
 
-    override fun parse(raw: String, baseUrl: String?): List<CueEvent> =
-        listOf(CueEvent(startTime = 0.0, endTime = 1.0, text = label))
+    override fun parse(raw: String, baseUrl: String?): List<Cue<String>> =
+        listOf(Cue(start = 0.0, end = 1.0, payload = label))
 }
 
 class CueParserRegistryTest {
@@ -56,10 +56,10 @@ class CueParserRegistryTest {
         subject.register(ExtensionParser("vtt", ".vtt", label = "built-in"))
         subject.register(ExtensionParser("fillz:vtt", ".vtt", label = "consumer"))
 
-        val chosen: CueParser? = subject.resolve("subs.vtt")
+        val chosen: CueParser<*>? = subject.resolve("subs.vtt")
 
         assertEquals("fillz:vtt", chosen?.id)
-        assertEquals("consumer", chosen?.parse("")?.single()?.text)
+        assertEquals("consumer", chosen?.parse("")?.single()?.payload)
     }
 
     @Test
@@ -83,7 +83,7 @@ class CueParserRegistryTest {
         subject.register(ExtensionParser("vtt", ".vtt", label = "second"))
 
         assertEquals(listOf("vtt"), subject.list())
-        assertEquals("second", subject.resolve("subs.vtt")?.parse("")?.single()?.text)
+        assertEquals("second", subject.resolve("subs.vtt")?.parse("")?.single()?.payload)
     }
 
     @Test
@@ -121,10 +121,10 @@ class CueParserRegistryTest {
         // ordinary, and the content type is then the only signal there is.
         val subject: CueParserRegistry = registry()
         subject.register(
-            object : CueParser {
+            object : CueParser<String> {
                 override val id: String = "by-type"
                 override fun canParse(url: String, contentType: String?): Boolean = contentType == "text/vtt"
-                override fun parse(raw: String, baseUrl: String?): List<CueEvent> = emptyList()
+                override fun parse(raw: String, baseUrl: String?): List<Cue<String>> = emptyList()
             },
         )
 

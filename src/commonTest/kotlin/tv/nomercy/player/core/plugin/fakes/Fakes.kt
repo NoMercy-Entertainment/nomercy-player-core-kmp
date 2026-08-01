@@ -15,6 +15,7 @@ import tv.nomercy.player.core.events.EventEmitter
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.PluginHost
+import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
@@ -54,6 +55,10 @@ class RecordingStorage : Storage {
 class FakePluginHost(
     override val rootLogger: Logger = RecordingLogger("[nmplayer]"),
     override val rootStorage: Storage = RecordingStorage(),
+    // Absent by default, matching PluginHost's own default: a bare host
+    // resolves nothing. A test that wants to prove a plugin reaches the host's
+    // registry (rather than a private one of its own) supplies this.
+    private val cueParserResolver: (String, String?) -> CueParser<*>? = { _, _ -> null },
 ) : PluginHost {
     val bus: EventEmitter<Unit> = EventEmitter()
     val emitted: MutableList<Pair<String, Any?>> = mutableListOf()
@@ -89,4 +94,7 @@ class FakePluginHost(
     }
 
     override fun report(error: PlayerError) { reported.add(error) }
+
+    override fun resolveCueParser(url: String, contentType: String?): CueParser<*>? =
+        cueParserResolver(url, contentType)
 }

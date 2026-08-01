@@ -8,7 +8,7 @@
 
 package tv.nomercy.player.core.ports
 
-import tv.nomercy.player.core.events.CueEvent
+import tv.nomercy.player.core.cues.Cue
 
 // Turns a subtitle, lyric or sprite file into cues.
 //
@@ -17,7 +17,15 @@ import tv.nomercy.player.core.events.CueEvent
 // per-syllable timing, a sprite index, a fan-made chapter file are the ones a
 // consumer has and this library has never heard of. Registering a parser is how
 // they say so, and it means adding a format does not mean forking the player.
-public interface CueParser {
+//
+// Generic on T, matching the web's `ICueParser<T>`. It was not: every format
+// flattened its payload into CueEvent's `text: String?`, which read fine for a
+// subtitle and quietly dropped enhanced-LRC word timing, a sprite's rectangle
+// and WebVTT's align/line/size on the way through. A karaoke display, a
+// scrubber preview and a styled subtitle renderer each need the shape their
+// format actually carries; T is that shape, and CueParser<Nothing-in-particular>
+// was never the fix a narrower payload could have been.
+public interface CueParser<T> {
     // 'vtt', 'lrc', 'sprite-vtt'. Vendor-prefixed for anything custom —
     // 'fillz:karaoke' — so a consumer's format cannot collide with one this
     // library adds later.
@@ -33,7 +41,7 @@ public interface CueParser {
     // Errors propagate. The registry does not swallow them, because a subtitle
     // file that arrived corrupt is worth a visible failure rather than an empty
     // track that looks like a film with no dialogue.
-    public fun parse(raw: String, baseUrl: String? = null): List<CueEvent>
+    public fun parse(raw: String, baseUrl: String? = null): List<Cue<T>>
 }
 
 // Which parser handles what.
@@ -41,9 +49,16 @@ public interface CueParser {
 // Most-recently-registered wins, so a consumer overriding a built-in just
 // registers theirs. That is the whole ordering rule and it is the one that makes
 // override work without a priority number nobody can choose correctly.
+//
+// Star-projected throughout, matching the web's `ICueParser<T = unknown>`: the
+// registry is deliberately heterogeneous — an LRC parser and a sprite parser
+// sit in the same list — so nothing here can know any one entry's T. A caller
+// that resolved a parser for a url it chose (an `.lrc` a lyrics plugin asked
+// for) knows what T it expects and narrows at that one seam, the same way the
+// web's own LyricsPlugin does with `as CueList<LyricPayload>`.
 public class CueParserRegistry {
 
-    private val parsers: MutableList<CueParser> = mutableListOf()
+    private val parsers: MutableList<CueParser<*>> = mutableListOf()
 
     // Re-registering an id replaces the existing entry rather than shadowing it,
     // so a plugin re-registering on every setup does not grow the list forever.
@@ -51,7 +66,7 @@ public class CueParserRegistry {
     // atLowestPriority puts it where a built-in belongs: seeded so anything a
     // consumer registers later wins without them having to know what was
     // already there.
-    public fun register(parser: CueParser, atLowestPriority: Boolean = false) {
+    public fun register(parser: CueParser<*>, atLowestPriority: Boolean = false) {
         parsers.removeAll { it.id == parser.id }
         if (atLowestPriority) parsers.add(0, parser) else parsers.add(parser)
     }
@@ -64,10 +79,10 @@ public class CueParserRegistry {
     // unparseable subtitle is an error or a shrug is the caller's call: a
     // missing lyric file is nothing, a missing subtitle the viewer just chose is
     // something.
-    public fun resolve(url: String, contentType: String? = null): CueParser? =
+    public fun resolve(url: String, contentType: String? = null): CueParser<*>? =
         parsers.lastOrNull { it.canParse(url, contentType) }
 
-    public fun findById(id: String): CueParser? = parsers.firstOrNull { it.id == id }
+    public fun findById(id: String): CueParser<*>? = parsers.firstOrNull { it.id == id }
 
     public fun list(): List<String> = parsers.map { it.id }
 

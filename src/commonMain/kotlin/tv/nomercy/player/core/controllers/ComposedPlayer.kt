@@ -1116,12 +1116,15 @@ public open class ComposedPlayer(
     // registering one with the same job. atLowestPriority is how a built-in
     // seeds itself: anything a consumer adds later beats it without them
     // needing to know what was already there.
-    public open fun registerCueParser(parser: CueParser, atLowestPriority: Boolean = false): Unit =
+    public open fun registerCueParser(parser: CueParser<*>, atLowestPriority: Boolean = false): Unit =
         cueParsers.register(parser, atLowestPriority)
 
     public open fun unregisterCueParser(id: String): Unit = cueParsers.unregister(id)
 
-    public open fun resolveCueParser(url: String, contentType: String? = null): CueParser? =
+    // Overrides the PluginHost default (null): this player has a real registry,
+    // so a plugin asking through the host sees exactly what a consumer calling
+    // this method directly sees.
+    override fun resolveCueParser(url: String, contentType: String?): CueParser<*>? =
         cueParsers.resolve(url, contentType)
 
     // Seeded with LRC, subtitle VTT and sprite VTT. The web registers those at

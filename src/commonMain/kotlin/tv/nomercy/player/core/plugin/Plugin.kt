@@ -21,6 +21,7 @@ import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PluginDisabledPayload
 import tv.nomercy.player.core.events.PluginEnabledPayload
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Logger
@@ -201,6 +202,13 @@ public abstract class Plugin<O : Any> {
 
     protected suspend fun fetch(url: String, opts: FetchOptions = FetchOptions()): FetchResponse =
         wired.host.fetch(url, opts)
+
+    // The host's cue-parser registry, not a private one the plugin carries
+    // itself. A plugin that kept its own could never see a format the host
+    // registered — this is how a subtitle, lyric or sprite plugin reaches the
+    // same answer `player.resolveCueParser(url)` would give a consumer.
+    protected fun resolveCueParser(url: String, contentType: String? = null): CueParser<*>? =
+        wired.host.resolveCueParser(url, contentType)
 
     // Closes itself when the plugin goes away, unless it is already closing.
     protected fun websocket(url: String, opts: RealtimeFactoryOptions = RealtimeFactoryOptions()): RealtimeChannel {

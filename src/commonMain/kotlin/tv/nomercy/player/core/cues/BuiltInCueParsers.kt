@@ -8,7 +8,6 @@
 
 package tv.nomercy.player.core.cues
 
-import tv.nomercy.player.core.events.CueEvent
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.CueParserRegistry
 
@@ -20,24 +19,28 @@ import tv.nomercy.player.core.ports.CueParserRegistry
 // the lyrics plugin — whose whole job is synced lyrics — could not read a file it
 // was handed. The web registers these at setup; this seeds them at construction,
 // which is the same answer one step earlier.
+//
+// Each parser's T is the web's payload shape for that format — LrcPayload,
+// VttSubtitlePayload, VttSpritePayload — not the flattened CueEvent this used
+// to return. Word timing, cue-box positioning and sprite rectangles now cross
+// this seam instead of being discarded on the way through it.
 
 // `.lrc`, and the content types a server serves one with.
-public object LrcCueParser : CueParser {
+public object LrcCueParser : CueParser<LrcPayload> {
     override val id: String = "lrc"
 
     override fun canParse(url: String, contentType: String?): Boolean =
         LRC_EXTENSION.containsMatchIn(url) || (contentType != null && LRC_MIME.matches(contentType))
 
-    // Per-word timing is dropped here and only here: [CueEvent] carries a line
-    // and a span, and enhanced LRC carries syllables. A consumer that wants them
-    // calls [parseLrc], which keeps them.
-    override fun parse(raw: String, baseUrl: String?): List<CueEvent> =
-        parseLrc(raw).map { CueEvent(startTime = it.start, endTime = it.end, text = it.text) }
+    override fun parse(raw: String, baseUrl: String?): List<Cue<LrcPayload>> =
+        parseLrc(raw).map {
+            Cue(start = it.start, end = it.end, payload = LrcPayload(text = it.text, words = it.words))
+        }
 }
 
 // Plain subtitle WebVTT. Declines a sprite sheet rather than returning cues
 // whose text is a rectangle.
-public object VttSubtitleCueParser : CueParser {
+public object VttSubtitleCueParser : CueParser<VttSubtitlePayload> {
     override val id: String = "vtt"
 
     override fun canParse(url: String, contentType: String?): Boolean = when {
@@ -46,8 +49,19 @@ public object VttSubtitleCueParser : CueParser {
         else -> contentType != null && VTT_MIME.matches(contentType)
     }
 
-    override fun parse(raw: String, baseUrl: String?): List<CueEvent> =
-        parseVttSubtitles(raw).map { CueEvent(startTime = it.start, endTime = it.end, text = it.body) }
+    override fun parse(raw: String, baseUrl: String?): List<Cue<VttSubtitlePayload>> =
+        parseVttSubtitles(raw).map {
+            Cue(
+                start = it.start,
+                end = it.end,
+                payload = VttSubtitlePayload(
+                    text = it.body,
+                    alignment = it.settings.alignment,
+                    linePosition = it.settings.linePosition,
+                    size = it.settings.size,
+                ),
+            )
+        }
 }
 
 // Sprite WebVTT — `*.sprite.vtt`, `*.sprites.vtt`.
@@ -55,25 +69,27 @@ public object VttSubtitleCueParser : CueParser {
 // Sprite VTT shares the extension with subtitles, so the url is the only thing
 // that tells them apart before the file arrives. It ranks behind plain VTT and
 // activates on the hint alone.
-public object SpriteVttCueParser : CueParser {
+public object SpriteVttCueParser : CueParser<VttSpritePayload> {
     override val id: String = "sprite-vtt"
 
     override fun canParse(url: String, contentType: String?): Boolean = SPRITE_HINT.containsMatchIn(url)
 
-    // The cue body, with the sheet's url resolved against [baseUrl]. A rectangle
-    // does not fit in [CueEvent] and this does not pretend otherwise —
-    // [parseVttSprite] returns [SpriteCue] with the numbers in fields, and a
-    // scrubber preview should call it. This exists so resolution answers for a
-    // sprite url the way the web's registry does, rather than reporting that
-    // nothing can read the file.
-    override fun parse(raw: String, baseUrl: String?): List<CueEvent> =
+    // The rectangle itself, not a string reference into it. [parseVttSprite]
+    // already resolves the sheet's url against [baseUrl]; this just carries its
+    // fields through rather than flattening them into text a consumer has to
+    // re-parse.
+    override fun parse(raw: String, baseUrl: String?): List<Cue<VttSpritePayload>> =
         parseVttSprite(raw, baseUrl).map {
-            CueEvent(startTime = it.start, endTime = it.end, text = spriteReference(it))
+            Cue(
+                start = it.start,
+                end = it.end,
+                payload = VttSpritePayload(url = it.url, x = it.x, y = it.y, w = it.width, h = it.height),
+            )
         }
 }
 
 // What the kit registers by itself, in the web's order.
-public val builtInCueParsers: List<CueParser> = listOf(
+public val builtInCueParsers: List<CueParser<*>> = listOf(
     LrcCueParser,
     VttSubtitleCueParser,
     SpriteVttCueParser,
@@ -90,9 +106,6 @@ public fun CueParserRegistry.registerBuiltIns(): CueParserRegistry {
     builtInCueParsers.asReversed().forEach { parser -> register(parser, atLowestPriority = true) }
     return this
 }
-
-private fun spriteReference(cue: SpriteCue): String =
-    "${cue.url}#xywh=${cue.x},${cue.y},${cue.width},${cue.height}"
 
 private val LRC_EXTENSION = Regex("""\.lrc(\?|$)""", RegexOption.IGNORE_CASE)
 private val LRC_MIME = Regex("""application/x-(lrc|lyrics)|text/lrc""", RegexOption.IGNORE_CASE)

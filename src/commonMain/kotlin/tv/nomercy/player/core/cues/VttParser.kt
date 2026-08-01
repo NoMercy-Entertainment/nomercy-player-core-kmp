@@ -13,10 +13,24 @@ package tv.nomercy.player.core.cues
 // Seconds because everything else on this player is: a parser that handed back
 // milliseconds would be a unit boundary in the middle of the timeline, and the
 // conversion would live at every call site instead of here.
+//
+// [settings] defaults to empty rather than being absent: every existing
+// positional and copy() call site still compiles, and a cue with no cue-
+// settings line reads the same as one this parser has never seen.
 public data class VttCue(
     val start: Double,
     val end: Double,
     val body: String,
+    val settings: VttCueSettings = VttCueSettings(),
+)
+
+// `align`, `line`, `size` off the timing line. `position:` and `vertical:` are
+// intentionally not read — out of scope for the cue-list use cases, matching
+// the web parser's own documented cut.
+public data class VttCueSettings(
+    val alignment: String? = null,
+    val linePosition: Int? = null,
+    val size: Int? = null,
 )
 
 // A thumbnail, and where to find it inside the sheet.
@@ -32,6 +46,29 @@ public data class SpriteCue(
     val y: Int,
     val width: Int,
     val height: Int,
+)
+
+// What a subtitle consumer gets from
+// [tv.nomercy.player.core.ports.CueParser], once timing has gone into
+// [Cue.start]/[Cue.end]. The web's `VTTSubtitlePayload` shape: text plus the
+// positioning a renderer needs to reproduce the cue without re-parsing the
+// source.
+public data class VttSubtitlePayload(
+    override val text: String,
+    val alignment: String? = null,
+    val linePosition: Int? = null,
+    val size: Int? = null,
+) : TextPayload
+
+// A sprite consumer's payload, mirroring the web's `VTTSpritePayload` field
+// names — `w`/`h`, not `width`/`height` — so a rectangle crossing the wire
+// reads the same regardless of which client wrote it.
+public data class VttSpritePayload(
+    val url: String,
+    val x: Int,
+    val y: Int,
+    val w: Int,
+    val h: Int,
 )
 
 // HH:MM:SS.mmm or MM:SS.mmm, in seconds. Null on anything else.
@@ -79,9 +116,10 @@ public fun parseVtt(text: String): List<VttCue> =
 // the angle brackets to the viewer. Everything else about reading the file is
 // identical, and two readers of one format is two chances to disagree about it.
 //
-// What this does NOT carry is the cue's positioning — `align`, `line`, `size`
-// ride on the timing line and [VttCue] has nowhere to put them. A renderer that
-// needs them wants tv.nomercy.player.video.subtitles.SubtitleCue, which does.
+// `align`, `line`, `size` ride along on [VttCue.settings] — `copy()` below only
+// touches `body`. A renderer with its own richer cue type still wants
+// tv.nomercy.player.video.subtitles.SubtitleCue; this is the shape
+// [tv.nomercy.player.core.ports.CueParser]'s built-in hands to a plugin.
 public fun parseVttSubtitles(text: String): List<VttCue> =
     parseVtt(text).map { it.copy(body = it.body.replace(INLINE_TAG, "").trim()) }
 
@@ -122,24 +160,72 @@ private fun parseBlock(block: String): VttCue? {
     val timingAt: Int = lines.indexOfFirst { it.contains(ARROW) }
     if (timingAt < 0) return null
 
-    val range: ClosedRange<Double> = parseTiming(lines[timingAt]) ?: return null
+    val timing: VttTiming = parseTiming(lines[timingAt]) ?: return null
 
     val body: String = lines.drop(timingAt + 1).joinToString("\n")
     // A timing with nothing under it renders as a blank subtitle: a black box
     // with no text, which looks like a bug rather than silence.
-    return if (body.isEmpty()) null else VttCue(range.start, range.endInclusive, body)
+    return if (body.isEmpty()) null else VttCue(timing.range.start, timing.range.endInclusive, body, timing.settings)
 }
 
-private fun parseTiming(line: String): ClosedRange<Double>? {
+// The timing line's two halves: the range every cue needs, and the settings
+// only a styled one carries.
+private class VttTiming(val range: ClosedRange<Double>, val settings: VttCueSettings)
+
+private fun parseTiming(line: String): VttTiming? {
     val halves: List<String> = line.split(ARROW)
     if (halves.size != 2) return null
 
     val start: Double? = parseVttTimestamp(halves[0])
+    val tail: String = halves[1].trim()
     // Cue settings ride on the end timestamp, space-separated: align, line,
-    // position. Taking the whole field fails to parse every styled cue.
-    val end: Double? = parseVttTimestamp(halves[1].trim().substringBefore(' '))
+    // size (position and vertical are out of scope — see [VttCueSettings]).
+    // Taking the whole field for the timestamp fails to parse every styled cue.
+    val end: Double? = parseVttTimestamp(tail.substringBefore(' '))
 
-    return if (start == null || end == null) null else start..end
+    if (start == null || end == null) return null
+    return VttTiming(start..end, parseCueSettings(tail.substringAfter(' ', missingDelimiterValue = "")))
+}
+
+// `align:start line:50% size:80%`, tolerant of a missing trailing `%` and
+// silent on anything it does not recognise — a malformed cue still renders
+// centred at the safe-area baseline rather than failing to parse at all.
+private fun parseCueSettings(raw: String): VttCueSettings {
+    if (raw.isBlank()) return VttCueSettings()
+
+    var alignment: String? = null
+    var linePosition: Int? = null
+    var size: Int? = null
+
+    for (token in raw.trim().split(WHITESPACE)) {
+        val sep: Int = token.indexOf(':')
+        if (sep < 0) continue
+        val key: String = token.take(sep).lowercase()
+        val value: String = token.substring(sep + 1)
+
+        when (key) {
+            "align" -> alignment = normaliseAlignment(value)
+            "line" -> linePosition = parsePercent(value) ?: linePosition
+            "size" -> size = parsePercent(value) ?: size
+        }
+    }
+
+    return VttCueSettings(alignment = alignment, linePosition = linePosition, size = size)
+}
+
+private fun normaliseAlignment(raw: String): String? = when (raw.lowercase()) {
+    "start", "left" -> "start"
+    "end", "right" -> "end"
+    "center", "middle", "centre" -> "center"
+    else -> null
+}
+
+// `line:auto` and negative line numbers are not meaningful here — only a
+// percentage 0-100 is, matching the web parser.
+private fun parsePercent(raw: String): Int? {
+    val match: MatchResult = PERCENT.matchEntire(raw) ?: return null
+    val value: Int = match.groupValues[1].toIntOrNull() ?: return null
+    return value.takeIf { it in MIN_PERCENT..MAX_PERCENT }
 }
 
 // The thumbnail cues, with their rectangles resolved.
@@ -207,3 +293,10 @@ private val BLANK_LINE = Regex("""^[ \t]+$""", RegexOption.MULTILINE)
 private const val MAX_TIME_PARTS = 3
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3_600
+
+private val WHITESPACE = Regex("""\s+""")
+
+// Trailing `%` optional — legacy files write bare numbers.
+private val PERCENT = Regex("""^(-?\d+)%?$""")
+private const val MIN_PERCENT = 0
+private const val MAX_PERCENT = 100

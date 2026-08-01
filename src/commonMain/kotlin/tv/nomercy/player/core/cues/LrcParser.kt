@@ -30,6 +30,16 @@ public data class LrcCue(
     val words: List<LrcWord> = emptyList(),
 )
 
+// What an LRC line hands to [tv.nomercy.player.core.ports.CueParser]'s caller,
+// once the timing has already gone into [Cue.start]/[Cue.end]. The web's
+// `LrcPayload` shape exactly: a lyrics consumer asks for the line and, when the
+// file is enhanced, the words — nothing here repeats the timing [Cue] already
+// carries.
+public data class LrcPayload(
+    override val text: String,
+    val words: List<LrcWord> = emptyList(),
+) : TextPayload
+
 // Every line of an LRC or enhanced LRC file, in order.
 //
 //   plain            [mm:ss.xx]line text

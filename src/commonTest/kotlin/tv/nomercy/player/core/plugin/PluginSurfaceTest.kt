@@ -18,8 +18,10 @@ import tv.nomercy.player.core.errors.ErrorCode
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.errors.ScopeKind
 import tv.nomercy.player.core.errors.Severity
+import tv.nomercy.player.core.cues.Cue
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.RealtimeChannel
@@ -50,6 +52,7 @@ private class SurfacePlugin : Plugin<Unit>() {
     fun label(): String = t("play", mapOf("count" to "2"))
     fun scheduleLate(flag: BooleanArray) = timeout(1_000) { flag[0] = true }
     suspend fun askBeforeDrawing(value: Int) = dispatchBefore(Events.BeforeDraw, value)
+    fun findCueParser(url: String): CueParser<*>? = resolveCueParser(url)
 }
 
 // advanceTimeBy/runCurrent drive the virtual clock these tests measure
@@ -161,5 +164,33 @@ class PluginSurfaceTest {
 
         assertTrue(result.prevented)
         assertEquals(99, result.data)
+    }
+
+    // A bare host resolves nothing — the PluginHost default, not a plugin's own
+    // opinion about what "nothing registered" means.
+    @Test
+    fun aPluginWithNoHostRegistryResolvesNothing() = runTest {
+        val host = FakePluginHost()
+        val (plugin, _) = wire(host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        assertEquals(null, plugin.findCueParser("song.lrc"))
+    }
+
+    // The gap this closes: a plugin used to carry its own CueParserRegistry and
+    // could not see a format the HOST had registered. Wiring the fake host with
+    // a resolver and reaching it through the plugin's protected helper is the
+    // same path LyricsPlugin now takes through `resolveCueParser()` — this
+    // fails without the PluginHost seam or the Plugin-base forwarding method.
+    @Test
+    fun aPluginSeesTheHostsRegisteredParserNotAPrivateOne() = runTest {
+        val karaoke = object : CueParser<String> {
+            override val id: String = "fillz:karaoke"
+            override fun canParse(url: String, contentType: String?): Boolean = url.endsWith(".karaoke")
+            override fun parse(raw: String, baseUrl: String?): List<Cue<String>> = emptyList()
+        }
+        val host = FakePluginHost(cueParserResolver = { url, _ -> karaoke.takeIf { url.endsWith(".karaoke") } })
+        val (plugin, _) = wire(host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        assertEquals("fillz:karaoke", plugin.findCueParser("song.karaoke")?.id)
     }
 }
