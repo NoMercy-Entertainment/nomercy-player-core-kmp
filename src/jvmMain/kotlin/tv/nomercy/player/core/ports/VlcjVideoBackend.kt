@@ -35,13 +35,23 @@ private const val SUBTITLES_DISABLED = -1
 // the ladder cap — printed its loud skip and passed without running. A gate that
 // cannot fail is not a gate, and this is how it happened.
 //
-// Measured, twice, in a bare JVM against the installed VLC 3.0.23: 7137ms for the
-// first MediaPlayerFactory in a process, 684ms for the second. The first pays for
-// libVLC indexing its plugin directory because the on-disk plugins.dat is older
-// than the DLLs beside it — libVLC says so on stderr, on every launch, and it is
-// the same 7 seconds a desktop client pays before its first frame. Regenerating
-// that cache with vlc-cache-gen fixes the machine; this number is what makes the
-// answer correct on a machine nobody has fixed.
+// Twenty seconds looks absurd for "is a library present" and it is not enough
+// for the worst case. Measured on this machine, one run each:
+//
+//   bundled payload, first factory in a process     ~1.0s
+//   installed VLC, plugin cache stale               ~1.2s
+//   installed VLC, JVM started from C:\            118.6s
+//
+// The last one is not a typo and it is not the disk. vlcj's default discovery
+// asks for candidate directories and searches each one RECURSIVELY, and one of
+// the candidates is the JVM's working directory — so an application launched
+// from a large tree walks that whole tree before it ever reaches the install.
+// Two minutes, on a machine where VLC is installed and everything is warm.
+//
+// The bundled payload removes that case rather than surviving it: its provider
+// outranks every other, so discovery stops at a directory that contains libVLC
+// on the first look. This timeout is what keeps the answer honest on a machine
+// where no payload was available and the fallback has to go the long way round.
 private const val PROBE_TIMEOUT_MS = 20_000L
 
 // What an engine nobody has set a volume on is playing at.
@@ -565,10 +575,10 @@ public class VlcjVideoBackend private constructor(
                         MediaPlayerFactory().release()
                         null
                     } catch (missing: LinkageError) {
-                        "libVLC is not installed, or is the wrong architecture: ${missing.message}"
+                        "libVLC could not be loaded: ${missing.message}. ${payloadState()}"
                     } catch (refused: RuntimeException) {
                         // VLCJ's discovery throws this when it finds nothing.
-                        "libVLC could not be located: ${refused.message}"
+                        "libVLC could not be located: ${refused.message}. ${payloadState()}"
                     },
                 )
             }
@@ -581,5 +591,19 @@ public class VlcjVideoBackend private constructor(
             prober.join(millis)
             return answer.get()
         }
+
+        // What happened to the copy that was supposed to arrive with the
+        // library, appended to whatever libVLC itself said.
+        //
+        // Without it the message is "libVLC could not be located", which sends
+        // a developer looking for an installer — and the answer is nearly
+        // always that the payload could not be fetched or has not been
+        // published for their platform yet. Naming that is the difference
+        // between a five-minute fix and an afternoon.
+        private fun payloadState(): String =
+            tv.nomercy.player.core.natives.NativeRuntimes
+                .whyUnavailable(tv.nomercy.player.core.natives.NativeRuntimeKind.LIB_VLC)
+                ?.let { why -> "The bundled runtime was not used: $why" }
+                ?: "The bundled runtime is present, so this is a load failure rather than a missing library."
     }
 }

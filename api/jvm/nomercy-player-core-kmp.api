@@ -3086,6 +3086,44 @@ public final class tv/nomercy/player/core/media/UsableRung {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/natives/BundledVlcDirectoryProvider : uk/co/caprica/vlcj/factory/discovery/provider/DiscoveryDirectoryProvider {
+	public fun <init> ()V
+	public fun directories ()[Ljava/lang/String;
+	public fun priority ()I
+	public fun supported ()Z
+}
+
+public final class tv/nomercy/player/core/natives/HostPlatform : java/lang/Enum {
+	public static final field Companion Ltv/nomercy/player/core/natives/HostPlatform$Companion;
+	public static final field LINUX_ARM64 Ltv/nomercy/player/core/natives/HostPlatform;
+	public static final field LINUX_X64 Ltv/nomercy/player/core/natives/HostPlatform;
+	public static final field MACOS_ARM64 Ltv/nomercy/player/core/natives/HostPlatform;
+	public static final field MACOS_X64 Ltv/nomercy/player/core/natives/HostPlatform;
+	public static final field WINDOWS_X64 Ltv/nomercy/player/core/natives/HostPlatform;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/natives/HostPlatform;
+	public static fun values ()[Ltv/nomercy/player/core/natives/HostPlatform;
+}
+
+public final class tv/nomercy/player/core/natives/HostPlatform$Companion {
+	public final fun current ()Ltv/nomercy/player/core/natives/HostPlatform;
+}
+
+public final class tv/nomercy/player/core/natives/NativeRuntimeKind : java/lang/Enum {
+	public static final field LIB_ASS Ltv/nomercy/player/core/natives/NativeRuntimeKind;
+	public static final field LIB_VLC Ltv/nomercy/player/core/natives/NativeRuntimeKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/natives/NativeRuntimeKind;
+	public static fun values ()[Ltv/nomercy/player/core/natives/NativeRuntimeKind;
+}
+
+public final class tv/nomercy/player/core/natives/NativeRuntimes {
+	public static final field INSTANCE Ltv/nomercy/player/core/natives/NativeRuntimes;
+	public final fun directory (Ltv/nomercy/player/core/natives/NativeRuntimeKind;)Ljava/io/File;
+	public final fun whyUnavailable (Ltv/nomercy/player/core/natives/NativeRuntimeKind;)Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/player/ActionOptions {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;ZZ)V

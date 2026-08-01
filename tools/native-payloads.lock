@@ -1,0 +1,39 @@
+# Where each desktop native payload is built FROM, pinned by digest.
+#
+# This file is the upstream side of the contract. The downstream side — the
+# digest of the archive NoMercy publishes and the JVM target downloads — lives
+# in NativeArchives.kt, because that is what the running library verifies.
+#
+# Two digests per platform, deliberately. This one says "the bytes we built it
+# out of are the bytes VideoLAN published"; the one in Kotlin says "the bytes
+# this machine is about to load are the bytes we built". A single digest cannot
+# say both, and the interesting supply-chain failures live in the gap.
+#
+#   tools/build-native-payload.sh libvlc windows-x64
+
+libvlc.version=3.0.23
+
+# The official redistributable, unmodified. Digest published by VideoLAN at
+# https://get.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.zip.sha256
+libvlc.windows-x64.kind=zip
+libvlc.windows-x64.source=https://get.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.zip
+libvlc.windows-x64.sha256=992d19dbd0b8a7cde9167d2f7780b1ef6f92acc8a71acfa736101a21f35181e1
+
+# Linux has no official portable build: VideoLAN ships source and distro
+# packages, and a payload assembled from .deb files inherits that distro's
+# shared-library graph — which is the opposite of self-contained. So Linux is
+# built in a container from the distribution's own packages plus every
+# non-glibc shared object they pull in, and the container is the pin.
+libvlc.linux-x64.kind=container
+libvlc.linux-x64.source=debian:bookworm-slim
+libvlc.linux-x64.sha256=
+
+# macOS ships VLC as a .dmg carrying VLC.app. Extracting it needs hdiutil,
+# which needs macOS, so this payload is built on the Mac host and nowhere else.
+libvlc.macos-arm64.kind=dmg
+libvlc.macos-arm64.source=https://get.videolan.org/vlc/3.0.23/macosx/vlc-3.0.23-arm64.dmg
+libvlc.macos-arm64.sha256=
+
+libvlc.macos-x64.kind=dmg
+libvlc.macos-x64.source=https://get.videolan.org/vlc/3.0.23/macosx/vlc-3.0.23-intel64.dmg
+libvlc.macos-x64.sha256=
