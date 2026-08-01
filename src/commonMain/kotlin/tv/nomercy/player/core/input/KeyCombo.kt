@@ -22,6 +22,11 @@ public fun PlayerKey.asCombo(): KeyCombo = KeyCombo(combo)
 // The order is fixed rather than alphabetical because it is the order the web
 // reference already writes, and a binding table shared between them has to
 // agree on both sides.
+//
+// alt, ctrl, shift — the three the web's `canonicalKey` pushes, in that order.
+// Meta follows them because the web has no meta key to write and something has
+// to hold the position; it is the only part of this spelling with no counterpart
+// to agree with.
 public fun keyCombo(
     key: String,
     shift: Boolean = false,
@@ -30,8 +35,8 @@ public fun keyCombo(
     meta: Boolean = false,
 ): KeyCombo {
     val parts: MutableList<String> = mutableListOf()
-    if (ctrl) parts += "ctrl"
     if (alt) parts += "alt"
+    if (ctrl) parts += "ctrl"
     if (shift) parts += "shift"
     if (meta) parts += "meta"
     parts += key

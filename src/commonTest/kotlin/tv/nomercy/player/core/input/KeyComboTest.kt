@@ -30,9 +30,11 @@ class KeyComboTest {
     fun theOrderIsTheOneTheWebReferenceWrites() {
         // Both sides share binding tables, so this is not an internal detail:
         // a table authored against one has to resolve on the other.
+        // `canonicalKey` in the kit's key-handler pushes alt, then ctrl, then
+        // shift. Meta has no counterpart there and trails the three.
         val all: KeyCombo = keyCombo("k", shift = true, ctrl = true, alt = true, meta = true)
 
-        assertEquals("ctrl+alt+shift+meta+k", all.canonical)
+        assertEquals("alt+ctrl+shift+meta+k", all.canonical)
     }
 
     @Test
