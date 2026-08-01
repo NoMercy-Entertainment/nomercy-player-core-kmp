@@ -81,6 +81,25 @@ class PlayerTransportCommandsTest {
     }
 
     @Test
+    fun aSkipArrivesAsAnIntervalInSecondsAndMovesFromWherePlaybackIs() = runTest {
+        // The same thousandfold conversion as seekTo, on a value that means
+        // something else: how far, not where to. A skip forwarded as an absolute
+        // position would send playback to five seconds rather than on by five.
+        val player = ComposedPlayer(backend = FakeMediaBackend(), scope = backgroundScope)
+        val seeks: MutableList<Double> = mutableListOf()
+        player.setup(PlayerConfig())
+        player.queue(listOf(TestItem("a")))
+        player.time(30.0)
+        player.on(CoreEvents.Seek) { position -> seeks += position.time }
+
+        val commands = PlayerTransportCommands(player, eager())
+        commands.skipForward(5_000)
+        commands.skipBackward(5_000)
+
+        assertEquals(listOf(35.0, 30.0), seeks)
+    }
+
+    @Test
     fun anActionFromOutsideTheProcessIsMarkedAsRemote() = runTest {
         // So a listener can tell a car's steering wheel from the app's own
         // button. Both are legitimate and they are not the same event.

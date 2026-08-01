@@ -21,6 +21,7 @@ import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PluginDisabledPayload
 import tv.nomercy.player.core.events.PluginEnabledPayload
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
@@ -209,6 +210,10 @@ public abstract class Plugin<O : Any> {
     // same answer `player.resolveCueParser(url)` would give a consumer.
     protected fun resolveCueParser(url: String, contentType: String? = null): CueParser<*>? =
         wired.host.resolveCueParser(url, contentType)
+
+    // The item that is already playing when this plugin is installed. Null when
+    // nothing is, or when the host has no queue at all — see PluginHost.item.
+    protected fun item(): PlaylistItem? = wired.host.item()
 
     // Closes itself when the plugin goes away, unless it is already closing.
     protected fun websocket(url: String, opts: RealtimeFactoryOptions = RealtimeFactoryOptions()): RealtimeChannel {

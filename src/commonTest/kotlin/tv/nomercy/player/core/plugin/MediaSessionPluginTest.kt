@@ -200,6 +200,54 @@ class MediaSessionPluginTest {
     }
 
     @Test
+    fun theSkipButtonsReachThePlayerAsAnIntervalRatherThanAPosition() = runTest {
+        // A different button from the scrubber and a different question: how far
+        // from here, not where to. Both platforms hide theirs when no handler is
+        // registered, so a transport with nothing wired here is a lock screen
+        // with the two jump controls missing rather than one that ignores them.
+        val wiring: Wiring = wire()
+
+        wiring.transport.simulateOsSkipForward(15_000)
+        wiring.transport.simulateOsSkipBackward(5_000)
+
+        assertEquals(listOf("skipForward:15000", "skipBackward:5000"), wiring.commands.calls)
+        assertTrue(
+            wiring.transport.offeredActions().containsAll(setOf("skipForward", "skipBackward")),
+            "the system was offered no skip buttons to draw",
+        )
+    }
+
+    @Test
+    fun aPluginInstalledAfterPlaybackStartedStillFillsTheLockScreen() = runTest {
+        // The common order, not an edge case: a consumer builds the player,
+        // queues, plays, and installs the session plugin a line further down.
+        // The item event has already been and gone by then, so a plugin that
+        // only ever listens shows nothing until the track changes.
+        val transport = FakeSystemTransport()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+        player.queue(listOf(DemoItem()))
+
+        player.addPlugin(MediaSessionPlugin(RecordingTransportCommands(), openTransport = { transport }))
+
+        assertEquals("Blade Runner 2049", transport.lastNowPlaying?.title)
+    }
+
+    @Test
+    fun aPluginInstalledWithNothingPlayingLeavesTheLockScreenAlone() = runTest {
+        // The other half of the seed. An empty queue is not an item to announce,
+        // and announcing one would put a blank notification up for a player that
+        // has not been asked to play anything yet.
+        val transport = FakeSystemTransport()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+
+        player.addPlugin(MediaSessionPlugin(RecordingTransportCommands(), openTransport = { transport }))
+
+        assertEquals(null, transport.lastNowPlaying)
+    }
+
+    @Test
     fun theTransportIsReleasedWhenThePlayerGoesAway() = runTest {
         // A session that outlives its player is a notification a viewer can
         // press with nothing behind it, and on Android it is also a service that

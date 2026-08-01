@@ -13,6 +13,7 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
@@ -74,4 +75,18 @@ public interface PluginHost {
     // what is actually registered, and a default that guessed would disagree
     // with it the moment a consumer registered their own.
     public fun resolveCueParser(url: String, contentType: String? = null): CueParser<*>? = null
+
+    // What is playing right now, for a plugin that arrived after it started.
+    //
+    // A plugin only ever hears the item event, and a consumer that queues and
+    // plays before installing a plugin never fires one within its hearing: the
+    // item is already current. The web plugin reads `this.player.item()` for
+    // exactly this and calls it seeding.
+    //
+    // A default rather than an addition to every implementer's required
+    // surface, like resolveCueParser above: a minimal test double keeps
+    // compiling, and null means "this host has no queue" rather than "nothing
+    // is playing" — the two are indistinguishable to a plugin and it should
+    // treat both the same way.
+    public fun item(): PlaylistItem? = null
 }

@@ -26,6 +26,8 @@ import platform.MediaPlayer.MPRemoteCommandCenter
 import platform.MediaPlayer.MPRemoteCommandHandlerStatus
 import platform.MediaPlayer.MPRemoteCommandHandlerStatusCommandFailed
 import platform.MediaPlayer.MPRemoteCommandHandlerStatusSuccess
+import platform.MediaPlayer.MPSkipIntervalCommand
+import platform.MediaPlayer.MPSkipIntervalCommandEvent
 
 // The iOS and tvOS lock screen, control centre and car display.
 //
@@ -106,6 +108,8 @@ internal class AppleSystemTransport : SystemTransport {
         add(commands.nextTrackCommand, actions.onNext)
         add(commands.previousTrackCommand, actions.onPrevious)
         addSeek(actions.onSeekTo)
+        addSkip(commands.skipBackwardCommand, actions.onSkipBackward)
+        addSkip(commands.skipForwardCommand, actions.onSkipForward)
     }
 
     override fun clear() {
@@ -143,6 +147,31 @@ internal class AppleSystemTransport : SystemTransport {
                 MPRemoteCommandHandlerStatusCommandFailed
             } else {
                 handler((position.positionTime * MILLIS_PER_SECOND).toLong())
+                MPRemoteCommandHandlerStatusSuccess
+            }
+        }
+        targets += command to target
+    }
+
+    // The two interval buttons, which are drawn only where an interval was
+    // offered: MPSkipIntervalCommand with an empty preferredIntervals shows
+    // nothing at all, so the interval is set here rather than left to the
+    // system, and the number on the button is the number the handler is given.
+    private fun addSkip(command: MPSkipIntervalCommand, handler: ((Long) -> Unit)?) {
+        command.enabled = handler != null
+        if (handler == null) return
+
+        command.preferredIntervals = listOf(
+            NSNumber.numberWithDouble(DEFAULT_SKIP_OFFSET_MS / MILLIS_PER_SECOND),
+        )
+
+        val target: Any = command.addTargetWithHandler { event ->
+            val skip: MPSkipIntervalCommandEvent? = event as? MPSkipIntervalCommandEvent
+
+            if (skip == null) {
+                MPRemoteCommandHandlerStatusCommandFailed
+            } else {
+                handler((skip.interval * MILLIS_PER_SECOND).toLong())
                 MPRemoteCommandHandlerStatusSuccess
             }
         }

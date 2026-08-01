@@ -37,4 +37,12 @@ public interface TransportCommands {
     public fun next(): Unit = Unit
 
     public fun previous(): Unit = Unit
+
+    // A relative jump, in milliseconds, matching the port. Separate from
+    // seekTo because that is where the viewer dragged to and this is how far
+    // they asked to move — a player that clamps, or that skips a chapter
+    // instead, needs to know which of the two it was given.
+    public fun skipForward(offsetMs: Long): Unit = Unit
+
+    public fun skipBackward(offsetMs: Long): Unit = Unit
 }

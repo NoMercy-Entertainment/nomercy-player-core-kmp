@@ -38,8 +38,17 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     private var metadata: MediaMetadata = MediaMetadata.EMPTY
     private var hasItem: Boolean = false
 
+    // Recomputed when the handlers change rather than per getState, because
+    // getState runs on every invalidation and the answer only moves when the
+    // plugin rewires. Which commands are in here is what the notification and
+    // the car draw: a command advertised with no handler behind it is a button
+    // that does nothing when pressed.
+    private var available: Player.Commands = commandsFor(actions)
+
     fun setActions(actions: TransportActions) {
         this.actions = actions
+        available = commandsFor(actions)
+        invalidateState()
     }
 
     // Every setter invalidates rather than pushing. Media3 pulls its state when
@@ -74,10 +83,16 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
 
     override fun getState(): State {
         val builder = State.Builder()
-            .setAvailableCommands(COMMANDS)
+            .setAvailableCommands(available)
             .setPlayWhenReady(playing, Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
             .setPlaybackState(if (hasItem) Player.STATE_READY else Player.STATE_IDLE)
             .setContentPositionMs(positionMs)
+            // The interval the buttons are labelled with, so what a viewer is
+            // offered is what the player moves by. Media3's own defaults are
+            // five back and fifteen forward, which would draw two different
+            // numbers for one pair of controls.
+            .setSeekBackIncrementMs(DEFAULT_SKIP_OFFSET_MS)
+            .setSeekForwardIncrementMs(DEFAULT_SKIP_OFFSET_MS)
 
         if (hasItem) {
             builder.setPlaylist(
@@ -118,12 +133,32 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
             Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM,
             -> actions.onPrevious?.invoke()
 
-            // Everything else is a position: a scrubber dragged, a skip button,
-            // a car's rewind. They differ in how the position was arrived at and
-            // not in what the player should do with it.
+            // A jump of a known length, and the length is what gets passed on
+            // rather than the position Media3 worked out from it. The player's
+            // own skip clamps at both ends and says it was a skip; an absolute
+            // position it computed for us does neither.
+            Player.COMMAND_SEEK_BACK -> actions.onSkipBackward?.invoke(DEFAULT_SKIP_OFFSET_MS)
+
+            Player.COMMAND_SEEK_FORWARD -> actions.onSkipForward?.invoke(DEFAULT_SKIP_OFFSET_MS)
+
+            // Everything else is a position: a scrubber dragged, a car's jump to
+            // a bookmark. They differ in how the position was arrived at and not
+            // in what the player should do with it.
             else -> actions.onSeekTo?.invoke(positionMs)
         }
         return Futures.immediateVoidFuture()
+    }
+
+    // Only what there is a handler for. The two skip commands are the ones that
+    // move: everything else this transport offers is wired by the plugin every
+    // time, and these are the pair a consumer building TransportActions by hand
+    // can leave out.
+    private fun commandsFor(actions: TransportActions): Player.Commands {
+        val builder = Player.Commands.Builder()
+        ALWAYS.forEach { command -> builder.add(command) }
+        if (actions.onSkipBackward != null) builder.add(Player.COMMAND_SEEK_BACK)
+        if (actions.onSkipForward != null) builder.add(Player.COMMAND_SEEK_FORWARD)
+        return builder.build()
     }
 
     private companion object {
@@ -134,19 +169,15 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
 
         const val MICROS_PER_MILLI = 1_000L
 
-        val COMMANDS: Player.Commands = Player.Commands.Builder()
-            .addAll(
-                Player.COMMAND_PLAY_PAUSE,
-                Player.COMMAND_STOP,
-                Player.COMMAND_SEEK_TO_NEXT,
-                Player.COMMAND_SEEK_TO_PREVIOUS,
-                Player.COMMAND_SEEK_BACK,
-                Player.COMMAND_SEEK_FORWARD,
-                Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
-                Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
-                Player.COMMAND_GET_METADATA,
-                Player.COMMAND_GET_TIMELINE,
-            )
-            .build()
+        val ALWAYS: IntArray = intArrayOf(
+            Player.COMMAND_PLAY_PAUSE,
+            Player.COMMAND_STOP,
+            Player.COMMAND_SEEK_TO_NEXT,
+            Player.COMMAND_SEEK_TO_PREVIOUS,
+            Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
+            Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
+            Player.COMMAND_GET_METADATA,
+            Player.COMMAND_GET_TIMELINE,
+        )
     }
 }

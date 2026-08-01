@@ -38,4 +38,12 @@ class RecordingTransportCommands : TransportCommands {
     override fun previous() {
         calls += "previous"
     }
+
+    override fun skipForward(offsetMs: Long) {
+        calls += "skipForward:$offsetMs"
+    }
+
+    override fun skipBackward(offsetMs: Long) {
+        calls += "skipBackward:$offsetMs"
+    }
 }

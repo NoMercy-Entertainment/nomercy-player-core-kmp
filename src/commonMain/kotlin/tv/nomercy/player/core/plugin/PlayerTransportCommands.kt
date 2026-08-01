@@ -68,6 +68,18 @@ public open class PlayerTransportCommands(
     override fun previous() {
         scope.launch { player.previous(options) }
     }
+
+    // forward and rewind rather than time(now +/- offset), because that is what
+    // the web plugin's seekforward and seekbackward handlers call and the two
+    // are not the same thing: the player's own skip clamps at the ends and
+    // announces itself as a skip, and a computed absolute position does neither.
+    override fun skipForward(offsetMs: Long) {
+        scope.launch { player.forward(offsetMs / MILLIS_PER_SECOND, options) }
+    }
+
+    override fun skipBackward(offsetMs: Long) {
+        scope.launch { player.rewind(offsetMs / MILLIS_PER_SECOND, options) }
+    }
 }
 
 private const val MILLIS_PER_SECOND = 1_000.0

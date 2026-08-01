@@ -93,15 +93,26 @@ class FakeSystemTransport : SystemTransport {
         actions.onSeekTo?.invoke(positionMs)
     }
 
+    // The interval buttons, which hand over how far rather than where to.
+    fun simulateOsSkipForward(offsetMs: Long) {
+        actions.onSkipForward?.invoke(offsetMs)
+    }
+
+    fun simulateOsSkipBackward(offsetMs: Long) {
+        actions.onSkipBackward?.invoke(offsetMs)
+    }
+
     // What the system would draw. A platform hides a control it has no handler
     // for, so this is the difference between a lock screen with a next button
     // and one without.
-    fun offeredActions(): Set<String> = buildSet {
-        if (actions.onPlay != null) add("play")
-        if (actions.onPause != null) add("pause")
-        if (actions.onStop != null) add("stop")
-        if (actions.onNext != null) add("next")
-        if (actions.onPrevious != null) add("previous")
-        if (actions.onSeekTo != null) add("seekTo")
-    }
+    fun offeredActions(): Set<String> = mapOf<String, Any?>(
+        "play" to actions.onPlay,
+        "pause" to actions.onPause,
+        "stop" to actions.onStop,
+        "next" to actions.onNext,
+        "previous" to actions.onPrevious,
+        "seekTo" to actions.onSeekTo,
+        "skipBackward" to actions.onSkipBackward,
+        "skipForward" to actions.onSkipForward,
+    ).filterValues { handler -> handler != null }.keys
 }

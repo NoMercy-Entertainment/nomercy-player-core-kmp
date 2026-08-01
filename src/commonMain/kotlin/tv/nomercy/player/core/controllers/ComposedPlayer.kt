@@ -811,7 +811,9 @@ public open class ComposedPlayer(
 
     public open fun queue(items: List<PlaylistItem>): Unit = queue.queue(items)
 
-    public open fun item(): PlaylistItem? = queue.item()
+    // Also the PluginHost seam a plugin installed mid-playback reads to find
+    // out what it missed. Same answer to both callers by construction.
+    override fun item(): PlaylistItem? = queue.item()
 
     public open fun index(): Int = queue.index()
 

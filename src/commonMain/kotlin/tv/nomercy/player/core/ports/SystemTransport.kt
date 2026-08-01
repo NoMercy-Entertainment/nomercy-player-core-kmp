@@ -88,7 +88,22 @@ public data class TransportActions(
     val onNext: (() -> Unit)? = null,
     val onPrevious: (() -> Unit)? = null,
     val onSeekTo: ((Long) -> Unit)? = null,
+
+    // A jump of a known length, which is a different button from the scrubber
+    // and from next/previous: Android draws seek-back and seek-forward, Apple
+    // draws MPSkipIntervalCommand, and both hide theirs when nothing is
+    // registered. The offset is the one the system asked for, in milliseconds.
+    val onSkipBackward: ((Long) -> Unit)? = null,
+    val onSkipForward: ((Long) -> Unit)? = null,
 )
+
+// How far a skip button goes when the system has no opinion of its own.
+//
+// Five seconds because that is the web plugin's fallback for a browser that
+// hands `seekbackward` no seekOffset, and the two are the same control. It is
+// also what each platform is told to advertise, so the interval a viewer sees
+// on the button is the interval the player moves by.
+public const val DEFAULT_SKIP_OFFSET_MS: Long = 5_000
 
 // The transport this platform actually has.
 //

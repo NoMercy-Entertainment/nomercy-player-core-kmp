@@ -82,6 +82,15 @@ public open class MediaSessionPlugin(
             push(TransportPlaybackState.STOPPED)
             opened.clear()
         }
+
+        // What is already playing, for the attach that arrives late.
+        //
+        // The listeners above only ever hear the NEXT item, and a consumer that
+        // queues and plays before installing the plugin never fires one within
+        // their hearing — which is the common order, because the player is
+        // built and started and the session plugin is one line further down.
+        // Without this the lock screen stays empty until the track changes.
+        item()?.let { announce(it) }
     }
 
     override fun dispose() {
@@ -130,6 +139,14 @@ public open class MediaSessionPlugin(
         onNext = commands::next,
         onPrevious = commands::previous,
         onSeekTo = commands::seekTo,
+
+        // Wired unconditionally, like next and previous: TransportCommands
+        // defaults both to nothing, so a player that cannot skip registers a
+        // handler that does nothing rather than the platform hiding a control
+        // the web player draws. That is the web plugin's own shape — its
+        // seekbackward and seekforward handlers call optional player methods.
+        onSkipBackward = commands::skipBackward,
+        onSkipForward = commands::skipForward,
     )
 }
 
