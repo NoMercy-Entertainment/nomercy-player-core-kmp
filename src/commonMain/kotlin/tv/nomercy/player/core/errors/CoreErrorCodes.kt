@@ -38,11 +38,10 @@ public object CoreErrorCodes {
     // because the web raises it from the video package, and one failure must not
     // wear two names across two platforms.
     //
-    // Deliberately absent from [all], and it must stay absent. That set is
-    // measured against the vendored web contract, which only carries core: codes —
-    // adding this one there fails ErrorCatalogConformanceTest as a code the
-    // ecosystem has never heard of. It travels as an error's detail instead, and
-    // becomes a declared code the moment the contract is re-vendored with it.
+    // Deliberately absent from [all], and it must stay absent. That set is measured
+    // against the contract codes in core's own namespace, and this one is video's,
+    // so vendoring a contract that carries it does not make it declarable here.
+    // It travels as an error's detail instead.
     public const val HDR_UNPLAYABLE: String = "video:media/hdr-unplayable"
 
     // A playlist that did not arrive, and one that arrived unreadable. Two
