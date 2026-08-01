@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.devtools
 
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,6 +39,8 @@ public class PlayerInspector(
     private val mutable: MutableStateFlow<List<InspectorEvent>> = MutableStateFlow(emptyList())
     private val startedAt: TimeSource.Monotonic.ValueTimeMark = TimeSource.Monotonic.markNow()
 
+    private val lock: SynchronizedObject = SynchronizedObject()
+
     private var sequence: Long = 0
 
     // Names that are recorded but not kept.
@@ -60,7 +64,7 @@ public class PlayerInspector(
     // would keep counting events the buffer has already dropped, so the numbers
     // and the lines under them would describe different windows.
     public fun counts(): Map<String, Int> =
-        buffer.groupingBy { it.name }.eachCount()
+        synchronized(lock) { buffer.groupingBy { it.name }.eachCount() }
 
     /** Which names are currently dropped. */
     public fun muted(): Set<String> = muted.toSet()
@@ -78,8 +82,10 @@ public class PlayerInspector(
     }
 
     public fun clear() {
-        buffer.clear()
-        mutable.value = emptyList()
+        synchronized(lock) {
+            buffer.clear()
+            mutable.value = emptyList()
+        }
     }
 
     // Stops recording. A debug tool nobody can switch off is a debug tool that
@@ -90,23 +96,38 @@ public class PlayerInspector(
         clear()
     }
 
+    // Under a lock, because events no longer arrive on one thread.
+    //
+    // `sequence` is read, written into an event, and then incremented — three
+    // steps that are not one. Two threads recording at once both read the same
+    // value and both ship it, and a consumer keying a list by sequence gets
+    // "Key 5 was already used" and takes the window down. The desktop player is
+    // where this became reachable: libVLC raises its events from its own
+    // delivery thread while the chrome records from the main one, so the two
+    // meet here.
+    //
+    // The buffer is the other half. ArrayDeque is not thread-safe and this
+    // removes from the head and appends to the tail, so an unguarded pair of
+    // callers can corrupt it in ways that surface far from here.
     private fun record(name: String, payload: Any?) {
         if (name in muted) return
 
-        // removeAt(0), not removeFirst(). On JVM target 21 Kotlin resolves
-        // removeFirst() to java.util.SequencedCollection's, which does not
-        // exist on every Android runtime this library supports.
-        if (buffer.size >= capacity) buffer.removeAt(0)
-        buffer.addLast(
-            InspectorEvent(
-                sequence = sequence,
-                atMs = startedAt.elapsedNow().inWholeMilliseconds,
-                name = name,
-                summary = summarize(payload),
-            ),
+        val event = InspectorEvent(
+            sequence = 0,
+            atMs = startedAt.elapsedNow().inWholeMilliseconds,
+            name = name,
+            summary = summarize(payload),
         )
-        sequence += 1
-        mutable.value = buffer.toList()
+
+        synchronized(lock) {
+            // removeAt(0), not removeFirst(). On JVM target 21 Kotlin resolves
+            // removeFirst() to java.util.SequencedCollection's, which does not
+            // exist on every Android runtime this library supports.
+            if (buffer.size >= capacity) buffer.removeAt(0)
+            buffer.addLast(event.copy(sequence = sequence))
+            sequence += 1
+            mutable.value = buffer.toList()
+        }
     }
 
     // A payload whose toString throws is a payload a debug tool must not crash
