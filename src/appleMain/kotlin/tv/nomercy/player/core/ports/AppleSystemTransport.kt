@@ -14,6 +14,7 @@ import platform.Foundation.numberWithDouble
 import platform.MediaPlayer.MPChangePlaybackPositionCommandEvent
 import platform.MediaPlayer.MPMediaItemPropertyAlbumTitle
 import platform.MediaPlayer.MPMediaItemPropertyArtist
+import platform.MediaPlayer.MPMediaItemPropertyArtwork
 import platform.MediaPlayer.MPMediaItemPropertyPlaybackDuration
 import platform.MediaPlayer.MPMediaItemPropertyTitle
 import platform.MediaPlayer.MPNowPlayingInfoCenter
@@ -53,6 +54,11 @@ internal class AppleSystemTransport : SystemTransport {
     // dictionary every time. Pushing a state without it would blank the title.
     private var info: MutableMap<Any?, Any?> = mutableMapOf()
 
+    private val artwork: AppleArtworkLoader = AppleArtworkLoader()
+
+    // Which announcement the in-flight cover belongs to. See setNowPlaying.
+    private var artworkGeneration: Long = 0
+
     // The targets this transport added, so release removes exactly its own.
     // removeTarget(null) would take out every target on the command, including
     // any an embedding application added for itself.
@@ -69,6 +75,28 @@ internal class AppleSystemTransport : SystemTransport {
                 NSNumber.numberWithDouble(nowPlaying.durationMs / MILLIS_PER_SECOND)
         }
         center.setNowPlayingInfo(info)
+
+        // The text is on screen before the picture is asked for, so a slow or
+        // dead image host delays a cover rather than the whole announcement.
+        //
+        // Counted, because the download outlives the item that asked for it. Skip
+        // three tracks quickly and three fetches are in flight against one centre;
+        // without this the slowest to arrive wins and the lock screen ends up
+        // showing the second track's cover over the fourth track's title. The
+        // dictionary is rebuilt above on every announcement, so a late arrival
+        // whose generation has passed is dropped rather than merged.
+        artworkGeneration += 1
+        val generation: Long = artworkGeneration
+        val url: String? = nowPlaying.artworkUrl
+
+        if (url != null) {
+            artwork.load(url) { loaded ->
+                if (generation == artworkGeneration) {
+                    info[MPMediaItemPropertyArtwork] = loaded
+                    center.setNowPlayingInfo(info)
+                }
+            }
+        }
     }
 
     override fun setPlaybackState(
