@@ -15,8 +15,10 @@ import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.errors.stateError
+import tv.nomercy.player.core.events.ConfigResolvedPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.PreventedAction
+import tv.nomercy.player.core.events.SetupStartPayload
 import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.PlayerConfig
 import tv.nomercy.player.core.player.PlayerPhase
@@ -75,6 +77,31 @@ public class LifecycleController(
         ctx.transitionPhase(PlayerPhase.SETUP)
         ctx.internalVolume = config.defaultVolume
         ctx.volumeBeforeMute = config.defaultVolume
+
+        // The reference's setup pipeline, in its order. Every one of these keys
+        // was declared and registered in CoreEvents and emitted by nothing, so a
+        // consumer that awaited a named stage — the whole reason the stages are
+        // public — waited on a signal the player never sent.
+        //
+        // Emitting is the entire step here, unlike the reference, where two of
+        // them carry work: `pluginsRegistering` drains a queue this port does not
+        // have, because PluginRegistry.register admits a plugin immediately
+        // rather than deferring it to setup, and `streamsReady` fills a stream
+        // factory registry this port does not have either, because the engine is
+        // injected. The remaining four are empty on the reference too.
+        //
+        // No stage-failed error path, and that is a decision rather than an
+        // omission. On the reference a stage's emit sits inside its try, so a
+        // throwing listener fails the stage; here EventEmitter.deliver routes a
+        // listener's throw to onListenerError and never lets it out. With no work
+        // to throw either, a catch around this would be a handler nothing could
+        // reach, which is worse than its absence: it reads as covered.
+        ctx.emit(CoreEvents.SetupStart, SetupStartPayload())
+        ctx.emit(CoreEvents.ConfigResolved, ConfigResolvedPayload(config))
+        ctx.emit(CoreEvents.PluginsRegistering, Unit)
+        ctx.emit(CoreEvents.PluginsRegistered, Unit)
+        ctx.emit(CoreEvents.StreamsReady, Unit)
+        ctx.emit(CoreEvents.AuthReady, Unit)
 
         ctx.transitionPhase(PlayerPhase.READY)
         ctx.emit(CoreEvents.Ready, Unit)

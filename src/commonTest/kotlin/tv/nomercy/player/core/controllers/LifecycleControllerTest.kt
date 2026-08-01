@@ -25,18 +25,72 @@ class LifecycleControllerTest {
         return ctx to LifecycleController(ctx)
     }
 
+    // Strict equality, like the reference's own lock-in, so a reorder or a
+    // dropped stage fails rather than degrading quietly.
+    //
+    // This test used to assert listOf("beforeSetup", "ready") and pass, which is
+    // how six declared stages stayed unemitted through the whole port: it was
+    // written from the same partial reading of the reference as the code it
+    // grades, so both agreed and neither was right.
     @Test
-    fun setupWalksToReadyAndAnnouncesItInOrder() = runTest {
+    fun setupWalksToReadyAndAnnouncesEveryStageInOrder() = runTest {
         val (ctx, lifecycle) = rig()
         val seen = mutableListOf<String>()
         ctx.on(CoreEvents.BeforeSetup) { seen += "beforeSetup" }
+        ctx.on(CoreEvents.SetupStart) { seen += "setupStart" }
+        ctx.on(CoreEvents.ConfigResolved) { seen += "configResolved" }
+        ctx.on(CoreEvents.PluginsRegistering) { seen += "pluginsRegistering" }
+        ctx.on(CoreEvents.PluginsRegistered) { seen += "pluginsRegistered" }
+        ctx.on(CoreEvents.StreamsReady) { seen += "streamsReady" }
+        ctx.on(CoreEvents.AuthReady) { seen += "authReady" }
         ctx.on(CoreEvents.Ready) { seen += "ready" }
 
         lifecycle.setup()
         lifecycle.ready().await()
 
         assertEquals(PlayerPhase.READY, ctx.phase)
-        assertEquals(listOf("beforeSetup", "ready"), seen)
+        assertEquals(
+            listOf(
+                "beforeSetup",
+                "setupStart",
+                "configResolved",
+                "pluginsRegistering",
+                "pluginsRegistered",
+                "streamsReady",
+                "authReady",
+                "ready",
+            ),
+            seen,
+        )
+    }
+
+    // The stage a consumer reads its own configuration back from. Announcing it
+    // empty would be the stage firing and telling nobody anything.
+    @Test
+    fun configResolvedCarriesTheConfigSetupWasGiven() = runTest {
+        val (ctx, lifecycle) = rig()
+        var announced: PlayerConfig? = null
+        ctx.on(CoreEvents.ConfigResolved) { announced = it.config as? PlayerConfig }
+
+        lifecycle.setup(PlayerConfig(defaultVolume = 42))
+
+        assertEquals(42, announced?.defaultVolume)
+    }
+
+    // Every stage lands while the player is still setting up. A stage that
+    // arrived after READY would be describing a player that had finished, and a
+    // consumer holding work back until its stage would run it too late.
+    @Test
+    fun everyStageArrivesBeforeThePlayerIsReady() = runTest {
+        val (ctx, lifecycle) = rig()
+        val phases = mutableListOf<PlayerPhase>()
+        for (stage in listOf(CoreEvents.PluginsRegistering, CoreEvents.StreamsReady, CoreEvents.AuthReady)) {
+            ctx.on(stage) { phases += ctx.phase }
+        }
+
+        lifecycle.setup()
+
+        assertEquals(listOf(PlayerPhase.SETUP, PlayerPhase.SETUP, PlayerPhase.SETUP), phases)
     }
 
     @Test
