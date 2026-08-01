@@ -168,6 +168,19 @@ public open class QueueController(private val ctx: PlayerContext) {
 
         // The cursor moving is what a chrome renders as "now playing", whether
         // a caller moved it or a reorder carried it.
-        list.onCurrent { ctx.emit(CoreEvents.Item, ItemChange(it.item, it.index)) }
+        list.onCurrent { announceCursorMove(it.item, it.index) }
+    }
+
+    // The position and duration still describe the OUTGOING item, because the
+    // cursor moves before the media does. Dropped here rather than left for the
+    // incoming item to inherit — a listener reading time() inside this very
+    // event otherwise gets the previous item's end position and attributes it
+    // to the new one.
+    private fun announceCursorMove(item: PlaylistItem?, index: Int) {
+        if (ctx.mediaIsStale()) {
+            ctx.internalCurrentTime = 0.0
+            ctx.internalDuration = 0.0
+        }
+        ctx.emit(CoreEvents.Item, ItemChange(item, index))
     }
 }

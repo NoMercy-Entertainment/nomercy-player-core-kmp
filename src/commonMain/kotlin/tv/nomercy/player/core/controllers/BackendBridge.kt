@@ -132,33 +132,40 @@ public class BackendBridge(private val ctx: PlayerContext) {
 
     private fun attachPositionUpdates(backend: MediaBackend) {
         listen(backend, CanonicalBackendEvent.TIME_UPDATE) {
-            val time: Double = backend.currentTime()
-            val duration: Double = backend.duration()
-            ctx.internalCurrentTime = time
-            if (duration > 0.0) ctx.internalDuration = duration
-
-            // A position that advances is the engine saying it is being fed, so
-            // it is also the end of a stall.
-            //
-            // Clearing one on `canplay` alone is a rule borrowed from a media
-            // element, which re-fires canplay after every stall. VlcjVideoBackend
-            // announces it once per item on purpose — twice would make anything
-            // counting loads count two — and libVLC re-announces `playing` only
-            // on a state change, so on the desktop neither event that could clear
-            // a stall ever arrives again. Measured against the real engine: a
-            // stall at the first HLS rendition switch left bufferState STALLED for
-            // the remaining eighty seconds of a film playing at full rate.
-            if (ctx.bufferState == BufferState.STALLED) ctx.bufferState = BufferState.IDLE
-
-            val percentage: Double = if (duration <= 0.0) 0.0 else time / duration * PERCENT
-
-            // Two events for one engine tick, in the web's order. progress is
-            // what a scrubber binds to and time is what a clock binds to; they
-            // carry the same numbers because they are the same moment, and a
-            // consumer should not have to subscribe to both to get one.
-            ctx.emit(CoreEvents.Progress, ProgressPayload(time, duration, percentage))
-            ctx.emit(CoreEvents.Time, TimeUpdate(time = time, duration = duration, percentage = percentage))
+            // Between an advance and the incoming item's mount this engine is
+            // still holding the outgoing one. Publishing its position here
+            // hands every listener the previous item's position stamped with
+            // the new item's identity.
+            if (!ctx.mediaIsStale()) publishPosition(backend)
         }
+    }
+
+    private fun publishPosition(backend: MediaBackend) {
+        val time: Double = backend.currentTime()
+        val duration: Double = backend.duration()
+        ctx.internalCurrentTime = time
+        if (duration > 0.0) ctx.internalDuration = duration
+
+        // A position that advances is the engine saying it is being fed, so
+        // it is also the end of a stall.
+        //
+        // Clearing one on `canplay` alone is a rule borrowed from a media
+        // element, which re-fires canplay after every stall. VlcjVideoBackend
+        // announces it once per item on purpose — twice would make anything
+        // counting loads count two — and libVLC re-announces `playing` only
+        // on a state change, so on the desktop neither event that could clear
+        // a stall ever arrives again. Measured against the real engine: a
+        // stall at the first HLS rendition switch left bufferState STALLED for
+        // the remaining eighty seconds of a film playing at full rate.
+        if (ctx.bufferState == BufferState.STALLED) ctx.bufferState = BufferState.IDLE
+
+        val percentage: Double = if (duration <= 0.0) 0.0 else time / duration * PERCENT
+
+        // Only time. progress is derived from it and throttled to
+        // progressIntervalMs by TimeController, the same as the reference —
+        // emitting it here put a save-the-watch-position handler on the
+        // engine's own tick rate, several writes a second per viewer.
+        ctx.emit(CoreEvents.Time, TimeUpdate(time = time, duration = duration, percentage = percentage))
     }
 
     // Every subscription is remembered so detaching a backend really detaches

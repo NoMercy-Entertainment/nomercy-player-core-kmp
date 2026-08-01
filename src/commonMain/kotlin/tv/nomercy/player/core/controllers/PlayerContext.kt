@@ -126,6 +126,22 @@ public class PlayerContext(
     public var loadedItemId: String? = null
         private set
 
+    // Whether the engine is holding an item the cursor has already moved off.
+    //
+    // advanceTo() moves the cursor before the media, so for the length of a
+    // mount the OUTGOING source is still attached and still reporting its own
+    // position. Reading those as the incoming item's position is how one
+    // episode's end position gets written against the next one.
+    //
+    // False until the first load: a caller driving an engine without ever
+    // going through load() has no loaded item to be stale against, and its
+    // position updates must keep flowing.
+    internal fun mediaIsStale(): Boolean {
+        val loaded: String = loadedItemId ?: return false
+        val current: PlaylistItem = queue.current() ?: return false
+        return current.id != loaded
+    }
+
     // The load has settled by the time this returns: the engine holds the source
     // and will accept a seek. That is what anything continuing a load waits for
     // — hiding a poster, restoring a saved position, or reconciling to another
