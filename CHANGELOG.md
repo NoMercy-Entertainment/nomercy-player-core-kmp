@@ -25,6 +25,23 @@ than any other during this campaign, and it is not covered below.
 
 ### Breaking
 
+- `uk.co.caprica:vlcj` is gone. The JVM target binds libVLC directly through its C
+  API, and the two desktop backends take `VlcInstance` where they took
+  `MediaPlayerFactory`: `VlcjVideoBackend(MediaPlayerFactory)` is now
+  `VlcjVideoBackend(VlcInstance)`, `VlcjAudioBackend`'s defaulted parameter changed
+  the same way, and `VlcjVideoBackend.embeddedPlayer` answers `VlcMediaPlayer`
+  instead of `EmbeddedMediaPlayer`. `VideoSurface` in `nomercy-video-player-compose`
+  moved with it. An app that builds its surface with `VideoSurface(backend)` — which
+  is every app in this repository — needs no change; one that reached for a vlcj type
+  does. `BundledVlcDirectoryProvider` is gone too: it implemented a vlcj interface,
+  and the payload it pointed at is now read by the loader directly, in the same
+  order and with the same fallback to a system install.
+
+  Why: vlcj 4.11.0 and vlcj-natives 4.8.3 both declare GPL v3 on Maven Central, and
+  Apache-2.0 combines into GPLv3 rather than the reverse — so the published JVM
+  artifact was arguably a GPLv3 work carrying an Apache-2.0 licence file. libVLC
+  itself is LGPL-2.1-or-later and was never the problem. Behaviour is unchanged;
+  see THIRD_PARTY_NOTICES.md.
 - `SubtitleStyle` (`tv.nomercy.player.core.events`) was rewritten to the web's own
   nine fields and names, replacing six. `color` and `opacity` are gone as such and
   `fontSize` changed from `Double?` to `Int`. A consumer reading those three by name

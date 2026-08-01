@@ -8,7 +8,7 @@
 
 package tv.nomercy.player.core.ports
 
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
+import tv.nomercy.player.core.natives.libvlc.VlcInstance
 
 // Two libVLC players, swapped rather than promoted.
 //
@@ -17,14 +17,14 @@ import uk.co.caprica.vlcj.factory.MediaPlayerFactory
 // handles and move a gain. Writing the two backends to different shapes would
 // mean two places to look when a transition misbehaves on one platform.
 //
-// One factory for both players. libVLC's factory owns the plugin cache and the
-// logging, and two of them in a process is two copies of both — plus a second
-// discovery pass on a machine where discovery is the slow part.
+// One engine instance for both players. libVLC's instance owns the plugin cache
+// and the logging, and two of them in a process is two copies of both — plus a
+// second bind on a machine where finding the library is the slow part.
 public class VlcjAudioBackend(
-    private val factory: MediaPlayerFactory = MediaPlayerFactory(),
+    private val instance: VlcInstance = VlcInstance(),
 ) : AudioBackend {
 
-    private var current: VlcjVideoBackend = VlcjVideoBackend(factory)
+    private var current: VlcjVideoBackend = VlcjVideoBackend(instance)
     private var standby: VlcjVideoBackend? = null
 
     private val crossfader = EqualPowerCrossfader()
@@ -77,8 +77,20 @@ public class VlcjAudioBackend(
     // desktop is not the constraint it is on a phone.
     override fun supportsCrossfade(): Boolean = true
 
+    // What the playing engine is at, captured here because here is the last
+    // moment the answer is trustworthy.
+    //
+    // libVLC's volume is not strictly per-player: the line below silences the
+    // standby, and the playing engine's own reading follows it down. Measured on
+    // a real pair — the playing engine read 0.5, the standby was set to 0, and
+    // half a second later the playing engine read 0 as well. A fade that asked
+    // the outgoing engine what it was playing at once both were live faded IN to
+    // silence, which is the whole transition inaudible.
+    private var playingGain: Float? = null
+
     override suspend fun loadSecondary(url: String) {
-        val next: VlcjVideoBackend = standby ?: VlcjVideoBackend(factory).also { standby = it }
+        playingGain = current.volume()
+        val next: VlcjVideoBackend = standby ?: VlcjVideoBackend(instance).also { standby = it }
         next.volume(0f)
         next.load(url)
     }
@@ -94,7 +106,7 @@ public class VlcjAudioBackend(
     override suspend fun crossfade(durationMs: Long, curve: CrossfadeCurve) {
         val incoming: VlcjVideoBackend = standby ?: return
         val outgoing: VlcjVideoBackend = current
-        val startVolume: Float = outgoing.volume()
+        val startVolume: Float = playingGain ?: outgoing.volume()
 
         crossfader.run(
             outgoing = BackendGain(outgoing),
@@ -109,6 +121,7 @@ public class VlcjAudioBackend(
         outgoing.stop()
         current = incoming
         standby = outgoing
+        playingGain = null
     }
 
     override fun disposeSecondary() {
@@ -123,7 +136,7 @@ public class VlcjAudioBackend(
         standby?.volume(value)
     }
 
-    // Both engines and the factory that made them.
+    // Both engines and the instance that made them.
     //
     // Without it a caller can release the standby and stop the current one and
     // still leave two native players and a plugin cache alive — which in one
@@ -133,7 +146,7 @@ public class VlcjAudioBackend(
         standby?.release()
         standby = null
         current.release()
-        factory.release()
+        instance.release()
     }
 
     // The release the fader asks for is a no-op here for the same reason as on

@@ -17,9 +17,9 @@ import java.net.URI
 // A port rather than a client for the reason Fetcher is: an HTTP library in core
 // is an HTTP library in every consumer. This is not that — it is the JDK's own
 // connection, no dependency added, and it exists because the alternative is
-// playing HDR on an SDR screen. vlcj 4.11 exposes no colour primaries and no
-// transfer function, and neither does the libVLC 3 struct underneath it, so the
-// master playlist's VIDEO-RANGE attribute is the only place the answer lives.
+// playing HDR on an SDR screen. libvlc_video_track_t exposes no colour
+// primaries and no transfer function in any VLC 3 release, so the master
+// playlist's VIDEO-RANGE attribute is the only place the answer lives.
 //
 // Injectable because a test must not reach the network to prove what the parser
 // does with what comes back.

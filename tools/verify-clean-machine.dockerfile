@@ -14,14 +14,17 @@ FROM eclipse-temurin:21-jdk
 # libasound2 was renamed libasound2t64 in the 64-bit-time_t transition, and the
 # base image has moved across it before. Both names are tried so this file does
 # not break on an image bump for a reason unrelated to anything it is proving.
-# libXtst and friends are AWT's, not libVLC's. vlcj builds an OverlayApi in the
-# EmbeddedMediaPlayer constructor, which touches java.awt.Rectangle, which loads
-# the whole AWT toolkit — so the desktop engine cannot be CONSTRUCTED on a Linux
-# machine without X client libraries, regardless of whether anything is ever
-# drawn. Every Linux desktop has them; a bare JDK image does not.
+#
+# libXtst, libXrender, libXext and libXi used to be here and are gone. They were
+# AWT's, not libVLC's: the previous binding built an overlay in the media
+# player's constructor, which touched java.awt.Rectangle, which loaded the whole
+# toolkit — so the desktop engine could not be CONSTRUCTED on a Linux machine
+# without X client libraries, whether or not anything was ever drawn. The direct
+# binding touches no AWT at all, and tools/verify-in-container.sh now proves that
+# on an image with nothing installed on top of the JDK.
 RUN apt-get update -qq \
  && apt-get install -y -qq --no-install-recommends \
-      xvfb libxtst6 libxrender1 libxext6 libxi6 libx11-6 libfreetype6 libfontconfig1 \
+      xvfb libx11-6 libfreetype6 libfontconfig1 \
  && (apt-get install -y -qq --no-install-recommends libasound2t64 \
      || apt-get install -y -qq --no-install-recommends libasound2) \
  && rm -rf /var/lib/apt/lists/*

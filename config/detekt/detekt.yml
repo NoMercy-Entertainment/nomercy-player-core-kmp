@@ -51,6 +51,14 @@ complexity:
     constructorThreshold: 7                # controllers take their collaborators; DI is not a smell
     ignoreDefaultParameters: true
     ignoreDataClasses: true
+    # The two files that declare libVLC's C function signatures. Their parameter
+    # lists are copied from vlc/libvlc_media_player.h and there is nothing to
+    # decompose: a callback with one argument fewer is a different function than
+    # the one the engine will call, and the process crashes rather than fails.
+    # Scoped to those two files so nothing else inherits the exemption.
+    excludes:
+      - '**/natives/libvlc/LibVlcCallbacks.kt'
+      - '**/natives/libvlc/LibVlcVideoApi.kt'
 
   NestedBlockDepth:
     active: true

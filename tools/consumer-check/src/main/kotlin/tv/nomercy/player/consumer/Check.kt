@@ -27,8 +27,10 @@ private const val POLL_MS = 250L
 // machine for anything — because that is exactly what somebody adding this
 // library to their own project does, and it is the only thing that can prove
 // the library works out of the box.
+private const val BIND_ONLY = "--bind-only"
+
 fun main(args: Array<String>) {
-    val media: File = File(args.firstOrNull() ?: "media.mkv").absoluteFile
+    val media: File = File(args.firstOrNull { it != BIND_ONLY } ?: "media.mkv").absoluteFile
     report("host platform", HostPlatform.current()?.id ?: "unsupported")
     report("payload", NativeRuntimes.directory(NativeRuntimeKind.LIB_VLC)?.path ?: "none")
     report("payload reason", NativeRuntimes.whyUnavailable(NativeRuntimeKind.LIB_VLC) ?: "-")
@@ -37,9 +39,25 @@ fun main(args: Array<String>) {
     val unavailable: String? = VlcjVideoBackend.whyUnavailable()
     report("libvlc bind ms", ((System.nanoTime() - bound) / 1_000_000).toString())
     if (unavailable != null) fail("libVLC did not bind: $unavailable")
+
+    // Constructing the engine, and nothing after it. Separate from playing
+    // because the two need different things from the machine: the picture goes
+    // into a buffer, so construction needs no window system at all, while
+    // playing through libVLC's default output still wants somewhere to draw.
+    // Told apart here so a machine with no display can prove the first half.
+    if (args.contains(BIND_ONLY)) exitProcess(if (constructed()) 0 else 1)
+
     if (!media.isFile) fail("no media at ${media.path}")
 
     exitProcess(if (played(media)) 0 else 1)
+}
+
+private fun constructed(): Boolean {
+    val backend = VlcjVideoBackend()
+    report("engine state", backend.state().toString())
+    report("tracks", "audio=${backend.audioTracks().size} video=${backend.qualityLevels().size}")
+    backend.release()
+    return true
 }
 
 private fun played(media: File): Boolean = runBlocking {

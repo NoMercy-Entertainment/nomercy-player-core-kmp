@@ -28,7 +28,7 @@ package tv.nomercy.player.core.ports
 // that started this.
 //
 // It costs nothing today either way, because the other input is missing too:
-// vlcj's VideoTrackInfo carries no transfer function, so no desktop rung is ever
+// libvlc_video_track_t carries no transfer function, so no desktop rung is ever
 // identified as HDR to decide about. See VlcjVideoBackend.canToneMapHdrToSdr.
 // A function rather than a constant on purpose: it is the JVM's answer to the
 // question androidDisplayIsHdr and appleDisplayIsHdr answer, and the three call

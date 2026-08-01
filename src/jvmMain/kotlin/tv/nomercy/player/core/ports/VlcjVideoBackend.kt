@@ -15,10 +15,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.media.QualityDescriptor
-import uk.co.caprica.vlcj.factory.MediaPlayerFactory
-import uk.co.caprica.vlcj.player.base.MediaPlayer
-import uk.co.caprica.vlcj.player.base.MediaPlayerEventAdapter
-import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer
+import tv.nomercy.player.core.natives.libvlc.VlcInstance
+import tv.nomercy.player.core.natives.libvlc.VlcMediaPlayer
+import tv.nomercy.player.core.natives.libvlc.VlcPlayerEvents
+import tv.nomercy.player.core.natives.libvlc.VlcTrack
+import tv.nomercy.player.core.natives.libvlc.VlcTrackType
 
 private const val MILLIS_PER_SECOND = 1000.0
 private const val FULL_VOLUME_PERCENT = 100
@@ -26,8 +27,8 @@ private const val FULL_VOLUME_PERCENT = 100
 // libVLC turns captions off with track -1.
 private const val SUBTITLES_DISABLED = -1
 
-// Long enough for a real discovery on a cold filesystem, short enough that a
-// caller waiting on it has not given up.
+// Long enough for a real bind on a cold filesystem, short enough that a caller
+// waiting on it has not given up.
 //
 // It was 5 seconds and that was too short, which is worse than it sounds: a
 // machine with VLC installed answered "not installed", and every test that gates
@@ -35,23 +36,17 @@ private const val SUBTITLES_DISABLED = -1
 // the ladder cap — printed its loud skip and passed without running. A gate that
 // cannot fail is not a gate, and this is how it happened.
 //
-// Twenty seconds looks absurd for "is a library present" and it is not enough
-// for the worst case. Measured on this machine, one run each:
+// The reason it was ever slow is gone. The old binding found libVLC by asking
+// every registered provider for candidate directories and searching each one
+// RECURSIVELY, and one of the candidates was the JVM's working directory — so an
+// application launched from a large tree walked that whole tree before it
+// reached the install. Measured at 118.6 seconds on a machine where VLC was
+// installed and everything was warm.
 //
-//   bundled payload, first factory in a process     ~1.0s
-//   installed VLC, plugin cache stale               ~1.2s
-//   installed VLC, JVM started from C:\            118.6s
-//
-// The last one is not a typo and it is not the disk. vlcj's default discovery
-// asks for candidate directories and searches each one RECURSIVELY, and one of
-// the candidates is the JVM's working directory — so an application launched
-// from a large tree walks that whole tree before it ever reaches the install.
-// Two minutes, on a machine where VLC is installed and everything is warm.
-//
-// The bundled payload removes that case rather than surviving it: its provider
-// outranks every other, so discovery stops at a directory that contains libVLC
-// on the first look. This timeout is what keeps the answer honest on a machine
-// where no payload was available and the fallback has to go the long way round.
+// Nothing recurses now. VlcLibraryDirectory looks at named directories and never
+// descends into one, so the answer costs a handful of listings whichever way it
+// goes. The timeout stays because a first run also unpacks a sixty megabyte
+// payload, and because a bounded question is one a UI can ask on a click.
 private const val PROBE_TIMEOUT_MS = 20_000L
 
 // What an engine nobody has set a volume on is playing at.
@@ -65,34 +60,35 @@ private const val DEFAULT_VOLUME = 1.0f
 // two things: a MediaBackend, and a translation of VLC's event stream into the
 // canonical one every controller above is written against.
 //
-// Headless by default: no video surface is attached, so it decodes and reports
-// without needing a window. A desktop client attaches its own surface to
+// Headless by default, and headless in the strong sense: the engine renders
+// through libVLC's `vmem` output into a buffer, so constructing one touches no
+// window system and no toolkit. A desktop client attaches its own frame sink to
 // [embeddedPlayer]; the conformance gate does not, which is what lets the gate
-// run anywhere libVLC is installed.
+// run anywhere libVLC binds.
 public class VlcjVideoBackend private constructor(
-    private val factory: MediaPlayerFactory,
-    private val ownsFactory: Boolean,
+    private val instance: VlcInstance,
+    private val ownsInstance: Boolean,
 ) : VideoBackend {
 
-    // Made its own factory, and will release it.
-    public constructor() : this(MediaPlayerFactory(), ownsFactory = true)
+    // Made its own engine instance, and will release it.
+    public constructor() : this(VlcInstance(), ownsInstance = true)
 
-    // Given someone else's, and will not. A factory owns libVLC's plugin cache
+    // Given someone else's, and will not. An instance owns libVLC's plugin cache
     // and every player made from it, so an engine that released one it was
     // handed would pull the ground out from under its sibling — which is what
-    // two players sharing a factory for a crossfade are.
-    public constructor(factory: MediaPlayerFactory) : this(factory, ownsFactory = false)
+    // two players sharing an instance for a crossfade are.
+    public constructor(instance: VlcInstance) : this(instance, ownsInstance = false)
 
     private val bus = StringEventBus()
 
     // Public because video has to be drawn somewhere and only the caller knows
-    // where. libVLC renders into a native window handle the UI layer owns, so a
-    // backend that kept this private could decode a film and show no one.
-    // Nothing above the UI layer touches it: every playback call goes through
-    // MediaBackend, and this is the render target alone.
-    public val embeddedPlayer: EmbeddedMediaPlayer = factory.mediaPlayers().newEmbeddedMediaPlayer()
+    // where. libVLC decodes into a buffer this player owns, and the UI layer is
+    // what says where those frames should land. Nothing above the UI layer
+    // touches it: every playback call goes through MediaBackend, and this is the
+    // render target alone.
+    public val embeddedPlayer: VlcMediaPlayer = VlcMediaPlayer(instance)
 
-    private val player: MediaPlayer = embeddedPlayer
+    private val player: VlcMediaPlayer = embeddedPlayer
 
     // VLC reports position in milliseconds and this contract is in seconds. One
     // conversion, here, rather than at every call site.
@@ -137,53 +133,52 @@ public class VlcjVideoBackend private constructor(
     private var announcedReadable: Boolean = false
 
     init {
-        player.events().addMediaPlayerEventListener(object : MediaPlayerEventAdapter() {
-            override fun mediaPlayerReady(mediaPlayer: MediaPlayer) {
-                announceReadable()
-            }
+        player.events(
+            object : VlcPlayerEvents {
+                // Readiness is announced from `playing` rather than from an
+                // event of its own, and that is not a shortcut. libVLC has no
+                // "ready" event: the previous binding synthesised one from the
+                // first position report AFTER playing, so playing always came
+                // first and this guard always closed on it. An engine that is
+                // playing can certainly play, so saying so here is not a guess.
+                override fun playing() {
+                    announceReadable()
+                    bus.emit(CanonicalBackendEvent.PLAYING)
+                }
 
-            // Readiness is announced here too, and this is not belt-and-braces.
-            // libVLC does not fire mediaPlayerReady for every item — a short one
-            // can play to completion without it — so a controller waiting for
-            // canplay before it enables anything would wait forever on exactly
-            // the items that arrive fastest. An engine that is playing can
-            // certainly play, so saying so here is not a guess.
-            override fun playing(mediaPlayer: MediaPlayer) {
-                announceReadable()
-                bus.emit(CanonicalBackendEvent.PLAYING)
-            }
+                override fun paused() {
+                    bus.emit(CanonicalBackendEvent.PAUSE)
+                }
 
-            override fun paused(mediaPlayer: MediaPlayer) {
-                bus.emit(CanonicalBackendEvent.PAUSE)
-            }
+                override fun ended() {
+                    bus.emit(CanonicalBackendEvent.ENDED)
+                }
 
-            override fun finished(mediaPlayer: MediaPlayer) {
-                bus.emit(CanonicalBackendEvent.ENDED)
-            }
+                override fun errored() {
+                    bus.emit(CanonicalBackendEvent.ERROR)
+                }
 
-            override fun timeChanged(mediaPlayer: MediaPlayer, newTime: Long) {
-                bus.emit(CanonicalBackendEvent.TIME_UPDATE, newTime / MILLIS_PER_SECOND)
-            }
+                override fun timeChanged(millis: Long) {
+                    bus.emit(CanonicalBackendEvent.TIME_UPDATE, millis / MILLIS_PER_SECOND)
+                }
 
-            override fun lengthChanged(mediaPlayer: MediaPlayer, newLength: Long) {
-                lastKnownDuration = newLength / MILLIS_PER_SECOND
-                // Through the same guard, because knowing the length is knowing
-                // the metadata. Emitting it separately announced one item twice,
-                // and anything counting loads would have counted two.
-                announceReadable()
-            }
+                override fun lengthChanged(millis: Long) {
+                    lastKnownDuration = millis / MILLIS_PER_SECOND
+                    // Through the same guard, because knowing the length is
+                    // knowing the metadata. Emitting it separately announced one
+                    // item twice, and anything counting loads would have counted
+                    // two.
+                    announceReadable()
+                }
 
-            // VLC calls this "buffering" and reports a percentage. Zero means it
-            // has run dry, which is the moment a chrome should say so; anything
-            // else is progress and not worth an event.
-            override fun buffering(mediaPlayer: MediaPlayer, newCache: Float) {
-                if (newCache <= 0f) bus.emit(CanonicalBackendEvent.WAITING)
-            }
-
-            override fun error(mediaPlayer: MediaPlayer) {
-                bus.emit(CanonicalBackendEvent.ERROR)
-            }
-        })
+                // VLC calls this "buffering" and reports a percentage. Zero means
+                // it has run dry, which is the moment a chrome should say so;
+                // anything else is progress and not worth an event.
+                override fun buffering(cache: Float) {
+                    if (cache <= 0f) bus.emit(CanonicalBackendEvent.WAITING)
+                }
+            },
+        )
     }
 
     private fun announceReadable() {
@@ -263,7 +258,7 @@ public class VlcjVideoBackend private constructor(
     private fun refuseAsUnplayable() {
         if (refusedAsUnplayable) return
         refusedAsUnplayable = true
-        player.controls().stop()
+        player.playback.stop()
         bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.HDR_UNPLAYABLE)
     }
 
@@ -284,16 +279,9 @@ public class VlcjVideoBackend private constructor(
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.
-        // The ladder constraint travels with the media rather than being applied
-        // afterwards: libVLC decides which rung to open while it reads the
-        // manifest, so a limit set after prepare is a limit set too late.
-        // The array is built once per load and vlcj's signature is a vararg, so
-        // the copy detekt warns about is the call convention rather than a cost
-        // worth avoiding — a load happens per item, not per frame.
-        @Suppress("SpreadOperator")
-        player.media().prepare(
+        player.prepare(
             narrowedLocation(master) ?: playableLocation(url),
-            *VlcAdaptiveOptions.optionsFor(playableLadder).toTypedArray(),
+            VlcAdaptiveOptions.optionsFor(playableLadder),
         )
     }
 
@@ -331,34 +319,34 @@ public class VlcjVideoBackend private constructor(
 
     override suspend fun play() {
         bus.emit(CanonicalBackendEvent.PLAY)
-        player.controls().play()
+        player.playback.play()
     }
 
     override fun pause() {
-        player.controls().setPause(true)
+        player.playback.pause(true)
     }
 
     override fun stop() {
-        player.controls().stop()
+        player.playback.stop()
     }
 
     // libVLC answers -1 for "I do not know yet", on time as well as on
     // length. A negative position is meaningless to everything above and a
     // scrubber renders it as a bar pointing the wrong way.
     override fun currentTime(): Double {
-        val reported: Long = player.status().time()
+        val reported: Long = player.playback.time()
         return if (reported > 0) reported / MILLIS_PER_SECOND else 0.0
     }
 
     override fun currentTime(seconds: Double) {
-        player.controls().setTime((seconds * MILLIS_PER_SECOND).toLong())
+        player.playback.time((seconds * MILLIS_PER_SECOND).toLong())
     }
 
     // VLC's own length is -1 until it has read the container, so the last value
     // it reported is the honest answer rather than a negative number a scrubber
     // would try to divide by.
     override fun duration(): Double {
-        val reported: Long = player.status().length()
+        val reported: Long = player.playback.length()
         return if (reported > 0) reported / MILLIS_PER_SECOND else lastKnownDuration
     }
 
@@ -372,22 +360,22 @@ public class VlcjVideoBackend private constructor(
     // in that window, and the engine's own answer takes over once it has one.
     override fun volume(): Float {
         requestedVolume?.let { return it }
-        val reported: Int = player.audio().volume()
+        val reported: Int = player.audio.volume()
         return if (reported < 0) DEFAULT_VOLUME else reported / FULL_VOLUME_PERCENT.toFloat()
     }
 
     override fun volume(value: Float) {
         val clamped: Float = value.coerceIn(0f, 1f)
         requestedVolume = clamped
-        player.audio().setVolume((clamped * FULL_VOLUME_PERCENT).toInt())
+        player.audio.volume((clamped * FULL_VOLUME_PERCENT).toInt())
     }
 
     override fun mute() {
-        player.audio().isMute = true
+        player.audio.mute(true)
     }
 
     override fun unmute() {
-        player.audio().isMute = false
+        player.audio.mute(false)
     }
 
     // The playhead, which as an absolute frontier says "nothing buffered ahead
@@ -401,15 +389,15 @@ public class VlcjVideoBackend private constructor(
     // stronger claim than an engine that will not say has earned.
     override fun buffered(): Double = currentTime()
 
-    override fun playbackRate(): Double = player.status().rate().toDouble()
+    override fun playbackRate(): Double = player.playback.rate().toDouble()
 
     override fun playbackRate(rate: Double) {
-        player.controls().setRate(rate.toFloat())
+        player.playback.rate(rate.toFloat())
     }
 
     override fun state(): BackendState = when {
-        player.status().isPlaying -> BackendState.PLAYING
-        player.status().isPlayable -> BackendState.READY
+        player.playback.playing() -> BackendState.PLAYING
+        player.playback.playable() -> BackendState.READY
         else -> BackendState.IDLE
     }
 
@@ -425,26 +413,29 @@ public class VlcjVideoBackend private constructor(
     override fun qualityLevels(): List<QualityLevel> =
         manifestLevels.ifEmpty { containerLevels() }
 
+    private fun tracksOf(type: VlcTrackType): List<VlcTrack> =
+        player.tracks.all().filter { track -> track.type == type }
+
     private fun containerLevels(): List<QualityLevel> =
-        player.media().info()?.videoTracks().orEmpty().map { track ->
+        tracksOf(VlcTrackType.VIDEO).map { track ->
             QualityLevel(
-                height = track.height(),
-                bitrate = VlcTrackMapper.bitrateOf(track.bitRate()),
-                codec = VlcTrackMapper.codecFamily(track.codecName()),
+                height = track.height,
+                bitrate = VlcTrackMapper.bitrateOf(track.bitrate),
+                codec = VlcTrackMapper.codecFamily(track.codecName),
                 dynamicRange = VlcTrackMapper.dynamicRange(),
-                width = track.width().takeIf { it > 0 },
-                label = VlcTrackMapper.labelOf(track.description(), track.language()),
+                width = track.width.takeIf { it > 0 },
+                label = VlcTrackMapper.labelOf(track.description, track.language),
             )
         }
 
     override fun quality(): QualityLevel? {
         if (manifestLevels.isNotEmpty()) return decodingRung()
 
-        val selected: Int = player.video().track()
+        val selected: Int = player.tracks.video()
         if (selected < 0) return null
 
-        val tracks = player.media().info()?.videoTracks().orEmpty()
-        val index: Int = tracks.indexOfFirst { it.id() == selected }
+        val tracks: List<VlcTrack> = tracksOf(VlcTrackType.VIDEO)
+        val index: Int = tracks.indexOfFirst { it.id == selected }
         return containerLevels().getOrNull(index)
     }
 
@@ -456,8 +447,7 @@ public class VlcjVideoBackend private constructor(
     // 3840x1666. Requiring equality means a menu with nothing selected, on the
     // rung that is playing.
     private fun decodingRung(): QualityLevel? {
-        val decoding: Int = player.media().info()?.videoTracks().orEmpty()
-            .firstOrNull()?.height() ?: return null
+        val decoding: Int = tracksOf(VlcTrackType.VIDEO).firstOrNull()?.height ?: return null
         if (decoding <= 0) return null
         return manifestLevels.minByOrNull { abs(it.height - decoding) }
     }
@@ -477,52 +467,52 @@ public class VlcjVideoBackend private constructor(
     override fun quality(level: QualityLevel?) {
         if (manifestLevels.isNotEmpty()) return
 
-        val tracks = player.media().info()?.videoTracks().orEmpty()
+        val tracks: List<VlcTrack> = tracksOf(VlcTrackType.VIDEO)
         if (level == null) {
-            tracks.firstOrNull()?.let { player.video().setTrack(it.id()) }
+            tracks.firstOrNull()?.let { player.tracks.video(it.id) }
             return
         }
 
         val index: Int = QualityMatcher.match(level, containerLevels()) ?: return
-        tracks.getOrNull(index)?.let { player.video().setTrack(it.id()) }
+        tracks.getOrNull(index)?.let { player.tracks.video(it.id) }
     }
 
     override fun audioTracks(): List<AudioTrack> =
-        player.media().info()?.audioTracks().orEmpty().map { track ->
+        tracksOf(VlcTrackType.AUDIO).map { track ->
             AudioTrack(
-                id = track.id().toString(),
-                language = VlcTrackMapper.languageOf(track.language()),
-                label = VlcTrackMapper.labelOf(track.description(), track.language()),
-                channels = track.channels().coerceAtLeast(1),
-                codec = VlcTrackMapper.codecFamily(track.codecName()),
+                id = track.id.toString(),
+                language = VlcTrackMapper.languageOf(track.language),
+                label = VlcTrackMapper.labelOf(track.description, track.language),
+                channels = track.channels.coerceAtLeast(1),
+                codec = VlcTrackMapper.codecFamily(track.codecName),
             )
         }
 
     override fun audioTrack(): AudioTrack? =
-        audioTracks().firstOrNull { it.id == player.audio().track().toString() }
+        audioTracks().firstOrNull { it.id == player.audio.track().toString() }
 
     override fun audioTrack(track: AudioTrack) {
-        track.id.toIntOrNull()?.let { player.audio().setTrack(it) }
+        track.id.toIntOrNull()?.let { player.audio.track(it) }
     }
 
     override fun subtitleTracks(): List<SubtitleTrack> =
-        player.media().info()?.textTracks().orEmpty().map { track ->
+        tracksOf(VlcTrackType.TEXT).map { track ->
             SubtitleTrack(
-                id = track.id().toString(),
-                language = VlcTrackMapper.languageOf(track.language()),
-                label = VlcTrackMapper.labelOf(track.description(), track.language()),
-                format = VlcTrackMapper.codecFamily(track.codecName()),
+                id = track.id.toString(),
+                language = VlcTrackMapper.languageOf(track.language),
+                label = VlcTrackMapper.labelOf(track.description, track.language),
+                format = VlcTrackMapper.codecFamily(track.codecName),
             )
         }
 
     override fun subtitleTrack(): SubtitleTrack? =
-        subtitleTracks().firstOrNull { it.id == player.subpictures().track().toString() }
+        subtitleTracks().firstOrNull { it.id == player.tracks.subtitle().toString() }
 
     // libVLC turns captions off with track -1, which is a selection rather than
     // an error — the same thing a null descriptor means everywhere else.
     override fun subtitleTrack(track: SubtitleTrack?) {
         val id: Int = track?.id?.toIntOrNull() ?: SUBTITLES_DISABLED
-        player.subpictures().setTrack(id)
+        player.tracks.subtitle(id)
     }
 
     override fun on(event: String, fn: (Any?) -> Unit): Unit = bus.on(event, fn)
@@ -533,7 +523,7 @@ public class VlcjVideoBackend private constructor(
     // is dropped without this leaks a decoder thread per item.
     public fun release() {
         player.release()
-        if (ownsFactory) factory.release()
+        if (ownsInstance) instance.release()
     }
 
     public companion object {
@@ -544,26 +534,28 @@ public class VlcjVideoBackend private constructor(
 
         // The reason, so a desktop client can say "install VLC" rather than
         // "playback failed". Null when it binds.
+        //
         // LinkageError, not its subclasses one at a time. A machine without
-        // libVLC produced ExceptionInInitializerError from VLCJ's static
-        // initialiser, which is neither UnsatisfiedLinkError nor
-        // NoClassDefFoundError — the two this originally caught. Naming the
-        // shapes of absence individually means missing one, and the one missed
-        // is the one that reaches a user.
+        // libVLC has produced ExceptionInInitializerError as well as
+        // UnsatisfiedLinkError and NoClassDefFoundError, depending on where the
+        // failure lands. Naming the shapes of absence individually means missing
+        // one, and the one missed is the one that reaches a user.
         //
         // Bounded, and on a thread of its own. Answering this question means
-        // building a real factory, which is how VLCJ discovers the native
-        // library — and on a machine without a display that can sit rather than
-        // fail. A caller asking "do you have VLC" is often a UI deciding what to
-        // offer; blocking it forever is worse than saying no.
+        // starting a real engine, which on a first run also unpacks the bundled
+        // payload — and on a machine with neither that can sit rather than fail.
+        // A caller asking "do you have VLC" is often a UI deciding what to offer;
+        // blocking it forever is worse than saying no.
         //
         // Memoized because the answer cannot change while the process runs, and
         // because paying seconds for it twice would be paying it on a click.
-        @Suppress("TooGenericExceptionCaught")
         public fun whyUnavailable(): String? = probe
 
         private val probe: String? by lazy { probeWithin(PROBE_TIMEOUT_MS) }
 
+        // RuntimeException rather than a named one, because "libVLC would not
+        // start" arrives as whatever the layer that noticed threw, and the
+        // caller of this method needs a sentence rather than a type.
         @Suppress("TooGenericExceptionCaught")
         private fun probeWithin(millis: Long): String? {
             val answer = java.util.concurrent.atomic.AtomicReference<String?>(
@@ -572,13 +564,14 @@ public class VlcjVideoBackend private constructor(
             val prober = Thread {
                 answer.set(
                     try {
-                        MediaPlayerFactory().release()
+                        VlcInstance().release()
                         null
                     } catch (missing: LinkageError) {
                         "libVLC could not be loaded: ${missing.message}. ${payloadState()}"
                     } catch (refused: RuntimeException) {
-                        // VLCJ's discovery throws this when it finds nothing.
-                        "libVLC could not be located: ${refused.message}. ${payloadState()}"
+                        // libvlc_new answering null, which on a desktop is
+                        // nearly always a plugin directory that did not arrive.
+                        "libVLC could not be started: ${refused.message}. ${payloadState()}"
                     },
                 )
             }

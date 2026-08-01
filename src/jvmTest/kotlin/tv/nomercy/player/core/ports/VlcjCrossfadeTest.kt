@@ -15,7 +15,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 private const val FADE_MS = 400L
-private const val FULL = 1.0f
 private const val HALF = 0.5f
 
 // A crossfade between two real libVLC players.
@@ -86,17 +85,24 @@ class VlcjCrossfadeTest {
         val second: File = media("fade-b")
 
         try {
-            runBlocking {
+            val playing: Float = runBlocking {
                 backend.load(first.absolutePath, LoadOptions())
                 backend.play()
+                // Read here, with one engine live, because that is the level the
+                // fade has to arrive at. Asserting a hardcoded 1.0 instead reads
+                // the machine's saved VLC volume as if it were the contract: on
+                // a desktop whose vlcrc says 50%, a perfect fade lands at 0.5
+                // and a test expecting full scale calls it broken.
+                val level: Float = backend.volume()
                 backend.loadSecondary(second.absolutePath)
                 backend.primeSecondary()
                 backend.crossfade(FADE_MS, CrossfadeCurve.EQUAL_POWER)
+                level
             }
 
             assertTrue(
-                backend.volume() in FULL - TOLERANCE..FULL + TOLERANCE,
-                "the track that faded in is not at full volume: ${backend.volume()}",
+                backend.volume() in playing - TOLERANCE..playing + TOLERANCE,
+                "the track that faded in did not reach $playing: ${backend.volume()}",
             )
             assertEquals(0f, backend.secondaryGain(), "the retired engine was left audible")
         } finally {

@@ -157,9 +157,11 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
         }
         // The desktop engine. libVLC decodes practically everything, which is
-        // what a desktop client needs when the file came off a disc rip.
+        // what a desktop client needs when the file came off a disc rip, and it
+        // is bound through its own C API rather than through a wrapper — see
+        // tv.nomercy.player.core.natives.libvlc. JNA is what calls it.
         jvmMain.dependencies {
-            implementation(libs.vlcj)
+            implementation(libs.jna)
         }
         getByName("androidHostTest").dependencies {
             // A real HTTP exchange for the interceptor, because the plumbing it
