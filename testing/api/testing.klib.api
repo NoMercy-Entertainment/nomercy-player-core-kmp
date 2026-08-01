@@ -53,6 +53,8 @@ final class tv.nomercy.player.testing/FakeLogger : tv.nomercy.player.core.ports/
 final class tv.nomercy.player.testing/FakePlayer : tv.nomercy.player.core.devtools/EventFirehose, tv.nomercy.player.core.player/Player<kotlin/Unit>, tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.testing/FakePlayer|null[0]
     constructor <init>(kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> = ..., kotlinx.coroutines/CoroutineScope = ..., tv.nomercy.player.core.ports/Storage = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.testing/FakeFetcher? = ..., kotlin/Function2<kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions, tv.nomercy.player.core.ports/RealtimeChannel>? = ...) // tv.nomercy.player.testing/FakePlayer.<init>|<init>(kotlin.collections.List<tv.nomercy.player.core.media.PlaylistItem>;kotlinx.coroutines.CoroutineScope;tv.nomercy.player.core.ports.Storage;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.testing.FakeFetcher?;kotlin.Function2<kotlin.String,tv.nomercy.player.core.ports.RealtimeFactoryOptions,tv.nomercy.player.core.ports.RealtimeChannel>?){}[0]
 
+    final val cueParsers // tv.nomercy.player.testing/FakePlayer.cueParsers|{}cueParsers[0]
+        final fun <get-cueParsers>(): tv.nomercy.player.core.ports/CueParserRegistry // tv.nomercy.player.testing/FakePlayer.cueParsers.<get-cueParsers>|<get-cueParsers>(){}[0]
     final val plugins // tv.nomercy.player.testing/FakePlayer.plugins|{}plugins[0]
         final fun <get-plugins>(): tv.nomercy.player.core.plugin/PluginRegistry // tv.nomercy.player.testing/FakePlayer.plugins.<get-plugins>|<get-plugins>(){}[0]
     final val reportedErrors // tv.nomercy.player.testing/FakePlayer.reportedErrors|{}reportedErrors[0]
@@ -86,6 +88,7 @@ final class tv.nomercy.player.testing/FakePlayer : tv.nomercy.player.core.devtoo
     final fun queue(): kotlin.collections/List<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.testing/FakePlayer.queue|queue(){}[0]
     final fun removePluginById(kotlin/String) // tv.nomercy.player.testing/FakePlayer.removePluginById|removePluginById(kotlin.String){}[0]
     final fun report(tv.nomercy.player.core.errors/PlayerError) // tv.nomercy.player.testing/FakePlayer.report|report(tv.nomercy.player.core.errors.PlayerError){}[0]
+    final fun resolveCueParser(kotlin/String, kotlin/String?): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.testing/FakePlayer.resolveCueParser|resolveCueParser(kotlin.String;kotlin.String?){}[0]
     final fun setup(tv.nomercy.player.core.player/PlayerConfig): tv.nomercy.player.core.player/Player<kotlin/Unit> // tv.nomercy.player.testing/FakePlayer.setup|setup(tv.nomercy.player.core.player.PlayerConfig){}[0]
     final fun state(): tv.nomercy.player.core.player/PlayerState // tv.nomercy.player.testing/FakePlayer.state|state(){}[0]
     final fun stop(tv.nomercy.player.core.player/ActionOptions) // tv.nomercy.player.testing/FakePlayer.stop|stop(tv.nomercy.player.core.player.ActionOptions){}[0]

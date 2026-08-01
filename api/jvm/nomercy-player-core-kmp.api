@@ -574,7 +574,7 @@ public final class tv/nomercy/player/core/cues/LrcParserKt {
 	public static final fun parseLrc (Ljava/lang/String;)Ljava/util/List;
 }
 
-public final class tv/nomercy/player/core/cues/LrcPayload {
+public final class tv/nomercy/player/core/cues/LrcPayload : tv/nomercy/player/core/cues/TextPayload {
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -582,7 +582,7 @@ public final class tv/nomercy/player/core/cues/LrcPayload {
 	public final fun copy (Ljava/lang/String;Ljava/util/List;)Ltv/nomercy/player/core/cues/LrcPayload;
 	public static synthetic fun copy$default (Ltv/nomercy/player/core/cues/LrcPayload;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/cues/LrcPayload;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getText ()Ljava/lang/String;
+	public fun getText ()Ljava/lang/String;
 	public final fun getWords ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -629,6 +629,10 @@ public final class tv/nomercy/player/core/cues/SpriteVttCueParser : tv/nomercy/p
 	public fun canParse (Ljava/lang/String;Ljava/lang/String;)Z
 	public fun getId ()Ljava/lang/String;
 	public fun parse (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
+}
+
+public abstract interface class tv/nomercy/player/core/cues/TextPayload {
+	public abstract fun getText ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/cues/VttCue {
@@ -700,7 +704,7 @@ public final class tv/nomercy/player/core/cues/VttSubtitleCueParser : tv/nomercy
 	public fun parse (Ljava/lang/String;Ljava/lang/String;)Ljava/util/List;
 }
 
-public final class tv/nomercy/player/core/cues/VttSubtitlePayload {
+public final class tv/nomercy/player/core/cues/VttSubtitlePayload : tv/nomercy/player/core/cues/TextPayload {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -713,7 +717,7 @@ public final class tv/nomercy/player/core/cues/VttSubtitlePayload {
 	public final fun getAlignment ()Ljava/lang/String;
 	public final fun getLinePosition ()Ljava/lang/Integer;
 	public final fun getSize ()Ljava/lang/Integer;
-	public final fun getText ()Ljava/lang/String;
+	public fun getText ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

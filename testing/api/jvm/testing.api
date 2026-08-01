@@ -92,6 +92,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun dispose ()V
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun getCueParsers ()Ltv/nomercy/player/core/ports/CueParserRegistry;
 	public fun getPlugin (Lkotlin/reflect/KClass;)Ltv/nomercy/player/core/plugin/Plugin;
 	public final fun getPluginById (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/Plugin;
 	public final fun getPlugins ()Ltv/nomercy/player/core/plugin/PluginRegistry;
@@ -115,6 +116,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun queue ()Ljava/util/List;
 	public final fun removePluginById (Ljava/lang/String;)V
 	public fun report (Ltv/nomercy/player/core/errors/PlayerError;)V
+	public fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;)Ltv/nomercy/player/core/player/Player;
 	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
 	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;)V

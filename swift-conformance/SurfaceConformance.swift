@@ -137,7 +137,11 @@ enum SurfaceConformance {
             pauseWhenHidden: false,
             controls: false,
             wakeLock: WakeLockPolicy.auto,
-            onOffline: OfflinePolicy.continueBuffered
+            onOffline: OfflinePolicy.continueBuffered,
+            // Kotlin's default (`= HdrOnSdrFallback.Play`) does not survive into
+            // the ObjC header, so every new PlayerConfig field is a new REQUIRED
+            // argument here. This file exists to break loudly when that happens.
+            hdrOnSdr: HdrOnSdrFallback.play
         ))
         try await player.play(opts: ActionOptions(source: nil, silent: false, autoplay: false))
 

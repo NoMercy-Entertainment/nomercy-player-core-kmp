@@ -762,6 +762,11 @@ abstract interface <#A: kotlin/Any?> tv.nomercy.player.core.ports/CueParser { //
     abstract fun parse(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<#A>> // tv.nomercy.player.core.ports/CueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
+abstract interface tv.nomercy.player.core.cues/TextPayload { // tv.nomercy.player.core.cues/TextPayload|null[0]
+    abstract val text // tv.nomercy.player.core.cues/TextPayload.text|{}text[0]
+        abstract fun <get-text>(): kotlin/String // tv.nomercy.player.core.cues/TextPayload.text.<get-text>|<get-text>(){}[0]
+}
+
 abstract interface tv.nomercy.player.core.device/DeviceCapabilities { // tv.nomercy.player.core.device/DeviceCapabilities|null[0]
     abstract val formFactor // tv.nomercy.player.core.device/DeviceCapabilities.formFactor|{}formFactor[0]
         abstract fun <get-formFactor>(): tv.nomercy.player.core.device/FormFactor // tv.nomercy.player.core.device/DeviceCapabilities.formFactor.<get-formFactor>|<get-formFactor>(){}[0]
@@ -1764,7 +1769,7 @@ final class tv.nomercy.player.core.cues/LrcCue { // tv.nomercy.player.core.cues/
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/LrcCue.toString|toString(){}[0]
 }
 
-final class tv.nomercy.player.core.cues/LrcPayload { // tv.nomercy.player.core.cues/LrcPayload|null[0]
+final class tv.nomercy.player.core.cues/LrcPayload : tv.nomercy.player.core.cues/TextPayload { // tv.nomercy.player.core.cues/LrcPayload|null[0]
     constructor <init>(kotlin/String, kotlin.collections/List<tv.nomercy.player.core.cues/LrcWord> = ...) // tv.nomercy.player.core.cues/LrcPayload.<init>|<init>(kotlin.String;kotlin.collections.List<tv.nomercy.player.core.cues.LrcWord>){}[0]
 
     final val text // tv.nomercy.player.core.cues/LrcPayload.text|{}text[0]
@@ -1893,7 +1898,7 @@ final class tv.nomercy.player.core.cues/VttSpritePayload { // tv.nomercy.player.
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttSpritePayload.toString|toString(){}[0]
 }
 
-final class tv.nomercy.player.core.cues/VttSubtitlePayload { // tv.nomercy.player.core.cues/VttSubtitlePayload|null[0]
+final class tv.nomercy.player.core.cues/VttSubtitlePayload : tv.nomercy.player.core.cues/TextPayload { // tv.nomercy.player.core.cues/VttSubtitlePayload|null[0]
     constructor <init>(kotlin/String, kotlin/String? = ..., kotlin/Int? = ..., kotlin/Int? = ...) // tv.nomercy.player.core.cues/VttSubtitlePayload.<init>|<init>(kotlin.String;kotlin.String?;kotlin.Int?;kotlin.Int?){}[0]
 
     final val alignment // tv.nomercy.player.core.cues/VttSubtitlePayload.alignment|{}alignment[0]
