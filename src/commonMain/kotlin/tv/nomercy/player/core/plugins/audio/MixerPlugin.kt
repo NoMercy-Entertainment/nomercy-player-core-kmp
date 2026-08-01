@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.plugins.audio
 
+import kotlinx.serialization.Serializable
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
@@ -22,6 +23,14 @@ public data class MixerOptions(
     val pan: Double = 0.0,
     /** Symmetric dB ceiling. Values outside it are clamped rather than refused. */
     val maxGainDb: Double = DEFAULT_MAX_GAIN_DB,
+    /**
+     * Where gain, pan and mute are kept between sessions, under the plugin's own
+     * storage namespace. Null is no persistence, matching the web: a library
+     * that starts writing to a consumer's storage the moment it is registered is
+     * a surprise, and [DEFAULT_PERSIST_KEY] is the conventional value for the
+     * hosts that want it.
+     */
+    val persistKey: String? = null,
 )
 
 /**
@@ -71,6 +80,13 @@ public open class MixerPlugin(
     private var currentPan: Double = 0.0
     private var muted: Boolean = false
 
+    // Set while the plugin itself is moving the controls rather than a listener.
+    // Without it the configured defaults applied at registration are written
+    // straight back over the stored blob before the restore has had a chance to
+    // read it, which loses the setting on exactly the launch that was meant to
+    // bring it back.
+    private var applying: Boolean = false
+
     /** Current gain in dB, clamped to the ceiling. */
     public fun gain(): Double = currentGainDb
 
@@ -80,8 +96,48 @@ public open class MixerPlugin(
     public fun isMuted(): Boolean = muted
 
     override fun use() {
+        applying = true
         gain(opts.gainDb)
         pan(opts.pan)
+        applying = false
+        loadPersisted()
+    }
+
+    // What the listener left the mixer at, put back.
+    //
+    // After the configured defaults rather than instead of them, so a host with
+    // an asynchronous store still starts at a sane gain instead of at whatever
+    // silence a pending read leaves behind. Applied through the ordinary setters,
+    // which is what makes a chrome bound to `gain:changed` redraw when a late
+    // restore lands.
+    private fun loadPersisted() {
+        val key: String = opts.persistKey ?: return
+
+        this.launch {
+            val stored: StoredMixerState? = storage.getJSON(key, StoredMixerState.serializer())
+            if (stored != null) {
+                applying = true
+                gain(stored.gain)
+                pan(stored.pan)
+                mute(stored.muted)
+                applying = false
+            }
+        }
+    }
+
+    // Every change, because there is no moment a mixer is "done" being adjusted
+    // and a host that had to call save would eventually ship one that forgot.
+    private fun autoSave() {
+        val key: String = opts.persistKey ?: return
+        if (applying) return
+
+        this.launch {
+            storage.setJSON(
+                key,
+                StoredMixerState(gain = currentGainDb, pan = currentPan, muted = muted),
+                StoredMixerState.serializer(),
+            )
+        }
     }
 
     /**
@@ -96,6 +152,7 @@ public open class MixerPlugin(
         currentGainDb = clamped
         applyGain()
         emit(MixerEvents.GainChanged, clamped)
+        autoSave()
     }
 
     /** Set the pan, -1 to 1. Out-of-range values are clamped. */
@@ -113,6 +170,7 @@ public open class MixerPlugin(
 
         applyPan(clamped)
         emit(MixerEvents.PanChanged, clamped)
+        autoSave()
     }
 
     /**
@@ -125,6 +183,7 @@ public open class MixerPlugin(
         muted = value
         applyGain()
         emit(MixerEvents.MuteChanged, value)
+        autoSave()
     }
 
     /** Where a platform with a panner does the work. */
@@ -174,3 +233,15 @@ private const val TEN: Double = 10.0
 // Amplitude, not power: 20 rather than 10. Using 10 here halves every boost a
 // listener asks for and is the classic way to get this wrong.
 private const val DB_PER_DECADE: Double = 20.0
+
+// The mixer's whole position, as one stored value.
+//
+// One key rather than three: split, a restore could land the gain of one session
+// with the mute of another, which is a listener opening the app to silence they
+// never asked for and no control that looks wrong.
+@Serializable
+internal data class StoredMixerState(
+    val gain: Double,
+    val pan: Double,
+    val muted: Boolean,
+)

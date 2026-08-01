@@ -19,8 +19,8 @@ import tv.nomercy.player.core.dsp.BiquadPeaking
 import tv.nomercy.player.core.dsp.BiquadState
 import tv.nomercy.player.core.dsp.EqBand
 import tv.nomercy.player.core.dsp.EqBands
+import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
-import tv.nomercy.player.core.plugins.audio.BandEnergies
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -39,7 +39,12 @@ import java.nio.ByteOrder
 // decoding PCM16 twice per buffer to keep two stages separate would be paying
 // twice for the expensive part.
 @OptIn(UnstableApi::class)
-public class BiquadEqAudioProcessor : BaseAudioProcessor() {
+public class BiquadEqAudioProcessor(
+    // Shared with whatever is drawing, so `SpectrumPlugin.smoothingTimeConstant`
+    // reaches Media3's sink without a new method on the port. A host that does
+    // not care passes nothing and gets the web's default.
+    private val history: SpectrumHistory = SpectrumHistory(),
+) : BaseAudioProcessor() {
 
     // Per channel, per band. A biquad carries two samples of history and the
     // channels are independent signals — sharing state across them mixes left
@@ -68,8 +73,6 @@ public class BiquadEqAudioProcessor : BaseAudioProcessor() {
 
     private var frameTap: ((VisualizationFrame) -> Unit)? = null
 
-    private var previousPeaks: BandEnergies? = null
-
     private var elapsedSeconds: Double = 0.0
 
     public fun graph(): AudioDspGraph = Graph()
@@ -96,7 +99,7 @@ public class BiquadEqAudioProcessor : BaseAudioProcessor() {
         resetStates()
         windowFill = 0
         elapsedSeconds = 0.0
-        previousPeaks = null
+        history.reset()
     }
 
     override fun queueInput(inputBuffer: ByteBuffer) {
@@ -156,8 +159,7 @@ public class BiquadEqAudioProcessor : BaseAudioProcessor() {
         elapsedSeconds += deltaMs / MILLIS_PER_SECOND
 
         val frame: VisualizationFrame =
-            AudioSpectrum.analyse(window.copyOf(), sampleRate, deltaMs, elapsedSeconds, previousPeaks)
-        previousPeaks = frame.peakBandEnergies
+            AudioSpectrum.analyse(window.copyOf(), sampleRate, deltaMs, elapsedSeconds, history)
         tap(frame)
     }
 

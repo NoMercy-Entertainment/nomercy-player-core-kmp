@@ -14,8 +14,8 @@ import tv.nomercy.player.core.dsp.BiquadPeaking
 import tv.nomercy.player.core.dsp.BiquadState
 import tv.nomercy.player.core.dsp.EqBand
 import tv.nomercy.player.core.dsp.EqBands
+import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
-import tv.nomercy.player.core.plugins.audio.BandEnergies
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 
 // The equaliser and spectrum for any engine that hands over raw PCM.
@@ -44,7 +44,13 @@ import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 public class PcmEqualiser(
     private val sampleRate: Int,
     private val channels: Int,
+    // Shared with whatever is drawing, so `SpectrumPlugin.smoothingTimeConstant`
+    // reaches the analysis without a new method on the port. A host that does
+    // not care hands over nothing and gets the web's default.
+    private val history: SpectrumHistory,
 ) : AudioDspGraph {
+
+    public constructor(sampleRate: Int, channels: Int) : this(sampleRate, channels, SpectrumHistory())
 
     // Per channel, per band. Sharing history across channels mixes left into
     // right, which is heard as the stereo image collapsing rather than as a
@@ -65,8 +71,6 @@ public class PcmEqualiser(
     private var windowFill: Int = 0
 
     private var frameTap: ((VisualizationFrame) -> Unit)? = null
-
-    private var previousPeaks: BandEnergies? = null
 
     private var elapsedSeconds: Double = 0.0
 
@@ -118,8 +122,7 @@ public class PcmEqualiser(
         elapsedSeconds += deltaMs / MILLIS_PER_SECOND
 
         val frame: VisualizationFrame =
-            AudioSpectrum.analyse(window.copyOf(), sampleRate, deltaMs, elapsedSeconds, previousPeaks)
-        previousPeaks = frame.peakBandEnergies
+            AudioSpectrum.analyse(window.copyOf(), sampleRate, deltaMs, elapsedSeconds, history)
         tap(frame)
     }
 
@@ -129,7 +132,7 @@ public class PcmEqualiser(
         states = Array(channels) { Array(bands.size) { BiquadState() } }
         windowFill = 0
         elapsedSeconds = 0.0
-        previousPeaks = null
+        history.reset()
     }
 
     private fun tune(bands: List<EqBand>): List<BiquadCoefficients> = bands.map { band ->

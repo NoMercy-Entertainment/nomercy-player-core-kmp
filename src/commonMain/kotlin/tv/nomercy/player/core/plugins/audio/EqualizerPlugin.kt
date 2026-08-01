@@ -31,7 +31,13 @@ import tv.nomercy.player.core.ports.AudioDspGraph
 // desynchronise the state every controller above depends on.
 public open class EqualizerPlugin(
     private val graph: AudioDspGraph?,
-) : Plugin<Unit>() {
+    private val opts: EqualizerOptions,
+) : Plugin<EqualizerOptions>() {
+
+    // Spelled out rather than defaulted: a defaulted Kotlin parameter reaches
+    // Swift as a required argument, so a default here would break every
+    // `EqualizerPlugin(graph)` already written against the framework.
+    public constructor(graph: AudioDspGraph?) : this(graph, EqualizerOptions())
 
     public companion object Manifest : PluginManifest {
         override val id: String = "equalizer"
@@ -39,6 +45,12 @@ public open class EqualizerPlugin(
     }
 
     override val manifest: PluginManifest get() = Manifest
+
+    override val options: EqualizerOptions get() = opts
+
+    // The custom preset catalogue and the reading and writing of it, which is a
+    // second subject from the sliders and lives in its own file.
+    private val store: EqualizerStore = EqualizerStore(opts)
 
     // The live curve, held here rather than read back from the graph.
     //
@@ -53,6 +65,35 @@ public open class EqualizerPlugin(
     private var pre: Double = 1.0
 
     private var on: Boolean = true
+
+    // Whatever the listener left behind, put back before anything reads it.
+    //
+    // Asynchronous because storage is: one contract covers a synchronous
+    // preference file and a remote store, and the plugin cannot know which it
+    // was given. The web restores inside its own use() only because a browser's
+    // localStorage answers immediately, and its own docblock admits an async
+    // backend restores late there too.
+    override fun use() {
+        if (opts.persistKey == null) return
+
+        this.launch {
+            val restored: EqualizerState? = store.loadPersisted(storage)
+            if (restored != null) {
+                store.replaceAll(restored.customPresets)
+
+                // An empty band list is a blob written before a curve was ever
+                // set. Applying it would flatten a chain the listener has since
+                // built rather than leave it where it is.
+                if (restored.bands.isNotEmpty()) {
+                    current = restored.bands
+                    chosenPreset = restored.preset
+                    pre = restored.preGain
+                    graph?.setEqBands(current)
+                    graph?.preGain(pre)
+                }
+            }
+        }
+    }
 
     public open fun bands(): List<EqBand> = current
 
@@ -69,6 +110,7 @@ public open class EqualizerPlugin(
         // edited it is claiming something untrue about what they are hearing.
         chosenPreset = EqPresets.CUSTOM.name
         graph?.bandGain(frequencyHz, gainDb)
+        persist()
     }
 
     public open fun preGain(): Double = pre
@@ -76,20 +118,47 @@ public open class EqualizerPlugin(
     public open fun preGain(sliderValue: Double) {
         pre = EqBands.preGainLinear(sliderValue)
         graph?.preGain(pre)
+        persist()
     }
 
-    public open fun presets(): List<EqPreset> = EqPresets.BUILTIN
+    // Built-ins first, then whatever the consumer added, in the order they added
+    // it. A menu that reordered itself as presets were saved would move the
+    // entry under a viewer's thumb between one press and the next.
+    public open fun presets(): List<EqPreset> = EqPresets.BUILTIN + store.customPresets()
+
+    // A curve the listener built, kept under a name and stored with the rest.
+    //
+    // Replaces silently on a name collision, matching the web: saving over
+    // "Late night" is what a viewer means by saving it again, and refusing
+    // would leave them with no way to correct one.
+    public open fun addCustomPreset(preset: EqPreset) {
+        store.add(preset)
+        persist()
+    }
+
+    // Built-ins are not removable. A catalogue a viewer can empty is one they
+    // can lock themselves out of, and the built-ins are the floor everything
+    // else is compared against.
+    public open fun removePreset(name: String) {
+        if (store.remove(name)) persist()
+    }
 
     public open fun preset(): String = chosenPreset
 
     // The whole curve at once, because choosing a preset is one decision. Sent
     // band by band, a listener hears the chain reshape as a swoop.
     public open fun preset(name: String) {
-        val preset: EqPreset = EqPresets.byName(name) ?: return
+        // Built-in by name first, then the custom catalogue — the web's
+        // resolution order, and the one that stops a saved preset shadowing a
+        // built-in a viewer expects to be able to get back to.
+        val preset: EqPreset = EqPresets.byName(name)
+            ?: store.customPresets().firstOrNull { it.name == name }
+            ?: return
 
         current = preset.bands
         chosenPreset = preset.name
         graph?.setEqBands(preset.bands)
+        persist()
     }
 
     public open fun reset() {
@@ -98,6 +167,7 @@ public open class EqualizerPlugin(
         pre = 1.0
         graph?.setEqBands(EqBands.DEFAULT)
         graph?.preGain(pre)
+        persist()
     }
 
     public open fun enabled(equalizer: Boolean) {
@@ -117,4 +187,24 @@ public open class EqualizerPlugin(
     // sliders that change nothing. Silently accepting the calls is how a
     // control comes to look broken instead of absent.
     public open fun available(): Boolean = graph != null
+
+    // Nothing at all when no key was configured, which is also what keeps this
+    // safe to call from a plugin nobody registered: reaching the scoped storage
+    // needs a host, and a consumer who asked for no persistence should not need
+    // one to move a slider.
+    private fun persist() {
+        if (opts.persistKey == null) return
+
+        this.launch {
+            store.autoSave(
+                storage,
+                EqualizerState(
+                    bands = current,
+                    preset = chosenPreset,
+                    preGain = pre,
+                    customPresets = store.customPresets(),
+                ),
+            )
+        }
+    }
 }

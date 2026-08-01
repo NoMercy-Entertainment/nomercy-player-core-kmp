@@ -26,36 +26,50 @@ import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 public object AudioSpectrum {
 
     // The whole reduction, in the order the web player does it: window, then
-    // transform, then normalise, then split into bands.
+    // transform, then steady against the last frame, then normalise, then split
+    // into bands.
     //
-    // prevPeaks is the previous frame's peak hold, which is how the peak line
-    // decays smoothly rather than tracking the bars exactly. Null starts fresh —
-    // the first frame after a track change has no history worth keeping.
+    // history is what the previous frame left behind — the peak hold, which is
+    // how the peak line decays smoothly rather than tracking the bars exactly,
+    // and the smoothed magnitudes the browser's analyser keeps internally. Null
+    // starts fresh and smooths nothing; the first frame after a track change has
+    // no history worth keeping.
     //
     // Five parameters, and none of them can be derived from the others: the
     // samples, the rate they were taken at, where in the track they are, how
-    // long since the last frame, and what the peaks were. Bundling them into a
-    // context object would satisfy the rule by moving the same five values one
-    // level down and giving callers a type to construct first.
+    // long since the last frame, and what the last frame left. Bundling them
+    // into a context object would satisfy the rule by moving the same five
+    // values one level down and giving callers a type to construct first.
     @Suppress("LongParameterList")
     public fun analyse(
         pcm: DoubleArray,
         sampleRate: Int,
         deltaMs: Double,
         timeSeconds: Double,
-        prevPeaks: BandEnergies?,
+        history: SpectrumHistory?,
     ): VisualizationFrame {
         val windowed: DoubleArray = HannWindow.apply(pcm)
-        val magnitudes: DoubleArray = Fft.magnitudes(windowed)
         val binHz: Double = sampleRate.toDouble() / pcm.size
 
-        val normalised: DoubleArray = toDecibelScale(magnitudes, pcm.size)
+        // Divided by the window size first, matching Web Audio's own
+        // normalisation, so the numbers mean the same thing at any FFT size —
+        // and so the smoothing below blends comparable frames when the size
+        // changes under it.
+        val scaled: DoubleArray = Fft.magnitudes(windowed).also { magnitudes ->
+            for (bin in magnitudes.indices) magnitudes[bin] = magnitudes[bin] / pcm.size
+        }
+
+        val steadied: DoubleArray = history?.smooth(scaled) ?: scaled
+        val normalised: DoubleArray = toDecibelScale(steadied)
 
         val bands = BandEnergies(
             bass = bandEnergy(normalised, binHz, BASS_LOW_HZ, BASS_HIGH_HZ),
             mid = bandEnergy(normalised, binHz, MID_LOW_HZ, MID_HIGH_HZ),
             treble = bandEnergy(normalised, binHz, TREBLE_LOW_HZ, TREBLE_HIGH_HZ),
         )
+
+        val peaks: BandEnergies = held(history?.peaks, bands)
+        history?.peaks = peaks
 
         return VisualizationFrame(
             frequency = normalised,
@@ -67,7 +81,7 @@ public object AudioSpectrum {
             sampleRate = sampleRate,
             binHz = binHz,
             peakHz = peakFrequency(normalised, binHz),
-            peakBandEnergies = held(prevPeaks, bands),
+            peakBandEnergies = peaks,
         )
     }
 
@@ -82,13 +96,14 @@ public object AudioSpectrum {
     // reacts to peaks. On a dB scale the body of the sound is visible, which is
     // what a viewer reads as the music.
     //
-    // Magnitudes are divided by the window size first, matching Web Audio's own
-    // normalisation, so the numbers mean the same thing at any FFT size.
-    private fun toDecibelScale(magnitudes: DoubleArray, windowSize: Int): DoubleArray {
+    // Takes magnitudes already divided by the window size, which is where Web
+    // Audio's own normalisation sits and where the time smoothing has to happen
+    // before it.
+    private fun toDecibelScale(magnitudes: DoubleArray): DoubleArray {
         val span: Double = MAX_DECIBELS - MIN_DECIBELS
 
         return DoubleArray(magnitudes.size) { bin ->
-            val scaled: Double = magnitudes[bin] / windowSize
+            val scaled: Double = magnitudes[bin]
             // Silence is zero rather than negative infinity. log10(0) would
             // reach the consumer as NaN and draw nothing at all.
             if (scaled <= 0.0) {

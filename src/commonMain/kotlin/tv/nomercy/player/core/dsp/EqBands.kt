@@ -44,6 +44,30 @@ public object EqBands {
         EqBand(frequency = 16_000, gainDb = 0.0),
     )
 
+    // What a slider bound to any of this is allowed to be.
+    //
+    // Straight from the web's DEFAULT_SLIDER_VALUES: the pre-gain runs -1..3 and
+    // counts four steps of travel, the bands run ±12 dB and count twenty-four,
+    // and both move in hundredths. A hundredth is finer than anyone can hear on
+    // one nudge, which is the point — it is fine enough that a drag feels
+    // continuous rather than notched.
+    public val DEFAULT_SLIDER_VALUES: EqSliderValues = EqSliderValues(
+        pre = SliderRange(
+            min = -1.0,
+            max = 3.0,
+            step = 0.01,
+            default = 0.0,
+            totalSteps = 4.0,
+        ),
+        band = SliderRange(
+            min = -12.0,
+            max = 12.0,
+            step = 0.01,
+            default = 0.0,
+            totalSteps = 24.0,
+        ),
+    )
+
     // The pre-gain slider, as a linear multiplier rather than decibels.
     //
     // A -1..3 slider maps to 0..4 linear, and the web does the same. It is not

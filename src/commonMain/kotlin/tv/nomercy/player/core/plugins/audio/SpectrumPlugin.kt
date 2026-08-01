@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.plugins.audio
 
 import tv.nomercy.player.core.dsp.AudioSpectrum
+import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
@@ -25,7 +26,18 @@ import tv.nomercy.player.core.ports.AudioDspGraph
 // that on the shared bus makes every listener in the player pay to ignore it.
 public open class SpectrumPlugin(
     private val graph: AudioDspGraph?,
+    // The same instance the analysis was built with, which is what makes
+    // [smoothingTimeConstant] a live control rather than a number the plugin
+    // keeps to itself. A host that wires neither gets the web's default on both
+    // sides and the knob moves nothing, which is honest: there is no analysis
+    // to steady.
+    private val history: SpectrumHistory,
 ) : Plugin<Unit>() {
+
+    // Spelled out rather than defaulted: a defaulted Kotlin parameter reaches
+    // Swift as a required argument, so a default here would break every
+    // `SpectrumPlugin(graph)` already written against the framework.
+    public constructor(graph: AudioDspGraph?) : this(graph, SpectrumHistory())
 
     public companion object Manifest : PluginManifest {
         override val id: String = "spectrum"
@@ -35,6 +47,8 @@ public open class SpectrumPlugin(
     override val manifest: PluginManifest get() = Manifest
 
     private val listeners: MutableList<(VisualizationFrame) -> Unit> = mutableListOf()
+
+    private val beatProviders: MutableList<() -> BeatReading> = mutableListOf()
 
     private var tap: Subscription? = null
 
@@ -68,7 +82,30 @@ public open class SpectrumPlugin(
         // tap being closed. A viewer toggling the mode expects the real
         // spectrum back immediately, and reopening a tap costs a frame or two
         // of blank display every time.
-        tap = graph?.installFrameTap { frame -> if (!synthetic) deliver(frame) }
+        tap = graph?.installFrameTap { frame -> if (!synthetic) deliver(stamp(frame)) }
+    }
+
+    // Whatever the beat detectors say about this frame.
+    //
+    // Any provider reporting a beat makes it a beat, and the last one to name a
+    // tempo names it — the web's resolution, and the right one: two detectors
+    // disagreeing about whether a kick landed is not a reason to drop both.
+    //
+    // Null stays null when nobody is looking. A visualiser draws "no beat here"
+    // and "nobody is detecting beats" differently, and collapsing them to false
+    // would make every player without a detector look like one playing silence.
+    private fun stamp(frame: VisualizationFrame): VisualizationFrame {
+        if (beatProviders.isEmpty()) return frame
+
+        var beat: Boolean? = null
+        var bpm: Double? = null
+        for (provider in beatProviders.toList()) {
+            val reading: BeatReading = provider()
+            if (reading.beat == true) beat = true
+            if (reading.bpm != null) bpm = reading.bpm
+        }
+
+        return frame.copy(beat = beat, bpm = bpm)
     }
 
     // A copy of the list, because a visualiser that removes itself from inside
@@ -116,6 +153,28 @@ public open class SpectrumPlugin(
         return AudioSpectrum.bandEnergy(frame.frequency, frame.binHz, loHz, hiHz)
     }
 
+    // Something that knows where the beat is, asked once per frame.
+    //
+    // A registry rather than a setter, because a server-side detector and a
+    // local one can both be running and a setter makes the second silently
+    // replace the first. Nothing here detects beats: the frame already carries
+    // the fields and this is what fills them.
+    public open fun registerBeatProvider(provider: () -> BeatReading) {
+        beatProviders += provider
+    }
+
+    // How much of the previous frame survives into this one, 0..1.
+    //
+    // The web sets this once on the shared analyser and every visualiser reading
+    // from it inherits the value; here it is one object shared the same way. Zero
+    // is the raw transform, which jitters on noise between transients and reads
+    // as a broken display rather than as detail.
+    public open fun smoothingTimeConstant(): Double = history.smoothingTimeConstant
+
+    public open fun smoothingTimeConstant(value: Double) {
+        history.smoothingTimeConstant = value
+    }
+
     public open fun available(): Boolean = graph != null
 
     // The tap is the plugin's, not the listeners'. A host tearing the plugin
@@ -125,7 +184,18 @@ public open class SpectrumPlugin(
         tap?.dispose()
         tap = null
         listeners.clear()
+        beatProviders.clear()
         latest = null
         syntheticFrame = null
     }
 }
+
+// What a beat detector reports for one frame.
+//
+// Both nullable, because a detector that tracks tempo without calling
+// individual hits and one that calls hits without a stable tempo are both
+// ordinary. Neither is obliged to invent the other.
+public data class BeatReading(
+    val beat: Boolean? = null,
+    val bpm: Double? = null,
+)

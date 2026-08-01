@@ -92,9 +92,10 @@ class AudioSpectrumTest {
         // The peak line on a visualiser is the part a viewer reads as loudness
         // history. Without a hold it tracks the bar exactly and shows nothing;
         // without a decay it never comes down again.
-        val loud: VisualizationFrame = AudioSpectrum.analyse(tone(MID_TONE), SAMPLE_RATE, FRAME_MS, 0.0, null)
+        val history = SpectrumHistory()
+        val loud: VisualizationFrame = AudioSpectrum.analyse(tone(MID_TONE), SAMPLE_RATE, FRAME_MS, 0.0, history)
         val quiet: VisualizationFrame =
-            AudioSpectrum.analyse(DoubleArray(FFT_SIZE), SAMPLE_RATE, FRAME_MS, FRAME_SECONDS, loud.peakBandEnergies)
+            AudioSpectrum.analyse(DoubleArray(FFT_SIZE), SAMPLE_RATE, FRAME_MS, FRAME_SECONDS, history)
 
         assertTrue(
             quiet.peakBandEnergies.mid > 0.0,
@@ -104,6 +105,52 @@ class AudioSpectrumTest {
             quiet.peakBandEnergies.mid < loud.peakBandEnergies.mid,
             "the peak never decays: held at ${quiet.peakBandEnergies.mid}",
         )
+    }
+
+    // The half a viewer notices without being able to name it. The web's
+    // AnalyserNode blends each block into the last before it reports a number,
+    // so a browser visualiser glides; a native one recomputing a raw transform
+    // per frame jitters on noise between transients and reads as broken.
+    @Test
+    fun aSpectrumIsSteadiedAgainstTheFrameBeforeIt() {
+        val history = SpectrumHistory()
+        AudioSpectrum.analyse(tone(MID_TONE), SAMPLE_RATE, FRAME_MS, 0.0, history)
+
+        val silence: VisualizationFrame =
+            AudioSpectrum.analyse(DoubleArray(FFT_SIZE), SAMPLE_RATE, FRAME_MS, FRAME_SECONDS, history)
+
+        // Without the carry the bins are exactly zero the instant the sound
+        // stops, which on a display is every bar falling off the bottom between
+        // one frame and the next.
+        assertTrue(
+            silence.bandEnergies.mid > 0.0,
+            "the spectrum collapsed to nothing in one frame: ${silence.bandEnergies.mid}",
+        )
+    }
+
+    @Test
+    fun theSmoothingConstantSaysHowMuchOfTheLastFrameSurvives() {
+        val none = SpectrumHistory(0.0)
+        AudioSpectrum.analyse(tone(MID_TONE), SAMPLE_RATE, FRAME_MS, 0.0, none)
+
+        val silence: VisualizationFrame =
+            AudioSpectrum.analyse(DoubleArray(FFT_SIZE), SAMPLE_RATE, FRAME_MS, FRAME_SECONDS, none)
+
+        // Zero is the raw transform, which is what a consumer asks for when it
+        // wants the numbers rather than the picture.
+        assertEquals(0.0, silence.bandEnergies.mid)
+    }
+
+    @Test
+    fun aResetStopsThePreviousTrackBleedingIntoTheNext() {
+        val history = SpectrumHistory()
+        AudioSpectrum.analyse(tone(MID_TONE), SAMPLE_RATE, FRAME_MS, 0.0, history)
+
+        history.reset()
+        val afterSeek: VisualizationFrame =
+            AudioSpectrum.analyse(DoubleArray(FFT_SIZE), SAMPLE_RATE, FRAME_MS, FRAME_SECONDS, history)
+
+        assertEquals(0.0, afterSeek.bandEnergies.mid, "the old track kept moving through the silence after a seek")
     }
 
     @Test

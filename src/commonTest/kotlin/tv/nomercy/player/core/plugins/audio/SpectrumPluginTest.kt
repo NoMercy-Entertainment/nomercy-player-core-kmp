@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.plugins.audio
 
+import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.PluginManifest
 import kotlin.test.Test
@@ -198,6 +199,73 @@ class SpectrumPluginTest {
 
         assertEquals(0, visualiser.rendered)
         assertFalse(visualiser.running())
+    }
+
+    // The frame already carries beat and bpm and nothing filled them, so every
+    // native visualiser drew a track with no pulse in it while the web one
+    // kicked on every hit.
+    @Test
+    fun aBeatProviderReachesTheFrameAVisualiserDraws() {
+        val graph = FakeDspGraph()
+        val spectrum = SpectrumPlugin(graph)
+        val seen: MutableList<VisualizationFrame> = mutableListOf()
+
+        spectrum.onFrame { seen += it }
+        spectrum.registerBeatProvider { BeatReading(beat = true, bpm = 128.0) }
+        graph.pushFrame(frameAt(1.0))
+
+        assertEquals(true, seen.single().beat, "the detector's beat never reached the frame")
+        assertEquals(128.0, seen.single().bpm)
+    }
+
+    // Two detectors disagreeing about whether a kick landed is not a reason to
+    // drop both, and a tempo named later is the more recent answer.
+    @Test
+    fun anyDetectorCallingABeatMakesItABeatAndTheLastTempoWins() {
+        val graph = FakeDspGraph()
+        val spectrum = SpectrumPlugin(graph)
+        val seen: MutableList<VisualizationFrame> = mutableListOf()
+
+        spectrum.onFrame { seen += it }
+        spectrum.registerBeatProvider { BeatReading(beat = false, bpm = 90.0) }
+        spectrum.registerBeatProvider { BeatReading(beat = true, bpm = 174.0) }
+        graph.pushFrame(frameAt(1.0))
+
+        assertEquals(true, seen.single().beat)
+        assertEquals(174.0, seen.single().bpm)
+    }
+
+    // Null and false are different answers. A player with no detector at all
+    // must not look like one playing a track with no pulse.
+    @Test
+    fun withNoDetectorTheFrameSaysNothingAboutBeats() {
+        val graph = FakeDspGraph()
+        val spectrum = SpectrumPlugin(graph)
+        val seen: MutableList<VisualizationFrame> = mutableListOf()
+
+        spectrum.onFrame { seen += it }
+        graph.pushFrame(frameAt(1.0))
+
+        assertNull(seen.single().beat)
+        assertNull(seen.single().bpm)
+    }
+
+    // The knob is only a knob if it reaches the analysis. Held on the plugin
+    // alone it would read back correctly and change nothing anyone can see.
+    @Test
+    fun theSmoothingKnobReachesTheAnalysisRatherThanStoppingAtThePlugin() {
+        val history = SpectrumHistory()
+        val spectrum = SpectrumPlugin(FakeDspGraph(), history)
+
+        spectrum.smoothingTimeConstant(0.25)
+
+        assertEquals(0.25, history.smoothingTimeConstant, "the knob never reached the audio path")
+        assertEquals(0.25, spectrum.smoothingTimeConstant())
+    }
+
+    @Test
+    fun theSmoothingConstantStartsWhereTheWebsSharedAnalyserDoes() {
+        assertEquals(0.8, SpectrumPlugin(FakeDspGraph()).smoothingTimeConstant())
     }
 
     private fun frameAt(seconds: Double): VisualizationFrame = VisualizationFrame(
