@@ -79,6 +79,7 @@ import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.CueParserRegistry
 import tv.nomercy.player.core.ports.DefaultPreloadStrategy
 import tv.nomercy.player.core.ports.Device
+import tv.nomercy.player.core.ports.PreloadAsset
 import tv.nomercy.player.core.ports.GaplessTransitionStrategy
 import tv.nomercy.player.core.ports.PreloadStrategy
 import tv.nomercy.player.core.ports.TransitionStrategy
@@ -234,9 +235,13 @@ public open class ComposedPlayer(
     public val queue: QueueController = QueueController(context)
     public val transport: TransportController = TransportController(context, queue)
     public val volume: VolumeController = VolumeController(context)
-    public val time: TimeController = TimeController(context, queue, transport)
+    public val time: TimeController = TimeController(context, queue, transport, clock)
     public val state: StateController = StateController(context, queue, time)
-    private val playerScope: CoroutineScope = scope ?: CoroutineScope(SupervisorJob())
+    // Protected rather than private: a per-library player has its own event
+    // handlers that need to start suspending work — a segment window seeking
+    // back on a loop, a crossfade handing over — and a second scope built beside
+    // this one would outlive the player that owns the work.
+    protected val playerScope: CoroutineScope = scope ?: CoroutineScope(SupervisorJob())
 
     public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, playerScope)
     public val lifecycle: LifecycleController = LifecycleController(context, plugins, ::report)
@@ -248,6 +253,30 @@ public open class ComposedPlayer(
     public val bandwidth: BandwidthController = BandwidthController()
 
     public val metrics: MetricsController = MetricsController(clock)
+
+    // The screen, the surface and the connection. Three host-settable options
+    // that did nothing until setup wired them.
+    private val policy: PolicyController = PolicyController(context, platform, transport, playerScope)
+
+    // Reads the strategies through accessors rather than holding them, because
+    // setPreloadStrategy and setTransitionStrategy swap them at runtime and a
+    // captured reference would keep consulting the one the consumer replaced.
+    private val preloading: PreloadController = PreloadController(
+        ctx = context,
+        queue = queue,
+        scope = playerScope,
+        preload = ::preloadStrategy,
+        transition = ::transitionStrategy,
+        warm = ::warmAsset,
+    )
+
+    // Null-transport hosts are the ordinary case, so a preload that cannot fetch
+    // is not an error — the strategy still names what it wanted and the events
+    // still fire. Only a host that wired a fetcher pays for the request.
+    private suspend fun warmAsset(asset: PreloadAsset) {
+        if (fetcher == null) return
+        fetch(asset.url, FetchOptions(method = "HEAD"))
+    }
 
     // Built at setup, when the configured inactivity window is known. Until
     // then there is nothing to count down from.
@@ -299,6 +328,22 @@ public open class ComposedPlayer(
         // would have thought to ask, and a backend holding the answer cannot be
         // caught mid-load without one.
         video?.hdrOnSdrFallback(config.hdrOnSdr)
+
+        // Before lifecycle.setup, which is what announces `ready`. A host that
+        // queued an item and pressed play from its ready handler would otherwise
+        // be playing through wiring that had not been installed yet.
+        time.configure(config)
+        policy.setup(config)
+        preloading.setup(config)
+        metrics.startSampling(playerScope, config.metricsIntervalMs) {
+            context.emit(CoreEvents.PlaybackMetrics, it)
+        }
+
+        lifecycle.onCleanup("policies", policy::dispose)
+        lifecycle.onCleanup("preload", preloading::dispose)
+        lifecycle.onCleanup("metrics", metrics::stopSampling)
+        lifecycle.onCleanup("activity") { activity.dispose() }
+
         lifecycle.setup(config)
 
         // Controls start visible: the viewer just started a player, which is

@@ -28,9 +28,8 @@ import tv.nomercy.player.core.plugin.PluginRegistry
 // setting up twice and using a disposed player are different bugs and get
 // different codes, because "player is broken" is not a diagnosis.
 //
-// Stream, auth, metrics and preload wiring are named seams for later plans
-// rather than stubs here. A stub that does nothing looks exactly like a feature
-// that is broken.
+// Stream and auth wiring are named seams for later plans rather than stubs
+// here. A stub that does nothing looks exactly like a feature that is broken.
 public class LifecycleController(
     private val ctx: PlayerContext,
     private val plugins: PluginRegistry? = null,
@@ -40,7 +39,24 @@ public class LifecycleController(
 
     private var configured: PlayerConfig? = null
 
+    // What setup wired and dispose has to unwire, in registration order.
+    //
+    // The reference's `_policyCleanup`. Everything a setup step subscribed to,
+    // timed or acquired goes on here named, so a teardown that throws says which
+    // step it was rather than reporting that dispose failed.
+    private val policyCleanup: MutableList<Pair<String, () -> Unit>> = mutableListOf()
+
     public fun config(): PlayerConfig? = configured
+
+    // Register a teardown for something setup wired.
+    //
+    // Called by the composition rather than by a host: the pieces that wire at
+    // setup — policies, metrics sampling, preload orchestration — live on the
+    // player, and their unwiring has to happen inside the one dispose the host
+    // calls rather than beside it.
+    public fun onCleanup(step: String, teardown: () -> Unit) {
+        policyCleanup += step to teardown
+    }
 
     // Awaited by anything that must not run before the player exists. Memoized,
     // so twenty callers await one signal rather than racing twenty.
@@ -78,7 +94,12 @@ public class LifecycleController(
         }
 
         ctx.transitionPhase(PlayerPhase.DISPOSING)
+        // Plugins first, while the player is otherwise intact, then everything
+        // setup wired — the reference's order, and it matters: a plugin reading
+        // the player as it cleans up must not find the policies already gone.
         cleanUp("plugins") { plugins?.dispose() }
+        for ((step, teardown) in policyCleanup) cleanUp(step, teardown)
+        policyCleanup.clear()
         cleanUp("backend") { ctx.backend?.stop() }
         ctx.transitionPhase(PlayerPhase.DISPOSED)
         ctx.emit(CoreEvents.Dispose, Unit)

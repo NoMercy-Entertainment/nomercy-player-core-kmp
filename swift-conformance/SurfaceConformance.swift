@@ -123,6 +123,8 @@ enum SurfaceConformance {
             baseUrl: nil,
             baseImageUrl: nil,
             language: nil,
+            defaultSubtitleLanguage: nil,
+            defaultAudioLanguage: nil,
             defaultVolume: 100,
             metricsIntervalMs: 10_000,
             progressIntervalMs: 5_000,

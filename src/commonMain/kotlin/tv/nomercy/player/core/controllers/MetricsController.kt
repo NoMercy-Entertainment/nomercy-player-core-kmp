@@ -8,6 +8,11 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import tv.nomercy.player.core.events.PlaybackMetrics
 import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.defaultClock
@@ -95,4 +100,29 @@ public class MetricsController(private val clock: Clock = defaultClock()) {
     public fun endSession() {
         startedAt = null
     }
+
+    // Hand a snapshot to a sink every [intervalMs], until stopped.
+    //
+    // Without this the counters are only readable by a consumer that thought to
+    // poll them, which is the one thing a support ticket cannot do after the
+    // fact. Zero turns sampling off — a host shipping its own telemetry loop
+    // should not be paying for a second one.
+    public fun startSampling(scope: CoroutineScope, intervalMs: Long, sink: (PlaybackMetrics) -> Unit) {
+        stopSampling()
+        if (intervalMs <= 0L) return
+
+        sampler = scope.launch {
+            while (isActive) {
+                delay(intervalMs)
+                sink(metrics())
+            }
+        }
+    }
+
+    public fun stopSampling() {
+        sampler?.cancel()
+        sampler = null
+    }
+
+    private var sampler: Job? = null
 }

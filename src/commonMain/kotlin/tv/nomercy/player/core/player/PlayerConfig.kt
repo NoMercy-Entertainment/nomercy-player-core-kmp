@@ -46,6 +46,17 @@ public data class PlayerConfig(
     val baseUrl: String? = null,
     val baseImageUrl: String? = null,
     val language: String? = null,
+
+    // Which subtitle and audio track to select when the engine's lists arrive.
+    //
+    // BCP-47 tags, matched exactly first and by prefix second, so "en" finds
+    // "en-US" and "en-GB" finds "en". Null leaves the engine's own pick alone,
+    // which is what a host that has no opinion wants — and is why these are not
+    // defaulted to the UI language: a viewer watching a foreign-language film
+    // with a Dutch interface has not thereby asked for Dutch audio.
+    val defaultSubtitleLanguage: String? = null,
+    val defaultAudioLanguage: String? = null,
+
     val defaultVolume: Int = 100,
     val metricsIntervalMs: Long = 10_000,
     val progressIntervalMs: Long = 5_000,

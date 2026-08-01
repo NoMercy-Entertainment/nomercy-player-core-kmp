@@ -10,16 +10,21 @@ package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.TimeState
+import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.TimeRange
+import tv.nomercy.player.core.ports.defaultClock
 import tv.nomercy.player.core.events.ItemEndingSoon
 import tv.nomercy.player.core.events.PreventedAction
+import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.RateChange
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.PlayerConfig
 
 private const val MIN_RATE = 0.25
 private const val MAX_RATE = 2.0
 private const val PERCENT = 100.0
 private const val DEFAULT_ENDING_SOON_SECONDS = 10.0
+private const val DEFAULT_PROGRESS_INTERVAL_MS = 5_000L
 
 private val OFFERED_RATES: List<Double> = listOf(0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
 
@@ -38,6 +43,7 @@ public class TimeController(
     private val ctx: PlayerContext,
     private val queue: QueueController,
     private val transport: TransportController,
+    private val clock: Clock = defaultClock(),
 ) {
 
     init {
@@ -48,7 +54,46 @@ public class TimeController(
         // AutoAdvancePlugin's hand-off window, the preload strategy's head start,
         // a chrome's "up next" card. The reference calls the same check from its
         // timeupdate handler, which is this event.
-        ctx.on(CoreEvents.Time) { checkItemEndingSoon(it.time, it.duration) }
+        ctx.on(CoreEvents.Time) { update ->
+            checkItemEndingSoon(update.time, update.duration, endingSoonThreshold)
+            emitProgress(update.time)
+        }
+    }
+
+    private var endingSoonThreshold: Double = DEFAULT_ENDING_SOON_SECONDS
+    private var progressIntervalMs: Long = DEFAULT_PROGRESS_INTERVAL_MS
+    // Null until the first report. The reference gets the same first-tick-always
+    // behaviour from a zero stamp against a wall clock, which only holds because
+    // its epoch is 1970 — an injected clock counting from zero would swallow the
+    // first window, and a viewer who watched thirty seconds and left would have
+    // no position saved at all.
+    private var lastProgressEmit: Long? = null
+
+    // Setup hands over the two numbers a host tunes here.
+    //
+    // Read once rather than looked up per tick: this runs on every position
+    // update the engine sends, and both values are fixed for the session.
+    public fun configure(config: PlayerConfig) {
+        endingSoonThreshold = config.itemEndingSoonThreshold
+        progressIntervalMs = config.progressIntervalMs
+    }
+
+    // The same numbers `time` carries, at a rate something can persist at.
+    //
+    // `time` arrives on every engine tick, which is a watch-position write
+    // several times a second per viewer. Zero turns it off; the first tick after
+    // setup always emits, because the last-emitted stamp starts at zero.
+    private fun emitProgress(position: Double) {
+        if (progressIntervalMs <= 0L) return
+
+        val now: Long = clock.now()
+        val previous: Long? = lastProgressEmit
+        if (previous != null && now - previous < progressIntervalMs) return
+        lastProgressEmit = now
+
+        val total: Double = duration()
+        val percentage: Double = if (total > 0.0) position / total * PERCENT else 0.0
+        ctx.emit(CoreEvents.Progress, ProgressPayload(position, total, percentage))
     }
 
     public fun time(): Double = ctx.internalCurrentTime
