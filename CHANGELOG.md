@@ -11,6 +11,16 @@ a Kotlin data class rewrites `copy`, `componentN` and its constructor whenever a
 field is added — those are binary-breaking and source-safe, and they are not listed
 individually. What is listed is what a consumer can actually name.
 
+**This list is not the verification.** A dump diff cannot tell a rename from a
+changed signature from a deletion — a class that merely gained a member loses its
+old declaration line and reads as removed — and it cannot see whether any consumer
+touches the thing. The check that can fail for the right reason is: publish to
+mavenLocal, bump `nmPlayer` in `nomercy-app-kmp`, and compile the app and the
+acceptance consumers. Until that has run, treat every entry here as a lead, and
+assume the `ui-compose` surface in particular has more movement than is written
+down: it is the module `nomercy-video-player-compose` publishes, it changed more
+than any other during this campaign, and it is not covered below.
+
 ## [Unreleased]
 
 ### Breaking
