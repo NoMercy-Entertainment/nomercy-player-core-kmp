@@ -2982,6 +2982,10 @@ public final class tv/nomercy/player/core/media/DynamicRange$Companion {
 	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/media/DynamicRange;
 }
 
+public final class tv/nomercy/player/core/media/LanguageCodesKt {
+	public static final fun normalizeLanguage (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/media/MediaItem : tv/nomercy/player/core/media/PlaylistItem {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
