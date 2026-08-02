@@ -86,7 +86,25 @@ public class ExoPlayerVideoBackend(
     // Held rather than reached for through the player, because the tunneling
     // decision is re-applied per item and the engine's own accessor gives back
     // parameters rather than the selector that owns them.
-    private val trackSelector: DefaultTrackSelector = DefaultTrackSelector(context)
+    private val trackSelector: DefaultTrackSelector = DefaultTrackSelector(context).apply {
+        // A rung the decoder cannot play is not a rung.
+        //
+        // ExoPlayer's default is to select a format that EXCEEDS the renderer's
+        // capabilities when nothing else is preferred, on the reasoning that a
+        // best effort beats refusing to start. On a ladder with a supported
+        // alternative that is the wrong trade: Sintel's manifest carries a PQ
+        // variant beside an SDR one at the same resolution, the phone reported
+        // `format_supported=NO_EXCEEDS_CAPABILITIES` for the PQ rung, and
+        // playback died with ERROR_CODE_DECODING_FAILED rather than dropping to
+        // the SDR rung sitting next to it.
+        //
+        // Not an HDR rule. Any rung this device cannot decode — a profile, a
+        // level, a resolution — is now skipped rather than attempted, which is
+        // the class rather than the instance.
+        parameters = buildUponParameters()
+            .setExceedRendererCapabilitiesIfNecessary(false)
+            .build()
+    }
 
     // Read once. A device does not stop being a television while the app runs,
     // and this is consulted on every load.
