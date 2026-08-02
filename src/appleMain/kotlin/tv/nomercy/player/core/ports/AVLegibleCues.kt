@@ -16,6 +16,7 @@ import platform.AVFoundation.AVPlayerItemLegibleOutput
 import platform.AVFoundation.AVPlayerItemLegibleOutputPushDelegateProtocol
 import platform.AVFoundation.addOutput
 import platform.AVFoundation.outputs
+import platform.AVFoundation.removeOutput
 import platform.CoreMedia.CMTime
 import platform.Foundation.NSAttributedString
 import platform.darwin.NSObject
@@ -50,11 +51,41 @@ internal class AVLegibleCues(
         suppressesPlayerRendering = true
     }
 
-    // Per item, because an output belongs to the item it was added to.
-    // AVFoundation throws when the same output is added twice, so an item that
-    // already carries this one is left alone.
+    // The item this output is currently on, because it can only be on one.
+    //
+    // "already attached" is AVFoundation's wording and it means attached to ANY
+    // item, not to this one. Checking `item.outputs` alone reads as the careful
+    // thing to do and is not: the second item in a queue carries no outputs, the
+    // guard passes, and the add throws
+    // `-[AVPlayerItem addOutput:] Cannot attach an output that is already
+    // attached or nil output` — an NSException, which on Kotlin/Native takes the
+    // process down rather than surfacing as an error. The iOS testbed died on
+    // launch this way, before its first frame.
+    private var attachedTo: AVPlayerItem? = null
+
+    // Taken off the item it was on before it goes onto the next.
+    //
+    // One output rather than one per item, because it carries the delegate and
+    // the queue: a fresh output per item would need both re-bound, and a delegate
+    // bound twice announces every cue twice.
     fun attach(item: AVPlayerItem) {
+        if (attachedTo === item) return
+
+        attachedTo?.let { previous: AVPlayerItem ->
+            if (output in previous.outputs) previous.removeOutput(output)
+        }
+        attachedTo = item
+
         if (output !in item.outputs) item.addOutput(output)
+    }
+
+    // On the way out, so a released backend does not leave an output on an item
+    // the next one wants to use.
+    fun detach() {
+        attachedTo?.let { item: AVPlayerItem ->
+            if (output in item.outputs) item.removeOutput(output)
+        }
+        attachedTo = null
     }
 
     // AVFoundation reports an EMPTY array at the moment a cue ends, which is the

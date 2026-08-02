@@ -43,7 +43,7 @@ class VlcjLadderCapTest {
 
     @Test
     fun anSdrDesktopIsNeverHandedAnHdrRendition() = withBackend { backend ->
-        val narrowed: String = loadAndReadPlaylist {
+        val narrowed: String = playlistWrittenBy {
             runBlocking { backend.load(SINTEL_MASTER_URL, LoadOptions()) }
         }
 
@@ -57,12 +57,12 @@ class VlcjLadderCapTest {
     fun aSmallPaneIsNeverHandedAFourKRendition() = withBackend { backend ->
         backend.surfaceSize(PANE_WIDTH, PANE_HEIGHT)
 
-        val narrowed: String = loadAndReadPlaylist {
+        val narrowed: String = playlistWrittenBy {
             runBlocking { backend.load(SINTEL_MASTER_URL, LoadOptions()) }
         }
 
-        assertTrue(!narrowed.contains("3840x1635"), "a 4K rendition reached a 372px pane: $narrowed")
-        assertTrue(narrowed.contains("1920x818"), "nothing playable survived: $narrowed")
+        assertTrue(!narrowed.contains(FOUR_K_RUNG), "a 4K rendition reached a 372px pane: $narrowed")
+        assertTrue(narrowed.contains(FULL_HD_RUNG), NOTHING_SURVIVED)
     }
 
     @Test
@@ -70,12 +70,37 @@ class VlcjLadderCapTest {
         // The size arrives on the first layout pass, which can be after the first
         // load. The dynamic-range cap does not depend on it, and a cold start must
         // not be the one case that shows a washed-out picture.
-        val narrowed: String = loadAndReadPlaylist {
+        val narrowed: String = playlistWrittenBy {
             runBlocking { backend.load(SINTEL_MASTER_URL, LoadOptions()) }
         }
 
         assertTrue(!narrowed.contains("VIDEO-RANGE=PQ"), "no cap without a measured pane: $narrowed")
-        assertTrue(narrowed.contains("3840x1635"), "the size cap ran on a pane of zero: $narrowed")
+        assertTrue(narrowed.contains(FOUR_K_RUNG), "the size cap ran on a pane of zero: $narrowed")
+    }
+
+    @Test
+    fun aPaneMeasuredAfterTheLoadStillCapsTheLadder() = withBackend { backend ->
+        // The order every Compose desktop run actually takes. The surface reports
+        // its size once it has been laid out, which is after the item is open, so
+        // a ceiling computed only at load is computed from a pane of zero — and
+        // the 4K rung stayed in the ladder for the whole playback.
+        runBlocking { backend.load(SINTEL_MASTER_URL, LoadOptions()) }
+
+        val narrowed: String = playlistWrittenBy { backend.surfaceSize(PANE_WIDTH, PANE_HEIGHT) }
+
+        assertTrue(!narrowed.contains(FOUR_K_RUNG), "the measured pane did not re-narrow: $narrowed")
+        assertTrue(narrowed.contains(FULL_HD_RUNG), NOTHING_SURVIVED)
+    }
+
+    @Test
+    fun aResizeInsideTheSameRungReopensNothing() = withBackend { backend ->
+        backend.surfaceSize(PANE_WIDTH, PANE_HEIGHT)
+        runBlocking { backend.load(SINTEL_MASTER_URL, LoadOptions()) }
+
+        val before: Set<String> = spilledPlaylists()
+        backend.surfaceSize(PANE_WIDTH + 1, PANE_HEIGHT + 1)
+
+        assertEquals(before, spilledPlaylists(), "a resize that moved no ceiling reopened the item")
     }
 
     @Test
@@ -94,14 +119,14 @@ class VlcjLadderCapTest {
         }
     }
 
-    // The narrowed playlist this load wrote.
+    // The narrowed playlist [action] wrote.
     //
     // Found by difference against the temp directory rather than by asking the
     // backend, so the assertion is about what libVLC was actually handed and not
     // about a value the backend chose to report.
-    private fun loadAndReadPlaylist(load: () -> Unit): String {
+    private fun playlistWrittenBy(action: () -> Unit): String {
         val before: Set<String> = spilledPlaylists()
-        load()
+        action()
         val written: Set<String> = spilledPlaylists() - before
 
         assertEquals(1, written.size, "expected exactly one narrowed playlist, got $written")
@@ -129,6 +154,12 @@ class VlcjLadderCapTest {
         }
     }
 }
+
+// The two rungs the assertions turn on, as the manifest spells them.
+private const val FOUR_K_RUNG = "3840x1635"
+private const val FULL_HD_RUNG = "1920x818"
+
+private const val NOTHING_SURVIVED = "nothing playable survived"
 
 // The testbed's own pane at the default window size, which is where this was
 // measured.

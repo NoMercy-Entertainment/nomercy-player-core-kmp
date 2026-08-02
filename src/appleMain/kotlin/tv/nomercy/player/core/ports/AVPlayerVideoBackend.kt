@@ -275,6 +275,7 @@ public class AVPlayerVideoBackend : VideoBackend {
     public fun release() {
         timeObserver?.let { player.removeTimeObserver(it) }
         timeObserver = null
+        legible.detach()
         player.replaceCurrentItemWithPlayerItem(null)
     }
 

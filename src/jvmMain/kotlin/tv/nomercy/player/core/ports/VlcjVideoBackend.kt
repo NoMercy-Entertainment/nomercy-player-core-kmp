@@ -113,10 +113,70 @@ public class VlcjVideoBackend private constructor(
     private var surfaceWidthPx: Int = 0
     private var surfaceHeightPx: Int = 0
 
+    // The manifest of the item that is open, and the URL and options it was
+    // opened with. Kept so a pane measured after the load can narrow the same
+    // ladder again rather than having to refetch it.
+    private var openMaster: VlcMasterPlaylist? = null
+    private var openUrl: String? = null
+    private var openOptions: List<String> = emptyList()
+
+    // The height the open item was actually narrowed to, so a measurement that
+    // does not move the ceiling costs nothing at all.
+    private var appliedCeilingHeight: Int? = null
+
+    // The pane, and the ladder re-narrowed to it if it moved.
+    //
+    // Re-narrowed rather than merely recorded, and that is the whole fix. Compose
+    // reports a size only once it has laid the surface out, which is AFTER the
+    // load — so a ceiling read at load is read from 0x0, SizeAbrConstraint reads
+    // an unmeasured pane as "no cap", and a 1230px pane pulled a 3840x1666
+    // rendition at a third of the frame rate. The chain was wired; it ran too
+    // early to say anything.
+    //
+    // The web is the oracle and it has no such ordering problem: a ResizeObserver
+    // on the pane re-runs the constraint on every resize and writes
+    // hls.autoLevelCapping live. libVLC 3 takes a ladder constraint only while it
+    // builds the demuxer chain, so the counterpart here is a new playlist and a
+    // reopen at the current position. That is the cost of the engine, not a
+    // choice between deferring the load and reloading.
+    //
+    // No debouncing, because the ceiling is quantised to the ladder's rungs and
+    // that is its own rate limiter: dragging a window edge across a whole rung
+    // costs one reopen, and every pixel in between costs nothing.
     override fun surfaceSize(widthPx: Int, heightPx: Int) {
+        if (widthPx == surfaceWidthPx && heightPx == surfaceHeightPx) return
         surfaceWidthPx = widthPx
         surfaceHeightPx = heightPx
+
+        val master: VlcMasterPlaylist = openMaster ?: return
+        if (abrCeiling()?.height == appliedCeilingHeight) return
+        reopenNarrowed(master)
     }
+
+    // The open item again, through the ceiling that now holds.
+    //
+    // Position and play state are carried over: the item did not change, only the
+    // rungs adaptation may climb to. `start-time` rather than a seek after play,
+    // because libVLC takes a start position as a media option and a seek issued
+    // before the demuxer is ready is dropped silently.
+    //
+    // Nothing is announced. A listener counting loads must not see a second one
+    // for an item it is already playing, and the web's live cap emits nothing
+    // either.
+    private fun reopenNarrowed(master: VlcMasterPlaylist) {
+        val resumeAtMillis: Long = player.playback.time().coerceAtLeast(0)
+        val wasPlaying: Boolean = player.playback.playing()
+
+        appliedCeilingHeight = abrCeiling()?.height
+        val location: String = narrowedLocation(master) ?: openUrl ?: return
+
+        player.playback.stop()
+        player.prepare(location, openOptions + startTimeOption(resumeAtMillis))
+        if (wasPlaying) player.playback.play()
+    }
+
+    private fun startTimeOption(millis: Long): List<String> =
+        if (millis <= 0) emptyList() else listOf(":start-time=${millis / MILLIS_PER_SECOND}")
 
     // What the caller asked for, and authoritative once it has.
     //
@@ -276,12 +336,17 @@ public class VlcjVideoBackend private constructor(
 
         if (refusedBeforeOpening()) return
 
+        openMaster = master
+        openUrl = playableLocation(url)
+        openOptions = VlcAdaptiveOptions.optionsFor(playableLadder)
+        appliedCeilingHeight = abrCeiling()?.height
+
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.
         player.prepare(
-            narrowedLocation(master) ?: playableLocation(url),
-            VlcAdaptiveOptions.optionsFor(playableLadder),
+            narrowedLocation(master) ?: openUrl.orEmpty(),
+            openOptions,
         )
     }
 
