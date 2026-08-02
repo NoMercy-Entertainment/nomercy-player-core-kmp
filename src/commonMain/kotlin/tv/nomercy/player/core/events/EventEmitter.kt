@@ -189,7 +189,20 @@ public class EventEmitter<E> {
         try {
             deliver(name, data)
         } finally {
-            dispatchStack.removeAt(dispatchStack.lastIndex)
+            // Guarded, because this stack is not the only writer's.
+            //
+            // It threw `Index -1 out of bounds` the moment anything in the
+            // library launched work from inside a listener: the coroutine runs
+            // a dispatch of its own on another thread, the two pushes and pops
+            // interleave, and one of them pops a stack the other already
+            // emptied. That is a crash in the event bus reached through
+            // whatever emitted next — the trace names `subtitle()`, which had
+            // nothing to do with it.
+            //
+            // The stack only backs `dispatching()`, a re-entrancy read for
+            // diagnostics, so an interleaved pop costs a wrong name in a
+            // debug list. Taking the whole bus down for it is the worse trade.
+            if (dispatchStack.isNotEmpty()) dispatchStack.removeAt(dispatchStack.lastIndex)
         }
     }
 
