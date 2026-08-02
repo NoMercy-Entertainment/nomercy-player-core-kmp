@@ -44,6 +44,57 @@ class ActivityControllerTest {
     }
 
     @Test
+    fun aHeldChromeDoesNotFadeUntilEveryHolderLetsGo() = runTest {
+        // Two things open over the controls at once — a settings menu and a
+        // dialog the host put up. The flag this replaced could not express it:
+        // whichever closed first turned the countdown back on underneath the
+        // other, and the bar faded with a menu still open.
+        val player: ComposedPlayer = player()
+        val states: MutableList<Boolean> = record(player)
+        player.setup(PlayerConfig(inactivityMs = INACTIVITY_MS))
+        player.queue(listOf(TestItem("a")))
+        player.play()
+
+        player.activity.holdChrome()
+        player.activity.holdChrome()
+
+        advanceTimeBy(INACTIVITY_MS + 1)
+        runCurrent()
+        assertEquals(listOf(true), states, "held by two, so nothing fades")
+
+        player.activity.releaseChrome()
+        advanceTimeBy(INACTIVITY_MS + 1)
+        runCurrent()
+        assertEquals(listOf(true), states, "one holder left, still nothing fades")
+
+        player.activity.releaseChrome()
+        advanceTimeBy(INACTIVITY_MS + 1)
+        runCurrent()
+        assertEquals(listOf(true, false), states, "the last holder let go, so it fades")
+    }
+
+    @Test
+    fun releasingMoreOftenThanHoldingCannotWedgeTheChrome() = runTest {
+        // Floored at zero. A negative count would leave a hold nobody took and
+        // the controls up for the rest of the film.
+        val player: ComposedPlayer = player()
+        val states: MutableList<Boolean> = record(player)
+        player.setup(PlayerConfig(inactivityMs = INACTIVITY_MS))
+        player.queue(listOf(TestItem("a")))
+        player.play()
+
+        player.activity.releaseChrome()
+        player.activity.releaseChrome()
+        player.activity.holdChrome()
+        player.activity.releaseChrome()
+
+        advanceTimeBy(INACTIVITY_MS + 1)
+        runCurrent()
+
+        assertEquals(listOf(true, false), states)
+    }
+
+    @Test
     fun startingAPlayerShowsTheControls() = runTest {
         // The viewer just started a player. That is activity, and controls that
         // began hidden would make the first thing they see a bare video.

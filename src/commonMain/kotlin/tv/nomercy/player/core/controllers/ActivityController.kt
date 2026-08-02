@@ -36,6 +36,9 @@ public class ActivityController(
 
     private var active: Boolean = false
     private var countdown: Job? = null
+
+    // How many callers are currently keeping the controls up.
+    private var holds: Int = 0
     private var tracking: Boolean = inactivityMs > 0L
 
     // Whether the built-in countdown owns the activity event.
@@ -68,6 +71,28 @@ public class ActivityController(
     // playing, so it expired harmlessly while paused and nothing re-armed it.
     public fun onPlaybackResumed(): Unit = bumpActivity()
 
+    // Keep the controls up until whoever asked says otherwise.
+    //
+    // A COUNT rather than a flag, and that is the whole point. The nearest thing
+    // here was activityTracking(false), which one caller turning back on
+    // undoes for every other — a dialog and a menu both open, the dialog closes,
+    // and the countdown resumes while the menu is still up. That is a control bar
+    // vanishing under an open menu, which gets reported as flakiness rather than
+    // as the missing refcount it is.
+    public fun holdChrome() {
+        holds += 1
+        bumpActivity()
+    }
+
+    // Floored at zero rather than allowed to go negative, so a double release
+    // cannot wedge the chrome permanently hidden behind a hold nobody took.
+    public fun releaseChrome() {
+        holds = if (holds > 0) holds - 1 else 0
+        if (holds == 0) bumpActivity()
+    }
+
+    public fun chromeHolds(): Int = holds
+
     public fun dispose() {
         cancelCountdown()
     }
@@ -94,6 +119,7 @@ public class ActivityController(
     // an argument with someone trying to read a chapter title. The countdown is
     // deliberately not re-armed here; the next bump arms it.
     private fun maybeHide() {
+        if (holds > 0) return
         if (ctx.playState != PlayState.PLAYING) return
         setActive(false)
     }

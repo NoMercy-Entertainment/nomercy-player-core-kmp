@@ -683,6 +683,12 @@ public open class ComposedPlayer(
 
     public open fun activityTracking(enabled: Boolean): Unit = activity.activityTracking(enabled)
 
+    // holdChrome and releaseChrome are deliberately NOT forwarded here. The
+    // reference puts them on the desktop-ui PLUGIN rather than on the player, and
+    // the contract gate caught the first attempt at this: core inventing a method
+    // the web's core does not have is the same defect as core missing one. A
+    // chrome reaches the count through `activity`, which is public.
+
     // ── Instrumentation ──────────────────────────────────────────────────────
 
     public open fun metrics(): PlaybackMetrics = metrics.metrics()
