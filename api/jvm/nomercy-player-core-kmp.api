@@ -5669,6 +5669,8 @@ public final class tv/nomercy/player/core/ports/VlcTrackMapper {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/VlcTrackMapper;
 	public final fun bitrateOf (I)I
 	public final fun codecFamily (Ljava/lang/String;)Ljava/lang/String;
+	public final fun distinctAudio (Ljava/util/List;)Ljava/util/List;
+	public final fun distinctSubtitles (Ljava/util/List;)Ljava/util/List;
 	public final fun dynamicRange ()Ltv/nomercy/player/core/ports/DynamicRange;
 	public final fun labelOf (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public final fun languageOf (Ljava/lang/String;)Ljava/lang/String;
