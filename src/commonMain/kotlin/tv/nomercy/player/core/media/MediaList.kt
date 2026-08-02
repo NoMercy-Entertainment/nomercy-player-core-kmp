@@ -71,6 +71,10 @@ public class MediaList<T : PlaylistItem>(
         entries.clear()
         entries.addAll(items)
         moveCursor(playingId?.let { indexOf(it) }?.takeIf { it >= 0 } ?: defaultCursor())
+
+        // After the cursor lands, so a parked selection wins over the default —
+        // it is the more specific instruction and it was given first.
+        applyPendingSelection()
         emitChange()
     }
 
@@ -81,6 +85,7 @@ public class MediaList<T : PlaylistItem>(
         entries.addAll(items)
         bus.emit(key<MediaListAppend<T>>(EVENT_APPEND), MediaListAppend(items, from))
         if (wasEmpty) moveCursor(0)
+        if (wasEmpty) applyPendingSelection()
         emitChange()
     }
 
@@ -170,7 +175,22 @@ public class MediaList<T : PlaylistItem>(
         emitChange()
     }
 
+    // A selection made before there is anything to select, kept until there is.
+    //
+    // Both setCurrent overloads returned silently on an empty list, so "start on
+    // episode three" asked before the playlist seeded was DROPPED and playback
+    // began at the first item. The reference parks it — `_pendingSelection`, ap-
+    // plied by the setup pipeline right after the playlist seeds — and a host
+    // that resolves its queue asynchronously hits this every time.
+    private var pendingIndex: Int? = null
+    private var pendingId: String? = null
+
     public fun setCurrent(index: Int) {
+        if (entries.isEmpty()) {
+            pendingIndex = index
+            pendingId = null
+            return
+        }
         if (index !in entries.indices) return
         moveCursor(index)
     }
@@ -179,7 +199,31 @@ public class MediaList<T : PlaylistItem>(
 
     public fun setCurrent(id: String) {
         val index: Int = indexOf(id)
-        if (index >= 0) moveCursor(index)
+        if (index >= 0) {
+            moveCursor(index)
+            return
+        }
+
+        // Only while empty. An id that is simply not in a populated queue is a
+        // caller's mistake, and parking it would apply it to whatever arrives
+        // next — which is a worse answer than doing nothing.
+        if (entries.isEmpty()) {
+            pendingId = id
+            pendingIndex = null
+        }
+    }
+
+    // Applied once, on the first list that could satisfy it. Cleared either way,
+    // so a selection cannot be re-applied over a later queue the caller never
+    // asked it for.
+    private fun applyPendingSelection() {
+        val index: Int? = pendingId?.let { indexOf(it).takeIf { found -> found >= 0 } }
+            ?: pendingIndex?.takeIf { it in entries.indices }
+
+        pendingIndex = null
+        pendingId = null
+
+        if (index != null) moveCursor(index)
     }
 
     public fun setCurrent(predicate: (T) -> Boolean) {

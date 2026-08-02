@@ -26,6 +26,54 @@ private fun listOfItems(vararg ids: String): MediaList<TestItem> =
 class MediaListTest {
 
     @Test
+    fun aSelectionMadeBeforeTheListSeedsIsAppliedWhenItDoes() {
+        // "Start on episode three", asked before the playlist has resolved. Both
+        // setCurrent overloads used to return silently on an empty list, so the
+        // request was dropped and playback began at the first item.
+        val byId = MediaList<TestItem>()
+        byId.setCurrent("c")
+        byId.set(items("a", "b", "c"))
+        assertEquals("c", byId.current()?.id)
+
+        val byIndex = MediaList<TestItem>()
+        byIndex.setCurrent(1)
+        byIndex.set(items("a", "b", "c"))
+        assertEquals("b", byIndex.current()?.id)
+    }
+
+    @Test
+    fun aParkedSelectionIsAppliedOnceAndNotOverALaterQueue() {
+        val list = MediaList<TestItem>()
+        list.setCurrent("c")
+        list.set(items("a", "b", "c"))
+        assertEquals("c", list.current()?.id)
+
+        // A second queue the caller never selected into. Re-applying the old
+        // request here would move the cursor for a reason nobody gave.
+        list.set(items("x", "y", "c"))
+        assertEquals("c", list.current()?.id, "the same id is kept because set() preserves what is playing")
+
+        val fresh = MediaList<TestItem>()
+        fresh.setCurrent("c")
+        fresh.set(items("a", "b", "c"))
+        fresh.set(items("p", "q"))
+        assertEquals("p", fresh.current()?.id)
+    }
+
+    @Test
+    fun aSelectionForAnItemAPopulatedListDoesNotHaveIsIgnored() {
+        // Not parked: an unknown id in a queue that already exists is the
+        // caller's mistake, and parking it would apply it to whatever arrives
+        // next.
+        val list = listOfItems("a", "b")
+        list.setCurrent("zzz")
+        assertEquals("a", list.current()?.id)
+
+        list.set(items("zzz", "b"))
+        assertEquals("zzz", list.current()?.id, "only because set() keeps the id that was playing, not from a park")
+    }
+
+    @Test
     fun anEmptyListHasNoCursorAndNothingCurrent() {
         val list = MediaList<TestItem>()
 
