@@ -102,6 +102,7 @@ import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.ResolvedUrl
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.defaultStorage
 import tv.nomercy.player.core.ports.TimeRange
 import tv.nomercy.player.core.ports.StreamFactory
 import tv.nomercy.player.core.ports.StreamRegistry
@@ -144,6 +145,12 @@ private val LOCAL_TARGET = CastTarget(id = "local", name = "This device")
 
 private const val NO_CAST_SENDER = "no-cast-sender"
 
+// One namespace for the whole library, with each plugin's keys prefixed
+// underneath it by NamespacedStorage. Not the player id: two players in one
+// process are the phone and its cast session, and a viewer's subtitle
+// language is theirs rather than that session's.
+private const val NAMESPACE = "nmplayer"
+
 // Under this and a 1080p rung is not going to hold. The number is the web
 // player's, kept so a consumer moving between them sees the same badge at the
 // same moment rather than discovering that native calls it slow later.
@@ -185,7 +192,19 @@ private const val UNTRANSLATED = ""
 public open class ComposedPlayer(
     backend: MediaBackend? = null,
     private val logger: Logger = SilentLogger,
-    private val storage: Storage = InMemoryStorage(),
+    // The platform's own store, not a map that dies with the process.
+    //
+    // defaultStorage has had working actuals on Android, Apple and the JVM for
+    // as long as the port has existed, with tests, and was called by nothing
+    // outside them: the default here was InMemoryStorage, so every plugin's
+    // storage — equaliser presets, the viewer's subtitle language, anything a
+    // plugin wrote — was thrown away at exit.
+    //
+    // That is invisible from inside a process. A save-then-restore test passes
+    // against a map, the row appears in the plugin tree, and the only thing
+    // that can see the defect is relaunching the app and finding the choice
+    // gone. Which is the one thing a preferences plugin exists to do.
+    private val storage: Storage = defaultStorage(NAMESPACE),
     private val translator: Translator? = null,
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
