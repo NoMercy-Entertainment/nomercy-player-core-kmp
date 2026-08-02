@@ -42,6 +42,7 @@ import tv.nomercy.player.core.events.PlaybackMetrics
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.chapters.ChapterController
 import tv.nomercy.player.core.events.ChaptersPayload
+import tv.nomercy.player.core.events.ChapterPayload
 import tv.nomercy.player.core.media.Chapter
 import tv.nomercy.player.core.media.ChapterTrack
 import tv.nomercy.player.core.media.PlaylistItem
@@ -353,6 +354,37 @@ public open class ComposedPlayer(
         context.on(CoreEvents.Duration) { seconds ->
             if (chapterController.durationChanged(seconds)) publishChapters()
         }
+
+        // Which chapter is playing, announced when it changes.
+        //
+        // CoreEvents.Chapter was declared and NOTHING EMITTED IT, so a chrome
+        // showing the current chapter title had one read — chapter() — and no
+        // way to learn it had moved. The reference announces this, and the
+        // difference is visible the moment a viewer skips a chapter: the web
+        // fires chapter between beforeSeek and seek, and this fired nothing.
+        //
+        // On a change only. Time updates arrive continuously and re-announcing
+        // the same chapter on every tick would redraw a title that did not move.
+        context.on(CoreEvents.Time) { announceChapterIfMoved() }
+    }
+
+    // The last chapter announced, so a tick inside the same one says nothing.
+    private var announcedChapterStart: Double? = null
+
+    private fun announceChapterIfMoved() {
+        val current: Chapter? = chapterTrack.at(time())
+        if (current?.startTime == announcedChapterStart) return
+
+        announcedChapterStart = current?.startTime
+        if (current == null) return
+
+        context.emit(
+            CoreEvents.Chapter,
+            ChapterPayload(
+                index = chapterTrack.chapters.indexOf(current).toDouble(),
+                title = current.title,
+            ),
+        )
     }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
