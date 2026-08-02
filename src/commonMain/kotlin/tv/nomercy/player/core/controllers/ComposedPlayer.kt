@@ -24,6 +24,8 @@ import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.AudioTrackPayload
+import tv.nomercy.player.core.events.SubtitlePayload
 import tv.nomercy.player.core.events.AudioTrackStatePayload
 import tv.nomercy.player.core.events.BeforeTransferPayload
 import tv.nomercy.player.core.events.CastTarget
@@ -1037,9 +1039,16 @@ public open class ComposedPlayer(
 
     public open fun audioTrack(): AudioTrack? = video?.audioTrack()
 
+    // Two events, because they answer different questions and always have on
+    // the web: `audioTrack` says WHICH, `audioTrackState` says whether anybody
+    // chose it. Only the second was being emitted, so a consumer porting a
+    // listener for the first — and the shipped preferences plugin, which is
+    // what surfaced this — heard nothing at all while the track changed
+    // underneath them.
     public open fun audioTrack(track: AudioTrack) {
         video?.audioTrack(track)
         audioTrackChoice = AudioTrackState.MANUAL
+        context.emit(CoreEvents.AudioTrack, AudioTrackPayload(indexIn(audioTracks(), track)))
         context.emit(CoreEvents.AudioTrackState, AudioTrackStatePayload(AudioTrackState.MANUAL.token))
     }
 
@@ -1069,7 +1078,19 @@ public open class ComposedPlayer(
     // an error — and it is the one every engine spells differently underneath.
     public open fun subtitle(track: SubtitleTrack?) {
         video?.subtitleTrack(track)
+        context.emit(CoreEvents.Subtitle, SubtitlePayload(track?.let { indexIn(subtitles(), it) }))
     }
+
+    // Where the track sits in the list the viewer was shown, or null when the
+    // engine no longer reports it.
+    //
+    // The payload carries a position because the web's does and a listener
+    // ported across should not have to be rewritten. It is not what anything
+    // here SELECTS by — selection is by descriptor throughout, for the reason
+    // QualityLevel spells out — so this number is a label on an event, never an
+    // identity anyone acts on.
+    private fun <T> indexIn(list: List<T>, item: T): Double? =
+        list.indexOf(item).takeIf { it >= 0 }?.toDouble()
 
     public open fun bandwidth(): Int = bandwidth.bandwidth()
 
