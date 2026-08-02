@@ -35,6 +35,7 @@ import tv.nomercy.player.core.events.AuthFailedPayload
 import tv.nomercy.player.core.events.AuthRefreshedPayload
 import tv.nomercy.player.core.events.CastStatePayload
 import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.events.QualityStatePayload
 import tv.nomercy.player.core.events.TransitionCancelledPayload
 import tv.nomercy.player.core.events.PlaylistReadyPayload
 import tv.nomercy.player.core.events.PlaylistResolvingPayload
@@ -1096,12 +1097,27 @@ public open class ComposedPlayer(
     // which is recorded in the divergence gate rather than smoothed over here.
     public open fun quality(level: QualityLevel?) {
         video?.quality(level)
+
+        // Announced, which it was not. audioTrack() directly below records the
+        // choice and emits two events; this recorded nothing and emitted
+        // nothing, and that asymmetry is the whole bug: a quality menu has no
+        // way to learn a rung was picked, so it draws no selection however many
+        // times a viewer chooses one.
+        qualityChoice = if (level == null) QualityMode.AUTO else QualityMode.MANUAL
+        context.emit(CoreEvents.QualityState, QualityStatePayload(qualityChoice.wire))
     }
+
+    // What the VIEWER asked for, not what the engine happens to report.
+    //
+    // This read back through video?.quality(), and on an adaptive stream that is
+    // always null — libVLC's demuxer picks its own representation and publishes
+    // one track — so a manual pick read back as AUTO on the next recomposition
+    // and the menu forgot it immediately.
+    private var qualityChoice: QualityMode = QualityMode.AUTO
 
     // Whether a rung was chosen or the engine is adapting. A menu showing a
     // committed selection the viewer never made is worse than showing none.
-    public open fun qualityMode(): QualityMode =
-        if (video?.quality() == null) QualityMode.AUTO else QualityMode.MANUAL
+    public open fun qualityMode(): QualityMode = qualityChoice
 
     // Tracks, by the thing itself rather than by its place in a list. An
     // audio-only engine reports none rather than throwing, the same as the
