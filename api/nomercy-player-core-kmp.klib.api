@@ -1586,8 +1586,11 @@ final class tv.nomercy.player.core.controllers/ActivityController { // tv.nomerc
     final fun activityTracking(): kotlin/Boolean // tv.nomercy.player.core.controllers/ActivityController.activityTracking|activityTracking(){}[0]
     final fun activityTracking(kotlin/Boolean) // tv.nomercy.player.core.controllers/ActivityController.activityTracking|activityTracking(kotlin.Boolean){}[0]
     final fun bumpActivity() // tv.nomercy.player.core.controllers/ActivityController.bumpActivity|bumpActivity(){}[0]
+    final fun chromeHolds(): kotlin/Int // tv.nomercy.player.core.controllers/ActivityController.chromeHolds|chromeHolds(){}[0]
     final fun dispose() // tv.nomercy.player.core.controllers/ActivityController.dispose|dispose(){}[0]
+    final fun holdChrome() // tv.nomercy.player.core.controllers/ActivityController.holdChrome|holdChrome(){}[0]
     final fun onPlaybackResumed() // tv.nomercy.player.core.controllers/ActivityController.onPlaybackResumed|onPlaybackResumed(){}[0]
+    final fun releaseChrome() // tv.nomercy.player.core.controllers/ActivityController.releaseChrome|releaseChrome(){}[0]
 }
 
 final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.player.core.controllers/BackendBridge|null[0]

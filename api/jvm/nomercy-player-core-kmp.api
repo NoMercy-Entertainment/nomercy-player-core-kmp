@@ -56,8 +56,11 @@ public final class tv/nomercy/player/core/controllers/ActivityController {
 	public final fun activityTracking ()Z
 	public final fun activityTracking (Z)V
 	public final fun bumpActivity ()V
+	public final fun chromeHolds ()I
 	public final fun dispose ()V
+	public final fun holdChrome ()V
 	public final fun onPlaybackResumed ()V
+	public final fun releaseChrome ()V
 }
 
 public class tv/nomercy/player/core/controllers/AuthController {
