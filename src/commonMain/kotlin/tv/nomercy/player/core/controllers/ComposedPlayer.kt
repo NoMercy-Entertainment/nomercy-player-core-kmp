@@ -149,7 +149,7 @@ private const val NO_CAST_SENDER = "no-cast-sender"
 // underneath it by NamespacedStorage. Not the player id: two players in one
 // process are the phone and its cast session, and a viewer's subtitle
 // language is theirs rather than that session's.
-private const val NAMESPACE = "nmplayer"
+private const val NAMESPACE = "player"
 
 // Under this and a 1080p rung is not going to hold. The number is the web
 // player's, kept so a consumer moving between them sees the same badge at the
