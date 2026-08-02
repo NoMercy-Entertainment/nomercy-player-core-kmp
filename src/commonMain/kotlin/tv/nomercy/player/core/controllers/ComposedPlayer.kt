@@ -20,6 +20,7 @@ import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.NotImplementedError
 import tv.nomercy.player.core.errors.PlayerError
+import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
@@ -1066,14 +1067,7 @@ public open class ComposedPlayer(
     // consumer's single failure surface is listening for, and it should not have
     // to subscribe to every specific failure to know something went wrong.
     private fun reportPlaylistFailure(error: PlayerError) {
-        val payload = PlayerErrorEvent(
-            code = error.code,
-            message = error.message.orEmpty(),
-            severity = error.severity,
-            scope = error.scope,
-            suggestion = error.suggestion,
-            context = error.context,
-        )
+        val payload: PlayerErrorEvent = error.asEvent()
         context.emit(CoreEvents.PlaylistResolveError, payload)
         context.emit(CoreEvents.Error, payload)
         report(error)
@@ -1381,10 +1375,40 @@ public open class ComposedPlayer(
         translator?.translation(lang, key, value)
     }
 
+    // Every error in the library passes through here, which is why the fatal
+    // channel hangs off it.
+    //
+    // CoreEvents.Fatal was declared, listed in the registry, and emitted by
+    // NOTHING anywhere in the trio — so a consumer subscribing to `fatal` heard
+    // nothing ever, and PlayState.ERROR was unreachable because the only thing
+    // that would write it was a fatal that never arrived. The severity was on
+    // the payload the whole time and nobody read it.
     override fun report(error: PlayerError) {
         logger.error("${error.code}: ${error.message}")
+
+        if (error.severity != Severity.FATAL) return
+
+        // The state settles BEFORE the listener chain, exactly as the reference
+        // does it: a fatal listener already observes ERROR rather than the
+        // PLAYING it was a moment ago, and the flip cannot be skipped by a
+        // listener that stops propagation.
+        context.playState = PlayState.ERROR
+
+        context.emit(CoreEvents.Fatal, error.asEvent())
     }
 }
+
+// One error, one payload. Written out twice — once for a playlist failure and
+// once for the fatal channel — is two places for a field to be forgotten in, and
+// the second copy is how a `suggestion` reaches one listener and not the other.
+private fun PlayerError.asEvent(): PlayerErrorEvent = PlayerErrorEvent(
+    code = code,
+    message = message.orEmpty(),
+    severity = severity,
+    scope = scope,
+    suggestion = suggestion,
+    context = context,
+)
 
 // Says nothing. The default because a library that prints to a host's console
 // uninvited is a library people wrap to shut it up.
