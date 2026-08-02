@@ -58,4 +58,38 @@ public object VlcTrackMapper {
     // libVLC reports bitrate as 0 for a track it has not measured, which is most
     // local files. Zero is honest; a made-up number would sort a ladder wrongly.
     public fun bitrateOf(bitRate: Int): Int = bitRate.coerceAtLeast(0)
+
+    /**
+     * One rendition offered once, however many ways the demuxer reached it.
+     *
+     * An HLS master playlist declares its audio once and every variant points at
+     * the same GROUP-ID. libVLC enumerates what it can reach rather than what was
+     * declared, so a manifest with a single `EXT-X-MEDIA:TYPE=AUDIO` came back as
+     * two tracks with the same language, label, codec and channel count and
+     * different ids — the desktop player drew an audio menu with the same row
+     * twice, beside a browser that offered no audio button at all because
+     * hls.js counts renditions.
+     *
+     * Identity is the descriptor, not the id, which is the rule everywhere else
+     * in this codebase. Two rows a viewer cannot tell apart are not a choice.
+     *
+     * The FIRST of a duplicate pair survives: that is the id libVLC reports as
+     * the selected one, and keeping the later one leaves a menu with nothing
+     * marked active.
+     *
+     * The channel count is deliberately NOT part of the key. libVLC fills it in
+     * when it opens the elementary stream, so the same rendition reads `1ch`
+     * before and `2ch` after — a key including it collapsed the pair in one run
+     * and kept both in the next, which is a duplicate that comes and goes with
+     * timing. Alternatives that really differ by mix are named differently in
+     * the manifest ("English", "English 5.1"), so the label already separates
+     * them, and two rows a viewer reads as the same word are not a choice
+     * whatever their channel counts say.
+     */
+    public fun distinctAudio(tracks: List<AudioTrack>): List<AudioTrack> =
+        tracks.distinctBy { track -> listOf(track.language, track.label, track.codec) }
+
+    /** The same rule, for the same reason — a container reachable twice is one track. */
+    public fun distinctSubtitles(tracks: List<SubtitleTrack>): List<SubtitleTrack> =
+        tracks.distinctBy { track -> listOf(track.language, track.label, track.format, track.forced) }
 }

@@ -542,7 +542,7 @@ public class VlcjVideoBackend private constructor(
         tracks.getOrNull(index)?.let { player.tracks.video(it.id) }
     }
 
-    override fun audioTracks(): List<AudioTrack> =
+    override fun audioTracks(): List<AudioTrack> = VlcTrackMapper.distinctAudio(
         tracksOf(VlcTrackType.AUDIO).map { track ->
             AudioTrack(
                 id = track.id.toString(),
@@ -551,7 +551,8 @@ public class VlcjVideoBackend private constructor(
                 channels = track.channels.coerceAtLeast(1),
                 codec = VlcTrackMapper.codecFamily(track.codecName),
             )
-        }
+        },
+    )
 
     override fun audioTrack(): AudioTrack? =
         audioTracks().firstOrNull { it.id == player.audio.track().toString() }
@@ -560,7 +561,7 @@ public class VlcjVideoBackend private constructor(
         track.id.toIntOrNull()?.let { player.audio.track(it) }
     }
 
-    override fun subtitleTracks(): List<SubtitleTrack> =
+    override fun subtitleTracks(): List<SubtitleTrack> = VlcTrackMapper.distinctSubtitles(
         tracksOf(VlcTrackType.TEXT).map { track ->
             SubtitleTrack(
                 id = track.id.toString(),
@@ -568,7 +569,8 @@ public class VlcjVideoBackend private constructor(
                 label = VlcTrackMapper.labelOf(track.description, track.language),
                 format = VlcTrackMapper.codecFamily(track.codecName),
             )
-        }
+        },
+    )
 
     override fun subtitleTrack(): SubtitleTrack? =
         subtitleTracks().firstOrNull { it.id == player.tracks.subtitle().toString() }
