@@ -220,7 +220,11 @@ public open class ComposedPlayer(
     // against a map, the row appears in the plugin tree, and the only thing
     // that can see the defect is relaunching the app and finding the choice
     // gone. Which is the one thing a preferences plugin exists to do.
-    private val storage: Storage = persistentStorageOrMemory(),
+    // Null means the platform's own store. Nullable rather than defaulted so a
+    // subclass can forward the choice without having to reach the private
+    // helper that resolves it — NMVideoPlayer could not, so it hid the parameter
+    // and every consumer shared one file.
+    storage: Storage? = null,
     private val translator: Translator? = null,
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
@@ -1269,7 +1273,11 @@ public open class ComposedPlayer(
 
     override val rootLogger: Logger get() = logger
 
-    override val rootStorage: Storage get() = storage
+    // Resolved once. A `get()` calling the resolver would build a new store on
+    // every read, and two plugins would then be looking at two of them.
+    private val resolvedStorage: Storage = storage ?: persistentStorageOrMemory()
+
+    override val rootStorage: Storage get() = resolvedStorage
 
     override fun <T> on(key: EventKey<T>, fn: (T) -> Unit): Subscription = context.on(key, fn)
 
