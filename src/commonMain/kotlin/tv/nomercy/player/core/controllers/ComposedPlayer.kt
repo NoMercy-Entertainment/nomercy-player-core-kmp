@@ -151,6 +151,22 @@ private const val NO_CAST_SENDER = "no-cast-sender"
 // language is theirs rather than that session's.
 private const val NAMESPACE = "player"
 
+// The platform's store when it has one, a map when it does not.
+//
+// A player must not fail to CONSTRUCT because a preferences backend is
+// unavailable. java.util.prefs needs a writable backing store and has none in a
+// headless container — which turned every test that builds a player red the
+// moment the default stopped being in-memory, on a change whose entire point
+// was that nothing inside one process could see it.
+//
+// Losing preferences is a degraded player. Failing to build one is no player.
+@Suppress("TooGenericExceptionCaught", "SwallowedException")
+private fun persistentStorageOrMemory(): Storage = try {
+    defaultStorage(NAMESPACE)
+} catch (unavailable: Throwable) {
+    InMemoryStorage()
+}
+
 // Under this and a 1080p rung is not going to hold. The number is the web
 // player's, kept so a consumer moving between them sees the same badge at the
 // same moment rather than discovering that native calls it slow later.
@@ -204,7 +220,7 @@ public open class ComposedPlayer(
     // against a map, the row appears in the plugin tree, and the only thing
     // that can see the defect is relaunching the app and finding the choice
     // gone. Which is the one thing a preferences plugin exists to do.
-    private val storage: Storage = defaultStorage(NAMESPACE),
+    private val storage: Storage = persistentStorageOrMemory(),
     private val translator: Translator? = null,
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
