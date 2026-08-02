@@ -970,6 +970,7 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     abstract fun volume(kotlin/Float) // tv.nomercy.player.core.ports/MediaBackend.volume|volume(kotlin.Float){}[0]
     abstract suspend fun load(kotlin/String, tv.nomercy.player.core.ports/LoadOptions = ...) // tv.nomercy.player.core.ports/MediaBackend.load|load(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
     abstract suspend fun play() // tv.nomercy.player.core.ports/MediaBackend.play|play(){}[0]
+    open fun bandwidthEstimate(): kotlin/Int // tv.nomercy.player.core.ports/MediaBackend.bandwidthEstimate|bandwidthEstimate(){}[0]
     open fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.buffered|buffered(){}[0]
     open fun bufferedRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.bufferedRanges|bufferedRanges(){}[0]
     open fun seekableRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.seekableRanges|seekableRanges(){}[0]
@@ -1597,7 +1598,7 @@ final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.pla
 }
 
 final class tv.nomercy.player.core.controllers/BandwidthController { // tv.nomercy.player.core.controllers/BandwidthController|null[0]
-    constructor <init>() // tv.nomercy.player.core.controllers/BandwidthController.<init>|<init>(){}[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext? = ...) // tv.nomercy.player.core.controllers/BandwidthController.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext?){}[0]
 
     final fun bandwidth(): kotlin/Int // tv.nomercy.player.core.controllers/BandwidthController.bandwidth|bandwidth(){}[0]
     final fun bandwidthEstimator(): kotlin/Function0<kotlin/Int>? // tv.nomercy.player.core.controllers/BandwidthController.bandwidthEstimator|bandwidthEstimator(){}[0]

@@ -47,6 +47,35 @@ class BandwidthControllerTest {
     }
 
     @Test
+    fun withNoEstimatorTheEngineIsAsked() {
+        // The fall-through the reference has and this did not. Without it every
+        // consumer who had not injected an estimator read 0 forever while the
+        // engine beneath knew the answer.
+        val context = PlayerContext(backend = MeasuringBackend(3_000_000))
+
+        assertEquals(3_000_000, BandwidthController(context).bandwidth())
+    }
+
+    @Test
+    fun aSuppliedEstimatorStillBeatsTheEngine() {
+        // A host that measures for itself — a system bandwidth API, a CDN hint —
+        // is answering a question the engine can only answer about its own
+        // segments.
+        val context = PlayerContext(backend = MeasuringBackend(3_000_000))
+        val subject = BandwidthController(context)
+        subject.bandwidthEstimator { 9_000_000 }
+
+        assertEquals(9_000_000, subject.bandwidth())
+    }
+
+    @Test
+    fun anEngineReportingNothingIsStillZero() {
+        val context = PlayerContext(backend = MeasuringBackend(-1))
+
+        assertEquals(0, BandwidthController(context).bandwidth())
+    }
+
+    @Test
     fun theEstimatorCanBeTakenBackAgain() {
         val subject = BandwidthController()
         subject.bandwidthEstimator { 5_000_000 }

@@ -292,7 +292,7 @@ public open class ComposedPlayer(
     // the controllers drive the engine and nothing listens to it come back.
     public val bridge: BackendBridge = BackendBridge(context)
 
-    public val bandwidth: BandwidthController = BandwidthController()
+    public val bandwidth: BandwidthController = BandwidthController(context)
 
     public val metrics: MetricsController = MetricsController(clock)
 

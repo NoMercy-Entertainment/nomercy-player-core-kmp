@@ -17,7 +17,11 @@ package tv.nomercy.player.core.controllers
 //
 // Zero means nobody has answered yet, and it is the honest default. Guessing a
 // number would make adaptation decisions on a measurement that never happened.
-public class BandwidthController {
+public class BandwidthController(
+    // Where the engine's own measurement is read from, when a host has not
+    // supplied one. Null for a controller with no player around it.
+    private val ctx: PlayerContext? = null,
+) {
 
     private var estimator: (() -> Int)? = null
 
@@ -27,7 +31,17 @@ public class BandwidthController {
     // whole point of an injectable one is that it reflects a connection that
     // moves. A cached estimate is a measurement from whenever the caller last
     // thought to ask.
-    public fun bandwidth(): Int = estimator?.invoke()?.coerceAtLeast(0) ?: 0
+    //
+    // A host's estimator always wins; without one the ENGINE is asked, which is
+    // the fall-through the reference has and this did not. Missing it, every
+    // consumer who had not injected an estimator read 0 forever while the engine
+    // beneath knew the answer.
+    public fun bandwidth(): Int {
+        val supplied: Int? = estimator?.invoke()
+        if (supplied != null) return supplied.coerceAtLeast(0)
+
+        return (ctx?.backend?.bandwidthEstimate() ?: 0).coerceAtLeast(0)
+    }
 
     public fun bandwidthEstimator(): (() -> Int)? = estimator
 

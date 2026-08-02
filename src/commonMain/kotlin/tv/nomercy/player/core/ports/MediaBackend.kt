@@ -75,6 +75,21 @@ public interface MediaBackend {
     public fun playbackRate(): Double
     public fun playbackRate(rate: Double)
 
+    /**
+     * What this engine currently measures the connection at, in bits per second.
+     *
+     * An engine streaming segments knows what they cost, and the reference reads
+     * it: `bandwidth()` prefers a consumer-set estimator and falls through to
+     * here. This port declared no such thing, so the fall-through had nowhere to
+     * land and `bandwidth()` returned 0 for every caller who had not injected an
+     * estimator of their own — which is the same wrong answer the web comment
+     * says the two-field split used to give.
+     *
+     * Zero is the honest default for an engine that does not measure. Guessing
+     * would put an adaptation decision on a measurement that never happened.
+     */
+    public fun bandwidthEstimate(): Int = 0
+
     public fun state(): BackendState
 
     public fun on(event: String, fn: (Any?) -> Unit)

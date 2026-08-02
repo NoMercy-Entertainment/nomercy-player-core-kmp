@@ -28,6 +28,12 @@ class ThrowsOnStopBackend : MediaBackend by FakeMediaBackend() {
     }
 }
 
+// An engine that reports what its own segments are costing, which is the half of
+// bandwidth() the port had no way to express.
+class MeasuringBackend(private val bps: Int) : MediaBackend by FakeMediaBackend() {
+    override fun bandwidthEstimate(): Int = bps
+}
+
 fun newContext(): PlayerContext = PlayerContext(backend = FakeMediaBackend())
 
 fun PlayerContext.fakeBackend(): FakeMediaBackend = backend as FakeMediaBackend

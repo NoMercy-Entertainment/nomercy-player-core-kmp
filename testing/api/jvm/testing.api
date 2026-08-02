@@ -37,6 +37,7 @@ public final class tv/nomercy/player/testing/FakeLogger : tv/nomercy/player/core
 
 public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core/ports/MediaBackend {
 	public fun <init> ()V
+	public fun bandwidthEstimate ()I
 	public fun buffered ()D
 	public fun bufferedRanges ()Ljava/util/List;
 	public fun currentTime ()D
@@ -166,6 +167,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
 	public fun audioTracks ()Ljava/util/List;
+	public fun bandwidthEstimate ()I
 	public fun buffered ()D
 	public fun bufferedRanges ()Ljava/util/List;
 	public fun currentTime ()D
