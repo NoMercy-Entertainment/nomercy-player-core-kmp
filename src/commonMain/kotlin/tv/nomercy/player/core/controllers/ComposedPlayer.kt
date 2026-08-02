@@ -1273,9 +1273,19 @@ public open class ComposedPlayer(
 
     override val rootLogger: Logger get() = logger
 
-    // Resolved once. A `get()` calling the resolver would build a new store on
-    // every read, and two plugins would then be looking at two of them.
-    private val resolvedStorage: Storage = storage ?: persistentStorageOrMemory()
+    // Resolved once, and NOT during construction.
+    //
+    // A `get()` calling the resolver would build a new store on every read and
+    // two plugins would be looking at two of them. An eagerly initialised
+    // property declared this far down the class is worse: anything that touches
+    // `rootStorage` while the constructor is still running reads an
+    // uninitialised field, which the JVM tolerates as null and Kotlin/Native
+    // aborts on — the iOS testbed died at launch with SIGABRT through Kotlin's
+    // terminate handler and no Swift frame in the trace.
+    //
+    // `by lazy` puts the resolution at first USE, which is after construction
+    // however the properties are ordered.
+    private val resolvedStorage: Storage by lazy { storage ?: persistentStorageOrMemory() }
 
     override val rootStorage: Storage get() = resolvedStorage
 
