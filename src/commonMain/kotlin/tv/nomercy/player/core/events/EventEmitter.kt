@@ -107,14 +107,7 @@ public class EventEmitter<E> {
         event: BeforeEvent<T>,
         timeoutMs: Long,
     ): BeforeDispatchResult<T> {
-        for (listener in listenersOf(name)) {
-            if (event.isPropagationStopped()) break
-            try {
-                listener(event)
-            } catch (err: Throwable) {
-                onListenerError?.invoke(name, err)
-            }
-        }
+        runListeners(name, event)
 
         val gateFailure: String? = awaitDelayGates(event.consumeDelays(), timeoutMs)
         if (gateFailure != null) {
@@ -124,6 +117,63 @@ public class EventEmitter<E> {
             return BeforeDispatchResult(prevented = true, data = event.data, reason = PreventReason.ListenerPrevented)
         }
         return BeforeDispatchResult(prevented = false, data = event.data, reason = null)
+    }
+
+    // The same cancellable dispatch, without the gates.
+    //
+    // beforeMutation is the one before-event the reference dispatches
+    // synchronously, and what it guards is the reason: a mutation call site is
+    // a plain setter, not a suspending action, and making every one of them
+    // suspend in order to ask permission would push that colour onto the whole
+    // call chain above it. A listener here can refuse; it cannot hold the door
+    // open.
+    //
+    // A gate registered on one of these is reported rather than dropped. It
+    // cannot be honoured — there is nothing to suspend — and a delay that
+    // silently did nothing would read as a slow guard that worked.
+    @Suppress("TooGenericExceptionCaught")
+    public fun <T> dispatchBeforeSync(key: EventKey<BeforeEvent<T>>, data: T): BeforeDispatchResult<T> {
+        val event: BeforeEvent<T> = BeforeEvent(data)
+        dispatchStack += key.name
+        try {
+            runListeners(key.name, event)
+
+            if (event.consumeDelays().isNotEmpty()) {
+                onListenerError?.invoke(
+                    key.name,
+                    IllegalStateException("${key.name} is dispatched synchronously and cannot await a delay gate"),
+                )
+            }
+
+            val prevented: Boolean = event.isDefaultPrevented()
+            return BeforeDispatchResult(
+                prevented = prevented,
+                data = event.data,
+                reason = if (prevented) PreventReason.ListenerPrevented else null,
+            )
+        } finally {
+            dispatchStack.removeAt(dispatchStack.lastIndex)
+        }
+    }
+
+    // The listener loop both before-dispatches share.
+    //
+    // One copy because the two differ only in what they do afterwards, and the
+    // loop is where the two rules that are easy to get subtly wrong live:
+    // listeners run in registration order against one shared event, and the
+    // first stopImmediatePropagation ends it. A listener that throws is
+    // reported and the rest still run, because one plugin's bad handler must
+    // not silently veto by crashing.
+    @Suppress("TooGenericExceptionCaught")
+    private fun <T> runListeners(name: String, event: BeforeEvent<T>) {
+        for (listener in listenersOf(name)) {
+            if (event.isPropagationStopped()) break
+            try {
+                listener(event)
+            } catch (err: Throwable) {
+                onListenerError?.invoke(name, err)
+            }
+        }
     }
 
     public fun hasListeners(name: String): Boolean = listeners[name]?.isNotEmpty() == true

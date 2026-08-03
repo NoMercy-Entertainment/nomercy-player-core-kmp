@@ -1196,6 +1196,39 @@ sealed interface tv.nomercy.player.core.drm/DrmBindingResult { // tv.nomercy.pla
     }
 }
 
+sealed interface tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards|null[0]
+    final class Including : tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards.Including|null[0]
+        constructor <init>(kotlin.collections/Set<kotlin/String>) // tv.nomercy.player.core.player/MutationGuards.Including.<init>|<init>(kotlin.collections.Set<kotlin.String>){}[0]
+
+        final val hot // tv.nomercy.player.core.player/MutationGuards.Including.hot|{}hot[0]
+            final fun <get-hot>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.player/MutationGuards.Including.hot.<get-hot>|<get-hot>(){}[0]
+
+        final fun component1(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.player/MutationGuards.Including.component1|component1(){}[0]
+        final fun copy(kotlin.collections/Set<kotlin/String> = ...): tv.nomercy.player.core.player/MutationGuards.Including // tv.nomercy.player.core.player/MutationGuards.Including.copy|copy(kotlin.collections.Set<kotlin.String>){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.player/MutationGuards.Including.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.player/MutationGuards.Including.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.player/MutationGuards.Including.toString|toString(){}[0]
+    }
+
+    final object All : tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards.All|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.player/MutationGuards.All.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.player/MutationGuards.All.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.player/MutationGuards.All.toString|toString(){}[0]
+    }
+
+    final object Default : tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards.Default|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.player/MutationGuards.Default.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.player/MutationGuards.Default.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.player/MutationGuards.Default.toString|toString(){}[0]
+    }
+
+    final object None : tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards.None|null[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.player/MutationGuards.None.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.player/MutationGuards.None.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.player/MutationGuards.None.toString|toString(){}[0]
+    }
+}
+
 sealed interface tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState|null[0]
     final class Available : tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState.Available|null[0]
         constructor <init>(kotlin/Boolean, tv.nomercy.player.core.ports/ExternalRoute?) // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.<init>|<init>(kotlin.Boolean;tv.nomercy.player.core.ports.ExternalRoute?){}[0]
@@ -1284,6 +1317,8 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
         final fun <get-resolvedOptions>(): #A? // tv.nomercy.player.core.plugin/Plugin.resolvedOptions.<get-resolvedOptions>|<get-resolvedOptions>(){}[0]
     final val storage // tv.nomercy.player.core.plugin/Plugin.storage|{}storage[0]
         final fun <get-storage>(): tv.nomercy.player.core.ports/Storage // tv.nomercy.player.core.plugin/Plugin.storage.<get-storage>|<get-storage>(){}[0]
+    open val advisories // tv.nomercy.player.core.plugin/Plugin.advisories|{}advisories[0]
+        open fun <get-advisories>(): kotlin.collections/List<tv.nomercy.player.core.plugin/PluginAdvisory> // tv.nomercy.player.core.plugin/Plugin.advisories.<get-advisories>|<get-advisories>(){}[0]
     open val onError // tv.nomercy.player.core.plugin/Plugin.onError|{}onError[0]
         open fun <get-onError>(): kotlin.collections/Map<kotlin/String, tv.nomercy.player.core.plugin/PluginRecoveryAction> // tv.nomercy.player.core.plugin/Plugin.onError.<get-onError>|<get-onError>(){}[0]
     open val options // tv.nomercy.player.core.plugin/Plugin.options|{}options[0]
@@ -1424,6 +1459,7 @@ final class <#A: kotlin/Any?> tv.nomercy.player.core.events/EventEmitter { // tv
         final fun <get-onListenerError>(): kotlin/Function2<kotlin/String, kotlin/Throwable, kotlin/Unit>? // tv.nomercy.player.core.events/EventEmitter.onListenerError.<get-onListenerError>|<get-onListenerError>(){}[0]
         final fun <set-onListenerError>(kotlin/Function2<kotlin/String, kotlin/Throwable, kotlin/Unit>?) // tv.nomercy.player.core.events/EventEmitter.onListenerError.<set-onListenerError>|<set-onListenerError>(kotlin.Function2<kotlin.String,kotlin.Throwable,kotlin.Unit>?){}[0]
 
+    final fun <#A1: kotlin/Any?> dispatchBeforeSync(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.events/EventEmitter.dispatchBeforeSync|dispatchBeforeSync(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> emit(tv.nomercy.player.core.events/EventKey<#A1>, #A1) // tv.nomercy.player.core.events/EventEmitter.emit|emit(tv.nomercy.player.core.events.EventKey<0:0>;0:0){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> off(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>) // tv.nomercy.player.core.events/EventEmitter.off|off(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.events/EventEmitter.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
@@ -1702,6 +1738,9 @@ final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.pla
     final val queue // tv.nomercy.player.core.controllers/PlayerContext.queue|{}queue[0]
         final fun <get-queue>(): tv.nomercy.player.core.media/MediaList<tv.nomercy.player.core.media/PlaylistItem> // tv.nomercy.player.core.controllers/PlayerContext.queue.<get-queue>|<get-queue>(){}[0]
 
+    final var advisories // tv.nomercy.player.core.controllers/PlayerContext.advisories|{}advisories[0]
+        final fun <get-advisories>(): kotlin/Function3<kotlin/String, tv.nomercy.player.core.player/PlayerPhase, kotlin.collections/List<kotlin/String>, kotlin.collections/List<tv.nomercy.player.core.plugin/PluginAdvisoryNotice>> // tv.nomercy.player.core.controllers/PlayerContext.advisories.<get-advisories>|<get-advisories>(){}[0]
+        final fun <set-advisories>(kotlin/Function3<kotlin/String, tv.nomercy.player.core.player/PlayerPhase, kotlin.collections/List<kotlin/String>, kotlin.collections/List<tv.nomercy.player.core.plugin/PluginAdvisoryNotice>>) // tv.nomercy.player.core.controllers/PlayerContext.advisories.<set-advisories>|<set-advisories>(kotlin.Function3<kotlin.String,tv.nomercy.player.core.player.PlayerPhase,kotlin.collections.List<kotlin.String>,kotlin.collections.List<tv.nomercy.player.core.plugin.PluginAdvisoryNotice>>){}[0]
     final var auth // tv.nomercy.player.core.controllers/PlayerContext.auth|{}auth[0]
         final fun <get-auth>(): tv.nomercy.player.core.controllers/AuthController? // tv.nomercy.player.core.controllers/PlayerContext.auth.<get-auth>|<get-auth>(){}[0]
         final fun <set-auth>(tv.nomercy.player.core.controllers/AuthController?) // tv.nomercy.player.core.controllers/PlayerContext.auth.<set-auth>|<set-auth>(tv.nomercy.player.core.controllers.AuthController?){}[0]
@@ -1725,6 +1764,9 @@ final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.pla
         final fun <set-itemEndingSoonEmitted>(kotlin/Boolean) // tv.nomercy.player.core.controllers/PlayerContext.itemEndingSoonEmitted.<set-itemEndingSoonEmitted>|<set-itemEndingSoonEmitted>(kotlin.Boolean){}[0]
     final var loadedItemId // tv.nomercy.player.core.controllers/PlayerContext.loadedItemId|{}loadedItemId[0]
         final fun <get-loadedItemId>(): kotlin/String? // tv.nomercy.player.core.controllers/PlayerContext.loadedItemId.<get-loadedItemId>|<get-loadedItemId>(){}[0]
+    final var mutationGuards // tv.nomercy.player.core.controllers/PlayerContext.mutationGuards|{}mutationGuards[0]
+        final fun <get-mutationGuards>(): tv.nomercy.player.core.player/MutationGuards // tv.nomercy.player.core.controllers/PlayerContext.mutationGuards.<get-mutationGuards>|<get-mutationGuards>(){}[0]
+        final fun <set-mutationGuards>(tv.nomercy.player.core.player/MutationGuards) // tv.nomercy.player.core.controllers/PlayerContext.mutationGuards.<set-mutationGuards>|<set-mutationGuards>(tv.nomercy.player.core.player.MutationGuards){}[0]
     final var phase // tv.nomercy.player.core.controllers/PlayerContext.phase|{}phase[0]
         final fun <get-phase>(): tv.nomercy.player.core.player/PlayerPhase // tv.nomercy.player.core.controllers/PlayerContext.phase.<get-phase>|<get-phase>(){}[0]
     final var playState // tv.nomercy.player.core.controllers/PlayerContext.playState|{}playState[0]
@@ -1753,6 +1795,7 @@ final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.pla
     final fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.controllers/PlayerContext.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
     final fun assertReady() // tv.nomercy.player.core.controllers/PlayerContext.assertReady|assertReady(){}[0]
     final fun dispatching(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.controllers/PlayerContext.dispatching|dispatching(){}[0]
+    final fun guardMutation(kotlin/String, kotlin.collections/List<kotlin/Any?> = ...): kotlin/Boolean // tv.nomercy.player.core.controllers/PlayerContext.guardMutation|guardMutation(kotlin.String;kotlin.collections.List<kotlin.Any?>){}[0]
     final fun transitionPhase(tv.nomercy.player.core.player/PlayerPhase) // tv.nomercy.player.core.controllers/PlayerContext.transitionPhase|transitionPhase(tv.nomercy.player.core.player.PlayerPhase){}[0]
     final suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.controllers/PlayerContext.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
     final suspend fun load(tv.nomercy.player.core.media/PlaylistItem, tv.nomercy.player.core.ports/LoadOptions = ...) // tv.nomercy.player.core.controllers/PlayerContext.load|load(tv.nomercy.player.core.media.PlaylistItem;tv.nomercy.player.core.ports.LoadOptions){}[0]
@@ -3981,7 +4024,7 @@ final class tv.nomercy.player.core.player/ActionOptions { // tv.nomercy.player.c
 }
 
 final class tv.nomercy.player.core.player/PlayerConfig { // tv.nomercy.player.core.player/PlayerConfig|null[0]
-    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.player/WakeLockPolicy = ..., tv.nomercy.player.core.player/OfflinePolicy = ..., tv.nomercy.player.core.ports/HdrOnSdrFallback = ...) // tv.nomercy.player.core.player/PlayerConfig.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.player.WakeLockPolicy;tv.nomercy.player.core.player.OfflinePolicy;tv.nomercy.player.core.ports.HdrOnSdrFallback){}[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.player/WakeLockPolicy = ..., tv.nomercy.player.core.player/OfflinePolicy = ..., tv.nomercy.player.core.ports/HdrOnSdrFallback = ..., tv.nomercy.player.core.player/MutationGuards = ...) // tv.nomercy.player.core.player/PlayerConfig.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.player.WakeLockPolicy;tv.nomercy.player.core.player.OfflinePolicy;tv.nomercy.player.core.ports.HdrOnSdrFallback;tv.nomercy.player.core.player.MutationGuards){}[0]
 
     final val baseImageUrl // tv.nomercy.player.core.player/PlayerConfig.baseImageUrl|{}baseImageUrl[0]
         final fun <get-baseImageUrl>(): kotlin/String? // tv.nomercy.player.core.player/PlayerConfig.baseImageUrl.<get-baseImageUrl>|<get-baseImageUrl>(){}[0]
@@ -4013,6 +4056,8 @@ final class tv.nomercy.player.core.player/PlayerConfig { // tv.nomercy.player.co
         final fun <get-language>(): kotlin/String? // tv.nomercy.player.core.player/PlayerConfig.language.<get-language>|<get-language>(){}[0]
     final val metricsIntervalMs // tv.nomercy.player.core.player/PlayerConfig.metricsIntervalMs|{}metricsIntervalMs[0]
         final fun <get-metricsIntervalMs>(): kotlin/Long // tv.nomercy.player.core.player/PlayerConfig.metricsIntervalMs.<get-metricsIntervalMs>|<get-metricsIntervalMs>(){}[0]
+    final val mutationGuards // tv.nomercy.player.core.player/PlayerConfig.mutationGuards|{}mutationGuards[0]
+        final fun <get-mutationGuards>(): tv.nomercy.player.core.player/MutationGuards // tv.nomercy.player.core.player/PlayerConfig.mutationGuards.<get-mutationGuards>|<get-mutationGuards>(){}[0]
     final val onOffline // tv.nomercy.player.core.player/PlayerConfig.onOffline|{}onOffline[0]
         final fun <get-onOffline>(): tv.nomercy.player.core.player/OfflinePolicy // tv.nomercy.player.core.player/PlayerConfig.onOffline.<get-onOffline>|<get-onOffline>(){}[0]
     final val pauseWhenHidden // tv.nomercy.player.core.player/PlayerConfig.pauseWhenHidden|{}pauseWhenHidden[0]
@@ -4040,6 +4085,7 @@ final class tv.nomercy.player.core.player/PlayerConfig { // tv.nomercy.player.co
     final fun component2(): kotlin/String? // tv.nomercy.player.core.player/PlayerConfig.component2|component2(){}[0]
     final fun component20(): tv.nomercy.player.core.player/OfflinePolicy // tv.nomercy.player.core.player/PlayerConfig.component20|component20(){}[0]
     final fun component21(): tv.nomercy.player.core.ports/HdrOnSdrFallback // tv.nomercy.player.core.player/PlayerConfig.component21|component21(){}[0]
+    final fun component22(): tv.nomercy.player.core.player/MutationGuards // tv.nomercy.player.core.player/PlayerConfig.component22|component22(){}[0]
     final fun component3(): kotlin/String? // tv.nomercy.player.core.player/PlayerConfig.component3|component3(){}[0]
     final fun component4(): kotlin/String? // tv.nomercy.player.core.player/PlayerConfig.component4|component4(){}[0]
     final fun component5(): kotlin/String? // tv.nomercy.player.core.player/PlayerConfig.component5|component5(){}[0]
@@ -4047,7 +4093,7 @@ final class tv.nomercy.player.core.player/PlayerConfig { // tv.nomercy.player.co
     final fun component7(): kotlin/Long // tv.nomercy.player.core.player/PlayerConfig.component7|component7(){}[0]
     final fun component8(): kotlin/Long // tv.nomercy.player.core.player/PlayerConfig.component8|component8(){}[0]
     final fun component9(): kotlin/Long // tv.nomercy.player.core.player/PlayerConfig.component9|component9(){}[0]
-    final fun copy(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.player/WakeLockPolicy = ..., tv.nomercy.player.core.player/OfflinePolicy = ..., tv.nomercy.player.core.ports/HdrOnSdrFallback = ...): tv.nomercy.player.core.player/PlayerConfig // tv.nomercy.player.core.player/PlayerConfig.copy|copy(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.player.WakeLockPolicy;tv.nomercy.player.core.player.OfflinePolicy;tv.nomercy.player.core.ports.HdrOnSdrFallback){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin/Int = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Long = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.player/WakeLockPolicy = ..., tv.nomercy.player.core.player/OfflinePolicy = ..., tv.nomercy.player.core.ports/HdrOnSdrFallback = ..., tv.nomercy.player.core.player/MutationGuards = ...): tv.nomercy.player.core.player/PlayerConfig // tv.nomercy.player.core.player/PlayerConfig.copy|copy(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.String?;kotlin.Int;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Long;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Double;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.player.WakeLockPolicy;tv.nomercy.player.core.player.OfflinePolicy;tv.nomercy.player.core.ports.HdrOnSdrFallback;tv.nomercy.player.core.player.MutationGuards){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.player/PlayerConfig.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.player/PlayerConfig.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.player/PlayerConfig.toString|toString(){}[0]
@@ -4171,10 +4217,64 @@ final class tv.nomercy.player.core.plugin/ContributionBinding { // tv.nomercy.pl
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/ContributionBinding.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugin/PluginAdvisory { // tv.nomercy.player.core.plugin/PluginAdvisory|null[0]
+    constructor <init>(kotlin/String, kotlin.collections/Set<tv.nomercy.player.core.player/PlayerPhase> = ..., kotlin.collections/Set<kotlin/String> = ..., tv.nomercy.player.core.errors/Severity = ..., kotlin/String, kotlin/String) // tv.nomercy.player.core.plugin/PluginAdvisory.<init>|<init>(kotlin.String;kotlin.collections.Set<tv.nomercy.player.core.player.PlayerPhase>;kotlin.collections.Set<kotlin.String>;tv.nomercy.player.core.errors.Severity;kotlin.String;kotlin.String){}[0]
+
+    final val duringEvent // tv.nomercy.player.core.plugin/PluginAdvisory.duringEvent|{}duringEvent[0]
+        final fun <get-duringEvent>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.plugin/PluginAdvisory.duringEvent.<get-duringEvent>|<get-duringEvent>(){}[0]
+    final val duringPhase // tv.nomercy.player.core.plugin/PluginAdvisory.duringPhase|{}duringPhase[0]
+        final fun <get-duringPhase>(): kotlin.collections/Set<tv.nomercy.player.core.player/PlayerPhase> // tv.nomercy.player.core.plugin/PluginAdvisory.duringPhase.<get-duringPhase>|<get-duringPhase>(){}[0]
+    final val message // tv.nomercy.player.core.plugin/PluginAdvisory.message|{}message[0]
+        final fun <get-message>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.message.<get-message>|<get-message>(){}[0]
+    final val method // tv.nomercy.player.core.plugin/PluginAdvisory.method|{}method[0]
+        final fun <get-method>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.method.<get-method>|<get-method>(){}[0]
+    final val reason // tv.nomercy.player.core.plugin/PluginAdvisory.reason|{}reason[0]
+        final fun <get-reason>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.reason.<get-reason>|<get-reason>(){}[0]
+    final val severity // tv.nomercy.player.core.plugin/PluginAdvisory.severity|{}severity[0]
+        final fun <get-severity>(): tv.nomercy.player.core.errors/Severity // tv.nomercy.player.core.plugin/PluginAdvisory.severity.<get-severity>|<get-severity>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/Set<tv.nomercy.player.core.player/PlayerPhase> // tv.nomercy.player.core.plugin/PluginAdvisory.component2|component2(){}[0]
+    final fun component3(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.plugin/PluginAdvisory.component3|component3(){}[0]
+    final fun component4(): tv.nomercy.player.core.errors/Severity // tv.nomercy.player.core.plugin/PluginAdvisory.component4|component4(){}[0]
+    final fun component5(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.component5|component5(){}[0]
+    final fun component6(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.component6|component6(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/Set<tv.nomercy.player.core.player/PlayerPhase> = ..., kotlin.collections/Set<kotlin/String> = ..., tv.nomercy.player.core.errors/Severity = ..., kotlin/String = ..., kotlin/String = ...): tv.nomercy.player.core.plugin/PluginAdvisory // tv.nomercy.player.core.plugin/PluginAdvisory.copy|copy(kotlin.String;kotlin.collections.Set<tv.nomercy.player.core.player.PlayerPhase>;kotlin.collections.Set<kotlin.String>;tv.nomercy.player.core.errors.Severity;kotlin.String;kotlin.String){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugin/PluginAdvisory.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugin/PluginAdvisory.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisory.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugin/PluginAdvisoryNotice { // tv.nomercy.player.core.plugin/PluginAdvisoryNotice|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity) // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.<init>|<init>(kotlin.String;kotlin.String;kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity){}[0]
+
+    final val code // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.code|{}code[0]
+        final fun <get-code>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.code.<get-code>|<get-code>(){}[0]
+    final val message // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.message|{}message[0]
+        final fun <get-message>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.message.<get-message>|<get-message>(){}[0]
+    final val method // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.method|{}method[0]
+        final fun <get-method>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.method.<get-method>|<get-method>(){}[0]
+    final val pluginId // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.pluginId|{}pluginId[0]
+        final fun <get-pluginId>(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.pluginId.<get-pluginId>|<get-pluginId>(){}[0]
+    final val severity // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.severity|{}severity[0]
+        final fun <get-severity>(): tv.nomercy.player.core.errors/Severity // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.severity.<get-severity>|<get-severity>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.component2|component2(){}[0]
+    final fun component3(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.component3|component3(){}[0]
+    final fun component4(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.component4|component4(){}[0]
+    final fun component5(): tv.nomercy.player.core.errors/Severity // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., kotlin/String = ..., tv.nomercy.player.core.errors/Severity = ...): tv.nomercy.player.core.plugin/PluginAdvisoryNotice // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.copy|copy(kotlin.String;kotlin.String;kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/PluginAdvisoryNotice.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugin/PluginRegistry { // tv.nomercy.player.core.plugin/PluginRegistry|null[0]
     constructor <init>(tv.nomercy.player.core.plugin/PluginHost, kotlin/String, kotlinx.coroutines/CoroutineScope) // tv.nomercy.player.core.plugin/PluginRegistry.<init>|<init>(tv.nomercy.player.core.plugin.PluginHost;kotlin.String;kotlinx.coroutines.CoroutineScope){}[0]
 
     final fun <#A1: kotlin/Any> register(tv.nomercy.player.core.plugin/Plugin<#A1>, #A1? = ...): tv.nomercy.player.core.plugin/PluginRegistry // tv.nomercy.player.core.plugin/PluginRegistry.register|register(tv.nomercy.player.core.plugin.Plugin<0:0>;0:0?){0§<kotlin.Any>}[0]
+    final fun advisories(kotlin/String, tv.nomercy.player.core.player/PlayerPhase, kotlin.collections/List<kotlin/String>): kotlin.collections/List<tv.nomercy.player.core.plugin/PluginAdvisoryNotice> // tv.nomercy.player.core.plugin/PluginRegistry.advisories|advisories(kotlin.String;tv.nomercy.player.core.player.PlayerPhase;kotlin.collections.List<kotlin.String>){}[0]
     final fun contributions(tv.nomercy.player.core.plugin/ChromeSlot): kotlin.collections/List<tv.nomercy.player.core.plugin/ContributionBinding> // tv.nomercy.player.core.plugin/PluginRegistry.contributions|contributions(tv.nomercy.player.core.plugin.ChromeSlot){}[0]
     final fun dispose() // tv.nomercy.player.core.plugin/PluginRegistry.dispose|dispose(){}[0]
     final fun enabledPlugins(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.plugin/PluginRegistry.enabledPlugins|enabledPlugins(){}[0]
@@ -6629,12 +6729,16 @@ final val tv.nomercy.player.core.cues/builtInCueParsers // tv.nomercy.player.cor
     final fun <get-builtInCueParsers>(): kotlin.collections/List<tv.nomercy.player.core.ports/CueParser<*>> // tv.nomercy.player.core.cues/builtInCueParsers.<get-builtInCueParsers>|<get-builtInCueParsers>(){}[0]
 final val tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN // tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN|{}DEFAULT_TV_OVERSCAN[0]
     final fun <get-DEFAULT_TV_OVERSCAN>(): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/DEFAULT_TV_OVERSCAN.<get-DEFAULT_TV_OVERSCAN>|<get-DEFAULT_TV_OVERSCAN>(){}[0]
+final val tv.nomercy.player.core.player/HOT_MUTATIONS // tv.nomercy.player.core.player/HOT_MUTATIONS|{}HOT_MUTATIONS[0]
+    final fun <get-HOT_MUTATIONS>(): kotlin.collections/Set<kotlin/String> // tv.nomercy.player.core.player/HOT_MUTATIONS.<get-HOT_MUTATIONS>|<get-HOT_MUTATIONS>(){}[0]
 final val tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY // tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY|{}DEFAULT_RETRY_POLICY[0]
     final fun <get-DEFAULT_RETRY_POLICY>(): kotlin.collections/Map<kotlin/String, tv.nomercy.player.core.ports/RetryConfig> // tv.nomercy.player.core.ports/DEFAULT_RETRY_POLICY.<get-DEFAULT_RETRY_POLICY>|<get-DEFAULT_RETRY_POLICY>(){}[0]
 
 final fun (kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange>).tv.nomercy.player.core.ports/covers(kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.ports/covers|covers@kotlin.collections.List<tv.nomercy.player.core.ports.TimeRange>(kotlin.Double){}[0]
 final fun (kotlin.collections/Map<kotlin/String, tv.nomercy.player.core.ports/RetryConfig>).tv.nomercy.player.core.ports/resolve(kotlin/String): tv.nomercy.player.core.ports/RetryConfig // tv.nomercy.player.core.ports/resolve|resolve@kotlin.collections.Map<kotlin.String,tv.nomercy.player.core.ports.RetryConfig>(kotlin.String){}[0]
 final fun (tv.nomercy.player.core.input/PlayerKey).tv.nomercy.player.core.input/asCombo(): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/asCombo|asCombo@tv.nomercy.player.core.input.PlayerKey(){}[0]
+final fun (tv.nomercy.player.core.player/MutationGuards).tv.nomercy.player.core.player/guards(kotlin/String): kotlin/Boolean // tv.nomercy.player.core.player/guards|guards@tv.nomercy.player.core.player.MutationGuards(kotlin.String){}[0]
+final fun (tv.nomercy.player.core.plugin/PluginAdvisory).tv.nomercy.player.core.plugin/matches(kotlin/String, tv.nomercy.player.core.player/PlayerPhase, kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.plugin/matches|matches@tv.nomercy.player.core.plugin.PluginAdvisory(kotlin.String;tv.nomercy.player.core.player.PlayerPhase;kotlin.collections.List<kotlin.String>){}[0]
 final fun (tv.nomercy.player.core.ports/CueParserRegistry).tv.nomercy.player.core.cues/registerBuiltIns(): tv.nomercy.player.core.ports/CueParserRegistry // tv.nomercy.player.core.cues/registerBuiltIns|registerBuiltIns@tv.nomercy.player.core.ports.CueParserRegistry(){}[0]
 final fun (tv.nomercy.player.core.ports/RetryConfig).tv.nomercy.player.core.ports/delayMs(kotlin/Int): kotlin/Long // tv.nomercy.player.core.ports/delayMs|delayMs@tv.nomercy.player.core.ports.RetryConfig(kotlin.Int){}[0]
 final fun (tv.nomercy.player.core.stream/LiveSessionRequest).tv.nomercy.player.core.stream/toJson(): kotlin/String // tv.nomercy.player.core.stream/toJson|toJson@tv.nomercy.player.core.stream.LiveSessionRequest(){}[0]

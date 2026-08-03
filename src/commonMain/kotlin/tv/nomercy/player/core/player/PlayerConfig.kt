@@ -78,4 +78,14 @@ public data class PlayerConfig(
     // library that refused by default would turn a colour problem into a black
     // screen for consumers who never thought about dynamic range at all.
     val hdrOnSdr: HdrOnSdrFallback = HdrOnSdrFallback.Play,
+    /**
+     * Which mutations announce themselves before they happen.
+     *
+     * Default is everything except [HOT_MUTATIONS], which is the reference's
+     * default and the reason the hot list exists: a position write fires per
+     * tick and guarding it would put a dispatch on the engine's own clock rate.
+     * A consumer that wants those too names them, or asks for
+     * [MutationGuards.All].
+     */
+    val mutationGuards: MutationGuards = MutationGuards.Default,
 )

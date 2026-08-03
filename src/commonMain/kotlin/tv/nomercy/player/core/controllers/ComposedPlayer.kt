@@ -413,6 +413,13 @@ public open class ComposedPlayer(
         configuredBaseUrl = config.baseUrl
         configuredImageBaseUrl = config.baseImageUrl
         configuration = config
+        context.mutationGuards = config.mutationGuards
+        // The registry is what knows which plugin declared what, and the context
+        // is what raises the advisory. Wired here rather than at construction
+        // because a plugin registered later has to be seen: the lambda reads the
+        // live registry on every guarded call, so it always reflects what is
+        // installed and enabled right now.
+        context.advisories = plugins::advisories
         activity = ActivityController(context, playerScope, config.inactivityMs)
         // Pushed rather than read back from options() when the engine needs it: the
         // decision is taken on a tracks change, which can arrive before anything
@@ -710,7 +717,12 @@ public open class ComposedPlayer(
 
     public open fun metrics(): PlaybackMetrics = metrics.metrics()
 
-    public open fun recordMetric(metric: Metric, value: Double): Unit = metrics.recordMetric(metric, value)
+    // On the hot list, so guarded only when a consumer asks for it. A metric
+    // records per sample and a dispatch per sample is what the hot list exists
+    // to keep off by default.
+    public open fun recordMetric(metric: Metric, value: Double) {
+        if (context.guardMutation("recordMetric", listOf(metric, value))) metrics.recordMetric(metric, value)
+    }
 
     public open fun recordMetric(name: String, value: Double): Unit = metrics.recordMetric(name, value)
 
@@ -1219,13 +1231,18 @@ public open class ComposedPlayer(
 
     public open fun repeatState(): RepeatState = state.repeatState()
 
-    public open suspend fun repeatState(value: RepeatState, opts: ActionOptions = ActionOptions()): Unit =
-        state.repeatState(value, opts)
+    // Guarded, which is what the mutation surface is for: neither of these has
+    // a before-event of its own, so this is the only place a plugin can object
+    // to a repeat or shuffle change before it lands.
+    public open suspend fun repeatState(value: RepeatState, opts: ActionOptions = ActionOptions()) {
+        if (context.guardMutation("repeatState", listOf(value))) state.repeatState(value, opts)
+    }
 
     public open fun shuffleState(): ShuffleState = state.shuffleState()
 
-    public open suspend fun shuffleState(value: ShuffleState, opts: ActionOptions = ActionOptions()): Unit =
-        state.shuffleState(value, opts)
+    public open suspend fun shuffleState(value: ShuffleState, opts: ActionOptions = ActionOptions()) {
+        if (context.guardMutation("shuffleState", listOf(value))) state.shuffleState(value, opts)
+    }
 
     // ── Plugins ──────────────────────────────────────────────────────────────
 

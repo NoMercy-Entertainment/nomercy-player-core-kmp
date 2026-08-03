@@ -14,6 +14,7 @@ import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.player.PlayerPhase
 
 private class Registration(
     val plugin: Plugin<*>,
@@ -61,6 +62,39 @@ public class PluginRegistry(
             .map { it.value.plugin }
 
     public fun isDisposed(): Boolean = disposed
+
+    // What the registered plugins have to say about this call.
+    //
+    // Asked per guarded mutation rather than merged into a lookup at
+    // registration, which the reference does: a merged table has to be rebuilt
+    // whenever a plugin is added, removed, enabled or disabled, and the one
+    // that is not rebuilt is how a removed plugin keeps advising. Walking the
+    // enabled list costs a pass over a handful of plugins on a call that was
+    // already dispatching an event.
+    //
+    // Disabled plugins say nothing. A viewer who turned a plugin off should not
+    // keep getting its warnings.
+    public fun advisories(
+        method: String,
+        phase: PlayerPhase,
+        dispatchStack: List<String>,
+    ): List<PluginAdvisoryNotice> =
+        enabledPlugins().flatMap { plugin ->
+            plugin.advisories
+                .filter { it.matches(method, phase, dispatchStack) }
+                .map { advisory ->
+                    PluginAdvisoryNotice(
+                        pluginId = plugin.id,
+                        method = method,
+                        // Stamped here rather than by the plugin, so an advisory
+                        // cannot claim to come from a plugin that did not
+                        // declare it.
+                        code = "plugin:${plugin.id}/${advisory.reason}",
+                        message = advisory.message,
+                        severity = advisory.severity,
+                    )
+                }
+        }
 
     // What a chrome should render in one region, already ordered.
     //

@@ -9,17 +9,24 @@
 package tv.nomercy.player.core.controllers
 
 import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
+import tv.nomercy.player.core.events.BeforeMutationPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventEmitter
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.MutationPreventedPayload
 import tv.nomercy.player.core.events.PhaseChange
+import tv.nomercy.player.core.events.PlayerErrorEvent
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.MediaList
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.BufferState
+import tv.nomercy.player.core.player.MutationGuards
+import tv.nomercy.player.core.player.guards
+import tv.nomercy.player.core.plugin.PluginAdvisoryNotice
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.RepeatState
@@ -54,6 +61,61 @@ public class PlayerContext(
     ): BeforeDispatchResult<T> = emitter.dispatchBefore(key, data)
 
     public fun dispatching(): List<String> = emitter.dispatching()
+
+    // Which mutations announce themselves. Set from PlayerConfig at setup.
+    public var mutationGuards: MutationGuards = MutationGuards.Default
+
+    // Consulted before a guarded mutation happens, and told what to do about it.
+    //
+    // CoreEvents.BeforeMutation and CoreEvents.MutationPrevented were both
+    // declared, both carried payloads, and were emitted by nothing at all, so
+    // mutationGuards was a config field with no behaviour and a plugin
+    // subscribing to beforeMutation heard nothing ever.
+    //
+    // Returns whether to proceed. False also announces WHY, because a caller
+    // that silently did nothing is a mutation a consumer has no way to find out
+    // was refused.
+    public fun guardMutation(method: String, args: List<Any?> = emptyList()): Boolean {
+        if (!mutationGuards.guards(method)) return true
+
+        val stack: List<String> = dispatching()
+        advisories(method, phase, stack).forEach(::emitAdvisory)
+
+        val outcome: BeforeDispatchResult<BeforeMutationPayload> = emitter.dispatchBeforeSync(
+            CoreEvents.BeforeMutation,
+            BeforeMutationPayload(method = method, args = args, phase = phase, dispatchStack = stack),
+        )
+        if (!outcome.prevented) return true
+
+        emit(
+            CoreEvents.MutationPrevented,
+            MutationPreventedPayload(method = method, reason = outcome.reason.orEmpty()),
+        )
+        return false
+    }
+
+    // What the registered plugins have said about this method, supplied by
+    // whoever owns the registry. Empty by default so a context built without
+    // one — every test that does not care — behaves as it always did.
+    public var advisories: (String, PlayerPhase, List<String>) -> List<PluginAdvisoryNotice> = { _, _, _ ->
+        emptyList()
+    }
+
+    // Advisories are fired BEFORE the guard rather than after it, so one is
+    // raised whether or not a listener goes on to refuse the action. An
+    // advisory is a report about the call being made, not about its outcome.
+    private fun emitAdvisory(notice: PluginAdvisoryNotice) {
+        emit(
+            CoreEvents.Error,
+            PlayerErrorEvent(
+                code = notice.code,
+                message = notice.message,
+                severity = notice.severity,
+                scope = ErrorScope.plugin(notice.pluginId),
+                context = mapOf("method" to notice.method),
+            ),
+        )
+    }
 
     // The single writer of phase. Everything that changes it goes through
     // transitionPhase, so the phase event cannot be missed by a caller who

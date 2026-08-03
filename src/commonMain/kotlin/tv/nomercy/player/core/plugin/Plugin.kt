@@ -218,6 +218,14 @@ public abstract class Plugin<O : Any> {
         data: T,
     ): BeforeDispatchResult<T> = wired.host.dispatchBefore(EventKey(scopedName(key.name)), data)
 
+    // Calls this plugin wants to warn about, as data.
+    //
+    // Declarative because the alternative is every plugin that cares about a
+    // mutation writing the same beforeMutation subscription with a different
+    // string in it. A plugin needing to reshape or refuse the call still
+    // subscribes; this is for the common case that is only ever a message.
+    public open val advisories: List<PluginAdvisory> get() = emptyList()
+
     // What this plugin does about its own errors, keyed by code.
     //
     // Data an author writes once rather than a catch block at every call site,
