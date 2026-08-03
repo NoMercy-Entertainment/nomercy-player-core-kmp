@@ -10,6 +10,7 @@ package tv.nomercy.player.core.ports
 
 import java.io.File
 import java.net.URI
+import kotlin.concurrent.Volatile
 import kotlin.math.abs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,6 +24,8 @@ import tv.nomercy.player.core.natives.libvlc.VlcTrackType
 
 private const val MILLIS_PER_SECOND = 1000.0
 private const val FULL_VOLUME_PERCENT = 100
+
+private const val MS_PER_SECOND = 1_000.0
 
 // libVLC turns captions off with track -1.
 private const val SUBTITLES_DISABLED = -1
@@ -192,6 +195,11 @@ public class VlcjVideoBackend private constructor(
     // loaded.
     private var announcedReadable: Boolean = false
 
+    // libVLC's cache fullness, 0 to 100. The only thing it will say about how far
+    // ahead it has read.
+    @Volatile
+    private var cacheFill: Float = 0f
+
     init {
         player.events(
             object : VlcPlayerEvents {
@@ -235,6 +243,7 @@ public class VlcjVideoBackend private constructor(
                 // it has run dry, which is the moment a chrome should say so;
                 // anything else is progress and not worth an event.
                 override fun buffering(cache: Float) {
+                    cacheFill = cache
                     if (cache <= 0f) bus.emit(CanonicalBackendEvent.WAITING)
                 }
             },
@@ -452,7 +461,17 @@ public class VlcjVideoBackend private constructor(
     // percentage cannot say WHERE the data is. The default would read the empty
     // range list as nothing buffered and put the bar back at zero, which is a
     // stronger claim than an engine that will not say has earned.
-    override fun buffered(): Double = currentTime()
+    override fun buffered(): Double = currentTime() + bufferedAheadSeconds()
+
+    // How far past the playhead the cache reaches, as libVLC is able to say it.
+    //
+    // It reports fullness as a percentage of the caching window and never a
+    // range, so this converts the one number it gives into the one the shared
+    // bar wants. That is a smaller claim than a browser's buffered ranges and it
+    // is an honest one; returning the playhead instead — which is what this did
+    // — claims the buffer is always empty, and the bar drew nothing at all.
+    private fun bufferedAheadSeconds(): Double =
+        (cacheFill.toDouble() / FULL_VOLUME_PERCENT) * (VlcAdaptiveOptions.NETWORK_CACHING_MS / MS_PER_SECOND)
 
     override fun playbackRate(): Double = player.playback.rate().toDouble()
 

@@ -55,7 +55,26 @@ class VlcAdaptiveOptionsTest {
         // An option that repeats the default still sends libVLC down a code path
         // it would not otherwise take, and on a demuxer this old the untaken path
         // is the tested one.
-        assertEquals(emptyList(), VlcAdaptiveOptions.optionsFor(emptyList()))
+        //
+        // The LADDER is what an empty ladder leaves alone. The caching window is
+        // not a ladder constraint and is always sent: libVLC's own default is one
+        // second, which is why the desktop buffer bar had nothing to draw.
+        val options: List<String> = VlcAdaptiveOptions.optionsFor(emptyList())
+
+        assertTrue(options.none { it.startsWith(":adaptive") }, "an empty ladder constrained something: $options")
+    }
+
+    @Test
+    fun theCachingWindowIsAlwaysSentBecauseTheDefaultIsOneSecond() {
+        // Both shapes, because the ladder branch is where it would be dropped.
+        assertEquals(
+            listOf(":network-caching=${VlcAdaptiveOptions.NETWORK_CACHING_MS}"),
+            VlcAdaptiveOptions.optionsFor(emptyList()),
+        )
+        assertTrue(
+            VlcAdaptiveOptions.optionsFor(listOf(QualityDescriptor(height = 1080, bitrate = 6_000_000, codec = "avc1")))
+                .any { it == ":network-caching=${VlcAdaptiveOptions.NETWORK_CACHING_MS}" },
+        )
     }
 
     @Test

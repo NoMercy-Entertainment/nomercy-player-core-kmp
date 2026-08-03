@@ -45,8 +45,23 @@ public object VlcAdaptiveOptions {
     // resolution, which NoMercy's own ladder has — that case is what the manifest
     // rewrite exists for.
     public fun optionsFor(keep: Collection<QualityDescriptor>): List<String> {
-        if (keep.isEmpty()) return emptyList()
+        val caching: List<String> = listOf(":network-caching=$NETWORK_CACHING_MS")
+        if (keep.isEmpty()) return caching
 
-        return listOf(":adaptive-maxheight=${keep.maxOf { it.height }}")
+        return caching + ":adaptive-maxheight=${keep.maxOf { it.height }}"
     }
+
+    // How far ahead libVLC is asked to read.
+    //
+    // Its default is one second, which is why the desktop buffer bar had nothing
+    // to draw: a chrome asking how much is buffered was told "the playhead", and
+    // a bar whose buffered end is the position it is already at is a bar with no
+    // buffer on it. A browser holds tens of seconds through hls.js, so the same
+    // stream looked healthy in one and permanently on the edge in the other.
+    //
+    // Five seconds rather than more. The cache is held in memory and libVLC's
+    // demuxer does not hand back a range list, so this is also the entire window
+    // [buffered] can honestly report — asking for a minute would put a claim on
+    // the bar that nothing verifies.
+    public const val NETWORK_CACHING_MS: Int = 5_000
 }

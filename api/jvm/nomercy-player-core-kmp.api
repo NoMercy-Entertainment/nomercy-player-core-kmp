@@ -5862,6 +5862,7 @@ public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
 
 public final class tv/nomercy/player/core/ports/VlcAdaptiveOptions {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/VlcAdaptiveOptions;
+	public static final field NETWORK_CACHING_MS I
 	public final fun optionsFor (Ljava/util/Collection;)Ljava/util/List;
 }
 
