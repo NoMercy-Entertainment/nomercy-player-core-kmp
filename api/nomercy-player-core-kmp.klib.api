@@ -7,6 +7,18 @@
 // - Show declarations: true
 
 // Library unique name: <nomercy-player-core-kmp>
+final enum class tv.nomercy.player.core.controllers/FailureKind : kotlin/Enum<tv.nomercy.player.core.controllers/FailureKind> { // tv.nomercy.player.core.controllers/FailureKind|null[0]
+    enum entry MEDIA // tv.nomercy.player.core.controllers/FailureKind.MEDIA|null[0]
+    enum entry NETWORK // tv.nomercy.player.core.controllers/FailureKind.NETWORK|null[0]
+    enum entry OTHER // tv.nomercy.player.core.controllers/FailureKind.OTHER|null[0]
+
+    final val entries // tv.nomercy.player.core.controllers/FailureKind.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.controllers/FailureKind> // tv.nomercy.player.core.controllers/FailureKind.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.controllers/FailureKind // tv.nomercy.player.core.controllers/FailureKind.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.controllers/FailureKind> // tv.nomercy.player.core.controllers/FailureKind.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.controllers/Metric : kotlin/Enum<tv.nomercy.player.core.controllers/Metric> { // tv.nomercy.player.core.controllers/Metric|null[0]
     enum entry BITRATE // tv.nomercy.player.core.controllers/Metric.BITRATE|null[0]
     enum entry BUFFERING_EVENTS // tv.nomercy.player.core.controllers/Metric.BUFFERING_EVENTS|null[0]
@@ -26,6 +38,17 @@ final enum class tv.nomercy.player.core.controllers/Metric : kotlin/Enum<tv.nome
     final object Companion { // tv.nomercy.player.core.controllers/Metric.Companion|null[0]
         final fun byKey(kotlin/String): tv.nomercy.player.core.controllers/Metric? // tv.nomercy.player.core.controllers/Metric.Companion.byKey|byKey(kotlin.String){}[0]
     }
+}
+
+final enum class tv.nomercy.player.core.controllers/RecoveryStep : kotlin/Enum<tv.nomercy.player.core.controllers/RecoveryStep> { // tv.nomercy.player.core.controllers/RecoveryStep|null[0]
+    enum entry ESCALATE // tv.nomercy.player.core.controllers/RecoveryStep.ESCALATE|null[0]
+    enum entry RELOAD // tv.nomercy.player.core.controllers/RecoveryStep.RELOAD|null[0]
+
+    final val entries // tv.nomercy.player.core.controllers/RecoveryStep.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.controllers/RecoveryStep> // tv.nomercy.player.core.controllers/RecoveryStep.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.controllers/RecoveryStep // tv.nomercy.player.core.controllers/RecoveryStep.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.controllers/RecoveryStep> // tv.nomercy.player.core.controllers/RecoveryStep.values|values#static(){}[0]
 }
 
 final enum class tv.nomercy.player.core.device/FormFactor : kotlin/Enum<tv.nomercy.player.core.device/FormFactor> { // tv.nomercy.player.core.device/FormFactor|null[0]
@@ -1683,7 +1706,7 @@ final class tv.nomercy.player.core.controllers/ActivityController { // tv.nomerc
 }
 
 final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.player.core.controllers/BackendBridge|null[0]
-    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext) // tv.nomercy.player.core.controllers/BackendBridge.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext){}[0]
+    constructor <init>(tv.nomercy.player.core.controllers/PlayerContext, kotlinx.coroutines/CoroutineScope? = ..., tv.nomercy.player.core.ports/Clock = ...) // tv.nomercy.player.core.controllers/BackendBridge.<init>|<init>(tv.nomercy.player.core.controllers.PlayerContext;kotlinx.coroutines.CoroutineScope?;tv.nomercy.player.core.ports.Clock){}[0]
 
     final fun attach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.attach|attach(tv.nomercy.player.core.ports.MediaBackend){}[0]
     final fun detach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.detach|detach(tv.nomercy.player.core.ports.MediaBackend){}[0]
@@ -1832,6 +1855,24 @@ final class tv.nomercy.player.core.controllers/StateController { // tv.nomercy.p
     final suspend fun repeatState(tv.nomercy.player.core.player/RepeatState, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/StateController.repeatState|repeatState(tv.nomercy.player.core.player.RepeatState;tv.nomercy.player.core.player.ActionOptions){}[0]
     final suspend fun shuffleState(kotlin/Boolean, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/StateController.shuffleState|shuffleState(kotlin.Boolean;tv.nomercy.player.core.player.ActionOptions){}[0]
     final suspend fun shuffleState(tv.nomercy.player.core.player/ShuffleState, tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.controllers/StateController.shuffleState|shuffleState(tv.nomercy.player.core.player.ShuffleState;tv.nomercy.player.core.player.ActionOptions){}[0]
+}
+
+final class tv.nomercy.player.core.controllers/StreamRecovery { // tv.nomercy.player.core.controllers/StreamRecovery|null[0]
+    constructor <init>(kotlin/Int = ...) // tv.nomercy.player.core.controllers/StreamRecovery.<init>|<init>(kotlin.Int){}[0]
+
+    final fun progressed() // tv.nomercy.player.core.controllers/StreamRecovery.progressed|progressed(){}[0]
+    final fun reset() // tv.nomercy.player.core.controllers/StreamRecovery.reset|reset(){}[0]
+    final fun retryDelayMs(tv.nomercy.player.core.controllers/FailureKind): kotlin/Long // tv.nomercy.player.core.controllers/StreamRecovery.retryDelayMs|retryDelayMs(tv.nomercy.player.core.controllers.FailureKind){}[0]
+    final fun stepFor(tv.nomercy.player.core.controllers/FailureKind, kotlin/Long): tv.nomercy.player.core.controllers/RecoveryStep // tv.nomercy.player.core.controllers/StreamRecovery.stepFor|stepFor(tv.nomercy.player.core.controllers.FailureKind;kotlin.Long){}[0]
+
+    final object Companion { // tv.nomercy.player.core.controllers/StreamRecovery.Companion|null[0]
+        final const val FIRST_RETRY_DELAY_MS // tv.nomercy.player.core.controllers/StreamRecovery.Companion.FIRST_RETRY_DELAY_MS|{}FIRST_RETRY_DELAY_MS[0]
+            final fun <get-FIRST_RETRY_DELAY_MS>(): kotlin/Long // tv.nomercy.player.core.controllers/StreamRecovery.Companion.FIRST_RETRY_DELAY_MS.<get-FIRST_RETRY_DELAY_MS>|<get-FIRST_RETRY_DELAY_MS>(){}[0]
+        final const val MAX_NETWORK_RETRIES // tv.nomercy.player.core.controllers/StreamRecovery.Companion.MAX_NETWORK_RETRIES|{}MAX_NETWORK_RETRIES[0]
+            final fun <get-MAX_NETWORK_RETRIES>(): kotlin/Int // tv.nomercy.player.core.controllers/StreamRecovery.Companion.MAX_NETWORK_RETRIES.<get-MAX_NETWORK_RETRIES>|<get-MAX_NETWORK_RETRIES>(){}[0]
+        final const val MEDIA_WINDOW_MS // tv.nomercy.player.core.controllers/StreamRecovery.Companion.MEDIA_WINDOW_MS|{}MEDIA_WINDOW_MS[0]
+            final fun <get-MEDIA_WINDOW_MS>(): kotlin/Long // tv.nomercy.player.core.controllers/StreamRecovery.Companion.MEDIA_WINDOW_MS.<get-MEDIA_WINDOW_MS>|<get-MEDIA_WINDOW_MS>(){}[0]
+    }
 }
 
 final class tv.nomercy.player.core.controllers/TimeController { // tv.nomercy.player.core.controllers/TimeController|null[0]
@@ -6747,6 +6788,7 @@ final fun (tv.nomercy.player.core.ports/CueParserRegistry).tv.nomercy.player.cor
 final fun (tv.nomercy.player.core.ports/RetryConfig).tv.nomercy.player.core.ports/delayMs(kotlin/Int): kotlin/Long // tv.nomercy.player.core.ports/delayMs|delayMs@tv.nomercy.player.core.ports.RetryConfig(kotlin.Int){}[0]
 final fun (tv.nomercy.player.core.stream/LiveSessionRequest).tv.nomercy.player.core.stream/toJson(): kotlin/String // tv.nomercy.player.core.stream/toJson|toJson@tv.nomercy.player.core.stream.LiveSessionRequest(){}[0]
 final fun <#A: kotlin/Any?> tv.nomercy.player.core.plugin/pluginEventKey(tv.nomercy.player.core.plugin/PluginManifest, kotlin/String): tv.nomercy.player.core.events/EventKey<#A> // tv.nomercy.player.core.plugin/pluginEventKey|pluginEventKey(tv.nomercy.player.core.plugin.PluginManifest;kotlin.String){0§<kotlin.Any?>}[0]
+final fun tv.nomercy.player.core.controllers/failureKindOf(kotlin/String?): tv.nomercy.player.core.controllers/FailureKind // tv.nomercy.player.core.controllers/failureKindOf|failureKindOf(kotlin.String?){}[0]
 final fun tv.nomercy.player.core.cues/parseLrc(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.cues/LrcCue> // tv.nomercy.player.core.cues/parseLrc|parseLrc(kotlin.String){}[0]
 final fun tv.nomercy.player.core.cues/parseVtt(kotlin/String): kotlin.collections/List<tv.nomercy.player.core.cues/VttCue> // tv.nomercy.player.core.cues/parseVtt|parseVtt(kotlin.String){}[0]
 final fun tv.nomercy.player.core.cues/parseVttSprite(kotlin/String, kotlin/String? = ...): kotlin.collections/List<tv.nomercy.player.core.cues/SpriteCue> // tv.nomercy.player.core.cues/parseVttSprite|parseVttSprite(kotlin.String;kotlin.String?){}[0]

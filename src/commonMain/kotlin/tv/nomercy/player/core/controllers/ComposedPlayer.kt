@@ -308,7 +308,10 @@ public open class ComposedPlayer(
 
     // What the engine reports, turned into what the player says. Without it
     // the controllers drive the engine and nothing listens to it come back.
-    public val bridge: BackendBridge = BackendBridge(context)
+    // With the scope and the clock, which is what lets it retry rather than only
+    // report. A bridge given neither still works and gives up on the first
+    // failure, which is what every platform did before this.
+    public val bridge: BackendBridge = BackendBridge(context, playerScope, clock)
 
     public val bandwidth: BandwidthController = BandwidthController(context)
 

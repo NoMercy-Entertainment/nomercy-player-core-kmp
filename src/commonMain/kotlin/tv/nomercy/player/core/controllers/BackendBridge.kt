@@ -27,7 +27,10 @@ import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
+import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.MediaBackend
+import tv.nomercy.player.core.ports.defaultClock
+import kotlinx.coroutines.CoroutineScope
 
 private const val PERCENT = 100.0
 
@@ -48,7 +51,17 @@ private const val UNKNOWN_ENGINE = "unknown"
 //
 // Found by running the shared conformance scenarios against the native player:
 // transport/play observed [beforePlay, phase, play] and stopped there.
-public class BackendBridge(private val ctx: PlayerContext) {
+public class BackendBridge(
+    private val ctx: PlayerContext,
+    // Both nullable-by-default so a fixture can build a bridge without either.
+    // Without a scope there is nothing to schedule a retry on, and the bridge
+    // then behaves exactly as it did before recovery existed: every failure is
+    // the last word.
+    private val scope: CoroutineScope? = null,
+    private val clock: Clock = defaultClock(),
+) {
+    private val recovery: FailureRecovery = FailureRecovery(ctx, scope, clock)
+
 
     private val handlers: MutableList<Pair<String, (Any?) -> Unit>> = mutableListOf()
 
@@ -210,6 +223,11 @@ public class BackendBridge(private val ctx: PlayerContext) {
         // reporting LOADING until some unrelated event moved the state.
         listen(backend, CanonicalBackendEvent.CAN_PLAY) {
             ctx.bufferState = BufferState.IDLE
+            // The stream is healthy, so the retries it took to get here are spent
+            // budget rather than a running total. A film watched through three bad
+            // patches would otherwise die at the third having survived the first
+            // two, which is the failure mode that looks least like a bug.
+            recovery.progressed()
         }
     }
 
@@ -258,6 +276,13 @@ public class BackendBridge(private val ctx: PlayerContext) {
         // error is not an engine that is buffering. It is stored here, so without
         // this a spinner keeps turning on top of an item that already failed.
         ctx.bufferState = BufferState.IDLE
+
+        // Tried before it is announced, because a failure being recovered from is
+        // not a failure a viewer needs to read about. The web swallows the same
+        // ones — a fragment that did not arrive is retried three times before
+        // anything reaches the page — and this port announced every one of them
+        // as fatal, so a phone that walked past a wall ended the film.
+        if (recovery.tryRecover(engineWord)) return
 
         val kind: String = backend::class.simpleName ?: UNKNOWN_ENGINE
         ctx.emit(CoreEvents.BackendError, BackendErrorPayload(error = engineWord, kind = kind))

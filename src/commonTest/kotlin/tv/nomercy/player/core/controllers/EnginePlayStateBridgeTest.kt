@@ -133,6 +133,13 @@ class EnginePlayStateBridgeTest {
         // either as one would put a code in a dashboard that no dashboard knows.
         backend.fire(CanonicalBackendEvent.ERROR, "ERROR_CODE_DECODING_FAILED")
 
+        // The first one is not the answer. A decode failure buys one reload, as
+        // the web's `recoverMediaError` does, and a viewer never reads about the
+        // ones that recovery fixes.
+        assertTrue(failures.isEmpty(), "a first decode failure is retried, not announced")
+
+        backend.fire(CanonicalBackendEvent.ERROR, "ERROR_CODE_DECODING_FAILED")
+
         val reported: PlayerErrorEvent = failures.single()
         assertEquals(
             "media/decode-fatal-all",
