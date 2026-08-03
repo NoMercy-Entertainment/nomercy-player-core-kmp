@@ -33,13 +33,25 @@ class VlcLadderNarrowingTest {
     }
 
     @Test
-    fun noWidthIsClaimedForARungThatDeclaredNone() {
-        // The shared descriptor keeps only RESOLUTION's height. Inventing a width
-        // here would make SizeAbrConstraint reject rungs the web keeps, and the port
-        // would land on a different rendition than the oracle.
+    fun aRungCarriesTheWidthItsManifestDeclared() {
+        // This asserted the width stayed NULL, on the reasoning that inventing
+        // one would make SizeAbrConstraint reject rungs the web keeps. The
+        // reasoning held while nothing carried a width; the descriptor now reads
+        // it out of the same RESOLUTION attribute the height comes from, so it
+        // is the manifest's own number rather than an invention.
+        //
+        // The rung COUNT is asserted alongside it, because that is what the old
+        // assertion was really protecting: a width the size constraint can act
+        // on must not quietly shorten the ladder.
         val levels: List<QualityLevel> = VlcLadderNarrowing.levelsOf(ladder)
 
-        assertTrue(levels.all { it.width == null }, "a width was invented: $levels")
+        assertEquals(ladder.size, levels.size, "the ladder lost a rung: $levels")
+        assertTrue(levels.all { it.width != null }, "a declared width was dropped: $levels")
+        assertEquals(
+            ladder.map { it.width },
+            levels.map { it.width },
+            "a width does not match the rung it came from: $levels",
+        )
     }
 
     @Test

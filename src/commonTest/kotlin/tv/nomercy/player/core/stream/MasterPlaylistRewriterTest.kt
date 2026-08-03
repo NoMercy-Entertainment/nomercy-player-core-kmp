@@ -38,9 +38,9 @@ private val MASTER = """
 
 class MasterPlaylistRewriterTest {
 
-    private val sd = QualityDescriptor(480, 1_000_000, DynamicRange.Sdr, "avc1.640028")
-    private val hd = QualityDescriptor(1080, 6_000_000, DynamicRange.Sdr, "avc1.640028")
-    private val uhd = QualityDescriptor(2160, 20_000_000, DynamicRange.Hdr10, "av01.0.13M.10")
+    private val sd = QualityDescriptor(480, 1_000_000, DynamicRange.Sdr, "avc1.640028", width = 854)
+    private val hd = QualityDescriptor(1080, 6_000_000, DynamicRange.Sdr, "avc1.640028", width = 1920)
+    private val uhd = QualityDescriptor(2160, 20_000_000, DynamicRange.Hdr10, "av01.0.13M.10", width = 3840)
 
     @Test
     fun everyVariantIsReadWithItsIdentity() {
@@ -146,7 +146,7 @@ class MasterPlaylistRewriterTest {
 
         val rewritten = MasterPlaylistRewriter.rewrite(
             withComment,
-            listOf(QualityDescriptor(480, 1_280_000)),
+            listOf(QualityDescriptor(480, 1_280_000, width = 854)),
         )
 
         assertTrue(rewritten.contains("v/480.m3u8"))

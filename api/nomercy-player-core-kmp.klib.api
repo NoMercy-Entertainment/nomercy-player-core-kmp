@@ -3848,7 +3848,7 @@ final class tv.nomercy.player.core.media/MediaListMove { // tv.nomercy.player.co
 }
 
 final class tv.nomercy.player.core.media/QualityDescriptor : kotlin/Comparable<tv.nomercy.player.core.media/QualityDescriptor> { // tv.nomercy.player.core.media/QualityDescriptor|null[0]
-    constructor <init>(kotlin/Int, kotlin/Int, tv.nomercy.player.core.media/DynamicRange = ..., kotlin/String? = ...) // tv.nomercy.player.core.media/QualityDescriptor.<init>|<init>(kotlin.Int;kotlin.Int;tv.nomercy.player.core.media.DynamicRange;kotlin.String?){}[0]
+    constructor <init>(kotlin/Int, kotlin/Int, tv.nomercy.player.core.media/DynamicRange = ..., kotlin/String? = ..., kotlin/Int? = ...) // tv.nomercy.player.core.media/QualityDescriptor.<init>|<init>(kotlin.Int;kotlin.Int;tv.nomercy.player.core.media.DynamicRange;kotlin.String?;kotlin.Int?){}[0]
 
     final val bitrate // tv.nomercy.player.core.media/QualityDescriptor.bitrate|{}bitrate[0]
         final fun <get-bitrate>(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.bitrate.<get-bitrate>|<get-bitrate>(){}[0]
@@ -3858,13 +3858,16 @@ final class tv.nomercy.player.core.media/QualityDescriptor : kotlin/Comparable<t
         final fun <get-dynamicRange>(): tv.nomercy.player.core.media/DynamicRange // tv.nomercy.player.core.media/QualityDescriptor.dynamicRange.<get-dynamicRange>|<get-dynamicRange>(){}[0]
     final val height // tv.nomercy.player.core.media/QualityDescriptor.height|{}height[0]
         final fun <get-height>(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.height.<get-height>|<get-height>(){}[0]
+    final val width // tv.nomercy.player.core.media/QualityDescriptor.width|{}width[0]
+        final fun <get-width>(): kotlin/Int? // tv.nomercy.player.core.media/QualityDescriptor.width.<get-width>|<get-width>(){}[0]
 
     final fun compareTo(tv.nomercy.player.core.media/QualityDescriptor): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.compareTo|compareTo(tv.nomercy.player.core.media.QualityDescriptor){}[0]
     final fun component1(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.component1|component1(){}[0]
     final fun component2(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.component2|component2(){}[0]
     final fun component3(): tv.nomercy.player.core.media/DynamicRange // tv.nomercy.player.core.media/QualityDescriptor.component3|component3(){}[0]
     final fun component4(): kotlin/String? // tv.nomercy.player.core.media/QualityDescriptor.component4|component4(){}[0]
-    final fun copy(kotlin/Int = ..., kotlin/Int = ..., tv.nomercy.player.core.media/DynamicRange = ..., kotlin/String? = ...): tv.nomercy.player.core.media/QualityDescriptor // tv.nomercy.player.core.media/QualityDescriptor.copy|copy(kotlin.Int;kotlin.Int;tv.nomercy.player.core.media.DynamicRange;kotlin.String?){}[0]
+    final fun component5(): kotlin/Int? // tv.nomercy.player.core.media/QualityDescriptor.component5|component5(){}[0]
+    final fun copy(kotlin/Int = ..., kotlin/Int = ..., tv.nomercy.player.core.media/DynamicRange = ..., kotlin/String? = ..., kotlin/Int? = ...): tv.nomercy.player.core.media/QualityDescriptor // tv.nomercy.player.core.media/QualityDescriptor.copy|copy(kotlin.Int;kotlin.Int;tv.nomercy.player.core.media.DynamicRange;kotlin.String?;kotlin.Int?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/QualityDescriptor.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/QualityDescriptor.hashCode|hashCode(){}[0]
     final fun label(): kotlin/String // tv.nomercy.player.core.media/QualityDescriptor.label|label(){}[0]

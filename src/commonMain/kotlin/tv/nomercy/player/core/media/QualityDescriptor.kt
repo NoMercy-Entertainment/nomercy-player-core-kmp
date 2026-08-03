@@ -43,6 +43,15 @@ public data class QualityDescriptor(
     val bitrate: Int,
     val dynamicRange: DynamicRange = DynamicRange.Sdr,
     val codec: String? = null,
+    /**
+     * The rung's width, when the source declares one.
+     *
+     * A manifest writes `RESOLUTION=1280x536` and this carried only the part
+     * after the x, so every rung reached the quality menu with a null width and
+     * the pane could name it nothing but "536p" - beside a browser naming the
+     * same stream 1280x536.
+     */
+    val width: Int? = null,
 ) : Comparable<QualityDescriptor> {
 
     // Height first, then bitrate, then range. A ladder sorted this way reads the

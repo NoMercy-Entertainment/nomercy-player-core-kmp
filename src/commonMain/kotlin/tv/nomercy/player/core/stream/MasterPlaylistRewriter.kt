@@ -95,6 +95,8 @@ public object MasterPlaylistRewriter {
 
         return QualityDescriptor(
             height = height,
+            width = widthOf(attributes),
+
             // AVERAGE-BANDWIDTH is the honest number for choosing a rendition;
             // BANDWIDTH is the peak, and the spec requires only the latter.
             bitrate = (attributes["AVERAGE-BANDWIDTH"] ?: attributes["BANDWIDTH"])?.toIntOrNull() ?: 0,
@@ -105,6 +107,9 @@ public object MasterPlaylistRewriter {
 
     private fun heightOf(attributes: Map<String, String>): Int? =
         attributes["RESOLUTION"]?.substringAfter('x')?.toIntOrNull()
+
+    private fun widthOf(attributes: Map<String, String>): Int? =
+        attributes["RESOLUTION"]?.substringBefore('x')?.toIntOrNull()
 
     // The spec's VIDEO-RANGE values. PQ covers HDR10 and Dolby Vision and the
     // playlist does not distinguish them — a client that needs to reads the

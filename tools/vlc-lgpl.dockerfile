@@ -79,6 +79,11 @@ RUN mkdir -p contrib/native && cd contrib/native \
 # The interfaces are dropped here rather than trimmed out of the payload later,
 # because a plugin that is never built cannot be shipped by accident. Qt, skins2
 # and Lua together are 259 of the GPL files in the official payload.
+#
+# No X11 either, and not as a size decision: the desktop player renders through
+# libVLC's vmem callbacks into a Compose surface, and the headless verification
+# already proves the payload loads on a machine carrying no libX11 at all. An X
+# output would be a dependency nothing calls and one more thing to close over.
 RUN ./bootstrap \
     && ./configure \
         --prefix=/opt/vlc-lgpl \
@@ -86,8 +91,9 @@ RUN ./bootstrap \
         --disable-qt --disable-skins2 --disable-lua --disable-ncurses \
         --disable-nls \
         --disable-x264 --disable-x265 --disable-postproc \
-        --disable-sout --disable-vlm \
+        --disable-sout --disable-vlm --disable-srt --disable-sdl-image \
         --disable-dbus --disable-udev \
+        --disable-xcb --disable-xvideo --disable-wayland --without-x \
         --disable-alsa --disable-jack --disable-pulse \
         --enable-avcodec --enable-avformat --enable-swscale \
     && make -j"$(nproc)" \

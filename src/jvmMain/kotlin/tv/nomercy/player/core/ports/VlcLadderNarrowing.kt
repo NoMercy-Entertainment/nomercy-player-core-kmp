@@ -31,6 +31,7 @@ internal object VlcLadderNarrowing {
                 bitrate = descriptor.bitrate,
                 codec = VlcTrackMapper.codecFamily(descriptor.codec),
                 dynamicRange = rangeOf(descriptor.dynamicRange),
+                width = descriptor.width,
                 label = descriptor.label(),
             )
         }
