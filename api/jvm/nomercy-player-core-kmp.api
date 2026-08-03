@@ -5683,6 +5683,7 @@ public final class tv/nomercy/player/core/ports/VlcTrackMapper {
 	public final fun dynamicRange ()Ltv/nomercy/player/core/ports/DynamicRange;
 	public final fun labelOf (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public final fun languageOf (Ljava/lang/String;)Ljava/lang/String;
+	public final fun rungLabel (ILtv/nomercy/player/core/ports/DynamicRange;)Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/VlcjAudioBackend : tv/nomercy/player/core/ports/AudioBackend {

@@ -489,7 +489,7 @@ public class VlcjVideoBackend private constructor(
                 codec = VlcTrackMapper.codecFamily(track.codecName),
                 dynamicRange = VlcTrackMapper.dynamicRange(),
                 width = track.width.takeIf { it > 0 },
-                label = VlcTrackMapper.labelOf(track.description, track.language),
+                label = VlcTrackMapper.rungLabel(track.height, VlcTrackMapper.dynamicRange()),
             )
         }
 

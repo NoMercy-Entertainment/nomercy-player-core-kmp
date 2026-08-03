@@ -92,4 +92,20 @@ public object VlcTrackMapper {
     /** The same rule, for the same reason — a container reachable twice is one track. */
     public fun distinctSubtitles(tracks: List<SubtitleTrack>): List<SubtitleTrack> =
         tracks.distinctBy { track -> listOf(track.language, track.label, track.format, track.forced) }
+
+    // What a quality menu shows for a container's video track.
+    //
+    // [labelOf] is the audio and subtitle labeller: it answers from the track's
+    // LANGUAGE, which on a video track is "und". A two-rung file offered a
+    // viewer two rows both called "und", and a one-rung file called its only
+    // quality "und" as well. A rung is named by its height, the way a
+    // manifest's rungs are named by QualityDescriptor.label().
+    public fun rungLabel(height: Int, dynamicRange: DynamicRange): String = buildString {
+        append(height)
+        append('p')
+        if (dynamicRange != DynamicRange.SDR) {
+            append(' ')
+            append(dynamicRange.name.replace('_', '-'))
+        }
+    }
 }
