@@ -1391,9 +1391,20 @@ public open class ComposedPlayer(
     // No transport at this layer, and no honest default for one. A NotImplemented
     // that names the feature is better than a stub returning an empty 200, which
     // a plugin cannot tell from a server that answered.
-    override suspend fun fetch(url: String, opts: FetchOptions): FetchResponse =
-        fetcher?.fetch(url, opts)
+    // Through the auth controller on the way out, which is the point of routing
+    // a plugin's fetches through the host at all: the url is transformed and the
+    // request is signed once, here, so a plugin cannot get either wrong by not
+    // knowing about them. Signed AFTER the url is transformed, because a
+    // signature covers the url that will actually be sent.
+    override suspend fun fetch(url: String, opts: FetchOptions): FetchResponse {
+        val transport: Fetcher = fetcher
             ?: throw NotImplementedError("This player was built without an HTTP transport.", "fetch")
+
+        val signedUrl: String = context.auth?.transformUrl(url) ?: url
+        val signedRequest: FetchOptions = context.auth?.signRequest(signedUrl, opts) ?: opts
+
+        return transport.fetch(signedUrl, signedRequest)
+    }
 
     override fun websocket(url: String, opts: RealtimeFactoryOptions): RealtimeChannel =
         throw NotImplementedError("This player was built without a realtime transport.", "websocket")

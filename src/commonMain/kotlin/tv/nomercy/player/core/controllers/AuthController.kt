@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.controllers
 
+import tv.nomercy.player.core.ports.FetchOptions
+
 // Turns an item's url into one the backend can actually fetch.
 //
 // A NoMercy media server signs playback urls, so the url on a queue item is not
@@ -19,6 +21,23 @@ package tv.nomercy.player.core.controllers
 // one method.
 public open class AuthController {
     public open fun transformUrl(url: String): String = url
+
+    // The escape hatch, for a scheme that signs the REQUEST rather than the url.
+    //
+    // HMAC over the body, AWS Signature v4, a challenge-response: none of them
+    // fit transformUrl, because what they sign is the method, the headers and
+    // the payload together. transformUrl was the only seam here, so those
+    // schemes had nowhere to go and a consumer using one had to wrap the
+    // transport instead — which puts the player's own fetches outside whatever
+    // they wrapped.
+    //
+    // Given the url alongside the request, because a signature covers both and
+    // the transformed url is the one that will actually be sent.
+    //
+    // Suspending, because a signature can need a key the host has to fetch or
+    // unwrap first. Pass-through by default: a consumer whose media needs no
+    // signing writes nothing.
+    public open suspend fun signRequest(url: String, request: FetchOptions): FetchOptions = request
 
     // Get a fresh token, when the one held has stopped working.
     //
