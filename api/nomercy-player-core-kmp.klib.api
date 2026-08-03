@@ -462,6 +462,25 @@ final enum class tv.nomercy.player.core.plugin/ChromeSlot : kotlin/Enum<tv.nomer
     final fun values(): kotlin/Array<tv.nomercy.player.core.plugin/ChromeSlot> // tv.nomercy.player.core.plugin/ChromeSlot.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.plugin/PluginRecoveryAction : kotlin/Enum<tv.nomercy.player.core.plugin/PluginRecoveryAction> { // tv.nomercy.player.core.plugin/PluginRecoveryAction|null[0]
+    enum entry DISABLE // tv.nomercy.player.core.plugin/PluginRecoveryAction.DISABLE|null[0]
+    enum entry FALLBACK // tv.nomercy.player.core.plugin/PluginRecoveryAction.FALLBACK|null[0]
+    enum entry IGNORE // tv.nomercy.player.core.plugin/PluginRecoveryAction.IGNORE|null[0]
+    enum entry RETRY_ONCE // tv.nomercy.player.core.plugin/PluginRecoveryAction.RETRY_ONCE|null[0]
+
+    final val entries // tv.nomercy.player.core.plugin/PluginRecoveryAction.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.plugin/PluginRecoveryAction> // tv.nomercy.player.core.plugin/PluginRecoveryAction.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val token // tv.nomercy.player.core.plugin/PluginRecoveryAction.token|{}token[0]
+        final fun <get-token>(): kotlin/String // tv.nomercy.player.core.plugin/PluginRecoveryAction.token.<get-token>|<get-token>(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.plugin/PluginRecoveryAction // tv.nomercy.player.core.plugin/PluginRecoveryAction.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.plugin/PluginRecoveryAction> // tv.nomercy.player.core.plugin/PluginRecoveryAction.values|values#static(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.plugin/PluginRecoveryAction.Companion|null[0]
+        final fun fromToken(kotlin/String): tv.nomercy.player.core.plugin/PluginRecoveryAction? // tv.nomercy.player.core.plugin/PluginRecoveryAction.Companion.fromToken|fromToken(kotlin.String){}[0]
+    }
+}
+
 final enum class tv.nomercy.player.core.ports/AnnouncementLevel : kotlin/Enum<tv.nomercy.player.core.ports/AnnouncementLevel> { // tv.nomercy.player.core.ports/AnnouncementLevel|null[0]
     enum entry ASSERTIVE // tv.nomercy.player.core.ports/AnnouncementLevel.ASSERTIVE|null[0]
     enum entry POLITE // tv.nomercy.player.core.ports/AnnouncementLevel.POLITE|null[0]
@@ -1265,6 +1284,8 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
         final fun <get-resolvedOptions>(): #A? // tv.nomercy.player.core.plugin/Plugin.resolvedOptions.<get-resolvedOptions>|<get-resolvedOptions>(){}[0]
     final val storage // tv.nomercy.player.core.plugin/Plugin.storage|{}storage[0]
         final fun <get-storage>(): tv.nomercy.player.core.ports/Storage // tv.nomercy.player.core.plugin/Plugin.storage.<get-storage>|<get-storage>(){}[0]
+    open val onError // tv.nomercy.player.core.plugin/Plugin.onError|{}onError[0]
+        open fun <get-onError>(): kotlin.collections/Map<kotlin/String, tv.nomercy.player.core.plugin/PluginRecoveryAction> // tv.nomercy.player.core.plugin/Plugin.onError.<get-onError>|<get-onError>(){}[0]
     open val options // tv.nomercy.player.core.plugin/Plugin.options|{}options[0]
         open fun <get-options>(): #A? // tv.nomercy.player.core.plugin/Plugin.options.<get-options>|<get-options>(){}[0]
 
@@ -1288,8 +1309,10 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
     final fun websocket(kotlin/String, tv.nomercy.player.core.ports/RealtimeFactoryOptions = ...): tv.nomercy.player.core.ports/RealtimeChannel // tv.nomercy.player.core.plugin/Plugin.websocket|websocket(kotlin.String;tv.nomercy.player.core.ports.RealtimeFactoryOptions){}[0]
     final suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.plugin/Plugin.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
     final suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions = ...): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.plugin/Plugin.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
+    open fun activateFallback() // tv.nomercy.player.core.plugin/Plugin.activateFallback|activateFallback(){}[0]
     open fun dispose() // tv.nomercy.player.core.plugin/Plugin.dispose|dispose(){}[0]
     open fun getRuntimeState(): kotlin.collections/Map<kotlin/String, kotlin/Any?> // tv.nomercy.player.core.plugin/Plugin.getRuntimeState|getRuntimeState(){}[0]
+    open fun retryLastOperation() // tv.nomercy.player.core.plugin/Plugin.retryLastOperation|retryLastOperation(){}[0]
     open fun use() // tv.nomercy.player.core.plugin/Plugin.use|use(){}[0]
 }
 

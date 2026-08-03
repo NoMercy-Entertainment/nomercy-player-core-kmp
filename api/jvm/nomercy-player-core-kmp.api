@@ -3778,6 +3778,7 @@ public class tv/nomercy/player/core/plugin/PlayerTransportCommands : tv/nomercy/
 
 public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public fun <init> ()V
+	protected fun activateFallback ()V
 	public final fun disable (Ljava/lang/String;)V
 	public static synthetic fun disable$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;ILjava/lang/Object;)V
 	protected final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -3791,6 +3792,7 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public final fun getId ()Ljava/lang/String;
 	protected final fun getLogger ()Ltv/nomercy/player/core/ports/Logger;
 	public abstract fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public fun getOnError ()Ljava/util/Map;
 	public fun getOptions ()Ljava/lang/Object;
 	protected final fun getResolvedOptions ()Ljava/lang/Object;
 	protected fun getRuntimeState ()Ljava/util/Map;
@@ -3805,6 +3807,7 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public static synthetic fun report$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)V
 	protected final fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
 	public static synthetic fun resolveCueParser$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CueParser;
+	protected fun retryLastOperation ()V
 	public final fun state ()Ltv/nomercy/player/core/plugin/PluginState;
 	protected final fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public static synthetic fun t$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
@@ -3875,6 +3878,22 @@ public final class tv/nomercy/player/core/plugin/PluginManifest$DefaultImpls {
 
 public final class tv/nomercy/player/core/plugin/PluginManifestKt {
 	public static final fun pluginEventKey (Ltv/nomercy/player/core/plugin/PluginManifest;Ljava/lang/String;)Ltv/nomercy/player/core/events/EventKey;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginRecoveryAction : java/lang/Enum {
+	public static final field Companion Ltv/nomercy/player/core/plugin/PluginRecoveryAction$Companion;
+	public static final field DISABLE Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
+	public static final field FALLBACK Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
+	public static final field IGNORE Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
+	public static final field RETRY_ONCE Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getToken ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
+	public static fun values ()[Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginRecoveryAction$Companion {
+	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/plugin/PluginRecoveryAction;
 }
 
 public final class tv/nomercy/player/core/plugin/PluginRegistry {

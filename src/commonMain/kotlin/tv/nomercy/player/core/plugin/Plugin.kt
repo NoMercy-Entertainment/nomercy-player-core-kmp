@@ -218,6 +218,14 @@ public abstract class Plugin<O : Any> {
         data: T,
     ): BeforeDispatchResult<T> = wired.host.dispatchBefore(EventKey(scopedName(key.name)), data)
 
+    // What this plugin does about its own errors, keyed by code.
+    //
+    // Data an author writes once rather than a catch block at every call site,
+    // and applied the moment the error is surfaced. A code with no entry is
+    // reported and nothing else, which is the behaviour every plugin had before
+    // this existed.
+    public open val onError: Map<String, PluginRecoveryAction> get() = emptyMap()
+
     // Surface a problem without stopping. Use for anything the viewer might
     // want to know about but that did not break playback.
     protected fun report(
@@ -227,7 +235,39 @@ public abstract class Plugin<O : Any> {
         cause: Throwable? = null,
         context: Map<String, Any?> = emptyMap(),
     ) {
-        wired.host.report(buildError(code, message, severity, cause, context))
+        surface(buildError(code, message, severity, cause, context))
+    }
+
+    // Report, then do whatever this plugin said it does about that code.
+    //
+    // In this order because the recovery may disable the plugin, and a consumer
+    // that heard the plugin go quiet without first hearing why would have no
+    // way to find out.
+    private fun surface(error: PlayerError) {
+        wired.host.report(error)
+        onError[error.code]?.let { recover(it, error) }
+    }
+
+    private fun recover(action: PluginRecoveryAction, error: PlayerError) {
+        when (action) {
+            PluginRecoveryAction.IGNORE -> Unit
+            PluginRecoveryAction.DISABLE -> disable("onError:${error.code}")
+            PluginRecoveryAction.RETRY_ONCE -> retryLastOperation()
+            PluginRecoveryAction.FALLBACK -> activateFallback()
+        }
+    }
+
+    // The bodies for the two recoveries that need one.
+    //
+    // Logged rather than silent when an author declared the action and did not
+    // implement it: a recovery that cannot run is a configuration mistake, and
+    // one that fails quietly looks exactly like one that worked.
+    protected open fun retryLastOperation() {
+        logger.warn("onError declares 'retry-once' for \"$id\" and retryLastOperation() is not implemented")
+    }
+
+    protected open fun activateFallback() {
+        logger.warn("onError declares 'fallback' for \"$id\" and activateFallback() is not implemented")
     }
 
     // Surface a problem and stop. The error is reported through the host before
@@ -240,7 +280,7 @@ public abstract class Plugin<O : Any> {
         context: Map<String, Any?> = emptyMap(),
     ): Nothing {
         val error: PlayerError = buildError(code, message, severity, cause, context)
-        wired.host.report(error)
+        surface(error)
         throw error
     }
 
