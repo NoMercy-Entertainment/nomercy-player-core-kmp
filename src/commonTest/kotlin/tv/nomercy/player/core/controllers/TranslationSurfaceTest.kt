@@ -61,6 +61,45 @@ class TranslationSurfaceTest {
         ComposedPlayer(backend = FakeMediaBackend(), translator = translator)
 
     @Test
+    fun aKeyThatResolvedToItselfIsReportedAsMissingWhileStillAnsweringWithTheKey() = runTest {
+        val misses: MutableList<Pair<String, Map<String, String>>> = mutableListOf()
+        val translator = RecordingTranslator()
+        val player = ComposedPlayer(
+            backend = FakeMediaBackend(),
+            translator = translator,
+            onMissingTranslation = { key, vars -> misses += key to vars },
+        )
+        player.addTranslations(mapOf("en" to mapOf("plugin.chapters.next" to "Next chapter")))
+
+        val translated: String = player.t("plugin.chapters.next")
+        val untranslated: String = player.t("plugin.chapters.previous", mapOf("n" to "2"))
+
+        // The visible answer does not change: a key on screen is the bug report,
+        // and a blank label is not.
+        assertEquals("Next chapter", translated)
+        assertEquals("plugin.chapters.previous", untranslated)
+
+        // Only the miss, and it carries the vars so a report says which call site.
+        assertEquals(listOf("plugin.chapters.previous" to mapOf("n" to "2")), misses.toList())
+    }
+
+    @Test
+    fun aPlayerWithNoTranslatorReportsEveryKeyAsMissing() = runTest {
+        val misses: MutableList<String> = mutableListOf()
+        val player = ComposedPlayer(
+            backend = FakeMediaBackend(),
+            onMissingTranslation = { key, _ -> misses += key },
+        )
+
+        assertEquals("plugin.chapters.next", player.t("plugin.chapters.next"))
+
+        // From the outside "no translator" and "no entry" are one thing, a
+        // string that never got translated, and a host wiring this up to find
+        // untranslated keys needs to hear about both.
+        assertEquals(listOf("plugin.chapters.next"), misses.toList())
+    }
+
+    @Test
     fun aPluginsStringsReachTheTranslatorAndComeBackTranslated() = runTest {
         val translator = RecordingTranslator()
         val player: ComposedPlayer = playerWith(translator)

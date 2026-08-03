@@ -161,6 +161,28 @@ public abstract class Plugin<O : Any> {
         return subscription
     }
 
+    // The same subscription, for something that happens once.
+    //
+    // Built on [on] rather than on a host method, so it inherits both
+    // guarantees: it goes away with the plugin, and it stays quiet while the
+    // plugin is disabled. Without it an author wanting a one-shot listener had
+    // to call on() and dispose the handle by hand, which is the leak the base
+    // class exists to make impossible.
+    //
+    // Disposed before the body runs, so a handler that emits the same event
+    // does not re-enter itself.
+    protected fun <T> once(key: EventKey<T>, fn: (T) -> Unit): Subscription {
+        var handle: Subscription? = null
+
+        val subscription: Subscription = on(key) { data ->
+            handle?.dispose()
+            fn(data)
+        }
+        handle = subscription
+
+        return subscription
+    }
+
     // Emits under this plugin's namespace. A key that is already namespaced
     // goes out verbatim, so re-emitting your own registry key is not
     // double-prefixed.

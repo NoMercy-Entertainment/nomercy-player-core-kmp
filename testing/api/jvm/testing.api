@@ -32,6 +32,7 @@ public final class tv/nomercy/player/testing/FakeLogger : tv/nomercy/player/core
 	public final fun getChildren ()Ljava/util/List;
 	public final fun getLines ()Ljava/util/List;
 	public fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun trace (Ljava/lang/String;[Ljava/lang/Object;)V
 	public fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
 }
 

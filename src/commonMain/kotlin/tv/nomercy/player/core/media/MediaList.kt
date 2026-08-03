@@ -43,8 +43,23 @@ private const val NO_CURSOR = -1
 // holding two objects that have to agree about one list.
 @Suppress("TooManyFunctions")
 public class MediaList<T : PlaylistItem>(
-    private val shuffleStrategy: ShuffleStrategy = FisherYatesShuffle(),
+    shuffleStrategy: ShuffleStrategy = FisherYatesShuffle(),
 ) {
+    private var shuffleStrategy: ShuffleStrategy = shuffleStrategy
+
+    // Swappable while the list is alive, because the interesting strategies are
+    // chosen after it is.
+    //
+    // A weighted or similarity-driven order is a consumer's decision, made when
+    // a viewer turns it on rather than when the queue was built, and this was a
+    // private constructor value: SmartShuffleGenerator could be written and
+    // never installed. Ordering is not recomputed here on purpose, the current
+    // order was one a viewer is listening to and re-rolling it under them is a
+    // change nobody asked for; the next shuffle() uses the new strategy.
+    public fun setShuffleStrategy(strategy: ShuffleStrategy) {
+        shuffleStrategy = strategy
+    }
+
     private val bus: EventEmitter<Unit> = EventEmitter()
     private val entries: MutableList<T> = mutableListOf()
     private var cursor: Int = NO_CURSOR

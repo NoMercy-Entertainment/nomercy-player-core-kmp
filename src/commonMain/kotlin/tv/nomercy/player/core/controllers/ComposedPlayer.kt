@@ -229,6 +229,15 @@ public open class ComposedPlayer(
     // and every consumer shared one file.
     storage: Storage? = null,
     private val translator: Translator? = null,
+    // Told when a key resolved to itself, which is the only way a team finds out
+    // which strings are untranslated in a build a viewer is already running.
+    //
+    // Beside the translator rather than in PlayerConfig, because it is the same
+    // decision: a host that injected no translator wants to hear about every key
+    // it is being asked for, and one that did wants to hear about the misses.
+    // The fallback is unchanged and stays the visible answer: the key itself
+    // reaches the UI, because a blank button is not a bug report.
+    private val onMissingTranslation: ((key: String, vars: Map<String, String>) -> Unit)? = null,
     // Supplied by the chrome, which is the only layer that can reach a platform
     // accessibility API. Absent means the player says nothing.
     private val announcer: Announcer? = null,
@@ -1367,8 +1376,17 @@ public open class ComposedPlayer(
 
     // Falls back to the key so an untranslated string is visibly a key rather
     // than an empty label.
-    override fun t(namespacedKey: String, vars: Map<String, String>): String =
-        translator?.t(namespacedKey, vars) ?: namespacedKey
+    //
+    // A translator answering with the key it was given is a miss, and it is
+    // reported the same way as having no translator at all: from the outside
+    // the two are one thing, a string that never got translated.
+    override fun t(namespacedKey: String, vars: Map<String, String>): String {
+        val translated: String? = translator?.t(namespacedKey, vars)
+        if (translated == null || translated == namespacedKey) {
+            onMissingTranslation?.invoke(namespacedKey, vars)
+        }
+        return translated ?: namespacedKey
+    }
 
     // The rest of the translator, reachable through the player.
     //

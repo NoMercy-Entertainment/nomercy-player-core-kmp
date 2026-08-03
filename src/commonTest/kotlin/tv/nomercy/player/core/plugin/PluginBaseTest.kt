@@ -17,6 +17,7 @@ import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.fakes.FakePluginHost
 import tv.nomercy.player.core.plugin.fakes.RecordingLogger
 import tv.nomercy.player.core.plugin.fakes.RecordingStorage
+import tv.nomercy.player.core.ports.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -40,10 +41,13 @@ private class DemoPlugin(private val authorDefault: DemoOptions? = null) : Plugi
 
     var pings: Int = 0
     var extras: Int = 0
+    var firstReady: Int = 0
 
     override fun use() {
         on(EventKey<Int>("ping")) { pings += it }
     }
+
+    fun listenOnceForReady(): Subscription = once(EventKey<Int>("ready")) { firstReady += it }
 
     fun listenForExtras(): Subscription = on(EventKey<Int>("extra")) { extras += it }
 
@@ -52,6 +56,7 @@ private class DemoPlugin(private val authorDefault: DemoOptions? = null) : Plugi
     suspend fun writeTheme() = storage.set("theme", "dark")
     suspend fun readTheme(): String? = storage.get("theme")
     fun logHello() = logger.info("hello")
+    fun logDetail() = logger.trace("frame 41 decoded")
     fun currentOptions(): DemoOptions? = resolvedOptions
 }
 
@@ -99,6 +104,69 @@ class PluginBaseTest {
             "plugin:demo:line" to "lyric",
         )
         assertEquals(expected, host.emitted.toList())
+    }
+
+    @Test
+    fun aTraceLineReachesALoggerThatOnlyImplementsTheFourOlderLevels() = runTest {
+        // RecordingLogger predates trace and overrides nothing for it, which is
+        // every Logger a consumer already wrote. The line has to arrive
+        // somewhere rather than being dropped by a default that does nothing.
+        val logger = RecordingLogger("[nmplayer]")
+        val host = FakePluginHost(rootLogger = logger)
+        val plugin = DemoPlugin()
+        wire(plugin, host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        plugin.logDetail()
+
+        assertEquals(listOf("[nmplayer][demo] DEBUG frame 41 decoded"), logger.lines.toList())
+    }
+
+    @Test
+    fun aLoggerThatSeparatesTraceFromDebugGetsItOnItsOwnChannel() = runTest {
+        val lines: MutableList<String> = mutableListOf()
+        val logger = object : Logger {
+            override fun error(message: String, vararg args: Any?) { lines.add("ERROR $message") }
+            override fun warn(message: String, vararg args: Any?) { lines.add("WARN $message") }
+            override fun info(message: String, vararg args: Any?) { lines.add("INFO $message") }
+            override fun debug(message: String, vararg args: Any?) { lines.add("DEBUG $message") }
+            override fun trace(message: String, vararg args: Any?) { lines.add("TRACE $message") }
+            override fun child(scope: String): Logger = this
+        }
+        val plugin = DemoPlugin()
+        wire(plugin, FakePluginHost(rootLogger = logger), CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        plugin.logDetail()
+
+        assertEquals(listOf("TRACE frame 41 decoded"), lines.toList())
+    }
+
+    @Test
+    fun aOneShotSubscriptionFiresOnceAndDisposesItself() = runTest {
+        val host = FakePluginHost()
+        val plugin = DemoPlugin()
+        wire(plugin, host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        plugin.listenOnceForReady()
+        host.emit(EventKey<Int>("ready"), 1)
+        host.emit(EventKey<Int>("ready"), 10)
+
+        // The accumulated value, not a call counter: 1 proves the first payload
+        // arrived AND the second did not, where a count of 1 would also be
+        // satisfied by a helper that dropped the first and kept the second.
+        assertEquals(1, plugin.firstReady)
+    }
+
+    @Test
+    fun aOneShotSubscriptionThatNeverFiresStillLeavesWithThePlugin() = runTest {
+        val host = FakePluginHost()
+        val plugin = DemoPlugin()
+        val lifecycle = wire(plugin, host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        plugin.listenOnceForReady()
+        lifecycle.dispose()
+        host.emit(EventKey<Int>("ready"), 1)
+
+        assertEquals(0, plugin.firstReady)
     }
 
     @Test

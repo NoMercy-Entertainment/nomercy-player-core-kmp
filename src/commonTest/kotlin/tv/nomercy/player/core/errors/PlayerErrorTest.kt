@@ -17,6 +17,37 @@ import kotlin.test.assertTrue
 class PlayerErrorTest {
 
     @Test
+    fun anErrorStartsUnhandledAndStaysHandledOnceAListenerClaimsIt() {
+        val error = PlayerError("core:media/decode-fatal-all", scope = ErrorScope.core())
+
+        assertFalse(error.isHandled(), "an error nobody has seen yet cannot be handled")
+
+        error.markHandled()
+
+        assertTrue(error.isHandled(), "the listener that recovered from this said so")
+    }
+
+    @Test
+    fun markingHandledTwiceIsTheSameAsOnce() {
+        val error = PlayerError("core:media/decode-fatal-all", scope = ErrorScope.core())
+
+        error.markHandled()
+        error.markHandled()
+
+        assertTrue(error.isHandled())
+    }
+
+    @Test
+    fun twoErrorsDoNotShareAHandledFlag() {
+        val recovered = PlayerError("core:media/decode-fatal-all", scope = ErrorScope.core())
+        val other = PlayerError("core:media/decode-fatal-all", scope = ErrorScope.core())
+
+        recovered.markHandled()
+
+        assertFalse(other.isHandled(), "a second failure is not covered by the first one's recovery")
+    }
+
+    @Test
     fun anAuthErrorIsStillANetworkErrorSoRetryHandlersKeepCatchingIt() {
         val error = AuthError("core:auth/forbidden", scope = ErrorScope(ScopeKind.AUTH))
 

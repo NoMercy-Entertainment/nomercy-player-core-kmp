@@ -19,5 +19,16 @@ public interface Logger {
     public fun warn(message: String, vararg args: Any?)
     public fun info(message: String, vararg args: Any?)
     public fun debug(message: String, vararg args: Any?)
+
+    // The level below debug: per-frame, per-segment, per-cue detail that is
+    // noise in a bug report and the whole story in a decode investigation.
+    //
+    // Defaulted to debug rather than added to every implementer's required
+    // surface, and defaulted to debug rather than to nothing. A no-op would
+    // silently drop these lines for every Logger a consumer already wrote,
+    // which is the failure mode where a level exists, a library writes to it,
+    // and the person reading the log never learns it was there.
+    public fun trace(message: String, vararg args: Any?): Unit = debug(message, *args)
+
     public fun child(scope: String): Logger
 }

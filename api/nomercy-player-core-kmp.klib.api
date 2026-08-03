@@ -951,6 +951,7 @@ abstract interface tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.co
     abstract fun error(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.ports/Logger.error|error(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
     abstract fun info(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.ports/Logger.info|info(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
     abstract fun warn(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.ports/Logger.warn|warn(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
+    open fun trace(kotlin/String, kotlin/Array<out kotlin/Any?>...) // tv.nomercy.player.core.ports/Logger.trace|trace(kotlin.String;kotlin.Array<out|kotlin.Any?>...){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.core.ports/MediaBackend|null[0]
@@ -1270,6 +1271,7 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
     final fun <#A1: kotlin/Any?> emit(tv.nomercy.player.core.events/EventKey<#A1>, #A1) // tv.nomercy.player.core.plugin/Plugin.emit|emit(tv.nomercy.player.core.events.EventKey<0:0>;0:0){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> listen(kotlinx.coroutines.flow/Flow<#A1>, kotlin/Function1<#A1, kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/Plugin.listen|listen(kotlinx.coroutines.flow.Flow<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
     final fun <#A1: kotlin/Any?> on(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.plugin/Plugin.on|on(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
+    final fun <#A1: kotlin/Any?> once(tv.nomercy.player.core.events/EventKey<#A1>, kotlin/Function1<#A1, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.plugin/Plugin.once|once(tv.nomercy.player.core.events.EventKey<0:0>;kotlin.Function1<0:0,kotlin.Unit>){0§<kotlin.Any?>}[0]
     final fun disable(kotlin/String? = ...) // tv.nomercy.player.core.plugin/Plugin.disable|disable(kotlin.String?){}[0]
     final fun enable() // tv.nomercy.player.core.plugin/Plugin.enable|enable(){}[0]
     final fun enabled(): kotlin/Boolean // tv.nomercy.player.core.plugin/Plugin.enabled|enabled(){}[0]
@@ -1556,6 +1558,7 @@ final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.co
     final fun setCurrent(kotlin/Function1<#A, kotlin/Boolean>) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.Function1<1:0,kotlin.Boolean>){}[0]
     final fun setCurrent(kotlin/Int) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.Int){}[0]
     final fun setCurrent(kotlin/String) // tv.nomercy.player.core.media/MediaList.setCurrent|setCurrent(kotlin.String){}[0]
+    final fun setShuffleStrategy(tv.nomercy.player.core.ports/ShuffleStrategy) // tv.nomercy.player.core.media/MediaList.setShuffleStrategy|setShuffleStrategy(tv.nomercy.player.core.ports.ShuffleStrategy){}[0]
     final fun shuffle() // tv.nomercy.player.core.media/MediaList.shuffle|shuffle(){}[0]
     final fun sort(kotlin/Comparator<#A>) // tv.nomercy.player.core.media/MediaList.sort|sort(kotlin.Comparator<1:0>){}[0]
 }
@@ -5212,7 +5215,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
 }
 
 open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player.core.devtools/EventFirehose, tv.nomercy.player.core.plugin/PluginHost { // tv.nomercy.player.core.controllers/ComposedPlayer|null[0]
-    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage? = ..., tv.nomercy.player.core.ports/Translator? = ..., tv.nomercy.player.core.ports/Announcer? = ..., tv.nomercy.player.core.ports/CastSender? = ..., tv.nomercy.player.core.ports/Platform = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ..., kotlin/String = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage?;tv.nomercy.player.core.ports.Translator?;tv.nomercy.player.core.ports.Announcer?;tv.nomercy.player.core.ports.CastSender?;tv.nomercy.player.core.ports.Platform;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?;kotlin.String){}[0]
+    constructor <init>(tv.nomercy.player.core.ports/MediaBackend? = ..., tv.nomercy.player.core.ports/Logger = ..., tv.nomercy.player.core.ports/Storage? = ..., tv.nomercy.player.core.ports/Translator? = ..., kotlin/Function2<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/Unit>? = ..., tv.nomercy.player.core.ports/Announcer? = ..., tv.nomercy.player.core.ports/CastSender? = ..., tv.nomercy.player.core.ports/Platform = ..., tv.nomercy.player.core.ports/Clock = ..., tv.nomercy.player.core.ports/Fetcher? = ..., tv.nomercy.player.core.ports/VideoBackend? = ..., kotlinx.coroutines/CoroutineScope? = ..., kotlin/String = ...) // tv.nomercy.player.core.controllers/ComposedPlayer.<init>|<init>(tv.nomercy.player.core.ports.MediaBackend?;tv.nomercy.player.core.ports.Logger;tv.nomercy.player.core.ports.Storage?;tv.nomercy.player.core.ports.Translator?;kotlin.Function2<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>,kotlin.Unit>?;tv.nomercy.player.core.ports.Announcer?;tv.nomercy.player.core.ports.CastSender?;tv.nomercy.player.core.ports.Platform;tv.nomercy.player.core.ports.Clock;tv.nomercy.player.core.ports.Fetcher?;tv.nomercy.player.core.ports.VideoBackend?;kotlinx.coroutines.CoroutineScope?;kotlin.String){}[0]
 
     final val bandwidth // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth|{}bandwidth[0]
         final fun <get-bandwidth>(): tv.nomercy.player.core.controllers/BandwidthController // tv.nomercy.player.core.controllers/ComposedPlayer.bandwidth.<get-bandwidth>|<get-bandwidth>(){}[0]
@@ -5507,7 +5510,9 @@ open class tv.nomercy.player.core.errors/PlayerError : kotlin/Exception { // tv.
     final val suggestion // tv.nomercy.player.core.errors/PlayerError.suggestion|{}suggestion[0]
         final fun <get-suggestion>(): kotlin/String? // tv.nomercy.player.core.errors/PlayerError.suggestion.<get-suggestion>|<get-suggestion>(){}[0]
 
+    final fun isHandled(): kotlin/Boolean // tv.nomercy.player.core.errors/PlayerError.isHandled|isHandled(){}[0]
     final fun isHttp(kotlin/Int): kotlin/Boolean // tv.nomercy.player.core.errors/PlayerError.isHttp|isHttp(kotlin.Int){}[0]
+    final fun markHandled() // tv.nomercy.player.core.errors/PlayerError.markHandled|markHandled(){}[0]
 }
 
 open class tv.nomercy.player.core.errors/PluginError : tv.nomercy.player.core.errors/PlayerError { // tv.nomercy.player.core.errors/PluginError|null[0]

@@ -86,8 +86,8 @@ public final class tv/nomercy/player/core/controllers/BandwidthController {
 
 public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/player/core/devtools/EventFirehose, tv/nomercy/player/core/plugin/PluginHost {
 	public fun <init> ()V
-	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
-	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Lkotlin/jvm/functions/Function2;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MediaBackend;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Translator;Lkotlin/jvm/functions/Function2;Ltv/nomercy/player/core/ports/Announcer;Ltv/nomercy/player/core/ports/CastSender;Ltv/nomercy/player/core/ports/Platform;Ltv/nomercy/player/core/ports/Clock;Ltv/nomercy/player/core/ports/Fetcher;Ltv/nomercy/player/core/ports/VideoBackend;Lkotlinx/coroutines/CoroutineScope;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun activityTracking ()Z
 	public fun activityTracking (Z)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -453,6 +453,7 @@ public final class tv/nomercy/player/core/controllers/SilentLogger : tv/nomercy/
 	public fun debug (Ljava/lang/String;[Ljava/lang/Object;)V
 	public fun error (Ljava/lang/String;[Ljava/lang/Object;)V
 	public fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun trace (Ljava/lang/String;[Ljava/lang/Object;)V
 	public fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
 }
 
@@ -1302,7 +1303,9 @@ public class tv/nomercy/player/core/errors/PlayerError : java/lang/Exception {
 	public final fun getScope ()Ltv/nomercy/player/core/errors/ErrorScope;
 	public final fun getSeverity ()Ltv/nomercy/player/core/errors/Severity;
 	public final fun getSuggestion ()Ljava/lang/String;
+	public final fun isHandled ()Z
 	public final fun isHttp (I)Z
+	public final fun markHandled ()V
 }
 
 public final class tv/nomercy/player/core/errors/PlayerErrorKt {
@@ -3042,6 +3045,7 @@ public final class tv/nomercy/player/core/media/MediaList {
 	public final fun setCurrent (Ljava/lang/String;)V
 	public final fun setCurrent (Lkotlin/jvm/functions/Function1;)V
 	public final fun setCurrent (Ltv/nomercy/player/core/media/PlaylistItem;)V
+	public final fun setShuffleStrategy (Ltv/nomercy/player/core/ports/ShuffleStrategy;)V
 	public final fun shuffle ()V
 	public final fun sort (Ljava/util/Comparator;)V
 }
@@ -3795,6 +3799,7 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	protected final fun launch (Lkotlin/jvm/functions/Function2;)Lkotlinx/coroutines/Job;
 	protected final fun listen (Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
 	protected final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	protected final fun once (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	protected final fun report (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;)V
 	public static synthetic fun report$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)V
 	protected final fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
@@ -4919,7 +4924,12 @@ public abstract interface class tv/nomercy/player/core/ports/Logger {
 	public abstract fun debug (Ljava/lang/String;[Ljava/lang/Object;)V
 	public abstract fun error (Ljava/lang/String;[Ljava/lang/Object;)V
 	public abstract fun info (Ljava/lang/String;[Ljava/lang/Object;)V
+	public fun trace (Ljava/lang/String;[Ljava/lang/Object;)V
 	public abstract fun warn (Ljava/lang/String;[Ljava/lang/Object;)V
+}
+
+public final class tv/nomercy/player/core/ports/Logger$DefaultImpls {
+	public static fun trace (Ltv/nomercy/player/core/ports/Logger;Ljava/lang/String;[Ljava/lang/Object;)V
 }
 
 public abstract interface class tv/nomercy/player/core/ports/MediaBackend {

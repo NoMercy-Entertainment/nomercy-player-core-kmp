@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.media
 
+import tv.nomercy.player.core.ports.ShuffleStrategy
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -24,6 +25,31 @@ private fun listOfItems(vararg ids: String): MediaList<TestItem> =
     MediaList<TestItem>().apply { set(items(*ids)) }
 
 class MediaListTest {
+
+    @Test
+    fun aShuffleStrategyInstalledAfterTheListExistsIsTheOneThatOrders() {
+        // The reason this exists: a smart shuffle is chosen by a consumer while
+        // the player is already running, and the strategy used to be a private
+        // constructor value. A generator nothing could install is a generator
+        // nothing uses.
+        var asked = 0
+        val reversing = object : ShuffleStrategy {
+            override fun <T : PlaylistItem> order(items: List<T>, currentIndex: Int): List<T> {
+                asked += 1
+                return items.reversed()
+            }
+        }
+
+        val list = listOfItems("a", "b", "c", "d", "e", "f")
+        list.setShuffleStrategy(reversing)
+        list.shuffle()
+
+        // Both, because either alone can pass by luck: the default Fisher-Yates
+        // can produce a reversed six by chance, and a strategy that was asked
+        // but whose answer was thrown away would still be counted.
+        assertEquals(1, asked, "the installed strategy is the one that was asked")
+        assertEquals(listOf("f", "e", "d", "c", "b", "a"), list.get().map { it.id })
+    }
 
     @Test
     fun aSelectionMadeBeforeTheListSeedsIsAppliedWhenItDoes() {
