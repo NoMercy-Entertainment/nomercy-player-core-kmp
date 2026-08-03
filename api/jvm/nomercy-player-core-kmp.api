@@ -2829,6 +2829,7 @@ public final class tv/nomercy/player/core/input/KeyBindingTable {
 	public final fun bind (Ltv/nomercy/player/core/input/PlayerKey;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun bind$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public static synthetic fun bind$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/PlayerKey;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public final fun bound ()Ljava/util/List;
 	public final fun handle (Ltv/nomercy/player/core/input/KeyCombo;)Z
 	public final fun handle (Ltv/nomercy/player/core/input/PlayerKey;)Z
 	public final fun isBound (Ltv/nomercy/player/core/input/KeyCombo;)Z

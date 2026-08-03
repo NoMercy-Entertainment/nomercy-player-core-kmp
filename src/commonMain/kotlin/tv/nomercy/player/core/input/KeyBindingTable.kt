@@ -60,6 +60,28 @@ public class KeyBindingTable(private val nowMs: () -> Long) {
 
     public fun isBound(combo: KeyCombo): Boolean = bindings.containsKey(combo.canonical)
 
+    // Every combo that would fire right now, in the order they were bound.
+    //
+    // For the one thing a binding table is for besides firing: drawing the
+    // shortcut sheet. The reference's handler binds ? to open one and can,
+    // because its table is readable; this one could only be asked about a combo
+    // somebody already suspected, so a sheet would have had to restate all
+    // fifty-three bindings and then drift from them.
+    //
+    // Guarded bindings are left out, and the first test written against this
+    // found out why: the video handler binds Back behind a form-factor guard,
+    // so a desktop sheet listing everything BOUND promised a key that does
+    // nothing there. A shortcut a viewer presses and sees ignored is worse than
+    // one that was never offered — they conclude the player is broken.
+    //
+    // Insertion order because that is the order the groups install them, so a
+    // sheet reads playback, then navigation, then volume, the way the handler
+    // is written.
+    public fun bound(): List<KeyCombo> = bindings
+        .filterValues { it.enabled() }
+        .keys
+        .map { KeyCombo(it) }
+
     // Answers whether the press was consumed, which is what a platform needs in
     // order to decide whether to pass it on. Claiming an unbound key is how a
     // television stops responding to its own back button.

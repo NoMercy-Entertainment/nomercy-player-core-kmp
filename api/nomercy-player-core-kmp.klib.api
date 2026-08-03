@@ -3818,6 +3818,7 @@ final class tv.nomercy.player.core.input/KeyBindingTable { // tv.nomercy.player.
 
     final fun bind(tv.nomercy.player.core.input/KeyCombo, kotlin/Long = ..., kotlin/Function0<kotlin/Boolean> = ..., kotlin/Function0<kotlin/Unit>) // tv.nomercy.player.core.input/KeyBindingTable.bind|bind(tv.nomercy.player.core.input.KeyCombo;kotlin.Long;kotlin.Function0<kotlin.Boolean>;kotlin.Function0<kotlin.Unit>){}[0]
     final fun bind(tv.nomercy.player.core.input/PlayerKey, kotlin/Long = ..., kotlin/Function0<kotlin/Boolean> = ..., kotlin/Function0<kotlin/Unit>) // tv.nomercy.player.core.input/KeyBindingTable.bind|bind(tv.nomercy.player.core.input.PlayerKey;kotlin.Long;kotlin.Function0<kotlin.Boolean>;kotlin.Function0<kotlin.Unit>){}[0]
+    final fun bound(): kotlin.collections/List<tv.nomercy.player.core.input/KeyCombo> // tv.nomercy.player.core.input/KeyBindingTable.bound|bound(){}[0]
     final fun handle(tv.nomercy.player.core.input/KeyCombo): kotlin/Boolean // tv.nomercy.player.core.input/KeyBindingTable.handle|handle(tv.nomercy.player.core.input.KeyCombo){}[0]
     final fun handle(tv.nomercy.player.core.input/PlayerKey): kotlin/Boolean // tv.nomercy.player.core.input/KeyBindingTable.handle|handle(tv.nomercy.player.core.input.PlayerKey){}[0]
     final fun isBound(tv.nomercy.player.core.input/KeyCombo): kotlin/Boolean // tv.nomercy.player.core.input/KeyBindingTable.isBound|isBound(tv.nomercy.player.core.input.KeyCombo){}[0]
