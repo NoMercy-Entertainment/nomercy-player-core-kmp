@@ -101,8 +101,22 @@ public class ExoPlayerVideoBackend(
         // Not an HDR rule. Any rung this device cannot decode — a profile, a
         // level, a resolution — is now skipped rather than attempted, which is
         // the class rather than the instance.
+        // And a cap the codec string cannot lie its way past.
+        //
+        // The rule above trusts what the manifest declares, and Sintel's declares
+        // `avc1.4D401E` — Main profile at LEVEL 3.0, which tops out at 720x576 —
+        // for all four rungs including the two at 3840x1635. The device reports
+        // that format as supported, because at level 3.0 it is; the decoder then
+        // receives 4K frames and dies with ERROR_CODE_DECODING_FAILED on the
+        // first one. Capability filtering cannot see a lie of that shape.
+        //
+        // The viewport can. Selecting no rung larger than the screen is what
+        // every Android player does anyway — decoding 4K for a 1080-wide panel
+        // is heat and battery for pixels nobody sees — and it survives a manifest
+        // whose codec strings are wrong, which is the case that actually bit.
         parameters = buildUponParameters()
             .setExceedRendererCapabilitiesIfNecessary(false)
+            .setViewportSizeToPhysicalDisplaySize(true)
             .build()
     }
 

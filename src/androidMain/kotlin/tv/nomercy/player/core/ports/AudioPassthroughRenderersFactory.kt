@@ -125,8 +125,22 @@ public open class AudioPassthroughRenderersFactory protected constructor(
         public fun hasSurroundCapability(capabilities: AudioCapabilities): Boolean =
             SURROUND_ENCODINGS.any { capabilities.supportsEncoding(it.first) }
 
+        // With decoder fallback, which is the difference between a film that
+        // plays and a dialog that says the decode failed.
+        //
+        // A hardware decoder that reports a format as supported can still fail on
+        // it. Sintel is 1920x818 — a height no multiple of sixteen — and this
+        // phone's MediaTek AVC decoder answered 318 consecutive
+        // `VIDIOC_DQBUF failed, err: 22` before ExoPlayer gave up with
+        // ERROR_CODE_DECODING_FAILED. Nothing in the format said that would
+        // happen, and no capability check can predict it.
+        //
+        // Fallback retries the next decoder in the list, which is the software
+        // one. Slower on the rungs where it is needed, and needed on exactly the
+        // streams that otherwise refuse to play at all.
         public fun create(context: Context, isTvForm: Boolean): AudioPassthroughRenderersFactory =
             AudioPassthroughRenderersFactory(context = context, enablePassthrough = isTvForm)
+                .apply { setEnableDecoderFallback(true) } as AudioPassthroughRenderersFactory
     }
 }
 
