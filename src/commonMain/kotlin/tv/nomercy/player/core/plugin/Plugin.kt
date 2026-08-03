@@ -131,6 +131,27 @@ public abstract class Plugin<O : Any> {
 
     private var active: Boolean = true
 
+    // Everything about this plugin, in one value a debug overlay can draw.
+    //
+    // Safe before registration on purpose, unlike the helpers above: the whole
+    // point is to be able to ask a plugin what it is, and a snapshot that threw
+    // for a plugin that had not been wired yet would be least useful exactly
+    // when somebody most wants it.
+    public fun state(): PluginState<O> = PluginState(
+        id = manifest.id,
+        version = manifest.version,
+        enabled = active,
+        opts = wiring?.options ?: options,
+        runtime = getRuntimeState(),
+    )
+
+    // Override to say what this plugin is currently doing.
+    //
+    // Empty by default rather than abstract: most plugins have nothing to add
+    // beyond their options, and making every author implement a method to say
+    // so would be a requirement invented by the library.
+    protected open fun getRuntimeState(): Map<String, Any?> = emptyMap()
+
     // Both the generic event and the plugin-scoped one, because a consumer
     // watching every plugin and one watching this plugin are different
     // listeners and neither should have to filter the other's stream.

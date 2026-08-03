@@ -1281,6 +1281,7 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
     final fun launch(kotlin.coroutines/SuspendFunction1<kotlinx.coroutines/CoroutineScope, kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/Plugin.launch|launch(kotlin.coroutines.SuspendFunction1<kotlinx.coroutines.CoroutineScope,kotlin.Unit>){}[0]
     final fun report(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...) // tv.nomercy.player.core.plugin/Plugin.report|report(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
     final fun resolveCueParser(kotlin/String, kotlin/String? = ...): tv.nomercy.player.core.ports/CueParser<*>? // tv.nomercy.player.core.plugin/Plugin.resolveCueParser|resolveCueParser(kotlin.String;kotlin.String?){}[0]
+    final fun state(): tv.nomercy.player.core.plugin/PluginState<#A> // tv.nomercy.player.core.plugin/Plugin.state|state(){}[0]
     final fun t(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String> = ...): kotlin/String // tv.nomercy.player.core.plugin/Plugin.t|t(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
     final fun throwError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/Throwable? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): kotlin/Nothing // tv.nomercy.player.core.plugin/Plugin.throwError|throwError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.Throwable?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
     final fun timeout(kotlin/Long, kotlin/Function0<kotlin/Unit>): kotlinx.coroutines/Job // tv.nomercy.player.core.plugin/Plugin.timeout|timeout(kotlin.Long;kotlin.Function0<kotlin.Unit>){}[0]
@@ -1288,6 +1289,7 @@ abstract class <#A: kotlin/Any> tv.nomercy.player.core.plugin/Plugin { // tv.nom
     final suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.plugin/Plugin.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
     final suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions = ...): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.plugin/Plugin.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
     open fun dispose() // tv.nomercy.player.core.plugin/Plugin.dispose|dispose(){}[0]
+    open fun getRuntimeState(): kotlin.collections/Map<kotlin/String, kotlin/Any?> // tv.nomercy.player.core.plugin/Plugin.getRuntimeState|getRuntimeState(){}[0]
     open fun use() // tv.nomercy.player.core.plugin/Plugin.use|use(){}[0]
 }
 
@@ -1309,6 +1311,31 @@ abstract class tv.nomercy.player.core.plugins.audio/VisualizationPlugin : tv.nom
         final val version // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.Manifest.version|{}version[0]
             final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
     }
+}
+
+final class <#A: kotlin/Any> tv.nomercy.player.core.plugin/PluginState { // tv.nomercy.player.core.plugin/PluginState|null[0]
+    constructor <init>(kotlin/String, kotlin/String, kotlin/Boolean, #A?, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...) // tv.nomercy.player.core.plugin/PluginState.<init>|<init>(kotlin.String;kotlin.String;kotlin.Boolean;1:0?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+
+    final val enabled // tv.nomercy.player.core.plugin/PluginState.enabled|{}enabled[0]
+        final fun <get-enabled>(): kotlin/Boolean // tv.nomercy.player.core.plugin/PluginState.enabled.<get-enabled>|<get-enabled>(){}[0]
+    final val id // tv.nomercy.player.core.plugin/PluginState.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugin/PluginState.id.<get-id>|<get-id>(){}[0]
+    final val opts // tv.nomercy.player.core.plugin/PluginState.opts|{}opts[0]
+        final fun <get-opts>(): #A? // tv.nomercy.player.core.plugin/PluginState.opts.<get-opts>|<get-opts>(){}[0]
+    final val runtime // tv.nomercy.player.core.plugin/PluginState.runtime|{}runtime[0]
+        final fun <get-runtime>(): kotlin.collections/Map<kotlin/String, kotlin/Any?> // tv.nomercy.player.core.plugin/PluginState.runtime.<get-runtime>|<get-runtime>(){}[0]
+    final val version // tv.nomercy.player.core.plugin/PluginState.version|{}version[0]
+        final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugin/PluginState.version.<get-version>|<get-version>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugin/PluginState.component1|component1(){}[0]
+    final fun component2(): kotlin/String // tv.nomercy.player.core.plugin/PluginState.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // tv.nomercy.player.core.plugin/PluginState.component3|component3(){}[0]
+    final fun component4(): #A? // tv.nomercy.player.core.plugin/PluginState.component4|component4(){}[0]
+    final fun component5(): kotlin.collections/Map<kotlin/String, kotlin/Any?> // tv.nomercy.player.core.plugin/PluginState.component5|component5(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String = ..., kotlin/Boolean = ..., #A? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.plugin/PluginState<#A> // tv.nomercy.player.core.plugin/PluginState.copy|copy(kotlin.String;kotlin.String;kotlin.Boolean;1:0?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugin/PluginState.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugin/PluginState.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugin/PluginState.toString|toString(){}[0]
 }
 
 final class <#A: kotlin/Any?> tv.nomercy.player.core.cues/Cue { // tv.nomercy.player.core.cues/Cue|null[0]

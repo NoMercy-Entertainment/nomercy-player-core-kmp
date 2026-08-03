@@ -57,6 +57,9 @@ private class DemoPlugin(private val authorDefault: DemoOptions? = null) : Plugi
     suspend fun readTheme(): String? = storage.get("theme")
     fun logHello() = logger.info("hello")
     fun logDetail() = logger.trace("frame 41 decoded")
+
+    var cuesLoaded: Int = 0
+    override fun getRuntimeState(): Map<String, Any?> = mapOf("cuesLoaded" to cuesLoaded)
     fun currentOptions(): DemoOptions? = resolvedOptions
 }
 
@@ -104,6 +107,41 @@ class PluginBaseTest {
             "plugin:demo:line" to "lyric",
         )
         assertEquals(expected, host.emitted.toList())
+    }
+
+    @Test
+    fun aSnapshotCarriesTheIdVersionEnabledStateOptionsAndWhateverThePluginAddsToIt() = runTest {
+        val plugin = DemoPlugin()
+        wire(plugin, FakePluginHost(), CoroutineScope(StandardTestDispatcher(testScheduler)), DemoOptions("lyrics"))
+        plugin.cuesLoaded = 42
+
+        val state = plugin.state()
+
+        assertEquals("demo", state.id)
+        assertEquals("1.0.0", state.version)
+        assertTrue(state.enabled)
+        assertEquals(DemoOptions("lyrics"), state.opts)
+        assertEquals(mapOf("cuesLoaded" to 42), state.runtime)
+    }
+
+    @Test
+    fun aSnapshotFollowsTheEnabledFlagRatherThanReportingWhatItWasAtRegistration() = runTest {
+        val plugin = DemoPlugin()
+        wire(plugin, FakePluginHost(), CoroutineScope(StandardTestDispatcher(testScheduler)))
+
+        plugin.disable("no service")
+
+        assertEquals(false, plugin.state().enabled, "a disabled plugin still reported itself enabled")
+    }
+
+    @Test
+    fun aPluginCanBeAskedWhatItIsBeforeAnybodyRegisteredIt() = runTest {
+        // The one moment somebody most wants to look at a plugin is when it has
+        // not come up, so this must not throw the way the wired helpers do.
+        val state = DemoPlugin(DemoOptions("author default")).state()
+
+        assertEquals("demo", state.id)
+        assertEquals(DemoOptions("author default"), state.opts)
     }
 
     @Test
