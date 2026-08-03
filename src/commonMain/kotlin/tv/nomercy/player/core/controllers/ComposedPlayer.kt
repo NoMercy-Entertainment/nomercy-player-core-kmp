@@ -244,6 +244,13 @@ public open class ComposedPlayer(
     // Whatever owns a remote session, when something does. Core cannot cast: the
     // protocols are a Google SDK, an AirPlay route and NoMercy's own Connect
     // session, and none belong in a library whose job is deciding what plays.
+    //
+    // A constructor parameter and not a setter, even though the object that
+    // implements it is a plugin added afterwards. The reference has no such
+    // seam at all — its cast plugin holds the session and calls the player back
+    // — so a setCastSender here would be a method the contract does not name,
+    // which the surface conformance test rejects and should. A consumer builds
+    // the controller and the plugin, hands the plugin in here, and adds it.
     private val castSender: CastSender? = null,
     // Wake lock, connectivity, visibility and codec probing, from the app's own
     // observers. A library that registered its own would be a second set beside
