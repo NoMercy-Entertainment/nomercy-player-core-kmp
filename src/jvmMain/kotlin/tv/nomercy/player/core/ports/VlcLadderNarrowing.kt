@@ -30,7 +30,7 @@ internal object VlcLadderNarrowing {
                 height = descriptor.height,
                 bitrate = descriptor.bitrate,
                 codec = VlcTrackMapper.codecFamily(descriptor.codec),
-                dynamicRange = rangeOf(descriptor.dynamicRange),
+                dynamicRange = declaredRangeOf(descriptor.dynamicRange),
                 width = descriptor.width,
                 label = descriptor.label(),
             )
@@ -74,10 +74,4 @@ internal object VlcLadderNarrowing {
     // does: the ports enum has no HLG entry and every decision written against it
     // asks only whether a rung is SDR. A second entry would be a wire-format
     // change for a question nobody asks.
-    private fun rangeOf(range: MediaDynamicRange): DynamicRange = when (range) {
-        MediaDynamicRange.Sdr -> DynamicRange.SDR
-        MediaDynamicRange.Hdr10, MediaDynamicRange.HlG -> DynamicRange.HDR10
-        MediaDynamicRange.Hdr10Plus -> DynamicRange.HDR10_PLUS
-        MediaDynamicRange.DolbyVision -> DynamicRange.DOLBY_VISION
-    }
 }

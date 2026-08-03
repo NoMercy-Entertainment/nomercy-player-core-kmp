@@ -36,6 +36,16 @@ public class BandwidthSanitizingInterceptor(
     private val ceiling: Long,
     private val floor: Long = BandwidthSanitizer.DEFAULT_FLOOR,
     private val keep: Collection<QualityDescriptor>? = null,
+    /**
+     * What the master playlist DECLARED, before anything narrowed it.
+     *
+     * This is the only place a Media3 engine can learn a variant's dynamic range.
+     * `Format.colorInfo` is null for an HLS variant until its decoder has been
+     * configured — so reading the range off the format answers SDR for every
+     * rung of a ladder whose manifest says `VIDEO-RANGE=PQ`, and an HDR film was
+     * reported as SDR by a player holding the playlist that said otherwise.
+     */
+    private val onVariants: (List<QualityDescriptor>) -> Unit = {},
     private val onAdjusted: (BandwidthSanitizer.Adjustment) -> Unit = {},
 ) : Interceptor {
 
@@ -53,6 +63,10 @@ public class BandwidthSanitizingInterceptor(
         // to be dropped is work for nobody, and reporting an adjustment to a
         // rung the engine will never see would make the adjustment log lie about
         // what happened.
+        // Before the narrowing, because the declaration is about the stream and
+        // not about what this device was willing to keep.
+        MasterPlaylistRewriter.variants(original).takeIf { it.isNotEmpty() }?.let(onVariants)
+
         val narrowed: String = keep?.let { MasterPlaylistRewriter.rewrite(original, it) } ?: original
         val result = BandwidthSanitizer.sanitize(narrowed, ceiling, floor)
         result.adjustments.forEach(onAdjusted)

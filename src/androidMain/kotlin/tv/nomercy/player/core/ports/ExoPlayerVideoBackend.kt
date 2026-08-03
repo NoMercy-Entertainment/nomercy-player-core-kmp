@@ -31,6 +31,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.media.QualityDescriptor
 import tv.nomercy.player.core.events.SubtitleCue
 import tv.nomercy.player.core.events.SubtitleCueChange
 
@@ -153,7 +154,15 @@ public class ExoPlayerVideoBackend(
     // only the host knows when it has.
     public var videoSurfaceAttached: Boolean = false
 
-    private val engine: ExoEngine = buildEngine(context, authHeaders, trackSelector, equaliser)
+    private val engine: ExoEngine =
+        buildEngine(context, authHeaders, trackSelector, equaliser) { declared -> declaredVariants = declared }
+
+    // The ladder the master playlist declared, kept so a rung can be told its own
+    // dynamic range. Media3 will not say: Format.colorInfo is null for an HLS
+    // variant until its decoder is configured, so every rung of a PQ ladder read
+    // back as SDR.
+    @Volatile
+    private var declaredVariants: List<QualityDescriptor> = emptyList()
 
     // Public because video has to be drawn somewhere and only the caller knows
     // where. A PlayerView is handed the engine, not a frame buffer, so a backend
@@ -438,7 +447,7 @@ public class ExoPlayerVideoBackend(
         cachedVolume = pendingVolume ?: player.volume
         cachedRate = player.playbackParameters.speed.toDouble()
         val tracks: Tracks = player.currentTracks
-        cachedQualityLevels = ExoTrackMapper.qualityLevels(tracks)
+        cachedQualityLevels = ExoTrackMapper.qualityLevels(tracks).map(::withDeclaredRange)
         cachedQuality = ExoTrackMapper.selectedQuality(tracks)
         cachedAudioTracks = ExoTrackMapper.audioTracks(tracks)
         cachedSubtitleTracks = ExoTrackMapper.subtitleTracks(tracks)
@@ -450,6 +459,19 @@ public class ExoPlayerVideoBackend(
             Player.STATE_ENDED -> BackendState.READY
             else -> BackendState.IDLE
         }
+    }
+
+    // The manifest's word about a rung's dynamic range, over the engine's.
+    //
+    // Matched on height, which is what a variant and its Format agree on. A rung
+    // the manifest never declared keeps whatever the engine said, because an
+    // unmatched rung is a progressive file or a local one and there is no
+    // playlist to be more right than the decoder.
+    private fun withDeclaredRange(level: QualityLevel): QualityLevel {
+        val declared: QualityDescriptor = declaredVariants
+            .firstOrNull { it.height == level.height } ?: return level
+
+        return level.copy(dynamicRange = declaredRangeOf(declared.dynamicRange))
     }
 
     override fun qualityLevels(): List<QualityLevel> = cachedQualityLevels

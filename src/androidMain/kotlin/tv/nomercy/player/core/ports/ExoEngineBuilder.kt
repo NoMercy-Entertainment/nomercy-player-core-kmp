@@ -25,6 +25,7 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
 import okhttp3.OkHttpClient
+import tv.nomercy.player.core.media.QualityDescriptor
 
 // How the engine is actually configured, as opposed to merely constructed.
 //
@@ -56,6 +57,15 @@ internal fun buildEngine(
     // inserting a processor into a video sink to change nothing would cost a
     // pass over every sample for no reason.
     processor: BiquadEqAudioProcessor? = null,
+    // What the master playlist declared, handed back as it is read.
+    //
+    // The interceptor that reads it was written, tested and never added to the
+    // client, so on Android the ladder narrowing, the bandwidth sanitiser and the
+    // manifest's own VIDEO-RANGE all did nothing at all — and the dynamic range
+    // was then read off Format.colorInfo, which Media3 leaves null for an HLS
+    // variant until its decoder is configured. An HDR film was reported as SDR by
+    // a player holding the playlist that said PQ.
+    onVariants: (List<QualityDescriptor>) -> Unit = {},
 ): ExoEngine {
     val budget: BufferConfig = bufferConfigForDevice(context)
     val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
@@ -85,7 +95,12 @@ internal fun buildEngine(
         .setLooper(Looper.getMainLooper())
         .setRenderersFactory(renderers)
         .setTrackSelector(selector)
-        .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory(context, auth), DefaultExtractorsFactory()))
+        .setMediaSourceFactory(
+            DefaultMediaSourceFactory(
+                dataSourceFactory(context, auth, onVariants),
+                DefaultExtractorsFactory(),
+            ),
+        )
         .setLoadControl(loadControlFor(budget))
         // Hold a network wakelock while playing. Without it a TV that dims its
         // screen can let the radio idle mid-stream, and the rebuffer that
@@ -179,12 +194,25 @@ private fun offloadFor(renderers: AudioPassthroughRenderersFactory): AudioOffloa
 // a 256MB heap and is not comfortable on a phone either. Sidecar ASS is drawn
 // by the subtitle overlay, which streams it, and NoMercy serves HLS rather than
 // MKV-embedded ASS, so nothing is lost by leaving the extractor path alone.
-private fun dataSourceFactory(context: Context, auth: AuthHeaders): DataSource.Factory {
+private fun dataSourceFactory(
+    context: Context,
+    auth: AuthHeaders,
+    onVariants: (List<QualityDescriptor>) -> Unit,
+): DataSource.Factory {
     val client = OkHttpClient.Builder()
         // Auth first, so the repair below sees the response that the
         // authenticated request actually returned rather than a 401 body.
         .addInterceptor(auth.asInterceptor())
         .addInterceptor(CodecFixInterceptor())
+        // No ceiling and no narrowing: the rung policy belongs to the backend,
+        // which measures the surface. This is here to READ, which is the half
+        // that was missing entirely.
+        .addInterceptor(
+            BandwidthSanitizingInterceptor(
+                ceiling = Long.MAX_VALUE,
+                onVariants = onVariants,
+            ),
+        )
         .build()
 
     return DefaultDataSource.Factory(context, OkHttpDataSource.Factory(client))

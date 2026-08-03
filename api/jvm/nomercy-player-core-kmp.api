@@ -5682,6 +5682,10 @@ public final class tv/nomercy/player/core/ports/TimeRangeKt {
 	public static final fun covers (Ljava/util/List;D)Z
 }
 
+public final class tv/nomercy/player/core/ports/TracksKt {
+	public static final fun declaredRangeOf (Ltv/nomercy/player/core/media/DynamicRange;)Ltv/nomercy/player/core/ports/DynamicRange;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/TransitionBackend {
 	public abstract fun crossfade (JLtv/nomercy/player/core/ports/CrossfadeCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun disposeSecondary ()V

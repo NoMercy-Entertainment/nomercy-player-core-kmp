@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.ports
 
+import tv.nomercy.player.core.media.DynamicRange as MediaDynamicRange
+
 public enum class DynamicRange(public val wire: String) {
     SDR("sdr"),
     HDR10("hdr10"),
@@ -67,3 +69,16 @@ public data class SubtitleTrack(
     // URL to fetch.
     val url: String? = null,
 )
+
+// A manifest's declared dynamic range, in the vocabulary a quality level uses.
+//
+// The two enums exist because a descriptor is what a PLAYLIST says and a level is
+// what a MENU shows, and they are allowed to diverge. The conversion between them
+// was written once per platform and was about to be written a third time, which
+// is the shape that guarantees the copies drift.
+public fun declaredRangeOf(range: MediaDynamicRange): DynamicRange = when (range) {
+    MediaDynamicRange.Sdr -> DynamicRange.SDR
+    MediaDynamicRange.Hdr10, MediaDynamicRange.HlG -> DynamicRange.HDR10
+    MediaDynamicRange.Hdr10Plus -> DynamicRange.HDR10_PLUS
+    MediaDynamicRange.DolbyVision -> DynamicRange.DOLBY_VISION
+}

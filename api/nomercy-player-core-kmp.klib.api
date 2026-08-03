@@ -6810,6 +6810,7 @@ final fun tv.nomercy.player.core.media/normalizeLanguage(kotlin/String?): kotlin
 final fun tv.nomercy.player.core.ports/appleDisplayIsHdr(): kotlin/Boolean // tv.nomercy.player.core.ports/appleDisplayIsHdr|appleDisplayIsHdr(){}[0]
 final fun tv.nomercy.player.core.ports/bufferedFrontier(kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange>, kotlin/Double): kotlin/Double // tv.nomercy.player.core.ports/bufferedFrontier|bufferedFrontier(kotlin.collections.List<tv.nomercy.player.core.ports.TimeRange>;kotlin.Double){}[0]
 final fun tv.nomercy.player.core.ports/currentDevice(): tv.nomercy.player.core.ports/Device // tv.nomercy.player.core.ports/currentDevice|currentDevice(){}[0]
+final fun tv.nomercy.player.core.ports/declaredRangeOf(tv.nomercy.player.core.media/DynamicRange): tv.nomercy.player.core.ports/DynamicRange // tv.nomercy.player.core.ports/declaredRangeOf|declaredRangeOf(tv.nomercy.player.core.media.DynamicRange){}[0]
 final fun tv.nomercy.player.core.ports/defaultClock(): tv.nomercy.player.core.ports/Clock // tv.nomercy.player.core.ports/defaultClock|defaultClock(){}[0]
 final fun tv.nomercy.player.core.ports/defaultIdGenerator(): tv.nomercy.player.core.ports/IdGenerator // tv.nomercy.player.core.ports/defaultIdGenerator|defaultIdGenerator(){}[0]
 final fun tv.nomercy.player.core.ports/defaultPlatform(): tv.nomercy.player.core.ports/Platform // tv.nomercy.player.core.ports/defaultPlatform|defaultPlatform(){}[0]
