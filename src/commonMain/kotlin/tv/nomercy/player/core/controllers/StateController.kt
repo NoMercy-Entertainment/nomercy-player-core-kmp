@@ -72,6 +72,25 @@ public class StateController(
         ctx.on(CoreEvents.Repeat) { recompute() }
         ctx.on(CoreEvents.Shuffle) { recompute() }
         ctx.on(CoreEvents.PlaybackRate) { recompute() }
+        // The buffer, which was the SECOND field this list forgot, in exactly
+        // the way the note above describes. bufferState is in the snapshot and
+        // no buffer event was subscribed, so the flow reported whatever the
+        // buffer was doing at the last unrelated recompute.
+        //
+        // Both directions matter and the clearing one is what a viewer sees: a
+        // player paused before its first frame gets no play, no time and no
+        // duration afterwards, so nothing recomputed and the spinner stayed on
+        // screen over a stream that was ready to go.
+        ctx.on(CoreEvents.BackendWaiting) { recompute() }
+        ctx.on(CoreEvents.BackendStalled) { recompute() }
+        // And the clear, which no event carries.
+        //
+        // Adding one was the obvious move and it is wrong: the conformance gate
+        // rejected `backend:canplay` because the web contract has no such event,
+        // and inventing API to publish a field is how two ecosystems drift. The
+        // field announces itself instead, so a value and its publication cannot
+        // come apart again.
+        ctx.onBufferStateChange = { recompute() }
         recompute()
     }
 

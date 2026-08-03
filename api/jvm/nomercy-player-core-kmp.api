@@ -374,6 +374,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun getItemEndingSoonEmitted ()Z
 	public final fun getLoadedItemId ()Ljava/lang/String;
 	public final fun getMutationGuards ()Ltv/nomercy/player/core/player/MutationGuards;
+	public final fun getOnBufferStateChange ()Lkotlin/jvm/functions/Function0;
 	public final fun getPhase ()Ltv/nomercy/player/core/player/PlayerPhase;
 	public final fun getPlayState ()Ltv/nomercy/player/core/player/PlayState;
 	public final fun getPlaybackRate ()D
@@ -397,6 +398,7 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun setInternalVolume (I)V
 	public final fun setItemEndingSoonEmitted (Z)V
 	public final fun setMutationGuards (Ltv/nomercy/player/core/player/MutationGuards;)V
+	public final fun setOnBufferStateChange (Lkotlin/jvm/functions/Function0;)V
 	public final fun setPlayState (Ltv/nomercy/player/core/player/PlayState;)V
 	public final fun setPlaybackRate (D)V
 	public final fun setQueueWired (Z)V

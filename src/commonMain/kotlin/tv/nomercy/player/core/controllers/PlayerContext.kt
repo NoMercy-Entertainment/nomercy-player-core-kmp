@@ -150,6 +150,23 @@ public class PlayerContext(
     // mid-playback, which is the difference between "wait a moment" and "your
     // connection is not keeping up".
     public var bufferState: BufferState = BufferState.IDLE
+        set(value) {
+            if (field == value) return
+            field = value
+            onBufferStateChange?.invoke()
+        }
+
+    /**
+     * Told whenever [bufferState] moves, so the snapshot cannot fall behind it.
+     *
+     * A hook rather than an event: the raise is carried by `backend:waiting` and
+     * `backend:stalled`, and the CLEAR is carried by nothing the web contract
+     * has. Adding `backend:canplay` to publish it was rejected by the conformance
+     * gate, correctly — inventing API to move a field is how two ecosystems come
+     * apart. So the field announces itself, internally, and a player paused
+     * before its first frame stops reporting LOADING over a stream that is ready.
+     */
+    public var onBufferStateChange: (() -> Unit)? = null
 
     public var playState: PlayState = PlayState.IDLE
 

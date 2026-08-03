@@ -204,6 +204,10 @@ public class BackendBridge(private val ctx: PlayerContext) {
             ctx.emit(CoreEvents.BackendStalled, BackendStalledPayload(ctx.backend?.currentTime() ?: 0.0))
         }
 
+        // Announced, like every other handler here. Setting the field alone
+        // left the clear invisible: nothing recomputes the snapshot for a value
+        // nobody emits, so a player that finished buffering while paused went on
+        // reporting LOADING until some unrelated event moved the state.
         listen(backend, CanonicalBackendEvent.CAN_PLAY) {
             ctx.bufferState = BufferState.IDLE
         }
