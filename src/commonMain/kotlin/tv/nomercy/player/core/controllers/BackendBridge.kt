@@ -12,6 +12,9 @@ import tv.nomercy.player.core.errors.ErrorCode
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.BackendErrorPayload
+import tv.nomercy.player.core.events.BackendLoadedPayload
+import tv.nomercy.player.core.events.BackendLoadingPayload
+import tv.nomercy.player.core.events.BackendStalledPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PlaySource
@@ -53,6 +56,7 @@ public class BackendBridge(private val ctx: PlayerContext) {
 
     public fun attach(backend: MediaBackend) {
         listen(backend, CanonicalBackendEvent.LOADED_METADATA) {
+            announceLoaded(backend)
             val duration: Double = backend.duration()
             if (duration > 0.0) {
                 ctx.internalDuration = duration
@@ -97,6 +101,10 @@ public class BackendBridge(private val ctx: PlayerContext) {
             // playing is a state that is lying. A toggle bound to it spent the
             // viewer's first press pausing a silent player.
             announcePause()
+            ctx.emit(
+                CoreEvents.BackendLoading,
+                BackendLoadingPayload(url = ctx.queue.current()?.url.orEmpty(), kind = BACKEND_KIND),
+            )
         }
 
         listen(backend, CanonicalBackendEvent.ENDED) {
@@ -188,10 +196,12 @@ public class BackendBridge(private val ctx: PlayerContext) {
     private fun attachBufferState(backend: MediaBackend) {
         listen(backend, CanonicalBackendEvent.WAITING) {
             ctx.bufferState = if (announcedFirstFrame) BufferState.STALLED else BufferState.LOADING
+            ctx.emit(CoreEvents.BackendWaiting, Unit)
         }
 
         listen(backend, CanonicalBackendEvent.STALLED) {
             ctx.bufferState = BufferState.STALLED
+            ctx.emit(CoreEvents.BackendStalled, BackendStalledPayload(ctx.backend?.currentTime() ?: 0.0))
         }
 
         listen(backend, CanonicalBackendEvent.CAN_PLAY) {
@@ -282,8 +292,28 @@ public class BackendBridge(private val ctx: PlayerContext) {
         ctx.emit(CoreEvents.Pause, PlaySource(ActionSource.PLATFORM))
     }
 
+    // The engine's own channel, spoken rather than merely declared. A consumer
+    // subscribing to backend:loaded heard nothing, ever, while the registry said
+    // the event existed - which reads as a working feature.
+    private fun announceLoaded(backend: MediaBackend) {
+        ctx.emit(
+            CoreEvents.BackendLoaded,
+            BackendLoadedPayload(
+                url = ctx.queue.current()?.url.orEmpty(),
+                kind = BACKEND_KIND,
+                duration = backend.duration(),
+            ),
+        )
+    }
+
     private fun listen(backend: MediaBackend, event: String, handler: (Any?) -> Unit) {
         backend.on(event, handler)
         handlers.add(event to handler)
     }
 }
+
+// What the web writes into these two payloads for a plain media element. The
+// desktop and mobile engines are all "media" from a consumer's point of view;
+// a bridge that named the engine would make the same stream read differently
+// on three platforms.
+private const val BACKEND_KIND = "media"
