@@ -92,7 +92,14 @@ class StreamRecoveryTest {
         // Media3's names, and the shapes the other two engines report. An engine
         // whose words this does not know is OTHER, which still gets one attempt.
         assertEquals(FailureKind.NETWORK, failureKindOf("ERROR_CODE_IO_NETWORK_CONNECTION_FAILED"))
-        assertEquals(FailureKind.NETWORK, failureKindOf("ERROR_CODE_IO_BAD_HTTP_STATUS"))
+        // NOT network, and this assertion used to say it was.
+        //
+        // It was wrong rather than weakened: a server that answered with a
+        // status is not a connection that dropped, and calling it network bought
+        // five reloads against a 404 that will never change. Stoney filed the
+        // consequence three times — "a server restart locks the video with a 404
+        // and no longer goes to the offline screen".
+        assertEquals(FailureKind.OTHER, failureKindOf("ERROR_CODE_IO_BAD_HTTP_STATUS"))
         assertEquals(FailureKind.MEDIA, failureKindOf("ERROR_CODE_DECODING_FAILED"))
         assertEquals(FailureKind.MEDIA, failureKindOf("ERROR_CODE_DECODER_INIT_FAILED"))
         assertEquals(FailureKind.MEDIA, failureKindOf("ERROR_CODE_PARSING_MANIFEST_MALFORMED"))
@@ -108,5 +115,45 @@ class StreamRecoveryTest {
         recovery.reset()
 
         assertEquals(RecoveryStep.RELOAD, recovery.stepFor(FailureKind.NETWORK, nowMs = 0L))
+    }
+}
+
+/**
+ * A server that answered and said no.
+ *
+ * Filed three times: "a server restart locks the video with a 404 error and no
+ * longer goes to the offline screen which should trigger a play recovery."
+ *
+ * The cause was the classifier's order. Media3 spells a refused status
+ * ERROR_CODE_IO_BAD_HTTP_STATUS, which contains both "_IO_" and "HTTP", so it
+ * matched NETWORK and bought five reloads against a server that will keep
+ * saying 404 — the budget spent silently on a permanent failure, and the
+ * escalation that shows the offline screen arriving a minute late.
+ */
+class RefusedStatusRecoveryTest {
+
+    @Test
+    fun aRefusedHttpStatusIsNotTreatedAsADroppedConnection() {
+        assertEquals(FailureKind.OTHER, failureKindOf("ERROR_CODE_IO_BAD_HTTP_STATUS"))
+        assertEquals(FailureKind.OTHER, failureKindOf("http status 404 not found"))
+    }
+
+    // And a real network failure keeps its budget, or this trade would fix one
+    // filing by breaking the other two.
+    @Test
+    fun aDroppedConnectionStillGetsTheNetworkBudget() {
+        assertEquals(FailureKind.NETWORK, failureKindOf("ERROR_CODE_IO_NETWORK_CONNECTION_FAILED"))
+        assertEquals(FailureKind.NETWORK, failureKindOf("ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT"))
+    }
+
+    // One reload, then the failure is the answer — which is what puts the
+    // offline screen in front of the viewer instead of a locked picture.
+    @Test
+    fun aRefusedStatusEscalatesAfterASingleAttempt() {
+        val recovery = StreamRecovery()
+        val kind: FailureKind = failureKindOf("ERROR_CODE_IO_BAD_HTTP_STATUS")
+
+        assertEquals(RecoveryStep.RELOAD, recovery.stepFor(kind, nowMs = 0L))
+        assertEquals(RecoveryStep.ESCALATE, recovery.stepFor(kind, nowMs = 100L))
     }
 }

@@ -213,11 +213,37 @@ public fun failureKindOf(reported: String?): FailureKind {
     val word: String = reported?.uppercase() ?: return FailureKind.OTHER
 
     return when {
+        // Asked BEFORE the network words, and that order is the fix.
+        //
+        // A server that ANSWERED with 404 is not a connection that dropped, but
+        // Media3 spells it ERROR_CODE_IO_BAD_HTTP_STATUS — which contains both
+        // "_IO_" and "HTTP", so it was read as a transient network failure and
+        // reloaded five times against a server that will keep saying 404. That
+        // is Stoney's "a server restart locks the video with a 404 and no longer
+        // goes to the offline screen": the budget is spent silently on a
+        // permanent failure, and the escalation that would show the offline
+        // screen arrives a minute late or not at all.
+        //
+        // A refused status gets the OTHER treatment — one reload from the
+        // current position, then out — because a library that moved while the
+        // player was paused is worth exactly one attempt and no more.
+        REFUSED_WORDS.any { it in word } -> FailureKind.OTHER
         NETWORK_WORDS.any { it in word } -> FailureKind.NETWORK
         MEDIA_WORDS.any { it in word } -> FailureKind.MEDIA
         else -> FailureKind.OTHER
     }
 }
+
+// The server answered and said no. Not a connection problem, whatever the
+// engine's constant happens to be spelled like.
+private val REFUSED_WORDS: List<String> = listOf(
+    "BAD_HTTP",
+    "HTTP_STATUS",
+    "NOT_FOUND",
+    "404",
+    "403",
+    "410",
+)
 
 private val NETWORK_WORDS: List<String> = listOf(
     "_IO_",
