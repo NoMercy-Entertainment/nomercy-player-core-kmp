@@ -174,7 +174,23 @@ public class TransportController(
 
         if (announce) ctx.transitionPhase(PlayerPhase.SEEKING)
         doSeek()
-        if (announce) ctx.transitionPhase(before)
+
+        // Seeking off the end LEAVES the end, and nothing here did that.
+        //
+        // The phase stayed ENDED through the seek and after it, so an episode
+        // scrubbed back to zero sat at its own end: the chrome kept the replay
+        // state, the transport had nothing to resume, and a play() found a
+        // player that believed it was finished. Filed three times as "restart
+        // episode does not actually start the episode after seeking back to 0".
+        //
+        // Paused rather than playing, because a seek is a position change and
+        // not a decision to start. The restart the app performs is a seek and
+        // then a play, and the play now lands somewhere it can work.
+        if (before == PlayerPhase.ENDED) {
+            ctx.transitionPhase(PlayerPhase.PAUSED)
+        } else if (announce) {
+            ctx.transitionPhase(before)
+        }
     }
 
     // The before/prevented pair, written once. Returning false means the
