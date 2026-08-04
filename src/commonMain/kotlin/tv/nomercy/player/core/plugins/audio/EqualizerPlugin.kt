@@ -14,6 +14,7 @@ import tv.nomercy.player.core.dsp.EqPreset
 import tv.nomercy.player.core.dsp.EqPresets
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
+import tv.nomercy.player.core.plugin.PluginOptionField
 import tv.nomercy.player.core.ports.AudioDspGraph
 
 // The ten sliders, and the presets that move them together.
@@ -31,7 +32,7 @@ import tv.nomercy.player.core.ports.AudioDspGraph
 // desynchronise the state every controller above depends on.
 public open class EqualizerPlugin(
     private val graph: AudioDspGraph?,
-    private val opts: EqualizerOptions,
+    opts: EqualizerOptions,
 ) : Plugin<EqualizerOptions>() {
 
     // Spelled out rather than defaulted: a defaulted Kotlin parameter reaches
@@ -46,7 +47,26 @@ public open class EqualizerPlugin(
 
     override val manifest: PluginManifest get() = Manifest
 
+    // Held rather than fixed: whether a curve is written on every drag is the
+    // setting a host tunes while watching what it costs.
+    private var opts: EqualizerOptions = opts
+
     override val options: EqualizerOptions get() = opts
+
+    override fun optionFields(): List<PluginOptionField> = listOf(
+        PluginOptionField.Toggle(
+            key = "autoLoad",
+            label = "Read the stored curve on registration",
+            value = opts.autoLoad,
+            apply = { on -> opts = opts.copy(autoLoad = on) },
+        ),
+        PluginOptionField.Toggle(
+            key = "autoSave",
+            label = "Write every band change straight away",
+            value = opts.autoSave,
+            apply = { on -> opts = opts.copy(autoSave = on) },
+        ),
+    )
 
     // The custom preset catalogue and the reading and writing of it, which is a
     // second subject from the sliders and lives in its own file.

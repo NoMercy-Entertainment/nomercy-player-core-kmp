@@ -3914,6 +3914,7 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	protected final fun listen (Lkotlinx/coroutines/flow/Flow;Lkotlin/jvm/functions/Function1;)Lkotlinx/coroutines/Job;
 	protected final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	protected final fun once (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun optionFields ()Ljava/util/List;
 	protected final fun report (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;)V
 	public static synthetic fun report$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ljava/lang/Throwable;Ljava/util/Map;ILjava/lang/Object;)V
 	protected final fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
@@ -4034,6 +4035,48 @@ public final class tv/nomercy/player/core/plugin/PluginManifest$DefaultImpls {
 
 public final class tv/nomercy/player/core/plugin/PluginManifestKt {
 	public static final fun pluginEventKey (Ltv/nomercy/player/core/plugin/PluginManifest;Ljava/lang/String;)Ltv/nomercy/player/core/events/EventKey;
+}
+
+public abstract class tv/nomercy/player/core/plugin/PluginOptionField {
+	public abstract fun getKey ()Ljava/lang/String;
+	public abstract fun getLabel ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginOptionField$Choice : tv/nomercy/player/core/plugin/PluginOptionField {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Lkotlin/jvm/functions/Function1;)V
+	public final fun getApply ()Lkotlin/jvm/functions/Function1;
+	public final fun getChoices ()Ljava/util/List;
+	public fun getKey ()Ljava/lang/String;
+	public fun getLabel ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginOptionField$Number : tv/nomercy/player/core/plugin/PluginOptionField {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;DDDDLkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;DDDDLkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getApply ()Lkotlin/jvm/functions/Function1;
+	public fun getKey ()Ljava/lang/String;
+	public fun getLabel ()Ljava/lang/String;
+	public final fun getMax ()D
+	public final fun getMin ()D
+	public final fun getStep ()D
+	public final fun getValue ()D
+}
+
+public final class tv/nomercy/player/core/plugin/PluginOptionField$Text : tv/nomercy/player/core/plugin/PluginOptionField {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun getApply ()Lkotlin/jvm/functions/Function1;
+	public fun getKey ()Ljava/lang/String;
+	public fun getLabel ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginOptionField$Toggle : tv/nomercy/player/core/plugin/PluginOptionField {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;)V
+	public final fun getApply ()Lkotlin/jvm/functions/Function1;
+	public fun getKey ()Ljava/lang/String;
+	public fun getLabel ()Ljava/lang/String;
+	public final fun getValue ()Z
 }
 
 public final class tv/nomercy/player/core/plugin/PluginRecoveryAction : java/lang/Enum {
@@ -4159,6 +4202,7 @@ public class tv/nomercy/player/core/plugins/audio/AudioGraphPlugin : tv/nomercy/
 	public fun getOptions ()Ltv/nomercy/player/core/plugins/audio/AudioGraphOptions;
 	public final fun graph ()Ltv/nomercy/player/core/ports/AudioDspGraph;
 	public final fun isReady ()Z
+	public fun optionFields ()Ljava/util/List;
 	public fun use ()V
 }
 
@@ -4239,6 +4283,7 @@ public class tv/nomercy/player/core/plugins/audio/EqualizerPlugin : tv/nomercy/p
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
 	public synthetic fun getOptions ()Ljava/lang/Object;
 	public fun getOptions ()Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;
+	public fun optionFields ()Ljava/util/List;
 	public fun preGain ()D
 	public fun preGain (D)V
 	public fun preset ()Ljava/lang/String;
@@ -4484,6 +4529,7 @@ public class tv/nomercy/player/core/plugins/canvas/CanvasPlugin : tv/nomercy/pla
 	public final fun getTicks ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun mount (DDD)V
 	public static synthetic fun mount$default (Ltv/nomercy/player/core/plugins/canvas/CanvasPlugin;DDDILjava/lang/Object;)V
+	public fun optionFields ()Ljava/util/List;
 	public final fun removeRenderer (Ltv/nomercy/player/core/plugins/canvas/CanvasRenderer;)V
 	public final fun size (DDD)V
 	public static synthetic fun size$default (Ltv/nomercy/player/core/plugins/canvas/CanvasPlugin;DDDILjava/lang/Object;)V
@@ -4738,6 +4784,7 @@ public class tv/nomercy/player/core/plugins/message/MessagePlugin : tv/nomercy/p
 	public final fun getPersistent ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun getToast ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun hide ()V
+	public fun optionFields ()Ljava/util/List;
 	public final fun queue (Ljava/util/List;)V
 	public final fun removePersistent (Ljava/lang/String;)V
 	public final fun show (Ljava/lang/String;J)V

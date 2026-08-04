@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
+import tv.nomercy.player.core.plugin.PluginOptionField
 
 public enum class CompositeMode {
     // Each frame starts blank. What a renderer did not draw this frame is gone.
@@ -63,8 +64,12 @@ public data class CanvasOptions(
  * denominator invented here.
  */
 public open class CanvasPlugin<S : Any>(
-    private val opts: CanvasOptions = CanvasOptions(),
+    opts: CanvasOptions = CanvasOptions(),
 ) : Plugin<CanvasOptions>() {
+
+    // Held rather than fixed: the fps cap is the option most worth turning down
+    // while watching what it costs, which means the loop has to read it again.
+    private var opts: CanvasOptions = opts
 
     public companion object Manifest : PluginManifest {
         override val id: String = "canvas"
@@ -76,6 +81,26 @@ public open class CanvasPlugin<S : Any>(
     override val manifest: PluginManifest get() = Manifest
 
     override val options: CanvasOptions get() = opts
+
+    override fun optionFields(): List<PluginOptionField> = listOf(
+        PluginOptionField.Number(
+            key = "fps",
+            label = "Frame cap",
+            value = opts.fps.toDouble(),
+            min = MIN_CANVAS_FPS,
+            max = MAX_CANVAS_FPS,
+            apply = { chosen -> opts = opts.copy(fps = chosen.toInt()) },
+        ),
+        PluginOptionField.Choice(
+            key = "compositeMode",
+            label = "Between frames",
+            value = opts.compositeMode.name,
+            choices = CompositeMode.entries.map { mode -> mode.name },
+            apply = { chosen ->
+                opts = opts.copy(compositeMode = CompositeMode.valueOf(chosen))
+            },
+        ),
+    )
 
     private val renderers: MutableList<CanvasRenderer<S>> = mutableListOf()
 
@@ -234,6 +259,11 @@ public fun interface CanvasRenderer<S : Any> {
 
 /** The web's sixty. */
 public const val DEFAULT_CANVAS_FPS: Int = 60
+
+// What an editor offers. One frame a second is still a loop, and past 120 the
+// surface's own refresh rate is the ceiling anyway.
+private const val MIN_CANVAS_FPS: Double = 1.0
+private const val MAX_CANVAS_FPS: Double = 120.0
 
 public const val CANVAS_RENDERER_FAILED: String = "canvas:render/renderer-failed"
 

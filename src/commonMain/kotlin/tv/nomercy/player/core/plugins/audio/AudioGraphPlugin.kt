@@ -11,6 +11,7 @@ package tv.nomercy.player.core.plugins.audio
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
+import tv.nomercy.player.core.plugin.PluginOptionField
 import tv.nomercy.player.core.plugin.pluginEventKey
 import tv.nomercy.player.core.ports.AudioDspGraph
 
@@ -43,7 +44,7 @@ public data class AudioGraphOptions(
  */
 public open class AudioGraphPlugin(
     private val graph: AudioDspGraph?,
-    private val opts: AudioGraphOptions = AudioGraphOptions(),
+    opts: AudioGraphOptions = AudioGraphOptions(),
 ) : Plugin<AudioGraphOptions>() {
 
     public companion object Manifest : PluginManifest {
@@ -55,7 +56,19 @@ public open class AudioGraphPlugin(
 
     override val manifest: PluginManifest get() = Manifest
 
+    // Held rather than fixed, so the toggle below turns the stage on for real.
+    private var opts: AudioGraphOptions = opts
+
     override val options: AudioGraphOptions get() = opts
+
+    override fun optionFields(): List<PluginOptionField> = listOf(
+        PluginOptionField.Toggle(
+            key = "eqEnabled",
+            label = "Equaliser stage on at start",
+            value = opts.eqEnabled,
+            apply = { on -> opts = opts.copy(eqEnabled = on) },
+        ),
+    )
 
     /**
      * The graph, or null on a platform without one.

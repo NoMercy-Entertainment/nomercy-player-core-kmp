@@ -64,6 +64,16 @@ public abstract class Plugin<O : Any> {
     // The author's default options. A consumer's options at registration win.
     public open val options: O? get() = null
 
+    // The same options, described so a host can draw an editor for them.
+    //
+    // Read on every call rather than held, because the values a field carries
+    // are the plugin's current ones and an editor that cached them would show
+    // the state as it was when the panel opened.
+    //
+    // Empty by default. A plugin with nothing worth editing gets a row and a
+    // toggle, which is what it had before this existed.
+    public open fun optionFields(): List<PluginOptionField> = emptyList()
+
     public val id: String get() = manifest.id
 
     private var wiring: Wiring<O>? = null

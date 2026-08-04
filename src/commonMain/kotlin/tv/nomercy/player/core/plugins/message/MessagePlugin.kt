@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
+import tv.nomercy.player.core.plugin.PluginOptionField
 
 public data class MessageOptions(
     /** How long a transient message stays when the caller does not say. */
@@ -46,8 +47,12 @@ public data class Message(
  * [toast] and [persistent] their own way, and both get the same answers.
  */
 public open class MessagePlugin(
-    private val opts: MessageOptions = MessageOptions(),
+    opts: MessageOptions = MessageOptions(),
 ) : Plugin<MessageOptions>() {
+
+    // Held rather than fixed, because an option a host can edit has to be an
+    // option the plugin reads again afterwards.
+    private var opts: MessageOptions = opts
 
     public companion object Manifest : PluginManifest {
         override val id: String = "message"
@@ -59,6 +64,18 @@ public open class MessagePlugin(
     override val manifest: PluginManifest get() = Manifest
 
     override val options: MessageOptions get() = opts
+
+    override fun optionFields(): List<PluginOptionField> = listOf(
+        PluginOptionField.Number(
+            key = "durationMs",
+            label = "Transient message duration (ms)",
+            value = opts.durationMs.toDouble(),
+            min = MIN_MESSAGE_MS,
+            max = MAX_MESSAGE_MS,
+            step = MESSAGE_STEP_MS,
+            apply = { chosen -> opts = opts.copy(durationMs = chosen.toLong()) },
+        ),
+    )
 
     private val transient: MutableStateFlow<String?> = MutableStateFlow(null)
     private val named: MutableStateFlow<Map<String, String>> = MutableStateFlow(emptyMap())
@@ -177,3 +194,10 @@ public open class MessagePlugin(
 
 /** The web's three seconds. */
 public const val DEFAULT_MESSAGE_MS: Long = 3_000
+
+// The range an editor offers. Half a second is the shortest a person reads a
+// toast at all, and thirty is long enough that anything beyond it wants a
+// persistent message instead.
+private const val MIN_MESSAGE_MS: Double = 500.0
+private const val MAX_MESSAGE_MS: Double = 30_000.0
+private const val MESSAGE_STEP_MS: Double = 250.0
