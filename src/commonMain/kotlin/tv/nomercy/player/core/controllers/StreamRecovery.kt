@@ -180,7 +180,11 @@ internal class FailureRecovery(
 
     // What there is to reload, if anything. No scope means nothing can be
     // scheduled, and no current item means there is nothing to schedule.
-    private fun reloadTarget(): PlaylistItem? = if (scope == null) null else ctx.queue.current()
+    // The queue's item when there is a queue, and otherwise whatever was
+    // actually loaded. An app that hands an item straight to load() had no
+    // recovery at all, because current() answers null for it.
+    private fun reloadTarget(): PlaylistItem? =
+        if (scope == null) null else ctx.queue.current() ?: ctx.loadedItem
 
     // Frames are flowing again, so the retries that got here are spent budget
     // rather than a running total.

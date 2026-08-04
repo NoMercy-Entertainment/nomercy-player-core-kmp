@@ -203,6 +203,14 @@ public class PlayerContext(
     // Which item the engine currently holds, so play() can tell an engine
     // that has something loaded from one that has nothing.
     public var loadedItemId: String? = null
+
+    // The item itself, not only its id.
+    //
+    // Recovery reloads what was playing, and it used to find that through
+    // queue.current() alone — so an item handed straight to load() had nothing
+    // to come back to and could not be recovered at all. The id was already
+    // kept here; the item is what a reload needs.
+    public var loadedItem: PlaylistItem? = null
         private set
 
     // Whether the engine is holding an item the cursor has already moved off.
@@ -245,6 +253,7 @@ public class PlayerContext(
         val url: String = auth?.transformUrl(item.url) ?: item.url
         backend?.load(url, opts)
         loadedItemId = item.id
+        loadedItem = item
         itemEndingSoonEmitted = false
     }
 }
