@@ -886,6 +886,7 @@ public final class tv/nomercy/player/core/devtools/PlayerInspector {
 	public final fun counts ()Ljava/util/Map;
 	public final fun dispose ()V
 	public final fun getEvents ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getMuffled ()Lkotlinx/coroutines/flow/StateFlow;
 	public final fun mute (Ljava/util/Set;)V
 	public final fun muted ()Ljava/util/Set;
 	public final fun unmute (Ljava/util/Set;)V

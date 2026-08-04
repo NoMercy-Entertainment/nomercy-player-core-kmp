@@ -56,6 +56,13 @@ public class PlayerInspector(
     // The live stream, newest last, for anything that renders.
     public val events: StateFlow<List<InspectorEvent>> = mutable.asStateFlow()
 
+    private val silenced: MutableMap<String, Int> = mutableMapOf()
+
+    private val mutedTally: MutableStateFlow<Map<String, Int>> = MutableStateFlow(emptyMap())
+
+    /** How many of each muted event went by, so a quiet log is not a silent player. */
+    public val muffled: StateFlow<Map<String, Int>> = mutedTally.asStateFlow()
+
     private val subscription: Subscription = player.onAll { name, payload -> record(name, payload) }
 
     // How many of each, over what is still in the buffer.
@@ -110,7 +117,20 @@ public class PlayerInspector(
     // removes from the head and appends to the tail, so an unguarded pair of
     // callers can corrupt it in ways that surface far from here.
     private fun record(name: String, payload: Any?) {
-        if (name in muted) return
+        // A muted event still HAPPENED, and the tally is how a reader knows it.
+        //
+        // Dropping it outright made the pane read `0 event(s)` over a film that
+        // was decoding, playing audio and firing time and progress several
+        // times a second — which looks exactly like a player emitting nothing,
+        // and is the reason a whole session was spent reading screenshots
+        // instead of the log. Muting belongs to the SCROLL, where a heartbeat
+        // would push everything else off the top; it was never meant to mean
+        // the event did not occur.
+        if (name in muted) {
+            synchronized(lock) { silenced[name] = (silenced[name] ?: 0) + 1 }
+            mutedTally.value = silenced.toMap()
+            return
+        }
 
         val event = InspectorEvent(
             sequence = 0,

@@ -51,6 +51,7 @@ public fun PlayerInspectorOverlay(
     modifier: Modifier = Modifier,
 ) {
     val events: List<InspectorEvent> by inspector.events.collectAsState()
+    val muffled: Map<String, Int> by inspector.muffled.collectAsState()
     val listState = rememberLazyListState()
 
     LaunchedEffect(events.size) {
@@ -63,7 +64,7 @@ public fun PlayerInspectorOverlay(
             .padding(horizontal = 8.dp, vertical = 6.dp)
             .semantics { contentDescription = "Player event inspector" },
     ) {
-        InspectorHeader(events.size, inspector.counts())
+        InspectorHeader(events.size, inspector.counts() + muffled)
 
         LazyColumn(
             state = listState,

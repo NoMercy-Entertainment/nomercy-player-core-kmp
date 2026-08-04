@@ -2240,6 +2240,8 @@ final class tv.nomercy.player.core.devtools/PlayerInspector { // tv.nomercy.play
 
     final val events // tv.nomercy.player.core.devtools/PlayerInspector.events|{}events[0]
         final fun <get-events>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/List<tv.nomercy.player.core.devtools/InspectorEvent>> // tv.nomercy.player.core.devtools/PlayerInspector.events.<get-events>|<get-events>(){}[0]
+    final val muffled // tv.nomercy.player.core.devtools/PlayerInspector.muffled|{}muffled[0]
+        final fun <get-muffled>(): kotlinx.coroutines.flow/StateFlow<kotlin.collections/Map<kotlin/String, kotlin/Int>> // tv.nomercy.player.core.devtools/PlayerInspector.muffled.<get-muffled>|<get-muffled>(){}[0]
 
     final fun clear() // tv.nomercy.player.core.devtools/PlayerInspector.clear|clear(){}[0]
     final fun counts(): kotlin.collections/Map<kotlin/String, kotlin/Int> // tv.nomercy.player.core.devtools/PlayerInspector.counts|counts(){}[0]
