@@ -20,6 +20,7 @@ import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.NotImplementedError
 import tv.nomercy.player.core.errors.PlayerError
+import tv.nomercy.player.core.errors.ScopeKind
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
@@ -1121,10 +1122,12 @@ public open class ComposedPlayer(
     // is what a caller awaiting this playlist is listening for; error is what a
     // consumer's single failure surface is listening for, and it should not have
     // to subscribe to every specific failure to know something went wrong.
+    //
+    // The general channel comes from report, which is now the one place a
+    // severity is turned into an event. Emitting it here as well delivered the
+    // same failure to the same listener twice.
     private fun reportPlaylistFailure(error: PlayerError) {
-        val payload: PlayerErrorEvent = error.asEvent()
-        context.emit(CoreEvents.PlaylistResolveError, payload)
-        context.emit(CoreEvents.Error, payload)
+        context.emit(CoreEvents.PlaylistResolveError, error.asEvent())
         report(error)
     }
 
@@ -1481,6 +1484,32 @@ public open class ComposedPlayer(
     override fun report(error: PlayerError) {
         logger.error("${error.code}: ${error.message}")
 
+        val payload: PlayerErrorEvent = error.asEvent()
+
+        // The severity's own channel, then the plugin-scoped one, exactly as the
+        // reference does it.
+        //
+        // This logged and returned for anything short of FATAL, so every
+        // warning a plugin raised reached the log and no listener at all — the
+        // four channels below were declared and never emitted. A subtitle
+        // reporting that it could not read a font is precisely the case: the
+        // film keeps playing, so it is not fatal, and the viewer sees the wrong
+        // typeface with nothing to explain it.
+        when (error.severity) {
+            Severity.INFO -> context.emit(CoreEvents.Info, payload)
+            Severity.WARNING -> context.emit(CoreEvents.Warning, payload)
+            Severity.ERROR -> context.emit(CoreEvents.Error, payload)
+            Severity.FATAL -> Unit
+        }
+
+        if (error.scope.kind == ScopeKind.PLUGIN) {
+            when (error.severity) {
+                Severity.WARNING -> context.emit(CoreEvents.PluginWarning, payload)
+                Severity.ERROR -> context.emit(CoreEvents.PluginError, payload)
+                else -> Unit
+            }
+        }
+
         if (error.severity != Severity.FATAL) return
 
         // The state settles BEFORE the listener chain, exactly as the reference
@@ -1489,7 +1518,7 @@ public open class ComposedPlayer(
         // listener that stops propagation.
         context.playState = PlayState.ERROR
 
-        context.emit(CoreEvents.Fatal, error.asEvent())
+        context.emit(CoreEvents.Fatal, payload)
     }
 }
 
