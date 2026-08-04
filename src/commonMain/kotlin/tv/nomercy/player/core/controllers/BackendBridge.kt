@@ -67,6 +67,11 @@ public class BackendBridge(
 
     private var announcedFirstFrame: Boolean = false
 
+    /** The connection returned. Handed on to recovery, which owns the reload. */
+    public fun onNetworkRestored() {
+        recovery.networkRestored()
+    }
+
     public fun attach(backend: MediaBackend) {
         listen(backend, CanonicalBackendEvent.LOADED_METADATA) {
             announceLoaded(backend)

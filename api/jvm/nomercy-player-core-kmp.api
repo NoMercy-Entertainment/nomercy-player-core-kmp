@@ -75,6 +75,7 @@ public final class tv/nomercy/player/core/controllers/BackendBridge {
 	public synthetic fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Clock;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun attach (Ltv/nomercy/player/core/ports/MediaBackend;)V
 	public final fun detach (Ltv/nomercy/player/core/ports/MediaBackend;)V
+	public final fun onNetworkRestored ()V
 }
 
 public final class tv/nomercy/player/core/controllers/BandwidthController {

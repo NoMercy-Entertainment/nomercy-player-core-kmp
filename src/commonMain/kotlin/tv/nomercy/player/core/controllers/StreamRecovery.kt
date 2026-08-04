@@ -188,6 +188,33 @@ internal class FailureRecovery(
         policy.progressed()
     }
 
+    /**
+     * The connection came back.
+     *
+     * A drop longer than the retry budget spends every attempt against a
+     * network that is not there, escalates, and then nothing happens when the
+     * network returns — the viewer is left on an error over a working
+     * connection, and their only move is to leave the screen and come back.
+     * Filed as "the native player does not handle network interruptions
+     * gracefully".
+     *
+     * The budget is forgiven first: those attempts failed for a reason that has
+     * since gone away, and holding them against the stream would mean one bad
+     * tunnel costs the rest of the film its recovery.
+     */
+    fun networkRestored() {
+        policy.progressed()
+        val item: PlaylistItem = reloadTarget() ?: return
+
+        val resumeAtMs: Long = ((ctx.backend?.currentTime() ?: 0.0) * MS_PER_SECOND)
+            .toLong()
+            .coerceAtLeast(0L)
+
+        scope?.launch {
+            ctx.loadQuietly(item, LoadOptions(startPositionMs = resumeAtMs, autoplay = true))
+        }
+    }
+
     // A word that parses as one of our own codes is a DECISION, not a hiccup: the
     // HDR refusal exists to stop playback and explain itself, and reloading the
     // item would put the viewer through the same refusal twice before showing it.

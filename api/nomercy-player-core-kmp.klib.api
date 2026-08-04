@@ -1798,6 +1798,7 @@ final class tv.nomercy.player.core.controllers/BackendBridge { // tv.nomercy.pla
 
     final fun attach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.attach|attach(tv.nomercy.player.core.ports.MediaBackend){}[0]
     final fun detach(tv.nomercy.player.core.ports/MediaBackend) // tv.nomercy.player.core.controllers/BackendBridge.detach|detach(tv.nomercy.player.core.ports.MediaBackend){}[0]
+    final fun onNetworkRestored() // tv.nomercy.player.core.controllers/BackendBridge.onNetworkRestored|onNetworkRestored(){}[0]
 }
 
 final class tv.nomercy.player.core.controllers/BandwidthController { // tv.nomercy.player.core.controllers/BandwidthController|null[0]

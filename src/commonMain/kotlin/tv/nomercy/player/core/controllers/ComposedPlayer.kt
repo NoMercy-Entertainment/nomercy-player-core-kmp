@@ -373,6 +373,7 @@ public open class ComposedPlayer(
         context.on(CoreEvents.Playing) { metrics.onWaitingEnded() }
         context.on(CoreEvents.FirstFrame) { metrics.onFirstFrame() }
 
+
         // Resuming re-arms the countdown even when the resume came from
         // somewhere no UI saw it — a headphone button, a car head unit.
         // Otherwise controls shown during a pause stay up for the rest of the
