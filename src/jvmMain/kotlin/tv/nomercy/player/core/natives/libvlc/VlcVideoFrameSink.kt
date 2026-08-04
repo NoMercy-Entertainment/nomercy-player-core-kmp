@@ -34,4 +34,19 @@ public interface VlcVideoFrameSink {
 
     /** One complete frame, positioned at zero. */
     public fun display(picture: ByteBuffer)
+
+    /**
+     * Forget the picture. Called when a new item is opened, before it has
+     * decoded anything.
+     *
+     * Nothing did this, so the canvas kept the last frame of the previous item
+     * until the next one produced its own — and an item that produces none
+     * leaves the wrong film on screen indefinitely, with the right title, the
+     * right audio and a running clock. It reads as a switching bug and is
+     * really the absence of an erase.
+     *
+     * Defaulted, because a sink that has nothing to forget is not broken.
+     */
+    public fun clear() {
+    }
 }

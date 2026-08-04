@@ -3302,8 +3302,13 @@ public final class tv/nomercy/player/core/natives/libvlc/VlcMediaPlayer {
 }
 
 public abstract interface class tv/nomercy/player/core/natives/libvlc/VlcVideoFrameSink {
+	public fun clear ()V
 	public abstract fun display (Ljava/nio/ByteBuffer;)V
 	public abstract fun format (II)V
+}
+
+public final class tv/nomercy/player/core/natives/libvlc/VlcVideoFrameSink$DefaultImpls {
+	public static fun clear (Ltv/nomercy/player/core/natives/libvlc/VlcVideoFrameSink;)V
 }
 
 public final class tv/nomercy/player/core/player/ActionOptions {

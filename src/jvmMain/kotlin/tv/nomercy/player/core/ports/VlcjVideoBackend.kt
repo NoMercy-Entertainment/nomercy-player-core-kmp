@@ -350,6 +350,12 @@ public class VlcjVideoBackend private constructor(
         openOptions = VlcAdaptiveOptions.optionsFor(playableLadder)
         appliedCeilingHeight = abrCeiling()?.height
 
+        // The previous item's last frame, dropped before this one opens. Left
+        // up, it stays on the canvas until the new item decodes something — and
+        // an item that decodes nothing leaves the wrong film on screen with the
+        // right title, the right audio and a running clock.
+        player.clearPicture()
+
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.

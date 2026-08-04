@@ -96,6 +96,10 @@ internal class VlcVideoOutput(
     // libVLC has finished with the format. The buffer is dropped rather than
     // freed: the display callback can still be in flight on another thread, and
     // freeing under it would be a use-after-free instead of a stale frame.
+    // The picture the sink is showing, dropped before a new item opens. The
+    // buffer itself is libVLC's business; this is the canvas.
+    fun clearPicture(): Unit = sink.clear()
+
     private fun forget() {
         frame = null
         plane = null

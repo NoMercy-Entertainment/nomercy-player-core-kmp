@@ -58,6 +58,13 @@ public class VlcMediaPlayer internal constructor(
     // The options travel WITH the item. libVLC reads them while it builds the
     // demuxer chain, so a ladder constraint applied after this is applied too
     // late to decide which rung it opens.
+    // The last item's picture, forgotten before this one opens. Without it the
+    // canvas keeps the previous film until the new one decodes a frame, and an
+    // item that decodes none never replaces it.
+    internal fun clearPicture() {
+        video?.clearPicture()
+    }
+
     internal fun prepare(mrl: String, options: List<String>) {
         val media: Pointer = open(mrl) ?: return
         options.forEach { option -> instance.binding.media.mediaAddOption(media, option) }
