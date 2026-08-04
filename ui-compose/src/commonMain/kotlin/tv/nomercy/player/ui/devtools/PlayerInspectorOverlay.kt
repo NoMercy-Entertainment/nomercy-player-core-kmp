@@ -110,10 +110,15 @@ private fun InspectorRow(event: InspectorEvent) {
             style = MONO.copy(color = TIME),
         )
         BasicText(text = event.name, style = MONO.copy(color = NAME))
+        // Wrapped rather than cut at one line. A payload is the whole reason
+        // to read a log line, and the widest ones are the interesting ones —
+        // PlaybackMetrics carries eight fields and every screenshot of this
+        // pane ended "bufferingEvents=0.0, bufferin…", which hides the numbers
+        // the row exists to show.
         BasicText(
             text = event.summary,
             style = MONO.copy(color = SUMMARY),
-            maxLines = 1,
+            maxLines = SUMMARY_MAX_LINES,
             overflow = TextOverflow.Ellipsis,
         )
     }
@@ -135,3 +140,6 @@ private val SUMMARY: Color = Color(0xFFD8D8DE)
 
 private const val HEADER_NAMES: Int = 3
 private const val TIME_COLUMN: Int = 6
+
+// Enough for a metrics snapshot, short of a payload taking the pane.
+private const val SUMMARY_MAX_LINES = 3

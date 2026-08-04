@@ -357,6 +357,22 @@ public open class ComposedPlayer(
         // app has been open.
         context.on(CoreEvents.Item) { metrics.startSession() }
 
+        // The counters, connected to the events that move them.
+        //
+        // Nothing anywhere in the trio called recordMetric, so the sampler
+        // faithfully published six zeros every interval for the life of every
+        // session — a whole telemetry path built, tested and wired to nothing,
+        // and a testbed log filled with `PlaybackMetrics(droppedFrames=0.0,
+        // totalFrames=0.0, ...)` on repeat.
+        //
+        // These three are countable here because core already has the events.
+        // droppedFrames, totalFrames and bitrate come from the engine and are
+        // the backend's to report.
+        context.on(CoreEvents.BackendWaiting) { metrics.onWaitingStarted() }
+        context.on(CoreEvents.BackendStalled) { metrics.onWaitingStarted() }
+        context.on(CoreEvents.Playing) { metrics.onWaitingEnded() }
+        context.on(CoreEvents.FirstFrame) { metrics.onFirstFrame() }
+
         // Resuming re-arms the countdown even when the resume came from
         // somewhere no UI saw it — a headphone button, a car head unit.
         // Otherwise controls shown during a pause stay up for the rest of the

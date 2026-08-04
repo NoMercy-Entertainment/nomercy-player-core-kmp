@@ -48,6 +48,7 @@ public class MetricsController(private val clock: Clock = defaultClock()) {
     private var counters: PlaybackMetrics = PlaybackMetrics()
     private val custom: MutableMap<String, Double> = mutableMapOf()
     private var startedAt: Long? = null
+    private var waitingSince: Long? = null
 
     // Wall-clock milliseconds, through the injected clock.
     //
@@ -64,8 +65,53 @@ public class MetricsController(private val clock: Clock = defaultClock()) {
     // a stalled player is being asked about.
     public fun metrics(): PlaybackMetrics = counters.copy(
         sessionDurationMs = startedAt?.let { now() - it } ?: 0L,
+        // A stall still in progress counts. Adding it only when it ends would
+        // leave the one number a viewer is staring at — how long have I been
+        // waiting — at zero for exactly as long as the wait lasts.
+        bufferingSeconds = counters.bufferingSeconds + inFlightWaitSeconds(),
         custom = custom.toMap(),
     )
+
+    /**
+     * A stall started.
+     *
+     * Ignored while one is already open, because the engine reports waiting and
+     * stalled separately and a single stall raises both — counting each would
+     * report twice the buffering events that happened.
+     */
+    public fun onWaitingStarted() {
+        if (waitingSince != null) return
+
+        waitingSince = now()
+        counters = counters.copy(bufferingEvents = counters.bufferingEvents + 1)
+    }
+
+    /** Playback resumed. Closes the open stall, if there is one. */
+    public fun onWaitingEnded() {
+        val since: Long = waitingSince ?: return
+
+        waitingSince = null
+        counters = counters.copy(bufferingSeconds = counters.bufferingSeconds + secondsSince(since))
+    }
+
+    /**
+     * The first frame of this item reached the screen.
+     *
+     * Only the first one counts. A seek renders a first frame too, and letting
+     * that overwrite the number would report the cost of the last scrub as the
+     * cost of starting the film.
+     */
+    public fun onFirstFrame() {
+        if (counters.startupSeconds > 0.0) return
+
+        val since: Long = startedAt ?: return
+        counters = counters.copy(startupSeconds = secondsSince(since))
+        onWaitingEnded()
+    }
+
+    private fun inFlightWaitSeconds(): Double = waitingSince?.let { secondsSince(it) } ?: 0.0
+
+    private fun secondsSince(stamp: Long): Double = (now() - stamp).toDouble() / MILLIS_PER_SECOND
 
     public fun recordMetric(metric: Metric, value: Double) {
         counters = when (metric) {
@@ -93,11 +139,13 @@ public class MetricsController(private val clock: Clock = defaultClock()) {
     // playing" with how long the app has been open.
     public fun startSession() {
         startedAt = now()
+        waitingSince = null
         counters = PlaybackMetrics()
         custom.clear()
     }
 
     public fun endSession() {
+        onWaitingEnded()
         startedAt = null
     }
 
@@ -126,3 +174,5 @@ public class MetricsController(private val clock: Clock = defaultClock()) {
 
     private var sampler: Job? = null
 }
+
+private const val MILLIS_PER_SECOND = 1_000.0

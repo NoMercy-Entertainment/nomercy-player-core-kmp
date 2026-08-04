@@ -357,6 +357,9 @@ public final class tv/nomercy/player/core/controllers/MetricsController {
 	public final fun endSession ()V
 	public final fun metrics ()Ltv/nomercy/player/core/events/PlaybackMetrics;
 	public final fun now ()J
+	public final fun onFirstFrame ()V
+	public final fun onWaitingEnded ()V
+	public final fun onWaitingStarted ()V
 	public final fun recordMetric (Ljava/lang/String;D)V
 	public final fun recordMetric (Ltv/nomercy/player/core/controllers/Metric;D)V
 	public final fun startSampling (Lkotlinx/coroutines/CoroutineScope;JLkotlin/jvm/functions/Function1;)V

@@ -160,6 +160,12 @@ public class PlayerInspector(
         // The high-frequency ones. Every consumer who has ever attached this
         // has muted the same three by hand, and a hand-written list drifts the
         // moment the player emits a fourth.
-        public val NOISY_EVENT_NAMES: Set<String> = setOf("time", "progress", "buffered")
+        // playback:metrics belongs here for the same reason the other three do
+        // and was left out: it is a SAMPLER, so it arrives on a timer whatever
+        // the player is doing. On a quiet film it is the only thing in the
+        // buffer, and a log showing nothing but the same snapshot on repeat is
+        // the instrument telling you nothing while looking like it works.
+        public val NOISY_EVENT_NAMES: Set<String> =
+            setOf("time", "progress", "buffered", "playback:metrics")
     }
 }
