@@ -24,7 +24,7 @@ class StudioDrmBindingTest {
     fun aSchemeWithNoLicenceEndpointIsBlockedRatherThanReady() {
         val blocked: DrmBindingResult.Blocked? = licenseUrlOrBlocked(DrmConfig(DrmScheme.WIDEVINE))
 
-        assertEquals(DrmErrorCodes.NO_LICENSE_URL, blocked?.code)
+        assertEquals(DrmErrorCodes.LICENSE_URL_MISSING, blocked?.code)
     }
 
     @Test
@@ -45,7 +45,7 @@ class StudioDrmBindingTest {
         val blocked: DrmBindingResult.Blocked? =
             licenseUrlOrBlocked(DrmConfig(DrmScheme.WIDEVINE, licenseUrl = "   "))
 
-        assertEquals(DrmErrorCodes.NO_LICENSE_URL, blocked?.code)
+        assertEquals(DrmErrorCodes.LICENSE_URL_MISSING, blocked?.code)
     }
 
     @Test
@@ -62,7 +62,7 @@ class StudioDrmBindingTest {
     fun aBlockedResultIsDistinguishableFromReadyWithoutReadingStrings() {
         // A caller deciding whether to offer another version should branch on
         // the shape, not on parsing a message meant for a person.
-        val result: DrmBindingResult = DrmBindingResult.Blocked(DrmErrorCodes.NO_LICENSE_URL, "no endpoint")
+        val result: DrmBindingResult = DrmBindingResult.Blocked(DrmErrorCodes.LICENSE_URL_MISSING, "no endpoint")
 
         assertIs<DrmBindingResult.Blocked>(result)
         assertTrue(DrmBindingResult.Ready !is DrmBindingResult.Blocked)

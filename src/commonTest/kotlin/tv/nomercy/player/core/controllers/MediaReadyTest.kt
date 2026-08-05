@@ -10,6 +10,8 @@ package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.errors.StateError
+import kotlin.test.assertFailsWith
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -93,17 +95,18 @@ class MediaReadyTest {
     }
 
     @Test
-    fun aPlayerWithNoEngineStillReportsReady() = runTest {
-        // A null backend is a player that has not been given an engine yet. The
-        // load is a no-op, and reporting nothing would leave a caller waiting
-        // forever instead of continuing against an engine that plays silence.
+    fun aPlayerWithNoEngineRefusesTheLoadRatherThanReportingReady() = runTest {
+        // This asserted the opposite, so that a caller awaiting readiness would
+        // not wait forever. It does not wait forever now either — it is told
+        // what is wrong instead of being told the media is ready when nothing
+        // loaded, which is what the web does and the more useful of the two.
         val player = ComposedPlayer(backend = null)
         val seen: MutableList<String> = mutableListOf()
         player.on(CoreEvents.MediaReady) { seen += "ready" }
         player.setup()
 
-        player.load(TestItem("a"))
+        assertFailsWith<StateError> { player.load(TestItem("a")) }
 
-        assertEquals(listOf("ready"), seen)
+        assertEquals(emptyList(), seen)
     }
 }

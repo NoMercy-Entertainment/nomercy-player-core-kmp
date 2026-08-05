@@ -38,7 +38,7 @@ internal fun licenseUrlOrBlocked(config: DrmConfig): DrmBindingResult.Blocked? {
     val url: String? = config.licenseUrl
     if (url.isNullOrBlank()) {
         return DrmBindingResult.Blocked(
-            DrmErrorCodes.NO_LICENSE_URL,
+            DrmErrorCodes.LICENSE_URL_MISSING,
             "no licence endpoint for ${config.scheme}",
         )
     }

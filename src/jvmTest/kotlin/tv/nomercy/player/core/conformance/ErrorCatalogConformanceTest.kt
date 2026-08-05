@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import tv.nomercy.player.core.drm.DrmErrorCodes
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorCode
 import tv.nomercy.player.core.plugin.PluginErrorCodes
@@ -31,6 +32,12 @@ private val WEB_ONLY = setOf(
     "core:player/invalid-id-type",
     "core:media/hls-unsupported",
     "core:stream/hls-attach-failed",
+    // Raised when resolvePlayerConstructor is handed an index into the web's
+    // registry of live instances. That registry exists because a web player is
+    // addressed by the container id it was mounted into and a second mount on
+    // the same element must find the first; a native consumer holds the object
+    // it constructed, so there is no index to miss.
+    "core:player/not-found",
     // Cancellation, which Kotlin reserves. A withdrawn request unwinds as a
     // CancellationException so structured concurrency keeps working; turning
     // that into a PlayerError would swallow the cancellation the caller asked
@@ -53,21 +60,43 @@ private val NOT_THE_PLAYER = setOf(
     "core:test/vitest-globals-missing",
 )
 
+// Failures a native DRM stack has and a browser never surfaces.
+//
+// The web's protected-playback path is EME, which reports one thing: it could
+// not get a licence. A platform CDM answers in more detail — the scheme is not
+// on this device, the key request itself failed, the output path is not
+// protected — and collapsing those into the web's single code would throw away
+// the only information that tells a viewer whether another version would play.
+//
+// They are listed rather than allowed by namespace, because "core:drm/" as a
+// free-for-all is how a port starts inventing codes nobody else can match.
+private val NATIVE_ONLY_CODES = setOf(
+    "core:drm/unsupported-scheme",
+    "core:drm/key-request-failed",
+    "core:drm/license-request-failed",
+    "core:drm/license-refused",
+    "core:drm/output-not-protected",
+)
+
+// Plugin-namespaced codes with no native raise site.
+//
+// Kept apart from WEB_ONLY because the gate below measures core's namespace
+// only — a plugin: code listed there is excused against a set it was never
+// compared to, which the ledger-honesty test catches. The cross-repo parity
+// report reads this one.
+private val PLUGIN_WEB_ONLY = setOf(
+    // Raised when the web plugin's canvas() is called before use() mounted an
+    // element. There is no element here: the drawing surface belongs to the
+    // host and arrives as a parameter each frame, so there is no moment at
+    // which the plugin holds an unmounted one.
+    "plugin:canvas/not-mounted",
+)
+
 // Real failures of subsystems this port has not reached. Every one is a code
 // core will raise once the subsystem lands, which is why they are listed by
 // hand: the list shrinking is the measure of the port, and a code disappearing
 // from it without the subsystem arriving is a regression this test catches.
-private val NOT_YET_PORTED = setOf(
-    "core:drm/license-url-missing",
-    "core:media-tracks/no-active-item",
-    "core:media/load-failed",
-    "core:media/missing-url",
-    "core:player/backend-missing",
-    "core:player/crossfade-unsupported",
-    "core:player/not-found",
-    "core:resource/playlist-fetch-failed",
-    "core:stream/no-factory-match",
-)
+private val NOT_YET_PORTED: Set<String> = emptySet()
 
 // The error catalog against the contract that names it.
 //
@@ -85,7 +114,7 @@ class ErrorCatalogConformanceTest {
 
     private fun contractErrorCodes(): Set<String> = ContractFixture.errorCodes()
 
-    private fun declared(): Set<String> = CoreErrorCodes.all + PluginErrorCodes.all
+    private fun declared(): Set<String> = CoreErrorCodes.all + PluginErrorCodes.all + DrmErrorCodes.all
 
     // Only core's own namespace is measurable here. plugin: and visualization:
     // codes belong to the plugins that raise them, which is the whole point of
@@ -95,7 +124,7 @@ class ErrorCatalogConformanceTest {
 
     @Test
     fun coreDeclaresNoCodeTheEcosystemHasNeverHeardOf() {
-        val invented: Set<String> = declared() - contractCoreCodes()
+        val invented: Set<String> = declared() - contractCoreCodes() - NATIVE_ONLY_CODES
 
         assertEquals(
             emptySet(),

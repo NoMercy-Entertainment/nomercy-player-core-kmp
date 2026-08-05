@@ -27,6 +27,9 @@ public object CoreErrorCodes {
     public const val SERVER_ERROR: String = "core:network/server-error"
     public const val FRAGMENT_FAILED: String = "core:stream/fragment-failed"
 
+    // A url a factory was required for and none claimed.
+    public const val NO_FACTORY_MATCH: String = "core:stream/no-factory-match"
+
     // The rest of the HTTP ladder, raised by AuthFetch. Named per status where
     // the answer differs — a 410 is never worth retrying and a 429 is worth
     // retrying slowly — and by class where it does not.
@@ -53,6 +56,24 @@ public object CoreErrorCodes {
     public const val REFRESH_FAILED: String = "core:auth/refresh-failed"
 
     public const val CODEC_UNSUPPORTED: String = "core:media/codec-unsupported"
+
+    // An item with nothing to play, a player with nothing to play it on, and an
+    // engine that refused what it was handed. Three codes because a consumer
+    // answers each differently: fix the item, wire a backend, try another
+    // rendition.
+    public const val MISSING_URL: String = "core:media/missing-url"
+    public const val BACKEND_MISSING: String = "core:player/backend-missing"
+    public const val LOAD_FAILED: String = "core:media/load-failed"
+
+    // A dual-playback request against an engine that holds one track.
+    public const val CROSSFADE_UNSUPPORTED: String = "core:player/crossfade-unsupported"
+
+    // A playlist that could not be fetched at all, as opposed to one the server
+    // answered with a status.
+    public const val PLAYLIST_FETCH_FAILED: String = "core:resource/playlist-fetch-failed"
+
+    // A track operation with nothing loaded to attach it to.
+    public const val NO_ACTIVE_ITEM: String = "core:media-tracks/no-active-item"
     public const val QUEUE_EMPTY: String = "core:state/queue-empty"
 
     // HDR content, an SDR screen, nothing able to convert, and a consumer who
@@ -93,10 +114,17 @@ public object CoreErrorCodes {
         OFFLINE,
         PARSE_FAILED,
         FRAGMENT_FAILED,
+        NO_FACTORY_MATCH,
         UNAUTHENTICATED,
         FORBIDDEN,
         REFRESH_FAILED,
         CODEC_UNSUPPORTED,
+        MISSING_URL,
+        BACKEND_MISSING,
+        LOAD_FAILED,
+        CROSSFADE_UNSUPPORTED,
+        PLAYLIST_FETCH_FAILED,
+        NO_ACTIVE_ITEM,
         QUEUE_EMPTY,
         PLAYLIST_FETCH_ERROR,
         PLAYLIST_PARSE_ERROR,

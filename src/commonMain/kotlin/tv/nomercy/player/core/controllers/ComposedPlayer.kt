@@ -17,6 +17,7 @@ import tv.nomercy.player.core.KIT_VERSION
 import tv.nomercy.player.core.cues.registerBuiltIns
 import tv.nomercy.player.core.devtools.EventFirehose
 import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.resourceError
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.NotImplementedError
 import tv.nomercy.player.core.errors.PlayerError
@@ -1105,6 +1106,18 @@ public open class ComposedPlayer(
         } catch (failure: PlayerError) {
             reportPlaylistFailure(failure)
             throw failure
+        } catch (@Suppress("TooGenericExceptionCaught") failure: Throwable) {
+            // The transport threw rather than answering with a status. That is
+            // not a playlist the server refused, it is one that could not be
+            // asked for, and it used to escape as whatever the transport chose
+            // to throw — an engine exception with no code on it at all.
+            val error = resourceError(
+                CoreErrorCodes.PLAYLIST_FETCH_FAILED,
+                failure.message ?: "The playlist at $url could not be fetched.",
+                mapOf("url" to url),
+            )
+            reportPlaylistFailure(error)
+            throw error
         }
 
         val items: List<PlaylistItem> = try {

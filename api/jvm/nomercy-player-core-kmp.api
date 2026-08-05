@@ -953,9 +953,10 @@ public final class tv/nomercy/player/core/drm/DrmErrorCodes {
 	public static final field KEY_REQUEST_FAILED Ljava/lang/String;
 	public static final field LICENSE_REFUSED Ljava/lang/String;
 	public static final field LICENSE_REQUEST_FAILED Ljava/lang/String;
-	public static final field NO_LICENSE_URL Ljava/lang/String;
+	public static final field LICENSE_URL_MISSING Ljava/lang/String;
 	public static final field OUTPUT_NOT_PROTECTED Ljava/lang/String;
 	public static final field UNSUPPORTED_SCHEME Ljava/lang/String;
+	public final fun getAll ()Ljava/util/Set;
 }
 
 public final class tv/nomercy/player/core/drm/DrmEvents {
@@ -1267,10 +1268,12 @@ public final class tv/nomercy/player/core/errors/BrowserPolicyErrorKt {
 
 public final class tv/nomercy/player/core/errors/CoreErrorCodes {
 	public static final field ALREADY_SETUP Ljava/lang/String;
+	public static final field BACKEND_MISSING Ljava/lang/String;
 	public static final field BAD_GATEWAY Ljava/lang/String;
 	public static final field CLEANUP_FAILED Ljava/lang/String;
 	public static final field CLIENT_ERROR Ljava/lang/String;
 	public static final field CODEC_UNSUPPORTED Ljava/lang/String;
+	public static final field CROSSFADE_UNSUPPORTED Ljava/lang/String;
 	public static final field DISPOSED Ljava/lang/String;
 	public static final field FORBIDDEN Ljava/lang/String;
 	public static final field FRAGMENT_FAILED Ljava/lang/String;
@@ -1278,12 +1281,17 @@ public final class tv/nomercy/player/core/errors/CoreErrorCodes {
 	public static final field GONE Ljava/lang/String;
 	public static final field HDR_UNPLAYABLE Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/errors/CoreErrorCodes;
+	public static final field LOAD_FAILED Ljava/lang/String;
+	public static final field MISSING_URL Ljava/lang/String;
 	public static final field NETWORK_TIMEOUT Ljava/lang/String;
 	public static final field NOT_FOUND Ljava/lang/String;
 	public static final field NOT_READY Ljava/lang/String;
+	public static final field NO_ACTIVE_ITEM Ljava/lang/String;
+	public static final field NO_FACTORY_MATCH Ljava/lang/String;
 	public static final field OFFLINE Ljava/lang/String;
 	public static final field PARSE_FAILED Ljava/lang/String;
 	public static final field PLAYLIST_FETCH_ERROR Ljava/lang/String;
+	public static final field PLAYLIST_FETCH_FAILED Ljava/lang/String;
 	public static final field PLAYLIST_PARSE_ERROR Ljava/lang/String;
 	public static final field QUEUE_EMPTY Ljava/lang/String;
 	public static final field RATE_LIMITED Ljava/lang/String;
@@ -4476,6 +4484,12 @@ public final class tv/nomercy/player/core/plugins/audio/SpectrumPlugin$Manifest 
 	public fun getVersion ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/audio/VisualizationErrorCodes {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/VisualizationErrorCodes;
+	public static final field RENDER_FAILED Ljava/lang/String;
+	public final fun getAll ()Ljava/util/Set;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 	public fun <init> ([D[DDDDLtv/nomercy/player/core/plugins/audio/BandEnergies;IDDLtv/nomercy/player/core/plugins/audio/BandEnergies;Ljava/lang/Boolean;Ljava/lang/Double;)V
 	public synthetic fun <init> ([D[DDDDLtv/nomercy/player/core/plugins/audio/BandEnergies;IDDLtv/nomercy/player/core/plugins/audio/BandEnergies;Ljava/lang/Boolean;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -6038,6 +6052,7 @@ public final class tv/nomercy/player/core/ports/StreamLevel {
 
 public final class tv/nomercy/player/core/ports/StreamRegistry {
 	public fun <init> ()V
+	public final fun create (Ltv/nomercy/player/core/ports/StreamFactoryOptions;)Ltv/nomercy/player/core/ports/StreamSource;
 	public final fun dispose ()V
 	public final fun findById (Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamFactory;
 	public final fun list ()Ljava/util/List;

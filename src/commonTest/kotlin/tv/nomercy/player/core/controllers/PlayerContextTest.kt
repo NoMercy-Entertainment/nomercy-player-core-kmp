@@ -13,6 +13,9 @@ import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.ports.LoadOptions
+import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.MediaFormatError
+import tv.nomercy.player.core.errors.StateError
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -126,12 +129,25 @@ class PlayerContextTest {
     }
 
     @Test
-    fun aContextWithNoBackendLoadsNothingRatherThanThrowing() = runTest {
+    fun aContextWithNoBackendSaysSoRatherThanLoadingNothing() = runTest {
+        // This used to be a no-op on the reasoning that setup wires the backend
+        // and a load before that is harmless. It is not harmless: the load
+        // recorded the item and announced mediaReady, so a caller was told the
+        // media was ready by a player that had nowhere to play it. The web
+        // raises core:player/backend-missing here and so does this.
         val ctx = PlayerContext()
 
-        ctx.load(TestItem("a"))
+        val raised = assertFailsWith<StateError> { ctx.load(TestItem("a")) }
 
-        // Setup wires the backend; a load before that is a no-op, not a crash.
-        assertFalse(ctx.itemEndingSoonEmitted)
+        assertEquals(CoreErrorCodes.BACKEND_MISSING, raised.code)
+    }
+
+    @Test
+    fun anItemWithNoUrlIsRefusedBeforeTheEngineSeesIt() = runTest {
+        val ctx = PlayerContext()
+
+        val raised = assertFailsWith<MediaFormatError> { ctx.load(TestItem("a").copy(url = "")) }
+
+        assertEquals(CoreErrorCodes.MISSING_URL, raised.code)
     }
 }

@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.plugins.audio
 
+import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
@@ -52,7 +53,26 @@ public abstract class VisualizationPlugin(
     public open fun start() {
         if (subscription != null) return
 
-        subscription = spectrum.onFrame { frame -> if (enabled()) render(frame) }
+        subscription = spectrum.onFrame { frame -> if (enabled()) renderGuarded(frame) }
+    }
+
+    // A renderer that throws used to take the frame subscription with it, so a
+    // visualiser with one bad branch went dark for the rest of the session and
+    // nothing said why. Reported once and stopped, which is the web's answer
+    // too: a buggy author must not storm the error bus every frame.
+    private fun renderGuarded(frame: VisualizationFrame) {
+        try {
+            render(frame)
+        }
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
+            report(
+                VisualizationErrorCodes.RENDER_FAILED,
+                "render() threw — stopping this visualiser so a buggy author cannot storm the error bus every frame.",
+                severity = Severity.ERROR,
+                cause = cause,
+            )
+            stop()
+        }
     }
 
     public open fun stop() {

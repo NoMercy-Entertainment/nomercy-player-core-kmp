@@ -8,8 +8,10 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CancellationException
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
+import tv.nomercy.player.core.errors.mediaFormatError
 import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
@@ -250,8 +252,43 @@ public class PlayerContext(
     // begun, not before it. Announcing from here would put it first and change
     // an ordering a chrome can see.
     internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
+        // Both refusals used to be silence. An item with no url reached the
+        // engine as an empty string, and a player built without a backend took
+        // the load, recorded the item and played nothing — the caller was told
+        // the media was ready either way.
+        if (item.url.isBlank()) {
+            throw mediaFormatError(
+                CoreErrorCodes.MISSING_URL,
+                "load(item) requires item.url to be present.",
+                mapOf("id" to item.id),
+            )
+        }
+
+        val engine: MediaBackend = backend
+            ?: throw stateError(
+                CoreErrorCodes.BACKEND_MISSING,
+                "No backend wired — backend() returned null.",
+            )
+
         val url: String = auth?.transformUrl(item.url) ?: item.url
-        backend?.load(url, opts)
+
+        try {
+            engine.load(url, opts)
+        }
+        catch (cause: CancellationException) {
+            throw cause
+        }
+        catch (cause: Throwable) {
+            // What the engine refused, said in the ecosystem's words. A raw
+            // engine exception names a decoder nobody outside this platform has
+            // heard of.
+            throw mediaFormatError(
+                CoreErrorCodes.LOAD_FAILED,
+                "The backend could not load $url.",
+                mapOf("id" to item.id),
+            ).also { it.addSuppressed(cause) }
+        }
+
         loadedItemId = item.id
         loadedItem = item
         itemEndingSoonEmitted = false

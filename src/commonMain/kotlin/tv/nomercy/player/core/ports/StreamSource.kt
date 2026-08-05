@@ -8,6 +8,10 @@
 
 package tv.nomercy.player.core.ports
 
+import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.ErrorScope
+import tv.nomercy.player.core.errors.StreamError
+
 // How a consumer teaches the player a protocol it does not know.
 //
 // Not the adaptive-bitrate path — that is MediaBackend. This is the extension
@@ -73,6 +77,27 @@ public class StreamRegistry {
     // absence as an error would make every plain mp4 a failure.
     public fun resolve(url: String, contentType: String? = null): StreamFactory? =
         factories.lastOrNull { it.canPlay(url, contentType) }
+
+    // Resolve, or say why not.
+    //
+    // The reverse of resolve()'s question. That one asks whether a factory
+    // wants this url and null is an ordinary no; this one is called when a
+    // factory is REQUIRED, and returning null there pushed the failure down the
+    // stack to whatever dereferenced it — a null pointer where the contract has
+    // a named code.
+    public fun create(opts: StreamFactoryOptions): StreamSource {
+        val factory: StreamFactory = resolve(opts.url, opts.contentType)
+            ?: throw StreamError(
+                code = CoreErrorCodes.NO_FACTORY_MATCH,
+                scope = ErrorScope.core(),
+                message = "No stream factory could play ${opts.url}" +
+                    (opts.contentType?.let { " ($it)" } ?: "") +
+                    ". Register a factory via player.registerStream(...) first.",
+                context = mapOf("url" to opts.url, "contentType" to opts.contentType),
+            )
+
+        return factory.create(opts)
+    }
 
     public fun findById(id: String): StreamFactory? = factories.firstOrNull { it.id == id }
 
