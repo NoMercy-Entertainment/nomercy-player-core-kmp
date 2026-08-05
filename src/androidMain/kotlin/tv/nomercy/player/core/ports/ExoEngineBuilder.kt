@@ -21,6 +21,7 @@ import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import android.util.DisplayMetrics
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.exoplayer.upstream.DefaultAllocator
@@ -49,6 +50,17 @@ import tv.nomercy.player.core.media.QualityDescriptor
 // The looper is named for the same reason. Left to itself the builder binds to
 // whatever looper happens to be current, so an engine built off the main thread
 // would answer a different thread than every callback arrives on.
+// The panel, in pixels, both orientations folded into one square.
+//
+// viewportOrientationMayChange is true because a phone rotates, and a viewport
+// measured in portrait would exclude a landscape-shaped rung the moment it is
+// turned. Taking the larger edge for both is what Media3's own helper does.
+private fun physicalDisplaySize(context: Context): Pair<Int, Int> {
+    val metrics: DisplayMetrics = context.resources.displayMetrics
+    val edge: Int = maxOf(metrics.widthPixels, metrics.heightPixels)
+    return edge to edge
+}
+
 internal fun buildEngine(
     context: Context,
     auth: AuthHeaders,
@@ -67,6 +79,7 @@ internal fun buildEngine(
     // a player holding the playlist that said PQ.
     onVariants: (List<QualityDescriptor>) -> Unit = {},
 ): ExoEngine {
+    val displaySize: Pair<Int, Int> = physicalDisplaySize(context)
     val budget: BufferConfig = bufferConfigForDevice(context)
     val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
         AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
@@ -82,7 +95,17 @@ internal fun buildEngine(
         // Adapt to the panel, not to the decoder's ambitions. Without this a
         // 4K ladder is climbed on a 1080p television, spending bandwidth on
         // pixels that are thrown away before they are shown.
-        .setViewportSizeToPhysicalDisplaySize(context, true)
+        //
+        // The size is measured and passed, not asked for by name. Media3 1.9
+        // deprecated the Context overload and the context-less one has no
+        // display to read, so between them the viewport came out as
+        // Integer.MAX_VALUE — no cap at all. That is not a cosmetic difference:
+        // Sintel declares avc1.4D401E, Main at LEVEL 3.0, for all four rungs
+        // including the two at 3840x1635, so capability filtering believes the
+        // 4K rung is fine, and the phone's decoder dies on the first frame with
+        // ERROR_CODE_DECODING_FAILED. The viewport is the only guard that
+        // survives a manifest lying about its own level, and it was not on.
+        .setViewportSize(displaySize.first, displaySize.second, true)
         // Never offer a stream this device cannot actually decode. Exceeding
         // capabilities turns a rung that would have been skipped into one that
         // starts and then fails partway through.

@@ -27,8 +27,30 @@ public object CoreErrorCodes {
     public const val SERVER_ERROR: String = "core:network/server-error"
     public const val FRAGMENT_FAILED: String = "core:stream/fragment-failed"
 
+    // The rest of the HTTP ladder, raised by AuthFetch. Named per status where
+    // the answer differs — a 410 is never worth retrying and a 429 is worth
+    // retrying slowly — and by class where it does not.
+    public const val NOT_FOUND: String = "core:network/not-found"
+    public const val REQUEST_TIMEOUT: String = "core:network/request-timeout"
+    public const val GONE: String = "core:network/gone"
+    public const val RATE_LIMITED: String = "core:network/rate-limited"
+    public const val CLIENT_ERROR: String = "core:network/client-error"
+    public const val BAD_GATEWAY: String = "core:network/bad-gateway"
+    public const val SERVICE_UNAVAILABLE: String = "core:network/service-unavailable"
+    public const val GATEWAY_TIMEOUT: String = "core:network/gateway-timeout"
+    public const val SERVER_ERROR_OTHER: String = "core:network/server-error-other"
+
+    // The request never got an answer, and the answer could not be read.
+    public const val OFFLINE: String = "core:network/offline"
+    public const val PARSE_FAILED: String = "core:network/parse-failed"
+
     public const val UNAUTHENTICATED: String = "core:auth/unauthenticated"
     public const val FORBIDDEN: String = "core:auth/forbidden"
+
+    // A 401 that survived a token refresh. Distinct from UNAUTHENTICATED
+    // because the answers differ: one is "sign in", the other is "the sign-in
+    // you have is broken".
+    public const val REFRESH_FAILED: String = "core:auth/refresh-failed"
 
     public const val CODEC_UNSUPPORTED: String = "core:media/codec-unsupported"
     public const val QUEUE_EMPTY: String = "core:state/queue-empty"
@@ -59,9 +81,21 @@ public object CoreErrorCodes {
         CLEANUP_FAILED,
         NETWORK_TIMEOUT,
         SERVER_ERROR,
+        NOT_FOUND,
+        REQUEST_TIMEOUT,
+        GONE,
+        RATE_LIMITED,
+        CLIENT_ERROR,
+        BAD_GATEWAY,
+        SERVICE_UNAVAILABLE,
+        GATEWAY_TIMEOUT,
+        SERVER_ERROR_OTHER,
+        OFFLINE,
+        PARSE_FAILED,
         FRAGMENT_FAILED,
         UNAUTHENTICATED,
         FORBIDDEN,
+        REFRESH_FAILED,
         CODEC_UNSUPPORTED,
         QUEUE_EMPTY,
         PLAYLIST_FETCH_ERROR,

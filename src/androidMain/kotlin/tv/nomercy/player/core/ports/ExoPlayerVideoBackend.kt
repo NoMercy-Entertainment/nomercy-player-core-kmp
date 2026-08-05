@@ -15,7 +15,9 @@ import android.os.Looper
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import android.util.Log
 import androidx.media3.common.C
+import androidx.media3.common.Format
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
@@ -117,7 +119,6 @@ public class ExoPlayerVideoBackend(
         // whose codec strings are wrong, which is the case that actually bit.
         parameters = buildUponParameters()
             .setExceedRendererCapabilitiesIfNecessary(false)
-            .setViewportSizeToPhysicalDisplaySize(true)
             .build()
     }
 
@@ -231,6 +232,31 @@ public class ExoPlayerVideoBackend(
 
     init {
         player.addListener(object : Player.Listener {
+            // Which rung was taken, and whether anything forced it.
+            //
+            // A decoder that dies partway through reports the format it choked
+            // on and nothing about how that format came to be selected. The
+            // difference between "auto picked a rung the constraints should
+            // have excluded" and "an override forced one past them" is the
+            // whole diagnosis, and neither is visible from the failure.
+            override fun onTracksChanged(tracks: Tracks) {
+                val chosen: Format? = tracks.groups
+                    .filter { group -> group.type == C.TRACK_TYPE_VIDEO }
+                    .flatMap { group -> (0 until group.length).mapNotNull { index ->
+                        if (group.isTrackSelected(index)) group.getTrackFormat(index) else null
+                    } }
+                    .firstOrNull()
+                val overrides: Int = player.trackSelectionParameters
+                    .overrides.keys.count { group -> group.type == C.TRACK_TYPE_VIDEO }
+                Log.i(
+                    "nm-rung",
+                    "video rung: ${chosen?.width}x${chosen?.height} ${chosen?.codecs} " +
+                        "bitrate=${chosen?.bitrate} overrides=$overrides " +
+                        "viewport=${trackSelector.parameters.viewportWidth}x" +
+                        "${trackSelector.parameters.viewportHeight}",
+                )
+            }
+
             override fun onPlaybackStateChanged(state: Int) {
                 refreshCache()
                 when (state) {

@@ -1307,6 +1307,62 @@ sealed interface tv.nomercy.player.core.drm/DrmBindingResult { // tv.nomercy.pla
     }
 }
 
+sealed interface tv.nomercy.player.core.net/FetchSignal { // tv.nomercy.player.core.net/FetchSignal|null[0]
+    final class Complete : tv.nomercy.player.core.net/FetchSignal { // tv.nomercy.player.core.net/FetchSignal.Complete|null[0]
+        constructor <init>(kotlin/String, kotlin/Boolean, kotlin/Int?) // tv.nomercy.player.core.net/FetchSignal.Complete.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.Int?){}[0]
+
+        final val ok // tv.nomercy.player.core.net/FetchSignal.Complete.ok|{}ok[0]
+            final fun <get-ok>(): kotlin/Boolean // tv.nomercy.player.core.net/FetchSignal.Complete.ok.<get-ok>|<get-ok>(){}[0]
+        final val status // tv.nomercy.player.core.net/FetchSignal.Complete.status|{}status[0]
+            final fun <get-status>(): kotlin/Int? // tv.nomercy.player.core.net/FetchSignal.Complete.status.<get-status>|<get-status>(){}[0]
+        final val url // tv.nomercy.player.core.net/FetchSignal.Complete.url|{}url[0]
+            final fun <get-url>(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Complete.url.<get-url>|<get-url>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Complete.component1|component1(){}[0]
+        final fun component2(): kotlin/Boolean // tv.nomercy.player.core.net/FetchSignal.Complete.component2|component2(){}[0]
+        final fun component3(): kotlin/Int? // tv.nomercy.player.core.net/FetchSignal.Complete.component3|component3(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/Boolean = ..., kotlin/Int? = ...): tv.nomercy.player.core.net/FetchSignal.Complete // tv.nomercy.player.core.net/FetchSignal.Complete.copy|copy(kotlin.String;kotlin.Boolean;kotlin.Int?){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.net/FetchSignal.Complete.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.net/FetchSignal.Complete.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Complete.toString|toString(){}[0]
+    }
+
+    final class Retry : tv.nomercy.player.core.net/FetchSignal { // tv.nomercy.player.core.net/FetchSignal.Retry|null[0]
+        constructor <init>(kotlin/String, kotlin/Int, kotlin/String, kotlin/Long) // tv.nomercy.player.core.net/FetchSignal.Retry.<init>|<init>(kotlin.String;kotlin.Int;kotlin.String;kotlin.Long){}[0]
+
+        final val attempt // tv.nomercy.player.core.net/FetchSignal.Retry.attempt|{}attempt[0]
+            final fun <get-attempt>(): kotlin/Int // tv.nomercy.player.core.net/FetchSignal.Retry.attempt.<get-attempt>|<get-attempt>(){}[0]
+        final val delayMs // tv.nomercy.player.core.net/FetchSignal.Retry.delayMs|{}delayMs[0]
+            final fun <get-delayMs>(): kotlin/Long // tv.nomercy.player.core.net/FetchSignal.Retry.delayMs.<get-delayMs>|<get-delayMs>(){}[0]
+        final val reason // tv.nomercy.player.core.net/FetchSignal.Retry.reason|{}reason[0]
+            final fun <get-reason>(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Retry.reason.<get-reason>|<get-reason>(){}[0]
+        final val url // tv.nomercy.player.core.net/FetchSignal.Retry.url|{}url[0]
+            final fun <get-url>(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Retry.url.<get-url>|<get-url>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Retry.component1|component1(){}[0]
+        final fun component2(): kotlin/Int // tv.nomercy.player.core.net/FetchSignal.Retry.component2|component2(){}[0]
+        final fun component3(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Retry.component3|component3(){}[0]
+        final fun component4(): kotlin/Long // tv.nomercy.player.core.net/FetchSignal.Retry.component4|component4(){}[0]
+        final fun copy(kotlin/String = ..., kotlin/Int = ..., kotlin/String = ..., kotlin/Long = ...): tv.nomercy.player.core.net/FetchSignal.Retry // tv.nomercy.player.core.net/FetchSignal.Retry.copy|copy(kotlin.String;kotlin.Int;kotlin.String;kotlin.Long){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.net/FetchSignal.Retry.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.net/FetchSignal.Retry.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Retry.toString|toString(){}[0]
+    }
+
+    final class Start : tv.nomercy.player.core.net/FetchSignal { // tv.nomercy.player.core.net/FetchSignal.Start|null[0]
+        constructor <init>(kotlin/String) // tv.nomercy.player.core.net/FetchSignal.Start.<init>|<init>(kotlin.String){}[0]
+
+        final val url // tv.nomercy.player.core.net/FetchSignal.Start.url|{}url[0]
+            final fun <get-url>(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Start.url.<get-url>|<get-url>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Start.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): tv.nomercy.player.core.net/FetchSignal.Start // tv.nomercy.player.core.net/FetchSignal.Start.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.net/FetchSignal.Start.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.net/FetchSignal.Start.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.net/FetchSignal.Start.toString|toString(){}[0]
+    }
+}
+
 sealed interface tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards|null[0]
     final class Including : tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.player.core.player/MutationGuards.Including|null[0]
         constructor <init>(kotlin.collections/Set<kotlin/String>) // tv.nomercy.player.core.player/MutationGuards.Including.<init>|<init>(kotlin.collections.Set<kotlin.String>){}[0]
@@ -4146,6 +4202,13 @@ final class tv.nomercy.player.core.media/UsableRung { // tv.nomercy.player.core.
     final fun toString(): kotlin/String // tv.nomercy.player.core.media/UsableRung.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.net/AuthFetch { // tv.nomercy.player.core.net/AuthFetch|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/Fetcher, tv.nomercy.player.core.controllers/AuthController? = ..., kotlin/Int = ..., kotlin/Long = ..., kotlin/Function1<tv.nomercy.player.core.net/FetchSignal, kotlin/Unit> = ...) // tv.nomercy.player.core.net/AuthFetch.<init>|<init>(tv.nomercy.player.core.ports.Fetcher;tv.nomercy.player.core.controllers.AuthController?;kotlin.Int;kotlin.Long;kotlin.Function1<tv.nomercy.player.core.net.FetchSignal,kotlin.Unit>){}[0]
+
+    final suspend fun <#A1: kotlin/Any?> fetchParsed(kotlin/String, tv.nomercy.player.core.ports/FetchOptions = ..., tv.nomercy.player.core.ports/RetryConfig = ..., kotlin/Function1<kotlin/String, #A1>): #A1 // tv.nomercy.player.core.net/AuthFetch.fetchParsed|fetchParsed(kotlin.String;tv.nomercy.player.core.ports.FetchOptions;tv.nomercy.player.core.ports.RetryConfig;kotlin.Function1<kotlin.String,0:0>){0§<kotlin.Any?>}[0]
+    final suspend fun fetch(kotlin/String, tv.nomercy.player.core.ports/FetchOptions = ..., tv.nomercy.player.core.ports/RetryConfig = ...): tv.nomercy.player.core.ports/FetchResponse // tv.nomercy.player.core.net/AuthFetch.fetch|fetch(kotlin.String;tv.nomercy.player.core.ports.FetchOptions;tv.nomercy.player.core.ports.RetryConfig){}[0]
+}
+
 final class tv.nomercy.player.core.player/ActionOptions { // tv.nomercy.player.core.player/ActionOptions|null[0]
     constructor <init>(kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.player/ActionOptions.<init>|<init>(kotlin.String?;kotlin.Boolean;kotlin.Boolean){}[0]
 
@@ -6480,8 +6543,12 @@ final object tv.nomercy.player.core.dsp/HannWindow { // tv.nomercy.player.core.d
 final object tv.nomercy.player.core.errors/CoreErrorCodes { // tv.nomercy.player.core.errors/CoreErrorCodes|null[0]
     final const val ALREADY_SETUP // tv.nomercy.player.core.errors/CoreErrorCodes.ALREADY_SETUP|{}ALREADY_SETUP[0]
         final fun <get-ALREADY_SETUP>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.ALREADY_SETUP.<get-ALREADY_SETUP>|<get-ALREADY_SETUP>(){}[0]
+    final const val BAD_GATEWAY // tv.nomercy.player.core.errors/CoreErrorCodes.BAD_GATEWAY|{}BAD_GATEWAY[0]
+        final fun <get-BAD_GATEWAY>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.BAD_GATEWAY.<get-BAD_GATEWAY>|<get-BAD_GATEWAY>(){}[0]
     final const val CLEANUP_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.CLEANUP_FAILED|{}CLEANUP_FAILED[0]
         final fun <get-CLEANUP_FAILED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.CLEANUP_FAILED.<get-CLEANUP_FAILED>|<get-CLEANUP_FAILED>(){}[0]
+    final const val CLIENT_ERROR // tv.nomercy.player.core.errors/CoreErrorCodes.CLIENT_ERROR|{}CLIENT_ERROR[0]
+        final fun <get-CLIENT_ERROR>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.CLIENT_ERROR.<get-CLIENT_ERROR>|<get-CLIENT_ERROR>(){}[0]
     final const val CODEC_UNSUPPORTED // tv.nomercy.player.core.errors/CoreErrorCodes.CODEC_UNSUPPORTED|{}CODEC_UNSUPPORTED[0]
         final fun <get-CODEC_UNSUPPORTED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.CODEC_UNSUPPORTED.<get-CODEC_UNSUPPORTED>|<get-CODEC_UNSUPPORTED>(){}[0]
     final const val DISPOSED // tv.nomercy.player.core.errors/CoreErrorCodes.DISPOSED|{}DISPOSED[0]
@@ -6490,20 +6557,40 @@ final object tv.nomercy.player.core.errors/CoreErrorCodes { // tv.nomercy.player
         final fun <get-FORBIDDEN>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.FORBIDDEN.<get-FORBIDDEN>|<get-FORBIDDEN>(){}[0]
     final const val FRAGMENT_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.FRAGMENT_FAILED|{}FRAGMENT_FAILED[0]
         final fun <get-FRAGMENT_FAILED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.FRAGMENT_FAILED.<get-FRAGMENT_FAILED>|<get-FRAGMENT_FAILED>(){}[0]
+    final const val GATEWAY_TIMEOUT // tv.nomercy.player.core.errors/CoreErrorCodes.GATEWAY_TIMEOUT|{}GATEWAY_TIMEOUT[0]
+        final fun <get-GATEWAY_TIMEOUT>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.GATEWAY_TIMEOUT.<get-GATEWAY_TIMEOUT>|<get-GATEWAY_TIMEOUT>(){}[0]
+    final const val GONE // tv.nomercy.player.core.errors/CoreErrorCodes.GONE|{}GONE[0]
+        final fun <get-GONE>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.GONE.<get-GONE>|<get-GONE>(){}[0]
     final const val HDR_UNPLAYABLE // tv.nomercy.player.core.errors/CoreErrorCodes.HDR_UNPLAYABLE|{}HDR_UNPLAYABLE[0]
         final fun <get-HDR_UNPLAYABLE>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.HDR_UNPLAYABLE.<get-HDR_UNPLAYABLE>|<get-HDR_UNPLAYABLE>(){}[0]
     final const val NETWORK_TIMEOUT // tv.nomercy.player.core.errors/CoreErrorCodes.NETWORK_TIMEOUT|{}NETWORK_TIMEOUT[0]
         final fun <get-NETWORK_TIMEOUT>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NETWORK_TIMEOUT.<get-NETWORK_TIMEOUT>|<get-NETWORK_TIMEOUT>(){}[0]
+    final const val NOT_FOUND // tv.nomercy.player.core.errors/CoreErrorCodes.NOT_FOUND|{}NOT_FOUND[0]
+        final fun <get-NOT_FOUND>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NOT_FOUND.<get-NOT_FOUND>|<get-NOT_FOUND>(){}[0]
     final const val NOT_READY // tv.nomercy.player.core.errors/CoreErrorCodes.NOT_READY|{}NOT_READY[0]
         final fun <get-NOT_READY>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NOT_READY.<get-NOT_READY>|<get-NOT_READY>(){}[0]
+    final const val OFFLINE // tv.nomercy.player.core.errors/CoreErrorCodes.OFFLINE|{}OFFLINE[0]
+        final fun <get-OFFLINE>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.OFFLINE.<get-OFFLINE>|<get-OFFLINE>(){}[0]
+    final const val PARSE_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.PARSE_FAILED|{}PARSE_FAILED[0]
+        final fun <get-PARSE_FAILED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.PARSE_FAILED.<get-PARSE_FAILED>|<get-PARSE_FAILED>(){}[0]
     final const val PLAYLIST_FETCH_ERROR // tv.nomercy.player.core.errors/CoreErrorCodes.PLAYLIST_FETCH_ERROR|{}PLAYLIST_FETCH_ERROR[0]
         final fun <get-PLAYLIST_FETCH_ERROR>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.PLAYLIST_FETCH_ERROR.<get-PLAYLIST_FETCH_ERROR>|<get-PLAYLIST_FETCH_ERROR>(){}[0]
     final const val PLAYLIST_PARSE_ERROR // tv.nomercy.player.core.errors/CoreErrorCodes.PLAYLIST_PARSE_ERROR|{}PLAYLIST_PARSE_ERROR[0]
         final fun <get-PLAYLIST_PARSE_ERROR>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.PLAYLIST_PARSE_ERROR.<get-PLAYLIST_PARSE_ERROR>|<get-PLAYLIST_PARSE_ERROR>(){}[0]
     final const val QUEUE_EMPTY // tv.nomercy.player.core.errors/CoreErrorCodes.QUEUE_EMPTY|{}QUEUE_EMPTY[0]
         final fun <get-QUEUE_EMPTY>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.QUEUE_EMPTY.<get-QUEUE_EMPTY>|<get-QUEUE_EMPTY>(){}[0]
+    final const val RATE_LIMITED // tv.nomercy.player.core.errors/CoreErrorCodes.RATE_LIMITED|{}RATE_LIMITED[0]
+        final fun <get-RATE_LIMITED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.RATE_LIMITED.<get-RATE_LIMITED>|<get-RATE_LIMITED>(){}[0]
+    final const val REFRESH_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.REFRESH_FAILED|{}REFRESH_FAILED[0]
+        final fun <get-REFRESH_FAILED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.REFRESH_FAILED.<get-REFRESH_FAILED>|<get-REFRESH_FAILED>(){}[0]
+    final const val REQUEST_TIMEOUT // tv.nomercy.player.core.errors/CoreErrorCodes.REQUEST_TIMEOUT|{}REQUEST_TIMEOUT[0]
+        final fun <get-REQUEST_TIMEOUT>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.REQUEST_TIMEOUT.<get-REQUEST_TIMEOUT>|<get-REQUEST_TIMEOUT>(){}[0]
     final const val SERVER_ERROR // tv.nomercy.player.core.errors/CoreErrorCodes.SERVER_ERROR|{}SERVER_ERROR[0]
         final fun <get-SERVER_ERROR>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.SERVER_ERROR.<get-SERVER_ERROR>|<get-SERVER_ERROR>(){}[0]
+    final const val SERVER_ERROR_OTHER // tv.nomercy.player.core.errors/CoreErrorCodes.SERVER_ERROR_OTHER|{}SERVER_ERROR_OTHER[0]
+        final fun <get-SERVER_ERROR_OTHER>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.SERVER_ERROR_OTHER.<get-SERVER_ERROR_OTHER>|<get-SERVER_ERROR_OTHER>(){}[0]
+    final const val SERVICE_UNAVAILABLE // tv.nomercy.player.core.errors/CoreErrorCodes.SERVICE_UNAVAILABLE|{}SERVICE_UNAVAILABLE[0]
+        final fun <get-SERVICE_UNAVAILABLE>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.SERVICE_UNAVAILABLE.<get-SERVICE_UNAVAILABLE>|<get-SERVICE_UNAVAILABLE>(){}[0]
     final const val UNAUTHENTICATED // tv.nomercy.player.core.errors/CoreErrorCodes.UNAUTHENTICATED|{}UNAUTHENTICATED[0]
         final fun <get-UNAUTHENTICATED>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.UNAUTHENTICATED.<get-UNAUTHENTICATED>|<get-UNAUTHENTICATED>(){}[0]
 
@@ -6831,6 +6918,11 @@ final object tv.nomercy.player.core.events/PreventReason { // tv.nomercy.player.
 
 final object tv.nomercy.player.core.media/TitleTokens { // tv.nomercy.player.core.media/TitleTokens|null[0]
     final fun interpolate(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/Function2<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/String>): kotlin/String // tv.nomercy.player.core.media/TitleTokens.interpolate|interpolate(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.Function2<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>,kotlin.String>){}[0]
+}
+
+final object tv.nomercy.player.core.net/HttpFailure { // tv.nomercy.player.core.net/HttpFailure|null[0]
+    final fun codeForClientError(kotlin/Int): kotlin/String // tv.nomercy.player.core.net/HttpFailure.codeForClientError|codeForClientError(kotlin.Int){}[0]
+    final fun codeForServerError(kotlin/Int): kotlin/String // tv.nomercy.player.core.net/HttpFailure.codeForServerError|codeForServerError(kotlin.Int){}[0]
 }
 
 final object tv.nomercy.player.core.player/ActionSource { // tv.nomercy.player.core.player/ActionSource|null[0]

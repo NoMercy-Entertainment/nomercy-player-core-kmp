@@ -31,6 +31,11 @@ private val WEB_ONLY = setOf(
     "core:player/invalid-id-type",
     "core:media/hls-unsupported",
     "core:stream/hls-attach-failed",
+    // Cancellation, which Kotlin reserves. A withdrawn request unwinds as a
+    // CancellationException so structured concurrency keeps working; turning
+    // that into a PlayerError would swallow the cancellation the caller asked
+    // for, and a code raised only by breaking the language is not parity.
+    "core:network/aborted",
 )
 
 // Raised by things the web package ships alongside the player rather than by
@@ -53,23 +58,10 @@ private val NOT_THE_PLAYER = setOf(
 // hand: the list shrinking is the measure of the port, and a code disappearing
 // from it without the subsystem arriving is a regression this test catches.
 private val NOT_YET_PORTED = setOf(
-    "core:auth/refresh-failed",
     "core:drm/license-url-missing",
     "core:media-tracks/no-active-item",
     "core:media/load-failed",
     "core:media/missing-url",
-    "core:network/aborted",
-    "core:network/bad-gateway",
-    "core:network/client-error",
-    "core:network/gateway-timeout",
-    "core:network/gone",
-    "core:network/not-found",
-    "core:network/offline",
-    "core:network/parse-failed",
-    "core:network/rate-limited",
-    "core:network/request-timeout",
-    "core:network/server-error-other",
-    "core:network/service-unavailable",
     "core:player/backend-missing",
     "core:player/crossfade-unsupported",
     "core:player/not-found",
