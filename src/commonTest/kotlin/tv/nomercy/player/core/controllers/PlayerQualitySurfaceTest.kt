@@ -79,4 +79,29 @@ class PlayerQualitySurfaceTest {
         player.quality(null)
         assertEquals(QualityMode.AUTO, player.qualityMode())
     }
+
+    // The contract spells the writer by rung index, because that is what a menu
+    // holds — the list it drew and the row that was touched.
+    @Test
+    fun aRungIsPinnedByItsPlaceInTheLadder() = runTest {
+        val backend = LadderBackend()
+        val player = ComposedPlayer(backend = backend, video = backend)
+
+        player.qualityMode(1)
+
+        assertEquals(QualityMode.MANUAL, player.qualityMode())
+        assertEquals(720, player.quality()?.height)
+    }
+
+    @Test
+    fun aNullIndexIsTheContractsAutoAndReleasesThePin() = runTest {
+        val backend = LadderBackend()
+        val player = ComposedPlayer(backend = backend, video = backend)
+        player.qualityMode(0)
+
+        player.qualityMode(null)
+
+        assertEquals(QualityMode.AUTO, player.qualityMode())
+        assertEquals(null, player.quality())
+    }
 }

@@ -16,6 +16,9 @@ import tv.nomercy.player.core.ports.AudioTrack
 import tv.nomercy.player.core.ports.AudioOutputKind
 import tv.nomercy.player.core.ports.AudioOutputRouter
 import tv.nomercy.player.core.ports.CapabilitiesProbe
+import tv.nomercy.player.core.ports.QualityLevel
+import tv.nomercy.player.core.ports.SubtitleTrack
+import tv.nomercy.player.core.ports.VideoBackend
 import tv.nomercy.player.core.ports.NetworkMonitor
 import tv.nomercy.player.core.ports.NoopWakeLock
 import tv.nomercy.player.core.ports.PermissiveCapabilitiesProbe
@@ -34,6 +37,28 @@ import tv.nomercy.player.testing.FakeMediaBackend
 private val SPEAKER = AudioOutput("0", "Built-in speaker", AudioOutputKind.SPEAKER, isDefault = true)
 private val EARBUDS = AudioOutput("17", "Earbuds", AudioOutputKind.BLUETOOTH)
 private val OTHER_EARBUDS = AudioOutput("18", "Earbuds", AudioOutputKind.BLUETOOTH)
+
+// An engine that publishes two audio tracks and remembers the pick. The plain
+// fake is not a VideoBackend, so a player built on it reports no tracks at all
+// and a selection test against it would pass for the wrong reason.
+private val TRACKS = listOf(
+    AudioTrack(id = "1", language = "en", label = "English"),
+    AudioTrack(id = "2", language = "nl", label = "Nederlands"),
+)
+
+private class TrackedBackend : FakeMediaBackend(), VideoBackend {
+    private var chosen: AudioTrack? = null
+
+    override fun audioTracks(): List<AudioTrack> = TRACKS
+    override fun audioTrack(): AudioTrack? = chosen
+    override fun audioTrack(track: AudioTrack) { chosen = track }
+    override fun qualityLevels(): List<QualityLevel> = emptyList()
+    override fun quality(): QualityLevel? = null
+    override fun quality(level: QualityLevel?) = Unit
+    override fun subtitleTracks(): List<SubtitleTrack> = emptyList()
+    override fun subtitleTrack(): SubtitleTrack? = null
+    override fun subtitleTrack(track: SubtitleTrack?) = Unit
+}
 
 // A platform that can route audio, and one that cannot.
 private class RoutingPlatform(private val router: AudioOutputRouter?) : Platform {
@@ -80,7 +105,7 @@ class AudioRoutingTest {
         val router = StubRouter(listOf(SPEAKER, EARBUDS))
         val player: ComposedPlayer = playerRouting(router)
 
-        assertTrue(player.selectAudioOutput("17"))
+        assertTrue(player.audioOutput("17"))
 
         assertEquals(EARBUDS, player.audioOutput())
     }
@@ -92,7 +117,7 @@ class AudioRoutingTest {
         val router = StubRouter(listOf(SPEAKER, EARBUDS, OTHER_EARBUDS))
         val player: ComposedPlayer = playerRouting(router)
 
-        player.selectAudioOutput("18")
+        player.audioOutput("18")
 
         assertEquals(OTHER_EARBUDS, player.audioOutput())
         assertEquals("18", player.audioOutput()?.id)
@@ -105,7 +130,7 @@ class AudioRoutingTest {
         // exceptional one.
         val player: ComposedPlayer = playerRouting(StubRouter(listOf(SPEAKER, EARBUDS), acceptsChoice = false))
 
-        assertFalse(player.selectAudioOutput("17"))
+        assertFalse(player.audioOutput("17"))
 
         assertEquals(SPEAKER, player.audioOutput())
     }
@@ -114,7 +139,7 @@ class AudioRoutingTest {
     fun choosingSomethingThatIsNotThereIsFalseNotACrash() = runTest {
         val player: ComposedPlayer = playerRouting(StubRouter(listOf(SPEAKER)))
 
-        assertFalse(player.selectAudioOutput("a device that went away"))
+        assertFalse(player.audioOutput("a device that went away"))
     }
 
     @Test
@@ -123,7 +148,7 @@ class AudioRoutingTest {
 
         assertEquals(emptyList(), player.audioOutputs())
         assertNull(player.audioOutput())
-        assertFalse(player.selectAudioOutput("17"))
+        assertFalse(player.audioOutput("17"))
     }
 
     @Test
@@ -145,5 +170,18 @@ class AudioRoutingTest {
         assertEquals(AudioTrackState.MANUAL, player.audioTrackMode())
         val expected: List<Any?> = listOf("manual")
         assertEquals(expected, announced)
+    }
+
+    @Test
+    fun choosingATrackByIndexIsTheSameChoice() = runTest {
+        // The contract's writer half of audioTrackMode. A language menu holds the
+        // list it drew and the row that was touched, not the track object.
+        val backend = TrackedBackend()
+        val player = ComposedPlayer(backend = backend, video = backend)
+
+        player.audioTrackMode(1)
+
+        assertEquals(AudioTrackState.MANUAL, player.audioTrackMode())
+        assertEquals("nl", player.audioTrack()?.language)
     }
 }

@@ -98,11 +98,13 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun addTranslations (Ljava/util/Map;)V
 	public fun announce (Ljava/lang/String;Ltv/nomercy/player/core/ports/AnnouncementLevel;)V
 	public static synthetic fun announce$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ljava/lang/String;Ltv/nomercy/player/core/ports/AnnouncementLevel;ILjava/lang/Object;)V
+	public fun audioOutput (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioOutput (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioOutputs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
 	public fun audioTrackMode ()Ltv/nomercy/player/core/player/AudioTrackState;
+	public fun audioTrackMode (I)V
 	public fun audioTracks ()Ljava/util/List;
 	public fun auth ()Ltv/nomercy/player/core/controllers/AuthController;
 	public fun auth (Ltv/nomercy/player/core/controllers/AuthController;)V
@@ -125,6 +127,8 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun castState ()Ltv/nomercy/player/core/player/CastState;
 	public fun castState (Ltv/nomercy/player/core/player/CastState;)V
 	public fun chapter ()Ltv/nomercy/player/core/media/Chapter;
+	public fun chapter (ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public static synthetic fun chapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun chapters ()Ljava/util/List;
 	public fun chapters (Ljava/util/List;)V
 	public fun contributions (Ltv/nomercy/player/core/plugin/ChromeSlot;)Ljava/util/List;
@@ -203,6 +207,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun playbackRate$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun playbackRates ()Ljava/util/List;
 	public fun pluginList ()Ljava/util/List;
+	public fun plugins ()Ljava/util/List;
 	public fun preloadStrategy ()Ltv/nomercy/player/core/ports/PreloadStrategy;
 	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -212,6 +217,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
 	public fun qualityMode ()Ltv/nomercy/player/core/ports/QualityMode;
+	public fun qualityMode (Ljava/lang/Integer;)V
 	public fun queue ()Ljava/util/List;
 	public fun queue (Ljava/util/List;)V
 	public fun queueAppend (Ljava/util/List;)V
@@ -255,7 +261,6 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public static synthetic fun seekToChapter$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;ILtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun seekToIndex (I)V
 	public fun seekable ()Ljava/util/List;
-	public fun selectAudioOutput (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun setPreloadStrategy (Ltv/nomercy/player/core/ports/PreloadStrategy;)V
 	public fun setTransitionStrategy (Ltv/nomercy/player/core/ports/TransitionStrategy;)V
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

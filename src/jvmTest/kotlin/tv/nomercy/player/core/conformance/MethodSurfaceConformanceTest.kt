@@ -33,6 +33,12 @@ private val WEB_ONLY_METHODS = setOf(
     "createElement",
     "createSVG",
     "audioContext",
+    // The browser's own output-device picker, Chrome only. No native platform
+    // has a picker to open — routing to a device you already know is
+    // audioOutput(id), which this player has. It used to be spelled
+    // selectAudioOutput(id) here, which is a different method wearing the
+    // contract's name for this one.
+    "selectAudioOutput",
     // A runtime method-override table. The web needs one because a
     // mixin-composed player cannot be subclassed; Kotlin's answer is that every
     // member here is already open, so a consumer replacing one behaviour

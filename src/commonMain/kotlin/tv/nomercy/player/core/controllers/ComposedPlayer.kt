@@ -305,6 +305,15 @@ public open class ComposedPlayer(
     protected val playerScope: CoroutineScope = scope ?: CoroutineScope(SupervisorJob())
 
     public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, playerScope)
+
+    // The contract's `plugins()` — the registered plugins themselves.
+    //
+    // The registry above answers to the same name and is the richer thing, so
+    // this looked done. It is not the same call: a consumer following the web
+    // docs writes `player.plugins()` expecting a list and, in Kotlin, the
+    // property shadowed nothing and the call did not compile.
+    public open fun plugins(): List<Plugin<*>> = plugins.plugins()
+
     public val lifecycle: LifecycleController = LifecycleController(context, plugins, ::report)
 
     // What the engine reports, turned into what the player says. Without it
@@ -617,12 +626,20 @@ public open class ComposedPlayer(
 
     public open suspend fun audioOutput(): AudioOutput? = platform.audioOutput?.current()
 
+    // The writer half of the pair above, not a differently-named method.
+    //
+    // This was `selectAudioOutput(id)`, which is the contract's name for
+    // something else entirely: on the web `selectAudioOutput()` takes nothing
+    // and opens the browser's device picker. Routing to a known device is
+    // `audioOutput(id)` there, so a consumer following the docs called a method
+    // this library did not have and found one whose name promised a picker.
+    //
     // False when there was nothing to ask or the platform refused.
     //
     // Not a throw: iOS routes audio by policy and treats a preference as a
     // suggestion, so "your choice did not take" is an ordinary outcome a caller
     // has to handle rather than an exceptional one.
-    public open suspend fun selectAudioOutput(id: String): Boolean =
+    public open suspend fun audioOutput(id: String): Boolean =
         platform.audioOutput?.select(id) ?: false
 
     // ── Environment ──────────────────────────────────────────────────────────
@@ -897,6 +914,13 @@ public open class ComposedPlayer(
 
     public open fun chapter(): Chapter? = chapterTrack.at(time())
 
+    // The writer half. The web's `chapter(idx)` hands straight to
+    // `seekToChapter`, and so does this — the pair exists because a chrome
+    // reading `chapter()` to draw a menu writes back through the same name.
+    public open suspend fun chapter(index: Int, opts: ActionOptions = ActionOptions()) {
+        seekToChapter(index, opts)
+    }
+
     // Null at the last chapter is the caller's cue to skip to the end of the
     // item; jumping to zero there would restart the film.
     public open suspend fun nextChapter(opts: ActionOptions = ActionOptions()) {
@@ -1170,6 +1194,13 @@ public open class ComposedPlayer(
     // committed selection the viewer never made is worse than showing none.
     public open fun qualityMode(): QualityMode = qualityChoice
 
+    // The writer half, by rung index, which is how the web spells it — null is
+    // the web's `'auto'`. An index rather than a descriptor because that is
+    // what a menu holds: the list it drew, and the row the viewer touched.
+    public open fun qualityMode(index: Int?) {
+        quality(index?.let { qualityLevels().getOrNull(it) })
+    }
+
     // Tracks, by the thing itself rather than by its place in a list. An
     // audio-only engine reports none rather than throwing, the same as the
     // ladder does.
@@ -1198,6 +1229,13 @@ public open class ComposedPlayer(
     // choice should survive the next item rather than being re-decided by the
     // engine — and this is what a per-library player reads to do that.
     public open fun audioTrackMode(): AudioTrackState = audioTrackChoice
+
+    // The writer half, by index into audioTracks(), which is how the web spells
+    // it and what a language menu has to hand. Choosing marks the selection
+    // MANUAL, which is the whole reason the reader exists.
+    public open fun audioTrackMode(index: Int) {
+        audioTracks().getOrNull(index)?.let { audioTrack(it) }
+    }
 
     private var audioTrackChoice: AudioTrackState = AudioTrackState.DEFAULT
 

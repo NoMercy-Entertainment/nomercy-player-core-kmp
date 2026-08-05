@@ -218,6 +218,30 @@ class ChapterSurfaceTest {
         assertEquals(listOf(2), announced)
     }
 
+    // The contract's writer half. A chrome that read chapter() to draw its menu
+    // writes the viewer's pick back through the same name, and until this
+    // existed that call did not compile.
+    @Test
+    fun choosingAChapterByIndexSeeksToIt() = runTest {
+        val subject = player()
+        subject.time(10.0)
+
+        subject.chapter(2)
+
+        assertEquals(120.0, subject.time())
+        assertEquals("Act one", subject.chapter()?.title)
+    }
+
+    @Test
+    fun choosingAChapterThatIsNotThereLeavesThePlayheadAlone() = runTest {
+        val subject = player()
+        subject.time(10.0)
+
+        subject.chapter(9)
+
+        assertEquals(10.0, subject.time())
+    }
+
     // What a real engine does once it has read the container, which is the only
     // way a duration reaches the player.
     private fun reportDuration(backend: FakeMediaBackend, seconds: Double) {
