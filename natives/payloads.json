@@ -12,10 +12,18 @@
     "months: nothing failed, styled subtitles simply drew nothing.",
     "",
     "bundle=true rides inside the published artifact and needs no network at",
-    "run time. That is required where the release lives in a private",
-    "repository, and it is why libass is bundled: nomercy-libass is private, so",
-    "a runtime fetch 404s for every consumer. libVLC stays unbundled because it",
-    "is sixty megabytes per platform and its release is reachable."
+    "run time, which is the only arrangement that works for either of these.",
+    "libass comes from nomercy-libass, which is private, so a runtime fetch",
+    "404s for every consumer. libVLC had no release at all: the URL its digest",
+    "named has never existed, there is no system VLC on a stock Windows box,",
+    "and the desktop drew a black rectangle with nothing logged.",
+    "",
+    "libass is fetched from its release; libVLC is BUILT at build time from the",
+    "upstream VideoLAN redistributable by tools/build-native-payload.sh, which",
+    "is published for every platform and needs no release of ours. That script",
+    "regenerates plugins.dat with vlc-cache-gen, a native binary, so a payload",
+    "can only be built ON the platform it targets — each one is produced by its",
+    "own runner and the host's is always available locally."
   ],
   "payloads": [
     {
@@ -24,7 +32,7 @@
       "version": "3.0.23",
       "sha256": "c159cf42bf11a1cebb2c820805443773e33414526d9aae13783497a7344a2e0f",
       "marker": "libvlc.dll",
-      "bundle": false
+      "bundle": true
     },
     {
       "kind": "LIB_VLC",
@@ -32,7 +40,7 @@
       "version": "3.0.23",
       "sha256": "3501b673bc6f87a563951e119f3746109080adc2277a63cb33bf2b7134140fef",
       "marker": "libvlc.so.5",
-      "bundle": false
+      "bundle": true
     },
     {
       "kind": "LIB_ASS",

@@ -228,6 +228,13 @@ esac
 if [ "$packed" = "no" ]; then
   write_notice
   echo "── packing $(basename "$out")"
+  # The previous archive goes first. Building twice into one outdir produced a
+  # DIFFERENT digest the second time — measured, c159cf42 then 7421e397 — which
+  # makes a script whose whole promise is byte-reproducibility unreproducible on
+  # any machine that builds more than once. A release check comparing digests
+  # would fail on a payload that is actually fine, and a bundling build that
+  # trusts the digest fails outright.
+  rm -f "$out"
   # Sorted, owner-stripped and with gzip's own timestamp suppressed, so the
   # same upstream produces the same bytes and therefore the same digest.
   tar --sort=name --owner=0 --group=0 --numeric-owner \

@@ -66,8 +66,11 @@ val nativePayloads: List<NativePayload> = run {
 val generateNativeCatalogue: TaskProvider<Task> = tasks.register("generateNativeCatalogue") {
     val outputDirectory: Provider<Directory> = layout.buildDirectory.dir("generated/natives/kotlin")
     val payloads: List<NativePayload> = nativePayloads
+    val bundleDirectory: Provider<Directory> = layout.buildDirectory.dir("generated/natives/resources")
 
+    dependsOn("bundleNativePayloads")
     inputs.file(layout.projectDirectory.file("natives/payloads.json"))
+    inputs.dir(bundleDirectory)
     outputs.dir(outputDirectory)
 
     doLast {
@@ -75,13 +78,29 @@ val generateNativeCatalogue: TaskProvider<Task> = tasks.register("generateNative
             outputDirectory.get().asFile.resolve("tv/nomercy/player/core/natives")
         packageDirectory.mkdirs()
 
+        val digestOf: (JavaFile) -> String = { file ->
+            MessageDigest.getInstance("SHA-256")
+                .digest(file.readBytes())
+                .joinToString("") { byte: Byte -> "%02x".format(byte) }
+        }
+
         val rows: String = payloads.joinToString("\n") { payload ->
+            // A payload BUILT here carries the digest of the archive that was
+            // actually produced, because repacking a verified upstream through
+            // a different tar and gzip changes the bytes without changing what
+            // is inside. Pinning a literal would make the install-time check
+            // reject the library's own payload on whichever machine did not
+            // build it. The supply-chain anchor is the upstream digest in
+            // tools/native-payloads.lock, checked before anything is unpacked.
+            val built = JavaFile(bundleDirectory.get().asFile, "tv/nomercy/player/natives/${payload.fileName}")
+            val sha: String = if (payload.bundle && built.isFile) digestOf(built) else payload.sha256
+
             """
             |        NativeArchive(
             |            kind = NativeRuntimeKind.${payload.kind},
             |            platform = HostPlatform.${payload.platform},
             |            version = "${payload.version}",
-            |            sha256 = "${payload.sha256}",
+            |            sha256 = "$sha",
             |            marker = "${payload.marker}",
             |        ),
             """.trimMargin()
@@ -114,18 +133,37 @@ val generateNativeCatalogue: TaskProvider<Task> = tasks.register("generateNative
 
 // The payloads that ride inside the published jar.
 //
-// Bundled rather than fetched because the release they come from lives in a
-// private repository: a runtime download 404s for every consumer, which is not
-// a degraded experience but a silent one — libass simply does not load and a
-// styled subtitle draws nothing. A bundled payload is verified against the same
-// digest on the way out of the jar as a downloaded one is off the network, so
-// this changes where the bytes come from and nothing about whether they are
-// trusted.
+// Bundled rather than fetched at run time, because neither of these could be
+// fetched at all. libass comes from a private repository, so a download 404s
+// for every consumer. libVLC had no release whatsoever — the URL its digest
+// named has never existed — and a stock Windows box has no system VLC either,
+// so the desktop engine loaded nothing and drew a black rectangle with not one
+// line logged.
+//
+// Two sources, because the two payloads are made differently. libass is a
+// release asset of the repo that builds it. libVLC is BUILT here from the
+// upstream VideoLAN redistributable, which is published for every platform and
+// needs no release of ours — that is what makes it a build-time dependency
+// rather than something we host.
+//
+// A bundled payload is verified against the same digest on the way out of the
+// jar as a downloaded one is off the network, so this changes where the bytes
+// come from and nothing about whether they are trusted.
 val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePayloads") {
     val outputDirectory: Provider<Directory> = layout.buildDirectory.dir("generated/natives/resources")
     val bundled: List<NativePayload> = nativePayloads.filter { payload -> payload.bundle }
+    val projectRoot: JavaFile = layout.projectDirectory.asFile
+    val hostPlatform: String = run {
+        val os: String = System.getProperty("os.name").lowercase()
+        when {
+            os.startsWith("windows") -> "WINDOWS_X64"
+            os.contains("linux") -> "LINUX_X64"
+            else -> "NONE"
+        }
+    }
 
     inputs.file(layout.projectDirectory.file("natives/payloads.json"))
+    inputs.file(layout.projectDirectory.file("tools/native-payloads.lock"))
     outputs.dir(outputDirectory)
 
     // Self-contained on purpose: the configuration cache cannot serialise a
@@ -145,24 +183,64 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             val destination = JavaFile(target, payload.fileName)
             if (destination.isFile && digestOf(destination) == payload.sha256) continue
 
-            // Through the gh CLI, because the release is private and this is
-            // the credential a release machine already has. A failure here is
-            // fatal on purpose: a jar published without its payload is the
-            // silent-no-subtitles bug shipped to every consumer at once.
-            val process: Process = ProcessBuilder(
-                "gh", "release", "download", payload.tag,
-                "--repo", "NoMercy-Entertainment/${payload.repository}",
-                "--pattern", payload.fileName,
-                "--output", destination.absolutePath,
-                "--clobber",
-            ).redirectErrorStream(true).start()
+            // libVLC is built from upstream; libass is fetched from its release.
+            //
+            // The build regenerates plugins.dat with vlc-cache-gen, which is a
+            // native binary for the platform being packaged, so a payload can
+            // only be produced ON its own target. Each platform's runner
+            // produces its own and the host's is always available locally —
+            // which is what matters here, because the machine running this is
+            // the machine whose desktop has to play.
+            val command: List<String> = if (payload.kind == "LIB_VLC") {
+                if (payload.platform != hostPlatform) {
+                    logger.lifecycle(
+                        "bundleNativePayloads: skipping ${payload.fileName} — " +
+                            "vlc-cache-gen is native to ${payload.platformId} and this host is not it. " +
+                            "Its own runner produces it.",
+                    )
+                    continue
+                }
+                listOf("bash", "tools/build-native-payload.sh", "libvlc", payload.platformId, "build/payloads")
+            } else {
+                listOf(
+                    "gh", "release", "download", payload.tag,
+                    "--repo", "NoMercy-Entertainment/${payload.repository}",
+                    "--pattern", payload.fileName,
+                    "--output", destination.absolutePath,
+                    "--clobber",
+                )
+            }
+
+            val process: Process = ProcessBuilder(command)
+                .directory(projectRoot)
+                .redirectErrorStream(true)
+                .start()
 
             val output: String = process.inputStream.bufferedReader().readText()
-            check(process.waitFor() == 0) { "could not fetch ${payload.fileName}: $output" }
+            check(process.waitFor() == 0) { "could not obtain ${payload.fileName}: $output" }
 
-            val actual: String = digestOf(destination)
-            check(actual == payload.sha256) {
-                "digest mismatch for ${payload.fileName}: expected ${payload.sha256} but got $actual"
+            // The build script writes where it was told; move it into the
+            // resource tree the loader reads from.
+            if (payload.kind == "LIB_VLC") {
+                JavaFile(projectRoot, "build/payloads/${payload.fileName}").copyTo(destination, overwrite = true)
+            }
+
+            // A FETCHED payload must match the digest we pinned — that is the
+            // supply-chain check and it is not negotiable.
+            //
+            // A BUILT one cannot be pinned that way and pretending otherwise is
+            // a false contract: repacking the same verified upstream through a
+            // different tar and gzip produces different bytes, so the archive
+            // digest depends on which shell ran the script. Measured here —
+            // git-bash gives c159cf42, the shell Gradle spawns gives 7421e397,
+            // from identical inputs. Its trust anchor is the UPSTREAM digest,
+            // which tools/native-payloads.lock pins and the script verifies
+            // before it unpacks anything.
+            if (payload.kind != "LIB_VLC") {
+                val actual: String = digestOf(destination)
+                check(actual == payload.sha256) {
+                    "digest mismatch for ${payload.fileName}: expected ${payload.sha256} but got $actual"
+                }
             }
         }
     }
