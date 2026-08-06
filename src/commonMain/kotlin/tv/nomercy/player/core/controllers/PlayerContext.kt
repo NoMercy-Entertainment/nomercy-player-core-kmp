@@ -15,13 +15,16 @@ import tv.nomercy.player.core.errors.mediaFormatError
 import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
+import tv.nomercy.player.core.events.BeforeLoadPayload
 import tv.nomercy.player.core.events.BeforeMutationPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventEmitter
 import tv.nomercy.player.core.events.EventKey
+import tv.nomercy.player.core.events.LoadPreventedPayload
 import tv.nomercy.player.core.events.MutationPreventedPayload
 import tv.nomercy.player.core.events.PhaseChange
 import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.events.PreventReason
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.MediaList
 import tv.nomercy.player.core.media.PlaylistItem
@@ -252,6 +255,32 @@ public class PlayerContext(
     // begun, not before it. Announcing from here would put it first and change
     // an ordering a chrome can see.
     internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
+        // Announced before the engine sees anything, and refusable.
+        //
+        // CoreEvents.BeforeLoad was declared, catalogued and given a payload,
+        // and dispatched by no code path at all, so a consumer following the
+        // documentation to cancel or rewrite a load had nothing to hook.
+        //
+        // The listener may replace the item as well as refuse it — a plugin
+        // that resolves the media URL late does it here.
+        val decision: BeforeDispatchResult<BeforeLoadPayload> =
+            // `source` stays null until LoadOptions carries one. The reference
+            // forwards opts.source here; the native LoadOptions has no such
+            // field yet, and inventing a value would be worse than the absence
+            // — a listener switching on it would branch on a fiction.
+            dispatchBefore(CoreEvents.BeforeLoad, BeforeLoadPayload(item = item, source = null))
+
+        if (decision.prevented) {
+            emit(
+                CoreEvents.LoadPrevented,
+                LoadPreventedPayload(reason = decision.reason ?: PreventReason.ListenerPrevented),
+            )
+            return
+        }
+
+        @Suppress("NAME_SHADOWING")
+        val item: PlaylistItem = decision.data.item
+
         // Both refusals used to be silence. An item with no url reached the
         // engine as an empty string, and a player built without a backend took
         // the load, recorded the item and played nothing — the caller was told

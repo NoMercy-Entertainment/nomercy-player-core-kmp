@@ -11,6 +11,7 @@ package tv.nomercy.player.core.controllers
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.PreventReason
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.ports.LoadOptions
 import tv.nomercy.player.core.errors.CoreErrorCodes
@@ -103,6 +104,34 @@ class PlayerContextTest {
         // Every transport route ends up here, so a per-library loader cannot
         // forget about authorisation.
         assertEquals(listOf("https://example.test/a?token=abc"), ctx.fakeBackend().loadedUrls)
+    }
+
+    @Test
+    fun loadingAnnouncesItselfBeforeTheEngineSeesAnything() = runTest {
+        val ctx = newContext()
+        val seen: MutableList<String> = mutableListOf()
+        ctx.on(CoreEvents.BeforeLoad) { seen += it.data.item.id }
+
+        ctx.load(TestItem("a"))
+
+        // The reference dispatches this first and a consumer reads the item off
+        // it. LiveTranscodingPlugin subscribes here and heard nothing ever,
+        // because the event was declared, catalogued, given a payload — and
+        // dispatched by no code path in the library.
+        assertEquals(listOf("a"), seen)
+    }
+
+    @Test
+    fun aPreventedLoadNeverReachesTheEngineAndSaysWhy() = runTest {
+        val ctx = newContext()
+        ctx.on(CoreEvents.BeforeLoad) { it.preventDefault() }
+        val refusals: MutableList<String> = mutableListOf()
+        ctx.on(CoreEvents.LoadPrevented) { refusals += it.reason }
+
+        ctx.load(TestItem("a"))
+
+        assertTrue(ctx.fakeBackend().loadedUrls.isEmpty())
+        assertEquals(listOf(PreventReason.ListenerPrevented), refusals)
     }
 
     @Test
