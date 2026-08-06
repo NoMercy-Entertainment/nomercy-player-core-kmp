@@ -450,11 +450,28 @@ public class VlcjVideoBackend private constructor(
         // prepare rather than play: loading and starting are separate decisions
         // above, and an engine that started on its own would ignore a refused
         // beforePlay.
+        //
+        // `:start-paused` is what makes a loaded item VISIBLE without starting
+        // it. libVLC decodes nothing until it runs, so a player that loads while
+        // paused showed a spinner over a black rectangle at 0:00 and stayed
+        // there — which reads as a hang, and was read as one. The web player
+        // paints a first frame there because a browser decodes one on load.
+        //
+        // It does not start playback: the engine reaches the first frame and
+        // halts, so a refused beforePlay is still refused and the transport
+        // still reports paused.
         player.prepare(
             narrowedLocation(master) ?: openUrl.orEmpty(),
-            openOptions,
+            openOptions + FIRST_FRAME_ONLY,
         )
+        // Straight to the engine, not through play(): that announces PLAY on the
+        // bus and the transport would show a film starting that is not.
+        player.playback.play()
     }
+
+    // Decode the first frame, then stop. A media option rather than a
+    // play-then-pause, which races the decoder and shows a flash of motion.
+    private val FIRST_FRAME_ONLY: List<String> = listOf(":start-paused")
 
     // A local playlist offering only the rungs this machine may use, or null to
     // open the original URL untouched.
