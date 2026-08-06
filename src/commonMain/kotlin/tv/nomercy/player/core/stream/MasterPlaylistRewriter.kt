@@ -58,10 +58,22 @@ public object MasterPlaylistRewriter {
         wanted: Set<QualityDescriptor>,
     ): Int {
         val uriIndex: Int = nextUriIndex(lines, index)
-        // A variant nobody can identify is kept. Guessing at it would drop a
-        // rendition on the strength of an attribute the server chose not to send.
+        // A variant with NO RESOLUTION at all is kept: guessing at it would drop
+        // a rendition on the strength of an attribute the server chose not to
+        // send, and an audio-only or muxed rung legitimately carries none.
+        //
+        // A variant with a MALFORMED one is dropped. Those are different cases
+        // and treating them alike is what put Tears of Steel's
+        // `RESOLUTION=video_3840x1714` back into the rewritten playlist after
+        // the ladder had already rejected it — so libVLC was handed a rung
+        // nothing else in the player believed in, opened it first, and got a
+        // 404. The film played its audio and drew its subtitles over a black
+        // rectangle.
+        val declaresResolution: Boolean = attributesOf(lines[index]).containsKey("RESOLUTION")
         val descriptor: QualityDescriptor? = descriptorOf(lines[index])
-        if (descriptor == null || descriptor in wanted) {
+        val keepThis: Boolean = if (descriptor == null) !declaresResolution else descriptor in wanted
+
+        if (keepThis) {
             out.add(lines[index])
             if (uriIndex < lines.size) out.add(lines[uriIndex])
         }
