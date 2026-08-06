@@ -78,7 +78,7 @@ public open class MixerPlugin(
 
     private var currentGainDb: Double = 0.0
     private var currentPan: Double = 0.0
-    private var muted: Boolean = false
+    private var isMutedNow: Boolean = false
 
     // Set while the plugin itself is moving the controls rather than a listener.
     // Without it the configured defaults applied at registration are written
@@ -93,7 +93,10 @@ public open class MixerPlugin(
     /** Current pan, -1 to 1. */
     public fun pan(): Double = currentPan
 
-    public fun isMuted(): Boolean = muted
+    // `muted`, both halves, because that is what the reference calls it.
+    // This shipped as isMuted()/mute(), which is the same pair wearing
+    // different names — and a UI ported from the web calls muted().
+    public fun muted(): Boolean = isMutedNow
 
     override fun use() {
         applying = true
@@ -119,9 +122,29 @@ public open class MixerPlugin(
                 applying = true
                 gain(stored.gain)
                 pan(stored.pan)
-                mute(stored.muted)
+                muted(stored.muted)
                 applying = false
             }
+        }
+    }
+
+    /**
+     * Write the mixer out now.
+     *
+     * autoSave() is private and fires on every change; a host that wants to
+     * decide WHEN state is committed had no way to say so, which is the gap the
+     * reference's save() fills. No-op without a persistKey, like everything
+     * else here.
+     */
+    public fun save() {
+        val key: String = opts.persistKey ?: return
+
+        this.launch {
+            storage.setJSON(
+                key,
+                StoredMixerState(gain = currentGainDb, pan = currentPan, muted = isMutedNow),
+                StoredMixerState.serializer(),
+            )
         }
     }
 
@@ -134,7 +157,7 @@ public open class MixerPlugin(
         this.launch {
             storage.setJSON(
                 key,
-                StoredMixerState(gain = currentGainDb, pan = currentPan, muted = muted),
+                StoredMixerState(gain = currentGainDb, pan = currentPan, muted = isMutedNow),
                 StoredMixerState.serializer(),
             )
         }
@@ -179,8 +202,12 @@ public open class MixerPlugin(
      * Unmuting restores the dB the listener chose rather than unity, which is
      * the difference between a mute button and a reset button.
      */
-    public fun mute(value: Boolean) {
-        muted = value
+    public fun muted(value: Boolean) {
+        // The reference returns early when nothing changes, so a redundant
+        // press emits nothing and does not write to storage.
+        if (isMutedNow == value) return
+
+        isMutedNow = value
         applyGain()
         emit(MixerEvents.MuteChanged, value)
         autoSave()
@@ -190,7 +217,7 @@ public open class MixerPlugin(
     protected open fun applyPan(value: Double) {}
 
     private fun applyGain() {
-        graph.preGain(if (muted) 0.0 else dbToLinear(currentGainDb))
+        graph.preGain(if (isMutedNow) 0.0 else dbToLinear(currentGainDb))
     }
 
     private fun dbToLinear(db: Double): Double = TEN.pow(db / DB_PER_DECADE)

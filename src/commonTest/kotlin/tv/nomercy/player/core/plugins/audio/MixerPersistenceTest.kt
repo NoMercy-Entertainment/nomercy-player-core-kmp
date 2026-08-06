@@ -33,7 +33,7 @@ class MixerPersistenceTest {
         val first = MixerPlugin(RecordingGraph(), opts)
         FakePlayer(scope = pluginScope(), rootStorage = storage).plugins.register(first)
         first.gain(-6.0)
-        first.mute(true)
+        first.muted(true)
         runCurrent()
 
         val graph = RecordingGraph()
@@ -42,7 +42,7 @@ class MixerPersistenceTest {
         runCurrent()
 
         assertEquals(-6.0, second.gain(), "the gain did not survive the restart")
-        assertTrue(second.isMuted(), "the app came back unmuted into a room somebody silenced")
+        assertTrue(second.muted(), "the app came back unmuted into a room somebody silenced")
 
         // Reaching the graph, not only the plugin's field: a restore that stopped
         // at the state would show a muted control over audible sound.

@@ -6200,10 +6200,11 @@ open class tv.nomercy.player.core.plugins.audio/MixerPlugin : tv.nomercy.player.
 
     final fun gain(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerPlugin.gain|gain(){}[0]
     final fun gain(kotlin/Double) // tv.nomercy.player.core.plugins.audio/MixerPlugin.gain|gain(kotlin.Double){}[0]
-    final fun isMuted(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/MixerPlugin.isMuted|isMuted(){}[0]
-    final fun mute(kotlin/Boolean) // tv.nomercy.player.core.plugins.audio/MixerPlugin.mute|mute(kotlin.Boolean){}[0]
+    final fun muted(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/MixerPlugin.muted|muted(){}[0]
+    final fun muted(kotlin/Boolean) // tv.nomercy.player.core.plugins.audio/MixerPlugin.muted|muted(kotlin.Boolean){}[0]
     final fun pan(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerPlugin.pan|pan(){}[0]
     final fun pan(kotlin/Double) // tv.nomercy.player.core.plugins.audio/MixerPlugin.pan|pan(kotlin.Double){}[0]
+    final fun save() // tv.nomercy.player.core.plugins.audio/MixerPlugin.save|save(){}[0]
     open fun applyPan(kotlin/Double) // tv.nomercy.player.core.plugins.audio/MixerPlugin.applyPan|applyPan(kotlin.Double){}[0]
     open fun use() // tv.nomercy.player.core.plugins.audio/MixerPlugin.use|use(){}[0]
 

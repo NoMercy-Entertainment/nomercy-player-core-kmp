@@ -146,10 +146,10 @@ class MixerPluginTest {
 
         testPlugin(plugin, FakePlayer()) { _, _ ->
             plugin.gain(6.0)
-            plugin.mute(true)
+            plugin.muted(true)
             assertClose(0.0, graph.preGains.last(), "muted")
 
-            plugin.mute(false)
+            plugin.muted(false)
             assertClose(1.995, graph.preGains.last(), "unmuted")
             assertEquals(6.0, plugin.gain())
         }
