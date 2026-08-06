@@ -93,6 +93,19 @@ public object MasterPlaylistRewriter {
         val attributes: Map<String, String> = attributesOf(streamInfLine)
         val height: Int = heightOf(attributes) ?: return null
 
+        // BOTH halves, because the spec says RESOLUTION is <int>x<int> and a
+        // value that is not is a rendition we cannot describe — so it is one we
+        // must not offer.
+        //
+        // Height alone was enough, and a real playlist shipped
+        // RESOLUTION=video_3840x1714: the height read 1714, the width read
+        // nothing, and the malformed rung was accepted as the HIGHEST one on
+        // the ladder. It was also the one whose media 404s. The film played its
+        // audio, drew its subtitles and its chapter markers, and showed a black
+        // rectangle — which reads as a broken decoder rather than as a rung
+        // that should never have been on the ladder.
+        if (widthOf(attributes) == null) return null
+
         return QualityDescriptor(
             height = height,
             width = widthOf(attributes),
