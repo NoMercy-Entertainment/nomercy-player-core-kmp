@@ -47,13 +47,33 @@ internal class VlcMasterPlaylist private constructor(
     // ladder was one rung long and always read as SDR.
     internal val ladder: List<QualityDescriptor> = MasterPlaylistRewriter.variants(text)
 
+    // How many renditions the manifest CLAIMS, describable or not. The gap
+    // between this and the ladder is the set of rungs that have to be stripped
+    // before libVLC sees them.
+    private val declaredVariants: Int = text.lines().count { it.startsWith("#EXT-X-STREAM-INF") }
+
     // A playlist offering only [keep], somewhere libVLC can open it.
     //
     // Null when there is nothing to narrow, when narrowing would leave nothing to
     // play, or when the file could not be written — and null means the caller
     // plays the original URL, which is what it did before any of this existed.
     internal fun narrowedTo(keep: Collection<QualityDescriptor>): String? {
-        if (keep.isEmpty() || keep.size == ladder.size) return null
+        if (keep.isEmpty()) return null
+
+        // Rewrite whenever the manifest declares rungs the ladder does not, not
+        // only when the CALLER asked to drop some.
+        //
+        // A rung whose RESOLUTION is not <int>x<int> is undescribable, so it is
+        // absent from the ladder — and this used to conclude there was nothing
+        // to narrow and hand libVLC the ORIGINAL url, malformed rung and all.
+        // libVLC then opened the first entry it saw. Tears of Steel declares
+        // RESOLUTION=video_3840x1714 pointing at media that 404s, so the film
+        // played its audio and drew its subtitles over a black rectangle.
+        //
+        // hls.js drops a rendition it cannot use and VLC itself falls to the
+        // next one; a player that hands the whole broken manifest downstream is
+        // the one doing something unusual.
+        if (keep.size == ladder.size && ladder.size == declaredVariants) return null
 
         val narrowed: String = MasterPlaylistRewriter.rewrite(text, keep)
         if (MasterPlaylistRewriter.variants(narrowed).isEmpty()) return null
