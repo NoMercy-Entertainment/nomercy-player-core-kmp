@@ -96,7 +96,35 @@ public class TimeController(
         ctx.emit(CoreEvents.Progress, ProgressPayload(position, total, percentage))
     }
 
-    public fun time(): Double = ctx.internalCurrentTime
+    /**
+     * Where playback actually is, asked of the engine rather than remembered.
+     *
+     * This returned the value cached from the last `timeupdate`, and an engine
+     * decides for itself how often that fires — libVLC raises it a few times a
+     * second, so the answer was the same number for hundreds of milliseconds
+     * and then jumped. Anything following the playhead per frame inherited that
+     * cadence: a subtitle overlay drawing at 120Hz still stepped three times a
+     * second, because it was drawing the same position over and over.
+     *
+     * The engines already hold a continuous clock — libVLC computes its time on
+     * demand, and a media element's currentTime is exact whenever it is read —
+     * so this is asking the thing that knows instead of the thing that was told.
+     * It is the same shape as buffered() below, which never cached.
+     *
+     * The remembered value stays as the fallback, and it is not a formality:
+     * between an item being released and the next backend arriving there is no
+     * engine to ask, and the last known position is what a progress bar should
+     * still be showing.
+     *
+     * Not while the media is stale. Between an advance and the incoming item's
+     * mount the engine still attached is the OUTGOING one, and asking it hands
+     * back the previous item's position stamped with the new item's identity —
+     * the same trap publishPosition already guards, and reading around it here
+     * would reopen it one call later.
+     */
+    public fun time(): Double =
+        if (ctx.mediaIsStale()) ctx.internalCurrentTime
+        else ctx.backend?.currentTime() ?: ctx.internalCurrentTime
 
     public suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()) {
         transport.seek(seconds.coerceAtLeast(0.0), opts)

@@ -35,11 +35,17 @@ class TimeControllerTest {
     }
 
     @Test
-    fun theTimeGetterReadsTheOneCopyOfThePlayhead() {
+    fun theTimeGetterAsksTheEngineRatherThanTheRememberedCopy() {
         val rig = TimeRig()
         rig.ctx.internalCurrentTime = 12.5
 
-        assertEquals(12.5, rig.time.time())
+        // An engine reports timeupdate on its own cadence — libVLC a few times
+        // a second — so the remembered copy is stale between them, and anything
+        // following the playhead per frame drew the same position repeatedly.
+        // The engine's own clock is continuous, so it is the one to ask.
+        rig.backend.currentTime(30.0)
+
+        assertEquals(30.0, rig.time.time(), "the getter answered from the remembered copy, not the engine")
     }
 
     @Test
