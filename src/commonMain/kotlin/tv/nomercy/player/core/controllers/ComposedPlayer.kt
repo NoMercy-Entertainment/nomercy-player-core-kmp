@@ -47,6 +47,9 @@ import tv.nomercy.player.core.events.AuthFailedPayload
 import tv.nomercy.player.core.events.AuthRefreshedPayload
 import tv.nomercy.player.core.events.CastStatePayload
 import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.events.BeforeSubtitlePayload
+import tv.nomercy.player.core.events.SubtitlePreventedPayload
+import tv.nomercy.player.core.events.PreventReason
 import tv.nomercy.player.core.events.QualityStatePayload
 import tv.nomercy.player.core.events.TransitionCancelledPayload
 import tv.nomercy.player.core.events.PlaylistReadyPayload
@@ -1336,9 +1339,34 @@ public open class ComposedPlayer(
 
     // Null turns captions off, which is a selection a viewer makes rather than
     // an error — and it is the one every engine spells differently underneath.
-    public open fun subtitle(track: SubtitleTrack?) {
-        video?.subtitleTrack(track)
-        context.emit(CoreEvents.Subtitle, SubtitlePayload(track?.let { indexIn(subtitles(), it) }))
+    // Refusable, and suspend for the same reason the reference's writer returns
+    // a promise: a before-listener can be answered by a suspending one, so the
+    // decision is not available synchronously.
+    //
+    // beforeSubtitle and subtitlePrevented were both declared, both catalogued,
+    // and emitted by nothing at all — a consumer following the reference to
+    // veto a caption change had nothing to veto. Making this suspend is what
+    // lets the hook be awaited; the trio is v0 with no published consumers, so
+    // there is nobody to migrate.
+    public open suspend fun subtitle(track: SubtitleTrack?) {
+        // The payload carries the INDEX, as the reference's does — a listener
+        // reading it gets the same number in both ecosystems, and it is what a
+        // listener rewrites when it redirects a selection.
+        val asked: Double? = track?.let { indexIn(subtitles(), it) }
+        val decision: BeforeDispatchResult<BeforeSubtitlePayload> =
+            context.dispatchBefore(CoreEvents.BeforeSubtitle, BeforeSubtitlePayload(asked))
+
+        if (decision.prevented) {
+            context.emit(
+                CoreEvents.SubtitlePrevented,
+                SubtitlePreventedPayload(reason = decision.reason ?: PreventReason.ListenerPrevented),
+            )
+            return
+        }
+
+        val chosen: SubtitleTrack? = decision.data.track?.let { subtitles().getOrNull(it.toInt()) }
+        video?.subtitleTrack(chosen)
+        context.emit(CoreEvents.Subtitle, SubtitlePayload(decision.data.track))
     }
 
     // Where the track sits in the list the viewer was shown, or null when the

@@ -276,7 +276,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun streamState ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun streams ()Ljava/util/List;
 	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
-	public fun subtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
+	public fun subtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun subtitles ()Ljava/util/List;
 	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public fun time ()D
