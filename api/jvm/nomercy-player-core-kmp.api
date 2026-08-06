@@ -208,6 +208,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun playbackRates ()Ljava/util/List;
 	public fun pluginList ()Ljava/util/List;
 	public fun plugins ()Ljava/util/List;
+	public fun preloadNow (Ltv/nomercy/player/core/media/PlaylistItem;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun preloadStrategy ()Ltv/nomercy/player/core/ports/PreloadStrategy;
 	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -440,6 +441,7 @@ public final class tv/nomercy/player/core/controllers/PreloadController {
 	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun dispose ()V
+	public final fun preloadNow (Ltv/nomercy/player/core/media/PlaylistItem;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun setup (Ltv/nomercy/player/core/player/PlayerConfig;)V
 }
 

@@ -177,6 +177,14 @@ class MethodSurfaceConformanceTest {
             "stateFlow", "rootLogger", "rootStorage", "emit", "on", "onAll", "once", "off",
             "dispatchBefore", "fetch", "websocket", "report", "aspectRatio",
             "pluginList", "contributions", "coreVersion", "formatTitle",
+            // The reference reaches its preload machinery from
+            // AutoAdvancePlugin.preloadNext, which loads into the browser's
+            // "next" slot through player.load(item, { slot: 'next' }).
+            // LoadOptions here carries no slot — the engines expose a real
+            // secondary rather than a cache to warm — so the same capability
+            // has to be reachable some other way, and this is it. The plugin
+            // method it serves IS on the contract; only this seam is ours.
+            "preloadNow",
         )
     }
 }

@@ -716,6 +716,17 @@ public open class ComposedPlayer(
     // warmed, and one that prefetches artwork has none about crossfades.
     public open fun preloadStrategy(): PreloadStrategy = preload
 
+    /**
+     * Warm an item now, through the same strategy the automatic pass uses.
+     *
+     * The reference's AutoAdvancePlugin.preloadNext is this: a host deciding
+     * for itself when the next thing is worth fetching, instead of waiting for
+     * the lead-seconds window.
+     */
+    public open suspend fun preloadNow(item: PlaylistItem) {
+        preloading.preloadNow(item)
+    }
+
     public open fun setPreloadStrategy(strategy: PreloadStrategy) {
         // The outgoing strategy may have work in flight against an item this
         // player is about to stop caring about.

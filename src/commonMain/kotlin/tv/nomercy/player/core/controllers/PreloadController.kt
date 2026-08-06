@@ -117,6 +117,23 @@ public class PreloadController(
     // The strategy is asked even at the end of the queue, where nextItem is
     // null: a custom one is entitled to see the queue running out. It just has
     // nothing to start on.
+    /**
+     * Warm [nextItem] now, rather than when the playhead reaches the
+     * threshold.
+     *
+     * The machinery was here and only a timer could reach it, so a host that
+     * knew what was coming — a radio UI the moment a station is picked, a
+     * queue built ahead of time — had no way to say so and had to wait for the
+     * lead-seconds window like everyone else.
+     *
+     * Marks the cycle fired, so the automatic pass does not repeat the work a
+     * moment later.
+     */
+    public suspend fun preloadNow(nextItem: PlaylistItem) {
+        preloadFired = true
+        runPreload(nextItem, preload())
+    }
+
     private fun maybePreload(context: PreloadContext) {
         if (preloadFired) return
         if (!preload().shouldPreload(context)) return
