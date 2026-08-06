@@ -36,6 +36,13 @@ private const val MILLIS_PER_SECOND = 1_000.0
 private const val MIN_CADENCE_MS = 50L
 private const val MAX_CADENCE_MS = 1_000L
 
+// Reports do not arrive evenly. Carrying for exactly one measured interval
+// leaves the playhead frozen for whatever a late one is late by, which is a
+// stall every time the machine is busy — so the carry is allowed two intervals,
+// under a hard ceiling that an engine which has stopped speaking cannot pass.
+private const val CARRY_INTERVALS = 2L
+private const val MAX_CARRY_MS = 750L
+
 // Until the engine has reported twice there is nothing to measure. Half a second
 // is libVLC's own worst case, which is the engine this exists for.
 private const val DEFAULT_CADENCE_MS = 500L
@@ -133,8 +140,14 @@ public class TimeController(
      * stops speaking — a stall, a released backend — would otherwise walk the
      * playhead into a part of the film nobody is watching. It follows the rate,
      * so half speed carries half as far. It stands still while paused, since a
-     * paused engine reports the same position forever. And a report that goes
-     * backwards is taken as it comes, because that is a seek.
+     * paused engine reports the same position forever.
+     *
+     * A report that lands BEHIND what was already shown is the usual case, not
+     * the exception — the carry is ahead by design and the engine catches up
+     * from underneath. Snapping to it made the playhead flash and bounce every
+     * time the engine spoke, so a report behind by less than the carry could
+     * have covered is absorbed: the clock keeps counting from where it had got
+     * to. Behind by more than that is a seek, and a seek is followed.
      *
      * The remembered value stays as the fallback, and it is not a formality:
      * between an item being released and the next backend arriving there is no
@@ -151,27 +164,46 @@ public class TimeController(
         if (ctx.mediaIsStale()) return ctx.internalCurrentTime
 
         val reported: Double = ctx.backend?.currentTime() ?: return ctx.internalCurrentTime
-        return if (anchor(reported)) reported else carried(reported)
+        anchor(reported)
+
+        val answer: Double = carried()
+        answered = answer
+        return answer
     }
 
-    // True when this report is news, which also re-measures how far apart the
-    // engine's reports are.
-    private fun anchor(reported: Double): Boolean {
-        if (reported == anchoredAt) return false
+    // Takes a new report, if this one is news.
+    //
+    // The base is not always the reported number. The carry runs ahead of the
+    // engine's last word by design, so the next report usually lands BEHIND
+    // what has already been shown, and starting again from it is a sawtooth —
+    // the playhead flashes and bounces every time the engine speaks, which
+    // reads worse than the stepping the carry was added to fix. A report that
+    // is behind by less than the carry could have covered is that overshoot
+    // coming home, so the clock keeps going from where it had got to and lets
+    // the engine catch up.
+    //
+    // Behind by more than that is a seek, and a seek is followed.
+    private fun anchor(reported: Double) {
+        if (reported == anchoredAt) return
 
         val now: Long = clock.now()
         if (anchoredAt >= 0.0) reportedEveryMs = (now - anchoredWhen).coerceIn(MIN_CADENCE_MS, MAX_CADENCE_MS)
+
+        val overshoot: Double = answered - reported
+        val absorbable: Double = carryCeilingMs() / MILLIS_PER_SECOND
+        anchoredFrom = if (overshoot > 0.0 && overshoot <= absorbable) answered else reported
         anchoredAt = reported
         anchoredWhen = now
-        return true
     }
 
-    // The same report, moved on by the time since it arrived.
-    private fun carried(reported: Double): Double {
-        if (ctx.playState != PlayState.PLAYING) return reported
+    private fun carryCeilingMs(): Long = (reportedEveryMs * CARRY_INTERVALS).coerceAtMost(MAX_CARRY_MS)
 
-        val elapsedMs: Long = (clock.now() - anchoredWhen).coerceAtMost(reportedEveryMs)
-        val moved: Double = reported + elapsedMs / MILLIS_PER_SECOND * ctx.playbackRate
+    // The base, moved on by the time since the engine last spoke.
+    private fun carried(): Double {
+        if (ctx.playState != PlayState.PLAYING) return anchoredFrom
+
+        val elapsedMs: Long = (clock.now() - anchoredWhen).coerceAtMost(carryCeilingMs())
+        val moved: Double = anchoredFrom + elapsedMs / MILLIS_PER_SECOND * ctx.playbackRate
         val total: Double = ctx.internalDuration
         return if (total > 0.0) moved.coerceAtMost(total) else moved
     }
@@ -185,6 +217,11 @@ public class TimeController(
     private var anchoredAt: Double = -1.0
     private var anchoredWhen: Long = 0L
     private var reportedEveryMs: Long = DEFAULT_CADENCE_MS
+
+    // Where the clock counts from, which is the report unless the carry had
+    // already gone past it, and the last answer this gave.
+    private var anchoredFrom: Double = 0.0
+    private var answered: Double = 0.0
 
     public suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()) {
         transport.seek(seconds.coerceAtLeast(0.0), opts)

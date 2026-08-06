@@ -105,6 +105,30 @@ class TimeControllerTest {
     }
 
     @Test
+    fun aReportThatLandsBehindTheCarryDoesNotJerkThePlayheadBack() {
+        // The carry runs ahead of the engine's last word, so the next report
+        // usually lands BEHIND what was already shown. Snapping to it is a
+        // sawtooth: the cue flashes and bounces twice a second, which is worse
+        // than the stepping it replaced.
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        rig.backend.currentTime(30.0)
+        rig.time.time()
+
+        stopwatch.advance(400L)
+        val carriedTo: Double = rig.time.time()
+
+        // The engine finally speaks, and it is behind where the carry had got to.
+        rig.backend.currentTime(30.2)
+
+        assertTrue(
+            rig.time.time() >= carriedTo,
+            "the playhead jumped back from $carriedTo when the engine reported 30.2",
+        )
+    }
+
+    @Test
     fun aBackwardsReportIsFollowed() {
         // A position that goes back is a seek, and a monotonic guard that
         // clamped it would leave the playhead in the part of the film the
