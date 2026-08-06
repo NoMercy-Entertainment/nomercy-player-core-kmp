@@ -102,9 +102,9 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun audioOutput (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioOutputs (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
-	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioTrackMode ()Ltv/nomercy/player/core/player/AudioTrackState;
-	public fun audioTrackMode (I)V
+	public fun audioTrackMode (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun audioTracks ()Ljava/util/List;
 	public fun auth ()Ltv/nomercy/player/core/controllers/AuthController;
 	public fun auth (Ltv/nomercy/player/core/controllers/AuthController;)V

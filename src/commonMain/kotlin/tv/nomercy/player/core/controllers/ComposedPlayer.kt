@@ -31,6 +31,10 @@ import tv.nomercy.player.core.net.FetchSignal
 import tv.nomercy.player.core.events.FetchStartPayload
 import tv.nomercy.player.core.events.FetchRetryPayload
 import tv.nomercy.player.core.events.FetchCompletePayload
+import tv.nomercy.player.core.events.BeforeAudioTrackPayload
+import tv.nomercy.player.core.events.BeforeLanguagePayload
+import tv.nomercy.player.core.events.AudioTrackPreventedPayload
+import tv.nomercy.player.core.events.LanguagePreventedPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.AudioTrackPayload
@@ -216,6 +220,11 @@ private const val UNTRANSLATED = ""
 // that owns the behaviour, and those are the small single-purpose pieces — this
 // is the door they are behind.
 @Suppress("TooManyFunctions", "LargeClass")
+// The reason a refusal carries when the listener gave none. The same string the
+// reference uses, because a consumer matching on it should not have to know
+// which platform refused.
+private const val LISTENER_PREVENTED: String = "listener-prevented"
+
 public open class ComposedPlayer(
     backend: MediaBackend? = null,
     private val logger: Logger = SilentLogger,
@@ -1250,8 +1259,36 @@ public open class ComposedPlayer(
     // listener for the first — and the shipped preferences plugin, which is
     // what surfaced this — heard nothing at all while the track changed
     // underneath them.
-    public open fun audioTrack(track: AudioTrack) {
-        video?.audioTrack(track)
+    // Refusable, and suspend for the same reason the reference's writer returns
+    // a promise: the before-hook can be answered by a suspending listener, so
+    // the decision is not available synchronously. beforeAudioTrack and
+    // audioTrackPrevented were both declared here and reachable from nowhere —
+    // a listener vetoing a track change was never asked.
+    public open suspend fun audioTrack(track: AudioTrack) {
+        // The seam runs when there is an index to dispatch, which is the only
+        // thing the reference's before-hook carries. It does not validate that
+        // index against the list — a listener may rewrite it, and the rewritten
+        // one is what gets applied — so neither does this.
+        val requested: Double? = indexIn(audioTracks(), track)
+
+        if (requested != null) {
+            val outcome: BeforeDispatchResult<BeforeAudioTrackPayload> =
+                context.dispatchBefore(CoreEvents.BeforeAudioTrack, BeforeAudioTrackPayload(id = requested))
+
+            if (outcome.prevented) {
+                context.emit(
+                    CoreEvents.AudioTrackPrevented,
+                    AudioTrackPreventedPayload(reason = outcome.reason ?: LISTENER_PREVENTED),
+                )
+                return
+            }
+
+            audioTracks().getOrNull(outcome.data.id.toInt())?.let { video?.audioTrack(it) }
+        }
+        else {
+            video?.audioTrack(track)
+        }
+
         audioTrackChoice = AudioTrackState.MANUAL
         context.emit(CoreEvents.AudioTrack, AudioTrackPayload(indexIn(audioTracks(), track)))
         context.emit(CoreEvents.AudioTrackState, AudioTrackStatePayload(AudioTrackState.MANUAL.token))
@@ -1269,7 +1306,7 @@ public open class ComposedPlayer(
     // The writer half, by index into audioTracks(), which is how the web spells
     // it and what a language menu has to hand. Choosing marks the selection
     // MANUAL, which is the whole reason the reader exists.
-    public open fun audioTrackMode(index: Int) {
+    public open suspend fun audioTrackMode(index: Int) {
         audioTracks().getOrNull(index)?.let { audioTrack(it) }
     }
 
@@ -1568,6 +1605,16 @@ public open class ComposedPlayer(
     public open fun language(): String = translator?.language() ?: UNTRANSLATED
 
     public open suspend fun language(lang: String) {
+        val outcome: BeforeDispatchResult<BeforeLanguagePayload> =
+            context.dispatchBefore(CoreEvents.BeforeLanguage, BeforeLanguagePayload(lang = lang))
+        if (outcome.prevented) {
+            context.emit(
+                CoreEvents.LanguagePrevented,
+                LanguagePreventedPayload(reason = outcome.reason ?: LISTENER_PREVENTED),
+            )
+            return
+        }
+
         translator?.language(lang)
     }
 
