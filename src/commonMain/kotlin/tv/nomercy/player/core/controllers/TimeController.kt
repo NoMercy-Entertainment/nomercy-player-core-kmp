@@ -18,6 +18,7 @@ import tv.nomercy.player.core.events.PreventedAction
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.RateChange
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerConfig
 
 private const val MIN_RATE = 0.25
@@ -25,6 +26,19 @@ private const val MAX_RATE = 2.0
 private const val PERCENT = 100.0
 private const val DEFAULT_ENDING_SOON_SECONDS = 10.0
 private const val DEFAULT_PROGRESS_INTERVAL_MS = 5_000L
+private const val MILLIS_PER_SECOND = 1_000.0
+
+// How far the playhead may be carried past the engine's last word.
+//
+// The floor keeps a chatty engine from pinning the carry to nothing between two
+// reports that arrived back to back; the ceiling is what an engine that has gone
+// quiet is allowed to cost before the playhead simply waits for it.
+private const val MIN_CADENCE_MS = 50L
+private const val MAX_CADENCE_MS = 1_000L
+
+// Until the engine has reported twice there is nothing to measure. Half a second
+// is libVLC's own worst case, which is the engine this exists for.
+private const val DEFAULT_CADENCE_MS = 500L
 
 private val OFFERED_RATES: List<Double> = listOf(0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
 
@@ -106,10 +120,21 @@ public class TimeController(
      * cadence: a subtitle overlay drawing at 120Hz still stepped three times a
      * second, because it was drawing the same position over and over.
      *
-     * The engines already hold a continuous clock — libVLC computes its time on
-     * demand, and a media element's currentTime is exact whenever it is read —
-     * so this is asking the thing that knows instead of the thing that was told.
-     * It is the same shape as buffered() below, which never cached.
+     * Asking the engine was half of it, and the half that was assumed was
+     * wrong: a media element's currentTime is exact whenever it is read, but
+     * libVLC answers get_time from its last input update rather than computing
+     * it on demand. Measured on the desktop testbed, the subtitle overlay asked
+     * sixty times a second and got a new number four times.
+     *
+     * So the report is carried forward by the time since it arrived. That is
+     * not a prediction: it is how far the media has run while the engine was
+     * not speaking, which is what a clock does between ticks. It is bounded by
+     * the cadence the engine is measured to report at, because an engine that
+     * stops speaking — a stall, a released backend — would otherwise walk the
+     * playhead into a part of the film nobody is watching. It follows the rate,
+     * so half speed carries half as far. It stands still while paused, since a
+     * paused engine reports the same position forever. And a report that goes
+     * backwards is taken as it comes, because that is a seek.
      *
      * The remembered value stays as the fallback, and it is not a formality:
      * between an item being released and the next backend arriving there is no
@@ -122,9 +147,44 @@ public class TimeController(
      * the same trap publishPosition already guards, and reading around it here
      * would reopen it one call later.
      */
-    public fun time(): Double =
-        if (ctx.mediaIsStale()) ctx.internalCurrentTime
-        else ctx.backend?.currentTime() ?: ctx.internalCurrentTime
+    public fun time(): Double {
+        if (ctx.mediaIsStale()) return ctx.internalCurrentTime
+
+        val reported: Double = ctx.backend?.currentTime() ?: return ctx.internalCurrentTime
+        return if (anchor(reported)) reported else carried(reported)
+    }
+
+    // True when this report is news, which also re-measures how far apart the
+    // engine's reports are.
+    private fun anchor(reported: Double): Boolean {
+        if (reported == anchoredAt) return false
+
+        val now: Long = clock.now()
+        if (anchoredAt >= 0.0) reportedEveryMs = (now - anchoredWhen).coerceIn(MIN_CADENCE_MS, MAX_CADENCE_MS)
+        anchoredAt = reported
+        anchoredWhen = now
+        return true
+    }
+
+    // The same report, moved on by the time since it arrived.
+    private fun carried(reported: Double): Double {
+        if (ctx.playState != PlayState.PLAYING) return reported
+
+        val elapsedMs: Long = (clock.now() - anchoredWhen).coerceAtMost(reportedEveryMs)
+        val moved: Double = reported + elapsedMs / MILLIS_PER_SECOND * ctx.playbackRate
+        val total: Double = ctx.internalDuration
+        return if (total > 0.0) moved.coerceAtMost(total) else moved
+    }
+
+    // The last position the engine actually reported, when it arrived, and how
+    // far apart its reports have been.
+    //
+    // Negative until the first one, because zero is a position a player can
+    // legitimately be at and starting there would treat the opening frame as a
+    // repeat.
+    private var anchoredAt: Double = -1.0
+    private var anchoredWhen: Long = 0L
+    private var reportedEveryMs: Long = DEFAULT_CADENCE_MS
 
     public suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()) {
         transport.seek(seconds.coerceAtLeast(0.0), opts)

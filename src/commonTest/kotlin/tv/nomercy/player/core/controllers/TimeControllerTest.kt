@@ -11,7 +11,10 @@ package tv.nomercy.player.core.controllers
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.TimeUpdate
+import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
+import tv.nomercy.player.core.ports.Clock
+import tv.nomercy.player.core.ports.defaultClock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -19,11 +22,11 @@ import tv.nomercy.player.testing.FakeMediaBackend
 
 class TimeControllerTest {
 
-    private class TimeRig {
+    private class TimeRig(private val clock: Clock = defaultClock()) {
         val ctx: PlayerContext = newContext()
         val queue: QueueController = QueueController(ctx)
         val transport: TransportController = TransportController(ctx, queue)
-        val time: TimeController = TimeController(ctx, queue, transport)
+        val time: TimeController = TimeController(ctx, queue, transport, clock)
         val backend: FakeMediaBackend get() = ctx.fakeBackend()
 
         init {
@@ -46,6 +49,84 @@ class TimeControllerTest {
         rig.backend.currentTime(30.0)
 
         assertEquals(30.0, rig.time.time(), "the getter answered from the remembered copy, not the engine")
+    }
+
+    @Test
+    fun thePlayheadKeepsMovingBetweenTwoIdenticalEngineReports() {
+        // libVLC answers get_time from its last input update, a few times a
+        // second, so an engine that is playing hands back the same number for
+        // hundreds of milliseconds. Anything following the playhead per frame
+        // inherits that: the subtitle overlay redraws sixty times a second and
+        // was measured advancing four.
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        rig.backend.currentTime(30.0)
+
+        val anchored: Double = rig.time.time()
+        stopwatch.advance(100L)
+
+        assertTrue(
+            rig.time.time() > anchored,
+            "the engine reported the same number twice and the playhead stood still",
+        )
+    }
+
+    @Test
+    fun aPausedEngineHoldsThePlayheadWhereItIs() {
+        // The carry is elapsed time, and a paused engine reports the same
+        // position forever. Carrying that walks the subtitles into a part of
+        // the film nobody is watching.
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PAUSED
+        rig.backend.currentTime(30.0)
+
+        rig.time.time()
+        stopwatch.advance(2_000L)
+
+        assertEquals(30.0, rig.time.time(), "a paused playhead moved")
+    }
+
+    @Test
+    fun theCarryStopsAtTheCadenceTheEngineReportsAt() {
+        // An engine that stops speaking entirely — a stall, a lost backend —
+        // must not let the playhead run away on its own. The carry is bounded
+        // by how far apart its reports actually are.
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        rig.backend.currentTime(30.0)
+
+        rig.time.time()
+        stopwatch.advance(10_000L)
+
+        assertTrue(rig.time.time() < 31.0, "the playhead ran away from an engine that went quiet")
+    }
+
+    @Test
+    fun aBackwardsReportIsFollowed() {
+        // A position that goes back is a seek, and a monotonic guard that
+        // clamped it would leave the playhead in the part of the film the
+        // viewer just left.
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        rig.backend.currentTime(30.0)
+        rig.time.time()
+
+        stopwatch.advance(50L)
+        rig.backend.currentTime(5.0)
+
+        assertEquals(5.0, rig.time.time(), "a seek backwards was clamped away")
+    }
+
+    private class TestClock : Clock {
+        private var millis: Long = 0L
+        override fun now(): Long = millis
+        fun advance(by: Long) {
+            millis += by
+        }
     }
 
     @Test
