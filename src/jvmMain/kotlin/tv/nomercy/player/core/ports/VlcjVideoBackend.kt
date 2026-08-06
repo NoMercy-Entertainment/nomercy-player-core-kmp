@@ -173,6 +173,19 @@ public class VlcjVideoBackend private constructor(
         appliedCeilingHeight = abrCeiling()?.height
         val location: String = narrowedLocation(master) ?: openUrl ?: return
 
+        reopenAt(location, resumeAtMillis, wasPlaying)
+    }
+
+    // The same reopen, on a location the caller chose.
+    //
+    // Shared with the dead-rung fallback, which picks its own narrowed playlist
+    // rather than one the ABR ceiling produced — same carry-over of position
+    // and play state, same silence, one implementation.
+    private fun reopenAt(
+        location: String,
+        resumeAtMillis: Long = player.playback.time().coerceAtLeast(0),
+        wasPlaying: Boolean = player.playback.playing(),
+    ) {
         player.playback.stop()
         player.prepare(location, openOptions + startTimeOption(resumeAtMillis))
         if (wasPlaying) player.playback.play()
@@ -284,8 +297,50 @@ public class VlcjVideoBackend private constructor(
         if (tracksOf(VlcTrackType.VIDEO).isNotEmpty()) return
 
         reportedMissingVideo = true
+
+        // Drop the rung that produced nothing and reopen, before saying a word
+        // about it. This is what hls.js does — it blacklists a level whose
+        // media will not load and falls to the next — and it is the difference
+        // between a film that plays and one that does not: Tears of Steel
+        // declares four rungs at an identical BANDWIDTH, two of which 404, so
+        // libVLC has no basis to prefer one that works and no way to recover
+        // from one that does not.
+        //
+        // The error is reported only when there is nothing left to fall back
+        // to. A viewer whose film recovers on the second rung does not need to
+        // be told the first one was broken.
+        if (fallBackFromDeadRung()) return
+
         bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.NO_VIDEO_TRACK)
     }
+
+    // Reopen on the rungs that are left, or false when none are.
+    //
+    // Which rung libVLC chose is not observable — that is the whole problem, it
+    // reports no video track at all — so the one dropped is the HIGHEST
+    // remaining, which is the one an engine picks when every declared bandwidth
+    // is the same. Each pass drops one more, so a manifest with several dead
+    // rungs walks down to a live one instead of giving up on the first.
+    private fun fallBackFromDeadRung(): Boolean {
+        val master: VlcMasterPlaylist = openMaster ?: return false
+        val remaining: List<QualityDescriptor> = deadRungsDropped(master)
+        if (remaining.isEmpty()) return false
+
+        val narrowed: String = master.narrowedTo(remaining) ?: return false
+
+        droppedRungs += 1
+        reportedMissingVideo = false
+        manifestLevels = VlcLadderNarrowing.levelsOf(remaining)
+        reopenAt(narrowed)
+        return true
+    }
+
+    private fun deadRungsDropped(master: VlcMasterPlaylist): List<QualityDescriptor> =
+        master.ladder.sortedByDescending { it.height }.drop(droppedRungs + 1)
+
+    // How many rungs this item has already lost to a dead one. Reset per load,
+    // so a film that recovered on its third rung starts the next one whole.
+    private var droppedRungs: Int = 0
 
     // Once per load. A time report arrives four times a second and this must
     // not become four errors a second on a film that has none.
@@ -368,6 +423,7 @@ public class VlcjVideoBackend private constructor(
     override suspend fun load(url: String, opts: LoadOptions) {
         announcedReadable = false
         reportedMissingVideo = false
+        droppedRungs = 0
         refusedAsUnplayable = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
 
