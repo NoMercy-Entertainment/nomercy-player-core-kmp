@@ -2907,6 +2907,7 @@ public final class tv/nomercy/player/core/input/KeyBindingTable {
 	public final fun isBound (Ltv/nomercy/player/core/input/KeyCombo;)Z
 	public final fun replace (Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun replace$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
+	public final fun snapshot ()Ljava/util/Map;
 	public final fun unbind (Ltv/nomercy/player/core/input/KeyCombo;)V
 }
 
@@ -2930,9 +2931,13 @@ public final class tv/nomercy/player/core/input/KeyComboKt {
 public abstract class tv/nomercy/player/core/input/KeyHandlerPlugin : tv/nomercy/player/core/plugin/Plugin {
 	public fun <init> (Lkotlin/jvm/functions/Function0;)V
 	protected abstract fun addDefaults ()V
+	public fun bind (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public fun bindings ()Ljava/util/Map;
 	protected final fun getBindings ()Ltv/nomercy/player/core/input/KeyBindingTable;
 	public fun handle (Ltv/nomercy/player/core/input/KeyCombo;)Z
 	public fun handle (Ltv/nomercy/player/core/input/PlayerKey;)Z
+	public fun replace (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
+	public fun unbind (Ljava/lang/String;)V
 	public fun use ()V
 }
 

@@ -53,6 +53,13 @@ public class KeyBindingTable(private val nowMs: () -> Long) {
         bind(combo, cooldownMs, enabled, action)
     }
 
+    // What is bound, as a value a caller can hold. Each entry runs the binding
+    // that is live WHEN IT IS CALLED rather than the one captured now, so a
+    // snapshot taken before a rebind does not fire the old action; and removing
+    // an entry from the copy does not unbind anything.
+    public fun snapshot(): Map<String, () -> Unit> =
+        bindings.keys.associateWith { key -> { bindings[key]?.action?.invoke() } }
+
     public fun unbind(combo: KeyCombo) {
         bindings.remove(combo.canonical)
         lastFiredMs.remove(combo.canonical)
