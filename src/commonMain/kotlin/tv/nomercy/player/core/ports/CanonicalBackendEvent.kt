@@ -23,6 +23,20 @@ public object CanonicalBackendEvent {
     public const val PLAY: String = "play"
     public const val PLAYING: String = "playing"
     public const val TIME_UPDATE: String = "timeupdate"
+
+    // The length, once an engine knows it.
+    //
+    // A browser knows it by loadedmetadata, which is why the reference never
+    // needed this and the port did not have it. libVLC does not: whichever
+    // path announces readability first latches it, and when that path is not
+    // lengthChanged the duration is still zero when the bridge reads it — so
+    // `duration` never reached a consumer on desktop at all, measured absent
+    // across a 97-second trace.
+    //
+    // Port vocabulary rather than contract surface: this is how an engine tells
+    // the bridge something, and the contract event it produces is the one that
+    // already existed.
+    public const val DURATION_CHANGE: String = "durationchange"
     public const val WAITING: String = "waiting"
 
     // The pipeline being hungry and the network having stopped feeding it are

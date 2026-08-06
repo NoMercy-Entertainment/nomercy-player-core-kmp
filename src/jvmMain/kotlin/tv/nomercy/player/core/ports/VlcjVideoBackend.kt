@@ -252,6 +252,12 @@ public class VlcjVideoBackend private constructor(
 
                 override fun lengthChanged(millis: Long) {
                     lastKnownDuration = millis / MILLIS_PER_SECOND
+
+                    // Said plainly, because announceReadable below is latched
+                    // and will do nothing when something else got there first —
+                    // which is every time on a stream whose length arrives after
+                    // its metadata.
+                    bus.emit(CanonicalBackendEvent.DURATION_CHANGE, lastKnownDuration)
                     // Through the same guard, because knowing the length is
                     // knowing the metadata. Emitting it separately announced one
                     // item twice, and anything counting loads would have counted

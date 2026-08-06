@@ -7180,6 +7180,8 @@ final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.
         final fun <get-ADAPTIVE_LEVEL_SWITCHED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ADAPTIVE_LEVEL_SWITCHED.<get-ADAPTIVE_LEVEL_SWITCHED>|<get-ADAPTIVE_LEVEL_SWITCHED>(){}[0]
     final const val CAN_PLAY // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY|{}CAN_PLAY[0]
         final fun <get-CAN_PLAY>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.CAN_PLAY.<get-CAN_PLAY>|<get-CAN_PLAY>(){}[0]
+    final const val DURATION_CHANGE // tv.nomercy.player.core.ports/CanonicalBackendEvent.DURATION_CHANGE|{}DURATION_CHANGE[0]
+        final fun <get-DURATION_CHANGE>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.DURATION_CHANGE.<get-DURATION_CHANGE>|<get-DURATION_CHANGE>(){}[0]
     final const val ENDED // tv.nomercy.player.core.ports/CanonicalBackendEvent.ENDED|{}ENDED[0]
         final fun <get-ENDED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ENDED.<get-ENDED>|<get-ENDED>(){}[0]
     final const val ERROR // tv.nomercy.player.core.ports/CanonicalBackendEvent.ERROR|{}ERROR[0]

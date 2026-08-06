@@ -5156,6 +5156,7 @@ public final class tv/nomercy/player/core/ports/BufferedFrontierKt {
 public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
 	public static final field ADAPTIVE_LEVEL_SWITCHED Ljava/lang/String;
 	public static final field CAN_PLAY Ljava/lang/String;
+	public static final field DURATION_CHANGE Ljava/lang/String;
 	public static final field ENDED Ljava/lang/String;
 	public static final field ERROR Ljava/lang/String;
 	public static final field FRAGMENT_LOADED Ljava/lang/String;

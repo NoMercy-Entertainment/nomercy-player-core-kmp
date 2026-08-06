@@ -73,6 +73,15 @@ public class BackendBridge(
     }
 
     public fun attach(backend: MediaBackend) {
+        // An engine that learns its length late says so here.
+        listen(backend, CanonicalBackendEvent.DURATION_CHANGE) {
+            val duration: Double = backend.duration()
+            if (duration > 0.0 && duration != ctx.internalDuration) {
+                ctx.internalDuration = duration
+                ctx.emit(CoreEvents.Duration, duration)
+            }
+        }
+
         listen(backend, CanonicalBackendEvent.LOADED_METADATA) {
             announceLoaded(backend)
             val duration: Double = backend.duration()
