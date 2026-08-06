@@ -4485,6 +4485,8 @@ public class tv/nomercy/player/core/plugins/audio/SpectrumPlugin : tv/nomercy/pl
 	public fun bandEnergy (DD)D
 	public fun currentFrame ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
 	public fun dispose ()V
+	public fun fftSize ()I
+	public fun fftSize (I)V
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
 	public fun onFrame (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public fun pushFrame (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V
@@ -4966,10 +4968,21 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 public abstract interface class tv/nomercy/player/core/ports/AudioDspGraph {
 	public abstract fun bandGain (ID)V
 	public abstract fun eqEnabled (Z)V
+	public fun fftSize ()I
+	public fun fftSize (I)V
 	public abstract fun installFrameTap (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public abstract fun preGain (D)V
 	public abstract fun removeFrameTap ()V
 	public abstract fun setEqBands (Ljava/util/List;)V
+}
+
+public final class tv/nomercy/player/core/ports/AudioDspGraph$DefaultImpls {
+	public static fun fftSize (Ltv/nomercy/player/core/ports/AudioDspGraph;)I
+	public static fun fftSize (Ltv/nomercy/player/core/ports/AudioDspGraph;I)V
+}
+
+public final class tv/nomercy/player/core/ports/AudioDspGraphKt {
+	public static final field DEFAULT_FFT_SIZE I
 }
 
 public final class tv/nomercy/player/core/ports/AudioOutput {
@@ -5743,6 +5756,8 @@ public final class tv/nomercy/player/core/ports/PcmEqualiser : tv/nomercy/player
 	public fun <init> (IILtv/nomercy/player/core/dsp/SpectrumHistory;)V
 	public fun bandGain (ID)V
 	public fun eqEnabled (Z)V
+	public fun fftSize ()I
+	public fun fftSize (I)V
 	public fun installFrameTap (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public fun preGain (D)V
 	public final fun process ([FI)V

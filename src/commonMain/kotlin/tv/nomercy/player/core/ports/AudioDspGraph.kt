@@ -47,6 +47,30 @@ public interface AudioDspGraph {
     // makes the second one silently replace the first.
     public fun installFrameTap(onFrame: (VisualizationFrame) -> Unit): Subscription
 
+    /**
+     * How many samples each analysis frame is taken over.
+     *
+     * The reference exposes this on the spectrum plugin and changes it at
+     * runtime, because the right answer depends on what is being drawn: a
+     * twelve-bar level meter wants a small transform and a fast response, a
+     * scrolling spectrogram wants a large one and finer bins. With no way to
+     * ask, a visualiser had to be written against whatever this graph happened
+     * to choose.
+     *
+     * Powers of two from 256 to 4096, as the reference constrains it. A value
+     * outside that is clamped rather than refused: a visualiser asking for
+     * more resolution than a backend offers should draw something.
+     *
+     * Defaults to reporting the fixed size and ignoring writes, so a backend
+     * whose analysis window is not adjustable keeps compiling and answers
+     * honestly about what it does.
+     */
+    public fun fftSize(): Int = DEFAULT_FFT_SIZE
+
+    public fun fftSize(samples: Int) {
+        // Nothing by default. A backend that can retune overrides both halves.
+    }
+
     public fun removeFrameTap()
 
     // Bypass, rather than a flat curve. Flat still runs ten biquads over every
@@ -54,3 +78,6 @@ public interface AudioDspGraph {
     // change nothing.
     public fun eqEnabled(enabled: Boolean)
 }
+
+// The reference's own default, and the midpoint of the range it allows.
+public const val DEFAULT_FFT_SIZE: Int = 2048

@@ -11,6 +11,7 @@ package tv.nomercy.player.core.plugins.audio
 import tv.nomercy.player.core.dsp.AudioSpectrum
 import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
+import tv.nomercy.player.core.ports.DEFAULT_FFT_SIZE
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
 import tv.nomercy.player.core.ports.AudioDspGraph
@@ -177,6 +178,31 @@ public open class SpectrumPlugin(
 
     public open fun available(): Boolean = graph != null
 
+    /**
+     * The analysis window, in samples.
+     *
+     * A twelve-bar level meter wants a small transform and a fast response; a
+     * scrolling spectrogram wants a large one and finer bins. The reference
+     * lets a visualiser say which, and without it one had to be written
+     * against whatever the graph happened to choose.
+     *
+     * Answers the reference's default when there is no graph to ask, so a
+     * chrome building its bar count off this gets a usable number rather than
+     * zero.
+     */
+    public open fun fftSize(): Int = graph?.fftSize() ?: DEFAULT_FFT_SIZE
+
+    /**
+     * Retune the analysis window.
+     *
+     * Clamped to the powers of two the reference allows rather than refused: a
+     * visualiser asking for more resolution than a backend offers should still
+     * draw something.
+     */
+    public open fun fftSize(samples: Int) {
+        graph?.fftSize(nearestFftSize(samples))
+    }
+
     // The tap is the plugin's, not the listeners'. A host tearing the plugin
     // down while a view still holds a subscription must still stop the graph
     // running an FFT into nothing.
@@ -199,3 +225,11 @@ public data class BeatReading(
     val beat: Boolean? = null,
     val bpm: Double? = null,
 )
+
+// 256 to 4096, the reference's own range. The nearest allowed size rather than
+// the next one up, so a caller asking for 1000 gets 1024 instead of a window
+// twice the length it asked for.
+private fun nearestFftSize(samples: Int): Int =
+    FFT_SIZES.minByOrNull { size -> kotlin.math.abs(size - samples) } ?: DEFAULT_FFT_SIZE
+
+private val FFT_SIZES: List<Int> = listOf(256, 512, 1024, 2048, 4096)

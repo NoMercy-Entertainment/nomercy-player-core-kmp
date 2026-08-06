@@ -1010,6 +1010,8 @@ abstract interface tv.nomercy.player.core.ports/AudioDspGraph { // tv.nomercy.pl
     abstract fun preGain(kotlin/Double) // tv.nomercy.player.core.ports/AudioDspGraph.preGain|preGain(kotlin.Double){}[0]
     abstract fun removeFrameTap() // tv.nomercy.player.core.ports/AudioDspGraph.removeFrameTap|removeFrameTap(){}[0]
     abstract fun setEqBands(kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand>) // tv.nomercy.player.core.ports/AudioDspGraph.setEqBands|setEqBands(kotlin.collections.List<tv.nomercy.player.core.dsp.EqBand>){}[0]
+    open fun fftSize(): kotlin/Int // tv.nomercy.player.core.ports/AudioDspGraph.fftSize|fftSize(){}[0]
+    open fun fftSize(kotlin/Int) // tv.nomercy.player.core.ports/AudioDspGraph.fftSize|fftSize(kotlin.Int){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/AudioOutputRouter { // tv.nomercy.player.core.ports/AudioOutputRouter|null[0]
@@ -6246,6 +6248,8 @@ open class tv.nomercy.player.core.plugins.audio/SpectrumPlugin : tv.nomercy.play
     open fun bandEnergy(kotlin/Double, kotlin/Double): kotlin/Double // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.bandEnergy|bandEnergy(kotlin.Double;kotlin.Double){}[0]
     open fun currentFrame(): tv.nomercy.player.core.plugins.audio/VisualizationFrame? // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.currentFrame|currentFrame(){}[0]
     open fun dispose() // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.dispose|dispose(){}[0]
+    open fun fftSize(): kotlin/Int // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.fftSize|fftSize(){}[0]
+    open fun fftSize(kotlin/Int) // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.fftSize|fftSize(kotlin.Int){}[0]
     open fun onFrame(kotlin/Function1<tv.nomercy.player.core.plugins.audio/VisualizationFrame, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.onFrame|onFrame(kotlin.Function1<tv.nomercy.player.core.plugins.audio.VisualizationFrame,kotlin.Unit>){}[0]
     open fun pushFrame(tv.nomercy.player.core.plugins.audio/VisualizationFrame) // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.pushFrame|pushFrame(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
     open fun registerBeatProvider(kotlin/Function0<tv.nomercy.player.core.plugins.audio/BeatReading>) // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.registerBeatProvider|registerBeatProvider(kotlin.Function0<tv.nomercy.player.core.plugins.audio.BeatReading>){}[0]
@@ -7350,6 +7354,8 @@ final const val tv.nomercy.player.core.plugins.message/DEFAULT_MESSAGE_MS // tv.
     final fun <get-DEFAULT_MESSAGE_MS>(): kotlin/Long // tv.nomercy.player.core.plugins.message/DEFAULT_MESSAGE_MS.<get-DEFAULT_MESSAGE_MS>|<get-DEFAULT_MESSAGE_MS>(){}[0]
 final const val tv.nomercy.player.core.ports/BYTES_PER_MB // tv.nomercy.player.core.ports/BYTES_PER_MB|{}BYTES_PER_MB[0]
     final fun <get-BYTES_PER_MB>(): kotlin/Int // tv.nomercy.player.core.ports/BYTES_PER_MB.<get-BYTES_PER_MB>|<get-BYTES_PER_MB>(){}[0]
+final const val tv.nomercy.player.core.ports/DEFAULT_FFT_SIZE // tv.nomercy.player.core.ports/DEFAULT_FFT_SIZE|{}DEFAULT_FFT_SIZE[0]
+    final fun <get-DEFAULT_FFT_SIZE>(): kotlin/Int // tv.nomercy.player.core.ports/DEFAULT_FFT_SIZE.<get-DEFAULT_FFT_SIZE>|<get-DEFAULT_FFT_SIZE>(){}[0]
 final const val tv.nomercy.player.core.ports/DEFAULT_SKIP_OFFSET_MS // tv.nomercy.player.core.ports/DEFAULT_SKIP_OFFSET_MS|{}DEFAULT_SKIP_OFFSET_MS[0]
     final fun <get-DEFAULT_SKIP_OFFSET_MS>(): kotlin/Long // tv.nomercy.player.core.ports/DEFAULT_SKIP_OFFSET_MS.<get-DEFAULT_SKIP_OFFSET_MS>|<get-DEFAULT_SKIP_OFFSET_MS>(){}[0]
 final const val tv.nomercy.player.core/CONTRACT_VERSION // tv.nomercy.player.core/CONTRACT_VERSION|{}CONTRACT_VERSION[0]
