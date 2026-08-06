@@ -6620,6 +6620,8 @@ final object tv.nomercy.player.core.errors/CoreErrorCodes { // tv.nomercy.player
         final fun <get-NO_ACTIVE_ITEM>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NO_ACTIVE_ITEM.<get-NO_ACTIVE_ITEM>|<get-NO_ACTIVE_ITEM>(){}[0]
     final const val NO_FACTORY_MATCH // tv.nomercy.player.core.errors/CoreErrorCodes.NO_FACTORY_MATCH|{}NO_FACTORY_MATCH[0]
         final fun <get-NO_FACTORY_MATCH>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NO_FACTORY_MATCH.<get-NO_FACTORY_MATCH>|<get-NO_FACTORY_MATCH>(){}[0]
+    final const val NO_VIDEO_TRACK // tv.nomercy.player.core.errors/CoreErrorCodes.NO_VIDEO_TRACK|{}NO_VIDEO_TRACK[0]
+        final fun <get-NO_VIDEO_TRACK>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.NO_VIDEO_TRACK.<get-NO_VIDEO_TRACK>|<get-NO_VIDEO_TRACK>(){}[0]
     final const val OFFLINE // tv.nomercy.player.core.errors/CoreErrorCodes.OFFLINE|{}OFFLINE[0]
         final fun <get-OFFLINE>(): kotlin/String // tv.nomercy.player.core.errors/CoreErrorCodes.OFFLINE.<get-OFFLINE>|<get-OFFLINE>(){}[0]
     final const val PARSE_FAILED // tv.nomercy.player.core.errors/CoreErrorCodes.PARSE_FAILED|{}PARSE_FAILED[0]

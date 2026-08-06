@@ -255,6 +255,28 @@ public class VlcjVideoBackend private constructor(
         announcedReadable = true
         bus.emit(CanonicalBackendEvent.LOADED_METADATA)
         bus.emit(CanonicalBackendEvent.CAN_PLAY)
+        reportMissingVideo()
+    }
+
+    // Playing, with a manifest that promised a picture and an engine that has
+    // none.
+    //
+    // A rendition whose media cannot be fetched does not stop an HLS engine:
+    // the audio group is a separate playlist, so libVLC keeps decoding sound,
+    // reports time, fires no error and looks entirely healthy while the picture
+    // stays black. Every layer above then sees ordinary playback, which is why
+    // the loudest symptom a viewer has — no picture at all — reached them with
+    // complete silence everywhere else and was reported three times as a
+    // decoder fault.
+    //
+    // The condition is exact rather than a heuristic: only an item whose
+    // manifest DECLARED video renditions can be missing one, so an audio-only
+    // item and a muxed container that reports its tracks late cannot trip it.
+    private fun reportMissingVideo() {
+        if (manifestLevels.isEmpty()) return
+        if (tracksOf(VlcTrackType.VIDEO).isNotEmpty()) return
+
+        bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.NO_VIDEO_TRACK)
     }
 
     // Whether libVLC can be asked to convert HDR as it decodes.

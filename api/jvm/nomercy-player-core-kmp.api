@@ -1291,6 +1291,7 @@ public final class tv/nomercy/player/core/errors/CoreErrorCodes {
 	public static final field NOT_READY Ljava/lang/String;
 	public static final field NO_ACTIVE_ITEM Ljava/lang/String;
 	public static final field NO_FACTORY_MATCH Ljava/lang/String;
+	public static final field NO_VIDEO_TRACK Ljava/lang/String;
 	public static final field OFFLINE Ljava/lang/String;
 	public static final field PARSE_FAILED Ljava/lang/String;
 	public static final field PLAYLIST_FETCH_ERROR Ljava/lang/String;

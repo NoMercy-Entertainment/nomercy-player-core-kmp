@@ -76,6 +76,12 @@ private val NATIVE_ONLY_CODES = setOf(
     "core:drm/license-request-failed",
     "core:drm/license-refused",
     "core:drm/output-not-protected",
+    // The web has no counterpart because hls.js answers this itself: it
+    // blacklists a level whose media will not load and falls to the next, so
+    // "playing with no picture" is a state it never reaches. libVLC does not,
+    // and every layer above saw ordinary playback while the screen stayed
+    // black — so the desktop needs a code the reference never had to name.
+    "core:stream/no-video-track",
 )
 
 // Plugin-namespaced codes with no native raise site.

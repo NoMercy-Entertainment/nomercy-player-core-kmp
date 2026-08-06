@@ -27,6 +27,18 @@ public object CoreErrorCodes {
     public const val SERVER_ERROR: String = "core:network/server-error"
     public const val FRAGMENT_FAILED: String = "core:stream/fragment-failed"
 
+    /**
+     * The manifest promised video and the engine is playing without any.
+     *
+     * A rendition whose media cannot be fetched does not stop an HLS engine:
+     * the audio group is a separate playlist, so it keeps decoding sound,
+     * reports time and looks entirely healthy while the picture stays black.
+     * Nothing in the stack could tell that apart from ordinary playback, so
+     * the single loudest symptom a viewer has — no picture — arrived with
+     * complete silence everywhere else.
+     */
+    public const val NO_VIDEO_TRACK: String = "core:stream/no-video-track"
+
     // A url a factory was required for and none claimed.
     public const val NO_FACTORY_MATCH: String = "core:stream/no-factory-match"
 
@@ -114,6 +126,7 @@ public object CoreErrorCodes {
         OFFLINE,
         PARSE_FAILED,
         FRAGMENT_FAILED,
+        NO_VIDEO_TRACK,
         NO_FACTORY_MATCH,
         UNAUTHENTICATED,
         FORBIDDEN,
