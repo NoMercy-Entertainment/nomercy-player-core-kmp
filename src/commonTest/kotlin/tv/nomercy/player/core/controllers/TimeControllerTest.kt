@@ -129,6 +129,38 @@ class TimeControllerTest {
     }
 
     @Test
+    fun everyStepIsCloseToRealTimeAcrossASecondOfEngineReports() {
+        // The measurement that caught the version before this one: the playhead
+        // moved on every frame and still flashed, because it crawled a few
+        // milliseconds a frame and then jumped three quarters of a second when
+        // the engine spoke. Moving is not the property that matters — moving at
+        // roughly the rate time moves is.
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+
+        var engineTime = 30.0
+        rig.backend.currentTime(engineTime)
+        var previous: Double = rig.time.time()
+        var worst = 0.0
+
+        repeat(FRAMES) { frame ->
+            stopwatch.advance(FRAME_MS)
+            // The engine speaks every quarter second, which is libVLC's own
+            // cadence, and always about a moment that has already passed.
+            if (frame % REPORT_EVERY == 0) {
+                engineTime += REPORT_EVERY * FRAME_MS / MILLIS
+                rig.backend.currentTime(engineTime)
+            }
+            val now: Double = rig.time.time()
+            worst = maxOf(worst, kotlin.math.abs(now - previous - FRAME_MS / MILLIS))
+            previous = now
+        }
+
+        assertTrue(worst < WORST_STEP_ERROR, "a frame moved the playhead ${worst}s more than the frame lasted")
+    }
+
+    @Test
     fun aBackwardsReportIsFollowed() {
         // A position that goes back is a seek, and a monotonic guard that
         // clamped it would leave the playhead in the part of the film the
@@ -143,6 +175,16 @@ class TimeControllerTest {
         rig.backend.currentTime(5.0)
 
         assertEquals(5.0, rig.time.time(), "a seek backwards was clamped away")
+    }
+
+    private companion object {
+        const val FRAMES = 60
+        const val FRAME_MS = 16L
+        const val REPORT_EVERY = 16
+        const val MILLIS = 1_000.0
+
+        // A frame may be off by a frame. Anything larger is a visible jump.
+        const val WORST_STEP_ERROR = 0.017
     }
 
     private class TestClock : Clock {

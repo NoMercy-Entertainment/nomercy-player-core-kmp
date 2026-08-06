@@ -20,6 +20,7 @@ import tv.nomercy.player.core.events.RateChange
 import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerConfig
+import kotlin.math.absoluteValue
 
 private const val MIN_RATE = 0.25
 private const val MAX_RATE = 2.0
@@ -42,6 +43,15 @@ private const val MAX_CADENCE_MS = 1_000L
 // under a hard ceiling that an engine which has stopped speaking cannot pass.
 private const val CARRY_INTERVALS = 2L
 private const val MAX_CARRY_MS = 750L
+
+// How much of real time the clock may spend correcting itself. At a tenth, a
+// quarter-second of drift is paid off across two and a half seconds running 10%
+// fast, which no viewer can see and nothing on screen jumps for.
+private const val SLEW_FRACTION = 0.1
+
+// Past this the engine has not corrected the clock, it has moved: a seek, an
+// advance, a scrubber. Those are supposed to jump.
+private const val SEEK_THRESHOLD_SECONDS = 1.0
 
 // Until the engine has reported twice there is nothing to measure. Half a second
 // is libVLC's own worst case, which is the engine this exists for.
@@ -143,11 +153,12 @@ public class TimeController(
      * paused engine reports the same position forever.
      *
      * A report that lands BEHIND what was already shown is the usual case, not
-     * the exception — the carry is ahead by design and the engine catches up
-     * from underneath. Snapping to it made the playhead flash and bounce every
-     * time the engine spoke, so a report behind by less than the carry could
-     * have covered is absorbed: the clock keeps counting from where it had got
-     * to. Behind by more than that is a seek, and a seek is followed.
+     * the exception — the clock is ahead by design and the engine catches up
+     * from underneath. Neither snapping to it nor absorbing it whole works:
+     * both were measured on the desktop testbed and both jump, the first every
+     * report and the second whenever the absorbed error ran out. So the report
+     * steers the clock instead, at a tenth of real time, and the clock runs
+     * imperceptibly fast or slow until the two agree.
      *
      * The remembered value stays as the fallback, and it is not a formality:
      * between an item being released and the next backend arriving there is no
@@ -164,64 +175,91 @@ public class TimeController(
         if (ctx.mediaIsStale()) return ctx.internalCurrentTime
 
         val reported: Double = ctx.backend?.currentTime() ?: return ctx.internalCurrentTime
-        anchor(reported)
+        val now: Long = clock.now()
+        anchor(reported, now)
 
-        val answer: Double = carried()
+        val answer: Double = steered(now)
         answered = answer
+        answeredWhen = now
         return answer
     }
 
-    // Takes a new report, if this one is news.
+    // Takes a new report and remembers when it arrived.
     //
-    // The base is not always the reported number. The carry runs ahead of the
-    // engine's last word by design, so the next report usually lands BEHIND
-    // what has already been shown, and starting again from it is a sawtooth —
-    // the playhead flashes and bounces every time the engine speaks, which
-    // reads worse than the stepping the carry was added to fix. A report that
-    // is behind by less than the carry could have covered is that overshoot
-    // coming home, so the clock keeps going from where it had got to and lets
-    // the engine catch up.
-    //
-    // Behind by more than that is a seek, and a seek is followed.
-    private fun anchor(reported: Double) {
+    // A report is not a correction to apply on the spot, it is the truth this
+    // clock converges on. Applying one directly is what made the playhead
+    // bounce: it describes where the media was when the engine last looked, so
+    // it lands behind what has already been shown every single time.
+    private fun anchor(reported: Double, now: Long) {
         if (reported == anchoredAt) return
 
-        val now: Long = clock.now()
         if (anchoredAt >= 0.0) reportedEveryMs = (now - anchoredWhen).coerceIn(MIN_CADENCE_MS, MAX_CADENCE_MS)
-
-        val overshoot: Double = answered - reported
-        val absorbable: Double = carryCeilingMs() / MILLIS_PER_SECOND
-        anchoredFrom = if (overshoot > 0.0 && overshoot <= absorbable) answered else reported
         anchoredAt = reported
         anchoredWhen = now
     }
 
     private fun carryCeilingMs(): Long = (reportedEveryMs * CARRY_INTERVALS).coerceAtMost(MAX_CARRY_MS)
 
-    // The base, moved on by the time since the engine last spoke.
-    private fun carried(): Double {
-        if (ctx.playState != PlayState.PLAYING) return anchoredFrom
+    // Where the engine says the media is now: its last report plus the time
+    // since it arrived, which is what that report would say if the engine were
+    // asked again. Bounded, so an engine that has stopped speaking parks the
+    // playhead rather than running away with it.
+    private fun engineNow(now: Long): Double {
+        // Nothing to add while the media is not running. A paused engine reports
+        // the same position forever, and carrying that walks the subtitles into
+        // a part of the film nobody is watching.
+        if (ctx.playState != PlayState.PLAYING) return anchoredAt
 
-        val elapsedMs: Long = (clock.now() - anchoredWhen).coerceAtMost(carryCeilingMs())
-        val moved: Double = anchoredFrom + elapsedMs / MILLIS_PER_SECOND * ctx.playbackRate
+        val sinceMs: Long = (now - anchoredWhen).coerceAtMost(carryCeilingMs())
+        return anchoredAt + sinceMs / MILLIS_PER_SECOND * ctx.playbackRate
+    }
+
+    // The clock's own answer, moved on by real time and steered toward the
+    // engine rather than snapped to it.
+    //
+    // The steering is the point. Every report lands somewhere the clock is not,
+    // and paying that difference in one step is a jump a viewer sees — measured
+    // on the desktop testbed at three quarters of a second inside a single
+    // frame. Paid a fraction at a time, the clock runs a few percent fast or
+    // slow for a moment and nothing on screen moves suddenly at all.
+    //
+    // A difference too large to steer away is a seek, an advance, a scrubber
+    // being dragged. Those are supposed to jump, and they are taken whole.
+    private fun steered(now: Long): Double {
+        val target: Double = engineNow(now)
+
+        // Not playing is not a clock problem. A paused engine, a stopped one and
+        // one that has just been seeked all know exactly where they are, and a
+        // remembered answer would override the truth with a stale copy — which
+        // is what a seek looked like from here until this branch said so.
+        if (ctx.playState != PlayState.PLAYING || answeredWhen < 0L) return target
+
+        val elapsedMs: Long = now - answeredWhen
+        val free: Double = answered + elapsedMs / MILLIS_PER_SECOND * ctx.playbackRate
+        val error: Double = target - free
+        if (error.absoluteValue > SEEK_THRESHOLD_SECONDS) return target
+
+        val allowed: Double = elapsedMs / MILLIS_PER_SECOND * SLEW_FRACTION
+        val steered: Double = free + error.coerceIn(-allowed, allowed)
+
         val total: Double = ctx.internalDuration
-        return if (total > 0.0) moved.coerceAtMost(total) else moved
+        return if (total > 0.0) steered.coerceAtMost(total) else steered
     }
 
     // The last position the engine actually reported, when it arrived, and how
     // far apart its reports have been.
     //
     // Negative until the first one, because zero is a position a player can
-    // legitimately be at and starting there would treat the opening frame as a
+    // legitimately be at and starting there would read the opening frame as a
     // repeat.
     private var anchoredAt: Double = -1.0
     private var anchoredWhen: Long = 0L
     private var reportedEveryMs: Long = DEFAULT_CADENCE_MS
 
-    // Where the clock counts from, which is the report unless the carry had
-    // already gone past it, and the last answer this gave.
-    private var anchoredFrom: Double = 0.0
+    // The last answer this gave and when. Negative until the first one, because
+    // there is nothing to advance from before the clock has answered once.
     private var answered: Double = 0.0
+    private var answeredWhen: Long = -1L
 
     public suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()) {
         transport.seek(seconds.coerceAtLeast(0.0), opts)
