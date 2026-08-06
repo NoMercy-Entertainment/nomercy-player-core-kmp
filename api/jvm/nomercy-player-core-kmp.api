@@ -4886,6 +4886,10 @@ public class tv/nomercy/player/core/plugins/message/MessagePlugin : tv/nomercy/p
 	public fun <init> (Ltv/nomercy/player/core/plugins/message/MessageOptions;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/plugins/message/MessageOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clear ()V
+	public final fun displayMessage (Ljava/lang/String;J)V
+	public final fun displayMessage (Ltv/nomercy/player/core/plugins/message/Message;)V
+	public static synthetic fun displayMessage$default (Ltv/nomercy/player/core/plugins/message/MessagePlugin;Ljava/lang/String;JILjava/lang/Object;)V
+	public final fun displayPersistent (Ljava/lang/String;Ljava/lang/String;)V
 	public fun dispose ()V
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
 	public synthetic fun getOptions ()Ljava/lang/Object;

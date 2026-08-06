@@ -6323,6 +6323,9 @@ open class tv.nomercy.player.core.plugins.message/MessagePlugin : tv.nomercy.pla
         open fun <get-options>(): tv.nomercy.player.core.plugins.message/MessageOptions // tv.nomercy.player.core.plugins.message/MessagePlugin.options.<get-options>|<get-options>(){}[0]
 
     final fun clear() // tv.nomercy.player.core.plugins.message/MessagePlugin.clear|clear(){}[0]
+    final fun displayMessage(kotlin/String, kotlin/Long = ...) // tv.nomercy.player.core.plugins.message/MessagePlugin.displayMessage|displayMessage(kotlin.String;kotlin.Long){}[0]
+    final fun displayMessage(tv.nomercy.player.core.plugins.message/Message) // tv.nomercy.player.core.plugins.message/MessagePlugin.displayMessage|displayMessage(tv.nomercy.player.core.plugins.message.Message){}[0]
+    final fun displayPersistent(kotlin/String, kotlin/String) // tv.nomercy.player.core.plugins.message/MessagePlugin.displayPersistent|displayPersistent(kotlin.String;kotlin.String){}[0]
     final fun hide() // tv.nomercy.player.core.plugins.message/MessagePlugin.hide|hide(){}[0]
     final fun queue(kotlin.collections/List<tv.nomercy.player.core.plugins.message/Message>) // tv.nomercy.player.core.plugins.message/MessagePlugin.queue|queue(kotlin.collections.List<tv.nomercy.player.core.plugins.message.Message>){}[0]
     final fun removePersistent(kotlin/String) // tv.nomercy.player.core.plugins.message/MessagePlugin.removePersistent|removePersistent(kotlin.String){}[0]

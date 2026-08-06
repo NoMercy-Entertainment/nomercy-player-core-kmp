@@ -106,6 +106,34 @@ public open class MessagePlugin(
     }
 
     /** Hide the transient message now, and cancel its timer. */
+    /**
+     * Show a message, by the name the reference gives this.
+     *
+     * It delegates to [show] there too — the pair exists because a caller
+     * holding a Message with its own duration should not have to unpack it at
+     * the call site. Absent here, a UI ported from the web found nothing.
+     */
+    public fun displayMessage(text: String, ms: Long = opts.durationMs) {
+        show(text, ms)
+    }
+
+    public fun displayMessage(message: Message) {
+        show(message.text, message.durationMs ?: opts.durationMs)
+    }
+
+    /**
+     * A message that stays until it is removed, by the reference's name and in
+     * the reference's argument order.
+     *
+     * The reference builds a div for this; here it lands on [persistent],
+     * which is the same guarantee expressed the way a declarative UI consumes
+     * it — and re-showing an id replaces its text rather than stacking, as
+     * there.
+     */
+    public fun displayPersistent(text: String, id: String) {
+        showPersistent(id, text)
+    }
+
     public fun hide() {
         hideJob?.cancel()
         hideJob = null
