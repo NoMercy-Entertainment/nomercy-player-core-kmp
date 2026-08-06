@@ -5168,8 +5168,13 @@ public abstract interface class tv/nomercy/player/core/ports/CapabilitiesProbe {
 }
 
 public abstract interface class tv/nomercy/player/core/ports/CastSender {
+	public fun isConnected ()Z
 	public abstract fun reclaim (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun transfer (Ltv/nomercy/player/core/events/CastTarget;Ltv/nomercy/player/core/media/PlaylistItem;DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/CastSender$DefaultImpls {
+	public static fun isConnected (Ltv/nomercy/player/core/ports/CastSender;)Z
 }
 
 public abstract interface class tv/nomercy/player/core/ports/Clock {

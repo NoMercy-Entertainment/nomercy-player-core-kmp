@@ -1026,6 +1026,7 @@ abstract interface tv.nomercy.player.core.ports/CapabilitiesProbe { // tv.nomerc
 abstract interface tv.nomercy.player.core.ports/CastSender { // tv.nomercy.player.core.ports/CastSender|null[0]
     abstract suspend fun reclaim(): kotlin/Double? // tv.nomercy.player.core.ports/CastSender.reclaim|reclaim(){}[0]
     abstract suspend fun transfer(tv.nomercy.player.core.events/CastTarget, tv.nomercy.player.core.media/PlaylistItem?, kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.ports/CastSender.transfer|transfer(tv.nomercy.player.core.events.CastTarget;tv.nomercy.player.core.media.PlaylistItem?;kotlin.Double){}[0]
+    open fun isConnected(): kotlin/Boolean // tv.nomercy.player.core.ports/CastSender.isConnected|isConnected(){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/Clock { // tv.nomercy.player.core.ports/Clock|null[0]

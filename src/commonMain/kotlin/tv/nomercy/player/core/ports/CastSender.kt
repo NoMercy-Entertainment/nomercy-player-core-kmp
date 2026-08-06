@@ -32,4 +32,17 @@ public interface CastSender {
     // the local engine resumes from there instead of from where it was paused
     // when the session started.
     public suspend fun reclaim(): Double?
+
+    /**
+     * Whether a session is live right now.
+     *
+     * transfer() and reclaim() move playback between here and a device, and
+     * nothing could ask which side it was on — so a chrome drawing a cast
+     * button had to track the answer itself from the events and would be wrong
+     * the moment a session ended somewhere else.
+     *
+     * Defaulted to false so every existing implementation keeps compiling; one
+     * that knows overrides it.
+     */
+    public fun isConnected(): Boolean = false
 }
