@@ -17,6 +17,7 @@ import tv.nomercy.player.core.KIT_VERSION
 import tv.nomercy.player.core.cues.registerBuiltIns
 import tv.nomercy.player.core.devtools.EventFirehose
 import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.NetworkError
 import tv.nomercy.player.core.errors.resourceError
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.NotImplementedError
@@ -25,6 +26,11 @@ import tv.nomercy.player.core.errors.ScopeKind
 import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
+import tv.nomercy.player.core.net.AuthFetch
+import tv.nomercy.player.core.net.FetchSignal
+import tv.nomercy.player.core.events.FetchStartPayload
+import tv.nomercy.player.core.events.FetchRetryPayload
+import tv.nomercy.player.core.events.FetchCompletePayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.AudioTrackPayload
@@ -1141,7 +1147,24 @@ public open class ComposedPlayer(
     }
 
     private suspend fun fetchPlaylist(url: String): String {
-        val response: FetchResponse = fetch(url, FetchOptions())
+        // The pipeline classifies the status now, so a 404 arrives here as
+        // core:network/not-found rather than as a response with a number on it.
+        // A caller awaiting a playlist wants the playlist code — that is what
+        // this method has always thrown and what a consumer catches — so the
+        // specific network code travels in the bag rather than replacing it.
+        val response: FetchResponse = try {
+            fetch(url, FetchOptions())
+        }
+        catch (failure: NetworkError) {
+            throw PlayerError(
+                code = CoreErrorCodes.PLAYLIST_FETCH_ERROR,
+                scope = ErrorScope.core(),
+                message = "The playlist at $url could not be fetched: ${failure.code}.",
+                cause = failure,
+                context = failure.context + mapOf("networkCode" to failure.code),
+            )
+        }
+
         if (response.status !in OK_STATUS) {
             throw PlayerError(
                 code = CoreErrorCodes.PLAYLIST_FETCH_ERROR,
@@ -1474,10 +1497,48 @@ public open class ComposedPlayer(
         val transport: Fetcher = fetcher
             ?: throw NotImplementedError("This player was built without an HTTP transport.", "fetch")
 
-        val signedUrl: String = context.auth?.transformUrl(url) ?: url
-        val signedRequest: FetchOptions = context.auth?.signRequest(signedUrl, opts) ?: opts
+        // Through the pipeline, not straight at the transport.
+        //
+        // This signed the request and handed it over raw: a 404 came back as a
+        // FetchResponse with a status on it and every caller decided for itself
+        // what that meant, and the three fetch:* events the contract declares
+        // were fired by nothing at all. Both are the same omission — the part
+        // between "send" and "answer" did not exist here.
+        return AuthFetch(
+            fetcher = transport,
+            auth = context.auth,
+            onSignal = ::announceFetch,
+        ).fetch(url, opts)
+    }
 
-        return transport.fetch(signedUrl, signedRequest)
+    private fun announceFetch(signal: FetchSignal) {
+        when (signal) {
+            is FetchSignal.Start ->
+                context.emit(CoreEvents.FetchStart, FetchStartPayload(url = signal.url))
+
+            is FetchSignal.Retry -> context.emit(
+                CoreEvents.FetchRetry,
+                FetchRetryPayload(
+                    url = signal.url,
+                    attempt = signal.attempt.toDouble(),
+                    reason = signal.reason,
+                    delayMs = signal.delayMs.toDouble(),
+                ),
+            )
+
+            is FetchSignal.Complete -> context.emit(
+                CoreEvents.FetchComplete,
+                FetchCompletePayload(
+                    url = signal.url,
+                    ok = signal.ok,
+                    status = signal.status?.toDouble(),
+                    // Not measured here. A duration wants a clock this method
+                    // does not hold, and a fabricated zero would be worse than
+                    // the field being absent.
+                    durationMs = 0.0,
+                ),
+            )
+        }
     }
 
     override fun websocket(url: String, opts: RealtimeFactoryOptions): RealtimeChannel =

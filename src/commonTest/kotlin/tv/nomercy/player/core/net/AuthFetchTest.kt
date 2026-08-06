@@ -17,6 +17,8 @@ import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.Fetcher
 import tv.nomercy.player.core.ports.RetryConfig
+import tv.nomercy.player.core.controllers.ComposedPlayer
+import tv.nomercy.player.testing.FakeMediaBackend
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -254,5 +256,19 @@ class AuthFetchTest {
         assertTrue(seen.first() is FetchSignal.Start, "no start")
         assertTrue(seen.any { it is FetchSignal.Retry }, "no retry")
         assertEquals(FetchSignal.Complete("https://example.test/a", ok = true, status = 200), seen.last())
+    }
+
+    @Test
+    fun aPlayerFetchAnnouncesItselfOnTheBus() = runTest {
+        // The three fetch:* keys were declared, had payload classes, and were
+        // fired by nothing — a consumer subscribing to them heard silence for
+        // every request the player ever made.
+        val player = ComposedPlayer(backend = FakeMediaBackend(), fetcher = ScriptedFetcher(503, 200))
+        val seen: MutableList<String> = mutableListOf()
+        player.onAll { name, _ -> if (name.startsWith("fetch:")) seen += name }
+
+        player.fetch("https://example.test/a", FetchOptions())
+
+        assertEquals(listOf("fetch:start", "fetch:retry", "fetch:complete"), seen)
     }
 }
