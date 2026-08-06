@@ -113,6 +113,18 @@ public open class QueueController(private val ctx: PlayerContext) {
         val index: Int = ctx.queue.indexOf(id)
         if (index < 0) return
 
+        // Announced, and refusable. The reference guards exactly one queue
+        // method and guards it from both entry points — `current`, from
+        // item(target) and from seekToIndex. Natively the guard was wired to
+        // repeatState, shuffleState and recordMetric and to nothing in the
+        // queue at all, so an advisory plugin refusing a track change had
+        // nothing to refuse and beforeMutation never fired on the path a viewer
+        // actually takes.
+        //
+        // After the id resolves, so a refusal is about a move that could have
+        // happened rather than about a track that is not in the queue.
+        if (!ctx.guardMutation("current", listOf(id))) return
+
         ctx.queue.setCurrent(index)
         val chosen: PlaylistItem = ctx.queue.current() ?: return
         if (ctx.phase == PlayerPhase.IDLE || ctx.phase == PlayerPhase.DISPOSED) return
@@ -130,6 +142,12 @@ public open class QueueController(private val ctx: PlayerContext) {
     public fun seekToIndex(position: Int) {
         require(position > 0) { "seekToIndex is one-based; got $position" }
         if (position > ctx.queue.length()) return
+
+        // The reference passes the ZERO-based index here, not the one-based
+        // argument, so a listener reading args sees the same number on both
+        // entry points.
+        if (!ctx.guardMutation("current", listOf(position - 1))) return
+
         ctx.queue.setCurrent(position - 1)
     }
 
