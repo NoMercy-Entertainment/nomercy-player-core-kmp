@@ -13,6 +13,8 @@ import com.sun.jna.Native
 import com.sun.jna.NativeLibrary
 import com.sun.jna.Platform
 import java.io.File
+import tv.nomercy.player.core.natives.NativeRuntimeKind
+import tv.nomercy.player.core.natives.NativeRuntimes
 
 // The seven halves of libVLC this library speaks to, bound to one shared object.
 //
@@ -58,7 +60,25 @@ internal object LibVlcLoader {
     private val bound: Result<LibVlcBinding> by lazy { runCatching(::load) }
 
     private fun load(): LibVlcBinding {
-        VlcLibraryDirectory.find()?.let(::point)
+        val directory: File? = VlcLibraryDirectory.find()
+
+        // No directory at all is its own diagnosis, and it was the one nobody
+        // got. Falling through to JNA here produces "Unable to load library
+        // 'libvlc'", which reads as a broken install on a machine that never
+        // had one — while the payload store knows exactly why it has nothing
+        // to offer (an archive that 404s, a platform with no build). That
+        // reason was sitting one call away and reaching no one, so a desktop
+        // with no libVLC drew a black rectangle and logged not one line.
+        if (directory == null) {
+            val reason: String = NativeRuntimes.whyUnavailable(NativeRuntimeKind.LIB_VLC)
+                ?: "no libVLC payload and none installed on this machine"
+            error(
+                "the desktop engine has no libVLC, so nothing can be decoded: $reason. " +
+                    "Point nomercy.player.natives.libvlc.dir at a build to override.",
+            )
+        }
+
+        point(directory)
         return LibVlcBinding(LIBRARY)
     }
 
