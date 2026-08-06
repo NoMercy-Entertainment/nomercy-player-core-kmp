@@ -34,6 +34,25 @@ public interface CastSender {
     public suspend fun reclaim(): Double?
 
     /**
+     * End the session without pulling playback back.
+     *
+     * The reference's `disconnect()`, and deliberately not an alias for
+     * [reclaim]: that one ANSWERS with the remote's position so the local
+     * engine can resume there, and a caller who only wants the session closed
+     * — the viewer walked away, the app is shutting down, the receiver went
+     * offline — would silently drop it. A handoff that restarts the episode is
+     * the single thing that makes people stop using the feature, so the two
+     * intentions stay two methods.
+     *
+     * Defaults to reclaiming and discarding the position, because that is the
+     * closest honest behaviour an existing implementation already has; one that
+     * can end a session more cheaply overrides it.
+     */
+    public suspend fun disconnect() {
+        reclaim()
+    }
+
+    /**
      * Whether a session is live right now.
      *
      * transfer() and reclaim() move playback between here and a device, and
