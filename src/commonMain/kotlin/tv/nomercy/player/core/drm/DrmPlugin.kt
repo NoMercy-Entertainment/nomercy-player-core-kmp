@@ -8,7 +8,9 @@
 
 package tv.nomercy.player.core.drm
 
+import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.plugin.Plugin
+import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.plugin.PluginManifest
 
 // Playing content that is protected.
@@ -43,6 +45,35 @@ public open class DrmPlugin(
     // so a chrome can choose a different version before anything has played
     // rather than after a viewer has watched a spinner.
     public open val isPlayable: Boolean get() = capability.supports(config.scheme)
+
+    /**
+     * Fetch a licence blob from the configured licence server.
+     *
+     * The transforms run around the exchange, as they do on the reference, so a
+     * caller can apply HMAC or a proprietary signing scheme without
+     * subclassing — which is the whole reason they are configuration rather
+     * than overridable methods. DrmConfig has carried both since it was
+     * written and nothing ever called them, because this method did not exist:
+     * a host doing its own licence exchange had to bypass the plugin entirely.
+     *
+     * POST with the challenge as the body, because that is what a licence
+     * server expects.
+     */
+    public open suspend fun fetchLicense(challenge: ByteArray): ByteArray {
+        val url: String = config.licenseUrl ?: throw stateError(
+            DrmErrorCodes.LICENSE_URL_MISSING,
+            "DrmPlugin: licenseUrl is required.",
+        )
+
+        val request: ByteArray = config.transformLicenseRequest?.invoke(challenge) ?: challenge
+
+        val response: ByteArray = fetch(
+            url,
+            FetchOptions(method = "POST", bodyBytes = request),
+        ).bytes ?: ByteArray(0)
+
+        return config.transformLicenseResponse?.invoke(response) ?: response
+    }
 
     override fun use() {
         if (!isPlayable) {

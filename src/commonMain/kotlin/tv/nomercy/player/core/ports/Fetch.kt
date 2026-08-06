@@ -15,6 +15,16 @@ public data class FetchOptions(
     val method: String = "GET",
     val headers: Map<String, String> = emptyMap(),
     val body: String? = null,
+    // The request's binary half, which was missing while the RESPONSE has had
+    // both since it was written. A DRM licence exchange POSTs a binary
+    // challenge, so with a text-only body it could not be expressed at all —
+    // and the plugin that needed it simply had no fetchLicense.
+    //
+    // Both, rather than one replacing the other: a plugin posting JSON wants
+    // the string and one posting a challenge wants the bytes, and forcing
+    // either through the other means an encoding step that corrupts the case
+    // it was not written for.
+    val bodyBytes: ByteArray? = null,
 )
 
 // [body] is the response as text and [bytes] as it arrived. Both, because a

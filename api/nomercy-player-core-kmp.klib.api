@@ -5122,10 +5122,12 @@ final class tv.nomercy.player.core.ports/ExternalRoute { // tv.nomercy.player.co
 }
 
 final class tv.nomercy.player.core.ports/FetchOptions { // tv.nomercy.player.core.ports/FetchOptions|null[0]
-    constructor <init>(kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ...) // tv.nomercy.player.core.ports/FetchOptions.<init>|<init>(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?){}[0]
+    constructor <init>(kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ..., kotlin/ByteArray? = ...) // tv.nomercy.player.core.ports/FetchOptions.<init>|<init>(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?;kotlin.ByteArray?){}[0]
 
     final val body // tv.nomercy.player.core.ports/FetchOptions.body|{}body[0]
         final fun <get-body>(): kotlin/String? // tv.nomercy.player.core.ports/FetchOptions.body.<get-body>|<get-body>(){}[0]
+    final val bodyBytes // tv.nomercy.player.core.ports/FetchOptions.bodyBytes|{}bodyBytes[0]
+        final fun <get-bodyBytes>(): kotlin/ByteArray? // tv.nomercy.player.core.ports/FetchOptions.bodyBytes.<get-bodyBytes>|<get-bodyBytes>(){}[0]
     final val headers // tv.nomercy.player.core.ports/FetchOptions.headers|{}headers[0]
         final fun <get-headers>(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.ports/FetchOptions.headers.<get-headers>|<get-headers>(){}[0]
     final val method // tv.nomercy.player.core.ports/FetchOptions.method|{}method[0]
@@ -5134,7 +5136,8 @@ final class tv.nomercy.player.core.ports/FetchOptions { // tv.nomercy.player.cor
     final fun component1(): kotlin/String // tv.nomercy.player.core.ports/FetchOptions.component1|component1(){}[0]
     final fun component2(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.ports/FetchOptions.component2|component2(){}[0]
     final fun component3(): kotlin/String? // tv.nomercy.player.core.ports/FetchOptions.component3|component3(){}[0]
-    final fun copy(kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ...): tv.nomercy.player.core.ports/FetchOptions // tv.nomercy.player.core.ports/FetchOptions.copy|copy(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?){}[0]
+    final fun component4(): kotlin/ByteArray? // tv.nomercy.player.core.ports/FetchOptions.component4|component4(){}[0]
+    final fun copy(kotlin/String = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ..., kotlin/ByteArray? = ...): tv.nomercy.player.core.ports/FetchOptions // tv.nomercy.player.core.ports/FetchOptions.copy|copy(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?;kotlin.ByteArray?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/FetchOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/FetchOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/FetchOptions.toString|toString(){}[0]
@@ -5990,6 +5993,7 @@ open class tv.nomercy.player.core.drm/DrmPlugin : tv.nomercy.player.core.plugin/
         open fun <get-options>(): tv.nomercy.player.core.drm/DrmConfig // tv.nomercy.player.core.drm/DrmPlugin.options.<get-options>|<get-options>(){}[0]
 
     open fun use() // tv.nomercy.player.core.drm/DrmPlugin.use|use(){}[0]
+    open suspend fun fetchLicense(kotlin/ByteArray): kotlin/ByteArray // tv.nomercy.player.core.drm/DrmPlugin.fetchLicense|fetchLicense(kotlin.ByteArray){}[0]
 
     final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.drm/DrmPlugin.Manifest|null[0]
         final val id // tv.nomercy.player.core.drm/DrmPlugin.Manifest.id|{}id[0]
