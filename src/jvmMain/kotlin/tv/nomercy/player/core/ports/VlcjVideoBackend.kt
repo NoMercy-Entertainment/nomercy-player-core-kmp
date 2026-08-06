@@ -227,6 +227,13 @@ public class VlcjVideoBackend private constructor(
                 }
 
                 override fun timeChanged(millis: Long) {
+                    // Checked here rather than on `playing`, because libVLC has
+                    // not enumerated its tracks by then: asking that early
+                    // reports every item as having no video and so reports
+                    // nothing at all once the false positives are suppressed.
+                    // The first time report is the earliest moment the answer
+                    // is true.
+                    reportMissingVideo()
                     bus.emit(CanonicalBackendEvent.TIME_UPDATE, millis / MILLIS_PER_SECOND)
                 }
 
@@ -255,7 +262,6 @@ public class VlcjVideoBackend private constructor(
         announcedReadable = true
         bus.emit(CanonicalBackendEvent.LOADED_METADATA)
         bus.emit(CanonicalBackendEvent.CAN_PLAY)
-        reportMissingVideo()
     }
 
     // Playing, with a manifest that promised a picture and an engine that has
@@ -273,11 +279,17 @@ public class VlcjVideoBackend private constructor(
     // manifest DECLARED video renditions can be missing one, so an audio-only
     // item and a muxed container that reports its tracks late cannot trip it.
     private fun reportMissingVideo() {
+        if (reportedMissingVideo) return
         if (manifestLevels.isEmpty()) return
         if (tracksOf(VlcTrackType.VIDEO).isNotEmpty()) return
 
+        reportedMissingVideo = true
         bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.NO_VIDEO_TRACK)
     }
+
+    // Once per load. A time report arrives four times a second and this must
+    // not become four errors a second on a film that has none.
+    private var reportedMissingVideo: Boolean = false
 
     // Whether libVLC can be asked to convert HDR as it decodes.
     //
@@ -355,6 +367,7 @@ public class VlcjVideoBackend private constructor(
 
     override suspend fun load(url: String, opts: LoadOptions) {
         announcedReadable = false
+        reportedMissingVideo = false
         refusedAsUnplayable = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
 
