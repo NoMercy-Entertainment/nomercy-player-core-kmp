@@ -12,6 +12,9 @@ import tv.nomercy.player.core.dsp.EqBand
 import tv.nomercy.player.core.dsp.EqBands
 import tv.nomercy.player.core.dsp.EqPreset
 import tv.nomercy.player.core.dsp.EqPresets
+import tv.nomercy.player.core.dsp.EqSliderTarget
+import tv.nomercy.player.core.dsp.EqSliderValues
+import tv.nomercy.player.core.dsp.SliderRange
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.plugin.PluginManifest
 import tv.nomercy.player.core.plugin.PluginOptionField
@@ -208,6 +211,90 @@ public open class EqualizerPlugin(
     // control comes to look broken instead of absent.
     public open fun available(): Boolean = graph != null
 
+    // The resonance width of one band.
+    //
+    // Spelled `bandwidth` on EqBand and `q` on the reference, which are the
+    // same number: a biquad's Q. Named for the reference here because this is
+    // the consumer-facing accessor and a UI porting from the web should not
+    // have to discover that the field was renamed on the way across.
+    //
+    // An absent band answers 1, the reference's own default, rather than
+    // throwing — a UI drawing a control for a frequency this curve does not
+    // carry gets a neutral value instead of a crash.
+    public open fun q(frequencyHz: Int): Double =
+        current.firstOrNull { it.frequency == frequencyHz }?.bandwidth ?: 1.0
+
+    // Clamped upward, because a Q of zero is a filter with no width and the
+    // reference clamps at the same hundredth of a thousandth for the same
+    // reason.
+    public open fun q(frequencyHz: Int, value: Double) {
+        val index: Int = current.indexOfFirst { it.frequency == frequencyHz }
+        if (index < 0) return
+
+        val safe: Double = maxOf(MIN_Q, value)
+        current = current.toMutableList().also { it[index] = it[index].copy(bandwidth = safe) }
+        graph?.setEqBands(current)
+        persist()
+    }
+
+    // The ranges a slider should be built from, so a UI does not hardcode them
+    // and then disagree with the curve it is driving.
+    public open fun sliderValues(): EqSliderValues = opts.sliderValues
+
+    public open fun bandSliderMin(frequencyHz: Int): Double = rangeFor(frequencyHz).min
+
+    public open fun bandSliderMax(frequencyHz: Int): Double = rangeFor(frequencyHz).max
+
+    public open fun bandSliderStep(frequencyHz: Int): Double = rangeFor(frequencyHz).step
+
+    // The band's gain as a 0..100 position, which is what a slider wants.
+    //
+    // Centre is 50 for a band, because a band runs symmetrically about zero.
+    // Pre-gain does not: its offset is half its travel, which is the
+    // reference's own arithmetic and the reason this is not simply
+    // (gain - min) / (max - min).
+    public open fun bandSliderValue(frequencyHz: Int): Double {
+        val band: EqBand = current.firstOrNull { it.frequency == frequencyHz } ?: return 0.0
+        val range: SliderRange = rangeFor(frequencyHz)
+        val offset: Double = if (frequencyHz == PRE_GAIN_FREQUENCY) range.max / 2 else range.max
+
+        return ((band.gainDb + offset) / range.totalSteps) * PERCENT
+    }
+
+    private fun rangeFor(frequencyHz: Int): SliderRange = opts.sliderValues.sliderRangeFor(
+        if (frequencyHz == PRE_GAIN_FREQUENCY) EqSliderTarget.PRE_GAIN else EqSliderTarget.BAND,
+    )
+
+    // Writing the curve out when the host asked not to do it automatically.
+    //
+    // Separate from persist() because that one is the autoSave path and does
+    // nothing when autoSave is off — which left a host that turned autoSave off
+    // with no way to save at all, so its viewers' settings were simply lost.
+    public open suspend fun save() {
+        store.save(storage, snapshot())
+    }
+
+    // The other half of the same pair. Reading the curve back is what setup
+    // does on registration, and a host that reloads a profile mid-session had
+    // no way to ask for it.
+    public open suspend fun restore() {
+        val restored: EqualizerState = store.loadPersisted(storage) ?: return
+
+        current = restored.bands
+        chosenPreset = restored.preset
+        pre = restored.preGain
+        store.replaceAll(restored.customPresets)
+        graph?.setEqBands(current)
+        graph?.preGain(pre)
+    }
+
+    private fun snapshot(): EqualizerState = EqualizerState(
+        bands = current,
+        preset = chosenPreset,
+        preGain = pre,
+        customPresets = store.customPresets(),
+    )
+
     // Nothing at all when no key was configured, which is also what keeps this
     // safe to call from a plugin nobody registered: reaching the scoped storage
     // needs a host, and a consumer who asked for no persistence should not need
@@ -228,3 +315,13 @@ public open class EqualizerPlugin(
         }
     }
 }
+
+// The reference's clamp, to the hundredth of a thousandth: a Q of zero is a
+// filter with no width at all.
+private const val MIN_Q: Double = 0.0001
+
+// Pre-gain rides in the band table under a frequency no audio band uses, which
+// is how the reference addresses it through the same slider API.
+private const val PRE_GAIN_FREQUENCY: Int = 0
+
+private const val PERCENT: Double = 100.0

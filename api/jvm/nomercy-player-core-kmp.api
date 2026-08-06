@@ -4370,6 +4370,10 @@ public class tv/nomercy/player/core/plugins/audio/EqualizerPlugin : tv/nomercy/p
 	public fun addCustomPreset (Ltv/nomercy/player/core/dsp/EqPreset;)V
 	public fun available ()Z
 	public fun band (ID)V
+	public fun bandSliderMax (I)D
+	public fun bandSliderMin (I)D
+	public fun bandSliderStep (I)D
+	public fun bandSliderValue (I)D
 	public fun bands ()Ljava/util/List;
 	public fun enabled (Z)V
 	public fun equalizerEnabled ()Z
@@ -4382,8 +4386,13 @@ public class tv/nomercy/player/core/plugins/audio/EqualizerPlugin : tv/nomercy/p
 	public fun preset ()Ljava/lang/String;
 	public fun preset (Ljava/lang/String;)V
 	public fun presets ()Ljava/util/List;
+	public fun q (I)D
+	public fun q (ID)V
 	public fun removePreset (Ljava/lang/String;)V
 	public fun reset ()V
+	public fun restore (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun save (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun sliderValues ()Ltv/nomercy/player/core/dsp/EqSliderValues;
 	public fun use ()V
 }
 
