@@ -6291,6 +6291,7 @@ open class tv.nomercy.player.core.plugins.embed/EmbedPlugin : tv.nomercy.player.
     final fun allowedOrigins(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.plugins.embed/EmbedPlugin.allowedOrigins|allowedOrigins(){}[0]
     final fun allowedOrigins(kotlin.collections/List<kotlin/String>) // tv.nomercy.player.core.plugins.embed/EmbedPlugin.allowedOrigins|allowedOrigins(kotlin.collections.List<kotlin.String>){}[0]
     final fun embedded(): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedPlugin.embedded|embedded(){}[0]
+    final fun options(tv.nomercy.player.core.plugins.embed/EmbedOptions) // tv.nomercy.player.core.plugins.embed/EmbedPlugin.options|options(tv.nomercy.player.core.plugins.embed.EmbedOptions){}[0]
     final fun sendToHost(tv.nomercy.player.core.plugins.embed/EmbedEventName, kotlinx.serialization.json/JsonObject) // tv.nomercy.player.core.plugins.embed/EmbedPlugin.sendToHost|sendToHost(tv.nomercy.player.core.plugins.embed.EmbedEventName;kotlinx.serialization.json.JsonObject){}[0]
     open fun dispose() // tv.nomercy.player.core.plugins.embed/EmbedPlugin.dispose|dispose(){}[0]
     open fun handleCommand(tv.nomercy.player.core.plugins.embed/EmbedCommand) // tv.nomercy.player.core.plugins.embed/EmbedPlugin.handleCommand|handleCommand(tv.nomercy.player.core.plugins.embed.EmbedCommand){}[0]

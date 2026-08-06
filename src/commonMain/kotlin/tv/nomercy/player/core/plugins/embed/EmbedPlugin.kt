@@ -55,7 +55,7 @@ public open class EmbedPlugin(
     private val commands: TransportCommands,
     private val volume: VolumeCommands,
     private val transport: EmbedTransport? = null,
-    private val opts: EmbedOptions = EmbedOptions(),
+    opts: EmbedOptions = EmbedOptions(),
 ) : Plugin<EmbedOptions>() {
 
     public companion object Manifest : PluginManifest {
@@ -67,7 +67,27 @@ public open class EmbedPlugin(
 
     override val manifest: PluginManifest get() = Manifest
 
-    override val options: EmbedOptions get() = opts
+    override val options: EmbedOptions get() = current
+
+    /**
+     * Replace the runtime options.
+     *
+     * The reference overrides its base accessor with a write form so a host can
+     * change allowedOrigins after registration — an embed whose parent frame
+     * moves, a host that learns its origin late. Only the read side existed
+     * here, so those options were fixed at construction and the plugin had to
+     * be rebuilt to change them.
+     *
+     * allowedOrigins is re-derived rather than merely stored, because the
+     * checked list is a separate field and leaving it behind would accept
+     * commands from an origin the caller had just revoked.
+     */
+    public fun options(next: EmbedOptions) {
+        current = next
+        origins = next.allowedOrigins
+    }
+
+    private var current: EmbedOptions = opts
 
     private val json: Json = Json { ignoreUnknownKeys = true }
 
@@ -201,7 +221,7 @@ public open class EmbedPlugin(
     }
 
     private fun forwarded(name: EmbedEventName, subscribe: () -> Unit) {
-        if (opts.forwardEvents.contains(name)) subscribe()
+        if (current.forwardEvents.contains(name)) subscribe()
     }
 }
 

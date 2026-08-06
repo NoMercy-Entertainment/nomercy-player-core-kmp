@@ -4779,6 +4779,7 @@ public class tv/nomercy/player/core/plugins/embed/EmbedPlugin : tv/nomercy/playe
 	public fun getOptions ()Ltv/nomercy/player/core/plugins/embed/EmbedOptions;
 	protected fun handleCommand (Ltv/nomercy/player/core/plugins/embed/EmbedCommand;)V
 	protected fun isOriginAllowed (Ljava/lang/String;)Z
+	public final fun options (Ltv/nomercy/player/core/plugins/embed/EmbedOptions;)V
 	public final fun sendToHost (Ltv/nomercy/player/core/plugins/embed/EmbedEventName;Lkotlinx/serialization/json/JsonObject;)V
 	public fun use ()V
 }
