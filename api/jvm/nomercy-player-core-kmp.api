@@ -3320,6 +3320,7 @@ public final class tv/nomercy/player/core/natives/NativeRuntimeKind : java/lang/
 public final class tv/nomercy/player/core/natives/NativeRuntimes {
 	public static final field INSTANCE Ltv/nomercy/player/core/natives/NativeRuntimes;
 	public final fun directory (Ltv/nomercy/player/core/natives/NativeRuntimeKind;)Ljava/io/File;
+	public final fun isPublished (Ltv/nomercy/player/core/natives/NativeRuntimeKind;)Z
 	public final fun whyUnavailable (Ltv/nomercy/player/core/natives/NativeRuntimeKind;)Ljava/lang/String;
 }
 

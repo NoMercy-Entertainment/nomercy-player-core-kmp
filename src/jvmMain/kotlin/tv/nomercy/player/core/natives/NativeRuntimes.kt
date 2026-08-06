@@ -27,13 +27,26 @@ import java.util.EnumMap
 // into a per-user cache and loaded from there — the same arrangement the Apple
 // targets already use for libass, moved from build time to first use because a
 // published JVM library has no build step in a consumer's project to hook.
-public enum class NativeRuntimeKind(internal val slug: String) {
+// [repository] and [tagOf] are where a kind's published archives live. They
+// differ by kind on purpose: libass is built and released by nomercy-libass,
+// which exists precisely so that every surface NoMercy draws a subtitle on —
+// web, desktop, Android, Apple — renders with the same build. Copying those
+// bytes into this repo's releases to keep one URL shape would recreate the
+// second origin that repo was made to remove.
+public enum class NativeRuntimeKind(
+    internal val slug: String,
+    internal val repository: String,
+    private val tagPrefix: String,
+) {
     // libVLC and its plugins: the desktop decoder.
-    LIB_VLC("libvlc"),
+    LIB_VLC("libvlc", "nomercy-player-core-kmp", "natives-libvlc-"),
 
     // libass: styled ASS and SSA subtitles, the ones that carry positioning,
     // fonts and karaoke. Without it those render as plain text or not at all.
-    LIB_ASS("libass"),
+    LIB_ASS("libass", "nomercy-libass", "v"),
+    ;
+
+    internal fun tagOf(version: String): String = "$tagPrefix$version"
 }
 
 public object NativeRuntimes {
@@ -50,6 +63,17 @@ public object NativeRuntimes {
     // Why [directory] answered null, in a sentence a developer can act on.
     // Null when it did not.
     public fun whyUnavailable(kind: NativeRuntimeKind): String? = resolved(kind).reason
+
+    // Whether a payload for this kind is published for the machine we are on.
+    //
+    // Asked WITHOUT installing anything, which is the point: this is the
+    // difference between "this host is supposed to have it and does not" and
+    // "no build exists for this host yet", and only the first of those is a
+    // fault. A gate that cannot tell them apart has to skip on both, which is
+    // how styled subtitles went untested on the one desktop platform they were
+    // broken on.
+    public fun isPublished(kind: NativeRuntimeKind): Boolean =
+        HostPlatform.current()?.let { host -> NativeArchives.of(kind, host) != null } ?: false
 
     // Once per kind per process. Installing means a digest check over sixty
     // megabytes and possibly a download, and a question asked twice would pay

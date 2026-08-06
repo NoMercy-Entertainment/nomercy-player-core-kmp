@@ -38,8 +38,9 @@ internal class NativeArchive(
     // unchanged, so a mirror serving the wrong bytes fails exactly as loudly.
     val url: String
         get() {
-            val base: String = System.getProperty("nomercy.player.natives.baseUrl") ?: RELEASES
-            return "$base/natives-${kind.slug}-$version/$fileName"
+            val base: String = System.getProperty("nomercy.player.natives.baseUrl")
+                ?: "$GITHUB/${kind.repository}/releases/download"
+            return "$base/${kind.tagOf(version)}/$fileName"
         }
 
     // Inside the archive, so a resource-shipped payload needs no separate
@@ -48,8 +49,7 @@ internal class NativeArchive(
 
     private companion object {
         const val DIGEST_PREFIX: Int = 12
-        const val RELEASES: String =
-            "https://github.com/NoMercy-Entertainment/nomercy-player-core-kmp/releases/download"
+        const val GITHUB: String = "https://github.com/NoMercy-Entertainment"
     }
 }
 
@@ -60,25 +60,15 @@ internal class NativeArchive(
 // the machine has — which is what every JVM consumer had before any of this.
 // Absent rather than pinned-to-nothing, because a table entry with an empty
 // digest is an entry that would happily install anything.
+//
+// GENERATED from natives/payloads.json by the `generateNativeCatalogue` Gradle
+// task, which is also what the bundling task reads. Hand-maintaining this list
+// beside the build's own copy is how libass came to be listed for no platform
+// at all while its archives had been published for months.
 internal object NativeArchives {
 
     fun of(kind: NativeRuntimeKind, platform: HostPlatform): NativeArchive? =
         published.firstOrNull { archive -> archive.kind == kind && archive.platform == platform }
 
-    private val published: List<NativeArchive> = listOf(
-        NativeArchive(
-            kind = NativeRuntimeKind.LIB_VLC,
-            platform = HostPlatform.WINDOWS_X64,
-            version = "3.0.23",
-            sha256 = "c159cf42bf11a1cebb2c820805443773e33414526d9aae13783497a7344a2e0f",
-            marker = "libvlc.dll",
-        ),
-        NativeArchive(
-            kind = NativeRuntimeKind.LIB_VLC,
-            platform = HostPlatform.LINUX_X64,
-            version = "3.0.23",
-            sha256 = "3501b673bc6f87a563951e119f3746109080adc2277a63cb33bf2b7134140fef",
-            marker = "libvlc.so.5",
-        ),
-    )
+    private val published: List<NativeArchive> get() = NativeCatalogue.PUBLISHED
 }
