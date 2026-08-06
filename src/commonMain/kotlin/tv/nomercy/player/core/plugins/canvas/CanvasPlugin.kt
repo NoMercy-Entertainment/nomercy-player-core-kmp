@@ -32,6 +32,14 @@ public data class CanvasOptions(
     val fps: Int = DEFAULT_CANVAS_FPS,
 
     val compositeMode: CompositeMode = CompositeMode.CLEAR,
+
+    // A size the host wants regardless of the surface it mounted, which is
+    // what makes [CanvasPlugin.resize] mean anything: without these, "use the
+    // configured size" has no configured size to use. Null keeps whatever the
+    // surface reported, which is the reference's behaviour when its own
+    // options carry none.
+    val width: Double? = null,
+    val height: Double? = null,
 )
 
 /**
@@ -162,6 +170,26 @@ public open class CanvasPlugin<S : Any>(
      * Returns the way to remove it, so a caller that owns one renderer does not
      * have to keep the reference to take it away again.
      */
+    /**
+     * Re-apply the configured size to the mounted surface.
+     *
+     * The reference re-reads the element's own client box when no size was
+     * configured; here the host owns the surface and reports its box through
+     * [mount] and [size], so this re-applies the CONFIGURED size and leaves a
+     * host that has none where it is — the surface it drew is still correct.
+     *
+     * It exists because a host reacting to a window resize had size(w, h) and
+     * nothing that meant "the options changed, use them", so a consumer
+     * changing width/height in options saw nothing happen.
+     */
+    public fun resize() {
+        val current: CanvasSize = surface.value ?: return
+        val width: Double = opts.width ?: current.width
+        val height: Double = opts.height ?: current.height
+
+        size(width, height, current.pixelRatio)
+    }
+
     public fun addRenderer(renderer: CanvasRenderer<S>): () -> Unit {
         renderers += renderer
         return { removeRenderer(renderer) }

@@ -4669,16 +4669,22 @@ final class tv.nomercy.player.core.plugins.canvas/CanvasFrame { // tv.nomercy.pl
 }
 
 final class tv.nomercy.player.core.plugins.canvas/CanvasOptions { // tv.nomercy.player.core.plugins.canvas/CanvasOptions|null[0]
-    constructor <init>(kotlin/Int = ..., tv.nomercy.player.core.plugins.canvas/CompositeMode = ...) // tv.nomercy.player.core.plugins.canvas/CanvasOptions.<init>|<init>(kotlin.Int;tv.nomercy.player.core.plugins.canvas.CompositeMode){}[0]
+    constructor <init>(kotlin/Int = ..., tv.nomercy.player.core.plugins.canvas/CompositeMode = ..., kotlin/Double? = ..., kotlin/Double? = ...) // tv.nomercy.player.core.plugins.canvas/CanvasOptions.<init>|<init>(kotlin.Int;tv.nomercy.player.core.plugins.canvas.CompositeMode;kotlin.Double?;kotlin.Double?){}[0]
 
     final val compositeMode // tv.nomercy.player.core.plugins.canvas/CanvasOptions.compositeMode|{}compositeMode[0]
         final fun <get-compositeMode>(): tv.nomercy.player.core.plugins.canvas/CompositeMode // tv.nomercy.player.core.plugins.canvas/CanvasOptions.compositeMode.<get-compositeMode>|<get-compositeMode>(){}[0]
     final val fps // tv.nomercy.player.core.plugins.canvas/CanvasOptions.fps|{}fps[0]
         final fun <get-fps>(): kotlin/Int // tv.nomercy.player.core.plugins.canvas/CanvasOptions.fps.<get-fps>|<get-fps>(){}[0]
+    final val height // tv.nomercy.player.core.plugins.canvas/CanvasOptions.height|{}height[0]
+        final fun <get-height>(): kotlin/Double? // tv.nomercy.player.core.plugins.canvas/CanvasOptions.height.<get-height>|<get-height>(){}[0]
+    final val width // tv.nomercy.player.core.plugins.canvas/CanvasOptions.width|{}width[0]
+        final fun <get-width>(): kotlin/Double? // tv.nomercy.player.core.plugins.canvas/CanvasOptions.width.<get-width>|<get-width>(){}[0]
 
     final fun component1(): kotlin/Int // tv.nomercy.player.core.plugins.canvas/CanvasOptions.component1|component1(){}[0]
     final fun component2(): tv.nomercy.player.core.plugins.canvas/CompositeMode // tv.nomercy.player.core.plugins.canvas/CanvasOptions.component2|component2(){}[0]
-    final fun copy(kotlin/Int = ..., tv.nomercy.player.core.plugins.canvas/CompositeMode = ...): tv.nomercy.player.core.plugins.canvas/CanvasOptions // tv.nomercy.player.core.plugins.canvas/CanvasOptions.copy|copy(kotlin.Int;tv.nomercy.player.core.plugins.canvas.CompositeMode){}[0]
+    final fun component3(): kotlin/Double? // tv.nomercy.player.core.plugins.canvas/CanvasOptions.component3|component3(){}[0]
+    final fun component4(): kotlin/Double? // tv.nomercy.player.core.plugins.canvas/CanvasOptions.component4|component4(){}[0]
+    final fun copy(kotlin/Int = ..., tv.nomercy.player.core.plugins.canvas/CompositeMode = ..., kotlin/Double? = ..., kotlin/Double? = ...): tv.nomercy.player.core.plugins.canvas/CanvasOptions // tv.nomercy.player.core.plugins.canvas/CanvasOptions.copy|copy(kotlin.Int;tv.nomercy.player.core.plugins.canvas.CompositeMode;kotlin.Double?;kotlin.Double?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.canvas/CanvasOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.canvas/CanvasOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.canvas/CanvasOptions.toString|toString(){}[0]
@@ -5720,6 +5726,7 @@ open class <#A: kotlin/Any> tv.nomercy.player.core.plugins.canvas/CanvasPlugin :
     final fun draw(#A) // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.draw|draw(1:0){}[0]
     final fun mount(kotlin/Double, kotlin/Double, kotlin/Double = ...) // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.mount|mount(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
     final fun removeRenderer(tv.nomercy.player.core.plugins.canvas/CanvasRenderer<#A>) // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.removeRenderer|removeRenderer(tv.nomercy.player.core.plugins.canvas.CanvasRenderer<1:0>){}[0]
+    final fun resize() // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.resize|resize(){}[0]
     final fun size(kotlin/Double, kotlin/Double, kotlin/Double = ...) // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.size|size(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
     final fun unmount() // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.unmount|unmount(){}[0]
     open fun dispose() // tv.nomercy.player.core.plugins.canvas/CanvasPlugin.dispose|dispose(){}[0]
