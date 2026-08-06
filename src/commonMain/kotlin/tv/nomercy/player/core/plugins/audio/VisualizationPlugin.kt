@@ -53,7 +53,10 @@ public abstract class VisualizationPlugin(
     public open fun start() {
         if (subscription != null) return
 
-        subscription = spectrum.onFrame { frame -> if (enabled()) renderGuarded(frame) }
+        subscription = spectrum.onFrame { frame ->
+            latestFrame = frame
+            if (enabled()) renderGuarded(frame)
+        }
     }
 
     // A renderer that throws used to take the frame subscription with it, so a
@@ -81,6 +84,19 @@ public abstract class VisualizationPlugin(
     }
 
     public open fun running(): Boolean = subscription != null
+
+    /**
+     * The frame this visualiser last drew, or null before the first one.
+     *
+     * The reference keeps it so a host can read what is on screen without
+     * subscribing a second time — a still for a thumbnail, a level meter drawn
+     * elsewhere, a test asserting what was rendered. Only the spectrum plugin
+     * exposed one here, and a consumer holding a VisualizationPlugin had no way
+     * to ask it about its own last frame.
+     */
+    public open fun currentFrame(): VisualizationFrame? = latestFrame
+
+    private var latestFrame: VisualizationFrame? = null
 
     override fun dispose() {
         stop()

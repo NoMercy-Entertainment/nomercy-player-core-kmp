@@ -4549,6 +4549,7 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 public abstract class tv/nomercy/player/core/plugins/audio/VisualizationPlugin : tv/nomercy/player/core/plugin/Plugin {
 	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/VisualizationPlugin$Manifest;
 	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;)V
+	public fun currentFrame ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
 	public fun dispose ()V
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
 	public abstract fun render (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V

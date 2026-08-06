@@ -1532,6 +1532,7 @@ abstract class tv.nomercy.player.core.plugins.audio/VisualizationPlugin : tv.nom
         open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
 
     abstract fun render(tv.nomercy.player.core.plugins.audio/VisualizationFrame) // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.render|render(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
+    open fun currentFrame(): tv.nomercy.player.core.plugins.audio/VisualizationFrame? // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.currentFrame|currentFrame(){}[0]
     open fun dispose() // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.dispose|dispose(){}[0]
     open fun running(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.running|running(){}[0]
     open fun start() // tv.nomercy.player.core.plugins.audio/VisualizationPlugin.start|start(){}[0]
