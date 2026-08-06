@@ -1202,6 +1202,7 @@ abstract interface tv.nomercy.player.core.ports/SystemTransport { // tv.nomercy.
     abstract fun setActionHandlers(tv.nomercy.player.core.ports/TransportActions) // tv.nomercy.player.core.ports/SystemTransport.setActionHandlers|setActionHandlers(tv.nomercy.player.core.ports.TransportActions){}[0]
     abstract fun setNowPlaying(tv.nomercy.player.core.ports/NowPlaying) // tv.nomercy.player.core.ports/SystemTransport.setNowPlaying|setNowPlaying(tv.nomercy.player.core.ports.NowPlaying){}[0]
     abstract fun setPlaybackState(tv.nomercy.player.core.ports/TransportPlaybackState, kotlin/Long, kotlin/Double) // tv.nomercy.player.core.ports/SystemTransport.setPlaybackState|setPlaybackState(tv.nomercy.player.core.ports.TransportPlaybackState;kotlin.Long;kotlin.Double){}[0]
+    open fun clearNowPlaying() // tv.nomercy.player.core.ports/SystemTransport.clearNowPlaying|clearNowPlaying(){}[0]
 }
 
 abstract interface tv.nomercy.player.core.ports/TransitionBackend { // tv.nomercy.player.core.ports/TransitionBackend|null[0]
@@ -6106,6 +6107,8 @@ open class tv.nomercy.player.core.plugin/MediaSessionPlugin : tv.nomercy.player.
     open val manifest // tv.nomercy.player.core.plugin/MediaSessionPlugin.manifest|{}manifest[0]
         open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugin/MediaSessionPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
 
+    final fun clearMetadata() // tv.nomercy.player.core.plugin/MediaSessionPlugin.clearMetadata|clearMetadata(){}[0]
+    final fun metadata(): tv.nomercy.player.core.ports/NowPlaying? // tv.nomercy.player.core.plugin/MediaSessionPlugin.metadata|metadata(){}[0]
     open fun dispose() // tv.nomercy.player.core.plugin/MediaSessionPlugin.dispose|dispose(){}[0]
     open fun nowPlayingFor(tv.nomercy.player.core.media/PlaylistItem): tv.nomercy.player.core.ports/NowPlaying // tv.nomercy.player.core.plugin/MediaSessionPlugin.nowPlayingFor|nowPlayingFor(tv.nomercy.player.core.media.PlaylistItem){}[0]
     open fun use() // tv.nomercy.player.core.plugin/MediaSessionPlugin.use|use(){}[0]

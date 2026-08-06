@@ -3946,8 +3946,10 @@ public class tv/nomercy/player/core/plugin/MediaSessionPlugin : tv/nomercy/playe
 	public static final field Manifest Ltv/nomercy/player/core/plugin/MediaSessionPlugin$Manifest;
 	public fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun clearMetadata ()V
 	public fun dispose ()V
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public final fun metadata ()Ltv/nomercy/player/core/ports/NowPlaying;
 	protected fun nowPlayingFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/ports/NowPlaying;
 	public fun use ()V
 }
@@ -5678,6 +5680,7 @@ public final class tv/nomercy/player/core/ports/NetworkType : java/lang/Enum {
 public class tv/nomercy/player/core/ports/NoSystemTransport : tv/nomercy/player/core/ports/SystemTransport {
 	public fun <init> ()V
 	public fun clear ()V
+	public fun clearNowPlaying ()V
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
@@ -6149,10 +6152,15 @@ public final class tv/nomercy/player/core/ports/SubtitleTrack {
 
 public abstract interface class tv/nomercy/player/core/ports/SystemTransport {
 	public abstract fun clear ()V
+	public fun clearNowPlaying ()V
 	public abstract fun release ()V
 	public abstract fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public abstract fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public abstract fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+}
+
+public final class tv/nomercy/player/core/ports/SystemTransport$DefaultImpls {
+	public static fun clearNowPlaying (Ltv/nomercy/player/core/ports/SystemTransport;)V
 }
 
 public final class tv/nomercy/player/core/ports/SystemTransportKt {
@@ -6475,6 +6483,7 @@ public abstract interface class tv/nomercy/player/core/ports/WakeLock {
 public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransport : tv/nomercy/player/core/ports/SystemTransport {
 	public fun <init> (Ltv/nomercy/player/core/ports/desktop/MprisBus;)V
 	public fun clear ()V
+	public fun clearNowPlaying ()V
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
@@ -6550,6 +6559,7 @@ public final class tv/nomercy/player/core/ports/desktop/SmtcStatus : java/lang/E
 public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransport : tv/nomercy/player/core/ports/SystemTransport {
 	public fun <init> (Ltv/nomercy/player/core/ports/desktop/SmtcControls;)V
 	public fun clear ()V
+	public fun clearNowPlaying ()V
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V

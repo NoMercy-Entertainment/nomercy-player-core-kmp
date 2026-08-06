@@ -111,6 +111,31 @@ public open class MediaSessionPlugin(
 
     private var lastState: TransportPlaybackState = TransportPlaybackState.STOPPED
 
+    /**
+     * What the system transport is currently showing, or null when nothing has
+     * been announced.
+     *
+     * The reference exposes it so a host can read back what the lock screen
+     * and the car display are actually saying, rather than re-deriving it from
+     * the item and hoping the two agree.
+     */
+    public fun metadata(): NowPlaying? = announced
+
+    /**
+     * Clear the system transport's metadata without tearing the session down.
+     *
+     * The reference separates this from dispose deliberately: a player between
+     * items, or one that has stopped but is still mounted, should not leave the
+     * previous track's title on a lock screen. Only dispose existed here, so
+     * the choice was a stale title or no session at all.
+     */
+    public fun clearMetadata() {
+        announced = null
+        transport?.clearNowPlaying()
+    }
+
+    private var announced: NowPlaying? = null
+
     private fun announce(item: PlaylistItem?) {
         val opened: SystemTransport = transport ?: return
         if (item == null) {
@@ -121,7 +146,9 @@ public open class MediaSessionPlugin(
         }
 
         positionMs = 0
-        opened.setNowPlaying(nowPlayingFor(item))
+        val playing: NowPlaying = nowPlayingFor(item)
+        announced = playing
+        opened.setNowPlaying(playing)
     }
 
     private fun push(state: TransportPlaybackState) {

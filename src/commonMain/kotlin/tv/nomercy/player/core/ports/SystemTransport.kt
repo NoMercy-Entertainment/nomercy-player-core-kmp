@@ -26,6 +26,17 @@ public interface SystemTransport {
     // flickers and a radio that never sleeps.
     public fun setNowPlaying(nowPlaying: NowPlaying)
 
+    /**
+     * Take the metadata off without ending the session.
+     *
+     * Defaulted to nothing so an existing implementation keeps compiling: a
+     * platform that cannot clear separately is no worse off than before, and
+     * one that can — Media3, MPNowPlayingInfoCenter, SMTC — overrides it. A
+     * player between items should not leave the previous track's title on a
+     * lock screen, and there was no way to say so.
+     */
+    public fun clearNowPlaying(): Unit = Unit
+
     // How it is going. Position is in milliseconds, which is Media3's unit and
     // the one most of these systems want; the two that do not convert once in
     // their own actual rather than making every caller guess.
