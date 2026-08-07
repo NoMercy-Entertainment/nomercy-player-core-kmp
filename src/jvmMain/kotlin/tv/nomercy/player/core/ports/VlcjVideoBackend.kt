@@ -20,6 +20,7 @@ import tv.nomercy.player.core.natives.libvlc.VlcInstance
 import tv.nomercy.player.core.natives.libvlc.VlcMediaPlayer
 import tv.nomercy.player.core.natives.libvlc.VlcPlayerEvents
 import tv.nomercy.player.core.natives.libvlc.VlcTrack
+import tv.nomercy.player.core.natives.libvlc.VlcVideoFrameSink
 import tv.nomercy.player.core.natives.libvlc.VlcTrackType
 
 private const val MILLIS_PER_SECOND = 1000.0
@@ -71,7 +72,7 @@ private const val DEFAULT_VOLUME = 1.0f
 public class VlcjVideoBackend private constructor(
     private val instance: VlcInstance,
     private val ownsInstance: Boolean,
-) : VideoBackend {
+) : VideoBackend, FrameSourceBackend {
 
     // Made its own engine instance, and will release it.
     public constructor() : this(VlcInstance(), ownsInstance = true)
@@ -92,6 +93,23 @@ public class VlcjVideoBackend private constructor(
     public val embeddedPlayer: VlcMediaPlayer = VlcMediaPlayer(instance)
 
     private val player: VlcMediaPlayer = embeddedPlayer
+
+    // The same attach the surface has always done through [embeddedPlayer],
+    // named the way both engines name it. A view holding a VideoBackend can now
+    // hand it a sink without knowing which engine it has.
+    // Wrapped rather than widening VlcMediaPlayer's parameter: that method is
+    // published API and every consumer that calls it links against its exact
+    // signature, so relaxing the type there would be a NoSuchMethodError for
+    // anyone who did not recompile.
+    override fun videoFrameSink(sink: VideoFrameSink) {
+        embeddedPlayer.videoFrameSink(
+            object : VlcVideoFrameSink {
+                override fun format(width: Int, height: Int): Unit = sink.format(width, height)
+                override fun display(picture: java.nio.ByteBuffer): Unit = sink.display(picture)
+                override fun clear(): Unit = sink.clear()
+            },
+        )
+    }
 
     // VLC reports position in milliseconds and this contract is in seconds. One
     // conversion, here, rather than at every call site.

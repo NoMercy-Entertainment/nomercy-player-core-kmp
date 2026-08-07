@@ -38,58 +38,62 @@ class VideoEnginesTest {
         // The failure this whole seam exists to prevent. Asking for mpv and
         // silently getting VLC is how a migration reports itself green while
         // never having run once — every fixture passes, on the old engine.
-        val decision: EngineSelection = select("mpv", StubEngine("vlc", true), StubEngine("mpv", false))
+        val decision: EngineSelection = select(MPV, StubEngine(VLC, true), StubEngine(MPV, false))
 
         val refusal = decision as? EngineSelection.None
         assertTrue(refusal != null, "an unavailable request was quietly satisfied by another engine")
-        assertTrue(refusal.reason.contains("mpv"), "the refusal does not name what was asked for: ${refusal.reason}")
+        assertTrue(refusal.reason.contains(MPV), "the refusal does not name what was asked for: ${refusal.reason}")
     }
 
     @Test
     fun anExplicitRequestWinsOverPreferenceOrder() {
-        val decision: EngineSelection = select("mpv", StubEngine("vlc", true), StubEngine("mpv", true))
+        val decision: EngineSelection = select(MPV, StubEngine(VLC, true), StubEngine(MPV, true))
 
-        assertEquals("mpv", (decision as EngineSelection.Chosen).provider.id)
+        assertEquals(MPV, (decision as EngineSelection.Chosen).provider.id)
     }
 
     @Test
     fun withNoRequestTheFirstAvailableEngineIsChosen() {
         // Preference order, not registration order by accident: an engine leads
         // only once it is proven, so the fallback has to be the one that plays.
-        val decision: EngineSelection = select(null, StubEngine("vlc", false), StubEngine("mpv", true))
+        val decision: EngineSelection = select(null, StubEngine(VLC, false), StubEngine(MPV, true))
 
-        assertEquals("mpv", (decision as EngineSelection.Chosen).provider.id)
+        assertEquals(MPV, (decision as EngineSelection.Chosen).provider.id)
     }
 
     @Test
     fun anUnknownIdIsSaidOutLoud() {
-        val decision: EngineSelection = select("gstreamer", StubEngine("vlc", true))
+        val decision: EngineSelection = select(UNKNOWN, StubEngine(VLC, true))
 
-        assertTrue((decision as EngineSelection.None).reason.contains("gstreamer"))
+        assertTrue((decision as EngineSelection.None).reason.contains(UNKNOWN))
     }
 
     @Test
     fun aRequestArrivesFromAConfigFileWithWhitespaceOnIt() {
-        val decision: EngineSelection = select("  MPV \n", StubEngine("vlc", true), StubEngine("mpv", true))
+        val decision: EngineSelection = select("  MPV \n", StubEngine(VLC, true), StubEngine(MPV, true))
 
-        assertEquals("mpv", (decision as EngineSelection.Chosen).provider.id)
+        assertEquals(MPV, (decision as EngineSelection.Chosen).provider.id)
     }
 
     @Test
     fun noEngineAtAllReportsEveryReason() {
         // A desktop with nothing installed has to be able to say why, per
         // engine. "Playback failed" sends a developer looking in the player.
-        val decision: EngineSelection = select(null, StubEngine("vlc", false), StubEngine("mpv", false))
+        val decision: EngineSelection = select(null, StubEngine(VLC, false), StubEngine(MPV, false))
 
         val reason: String = (decision as EngineSelection.None).reason
-        assertTrue(reason.contains("vlc") && reason.contains("mpv"), "not every engine was accounted for: $reason")
+        assertTrue(reason.contains(VLC) && reason.contains(MPV), "not every engine was accounted for: $reason")
     }
 
     @Test
     fun bothEnginesAreRegisteredWhetherOrNotThisMachineCanRunThem() {
         // Side by side is the point of this stage: mpv has to be selectable on
         // a machine that has it, without VLC being removed first.
-        assertEquals(listOf("vlc", "mpv"), VideoEngines.registered.map { provider -> provider.id })
-        assertNull(VideoEngines.byId("gstreamer"))
+        assertEquals(listOf(VLC, MPV), VideoEngines.registered.map { provider -> provider.id })
+        assertNull(VideoEngines.byId(UNKNOWN))
     }
 }
+
+private const val VLC = "vlc"
+private const val MPV = "mpv"
+private const val UNKNOWN = "gstreamer"

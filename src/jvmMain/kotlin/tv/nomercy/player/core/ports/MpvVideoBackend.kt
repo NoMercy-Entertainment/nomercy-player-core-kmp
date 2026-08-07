@@ -8,10 +8,17 @@
 
 package tv.nomercy.player.core.ports
 
+import com.sun.jna.Memory
+import com.sun.jna.Pointer
+import com.sun.jna.ptr.PointerByReference
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import tv.nomercy.player.core.natives.libmpv.LibMpv
+import tv.nomercy.player.core.natives.libmpv.MPV_RENDER_API_TYPE_SW
+import tv.nomercy.player.core.natives.libmpv.MPV_SW_FORMAT_BGRA
+import tv.nomercy.player.core.natives.libmpv.MpvRenderParams
+import tv.nomercy.player.core.natives.libmpv.MpvRenderParamType
 import tv.nomercy.player.core.natives.libmpv.MpvHandle
 import tv.nomercy.player.core.natives.libmpv.property
 
@@ -31,9 +38,10 @@ import tv.nomercy.player.core.natives.libmpv.property
  * The cost is a bounded lateness — one poll interval — on `pause` and `ended`,
  * which are also the two the player above re-derives from its own state.
  */
+@Suppress("TooManyFunctions")
 public class MpvVideoBackend internal constructor(
     private val mpv: LibMpv,
-) : VideoBackend {
+) : VideoBackend, FrameSourceBackend {
 
     public constructor() : this(LibMpv.load())
 
@@ -84,7 +92,7 @@ public class MpvVideoBackend internal constructor(
         // Paused unless asked otherwise, and the start position given to the
         // open rather than seeked to afterwards. A seek issued before the
         // demuxer is ready is dropped, silently, on every engine here.
-        mpv.mpv_set_property_string(handle, "pause", if (opts.autoplay) "no" else "yes")
+        mpv.mpv_set_property_string(handle, PAUSE, if (opts.autoplay) NO else YES)
         mpv.mpv_set_property_string(handle, "start", (opts.startPositionMs / MILLIS_PER_SECOND).toString())
 
         announcedMetadata = false
@@ -93,11 +101,11 @@ public class MpvVideoBackend internal constructor(
     }
 
     override suspend fun play() {
-        mpv.mpv_set_property_string(handle, "pause", "no")
+        mpv.mpv_set_property_string(handle, PAUSE, NO)
     }
 
     override fun pause() {
-        mpv.mpv_set_property_string(handle, "pause", "yes")
+        mpv.mpv_set_property_string(handle, PAUSE, YES)
     }
 
     override fun stop() {
@@ -112,7 +120,7 @@ public class MpvVideoBackend internal constructor(
         mpv.mpv_command(handle, arrayOf("seek", seconds.toString(), "absolute", null))
     }
 
-    override fun duration(): Double = number("duration") ?: 0.0
+    override fun duration(): Double = number(DURATION) ?: 0.0
 
     // mpv's own scale is 0..100 and this contract's is 0..1. One conversion,
     // here, rather than at every call site.
@@ -123,11 +131,11 @@ public class MpvVideoBackend internal constructor(
     }
 
     override fun mute() {
-        mpv.mpv_set_property_string(handle, "mute", "yes")
+        mpv.mpv_set_property_string(handle, "mute", YES)
     }
 
     override fun unmute() {
-        mpv.mpv_set_property_string(handle, "mute", "no")
+        mpv.mpv_set_property_string(handle, "mute", NO)
     }
 
     /**
@@ -161,8 +169,8 @@ public class MpvVideoBackend internal constructor(
     override fun state(): BackendState = when {
         released -> BackendState.IDLE
         flag("eof-reached") -> BackendState.IDLE
-        number("duration") == null -> BackendState.LOADING
-        flag("pause") -> BackendState.PAUSED
+        number(DURATION) == null -> BackendState.LOADING
+        flag(PAUSE) -> BackendState.PAUSED
         flag("core-idle") -> BackendState.READY
         else -> BackendState.PLAYING
     }
@@ -194,7 +202,7 @@ public class MpvVideoBackend internal constructor(
             language = trackField(index, "lang") ?: "und",
             label = trackField(index, "title") ?: trackField(index, "lang") ?: "Subtitle",
             format = trackField(index, "codec") ?: "vtt",
-            forced = trackField(index, "forced") == "yes",
+            forced = trackField(index, "forced") == YES,
         )
     }
 
@@ -275,6 +283,34 @@ public class MpvVideoBackend internal constructor(
     public val ladder: AdaptiveLadderDriver = AdaptiveLadderDriver(this)
 
     /**
+     * Where the picture goes, and the only thing that turns a decoding engine
+     * into a visible one.
+     *
+     * Software rendering rather than a native window. A native window on this
+     * desktop paints ABOVE everything the toolkit draws, so an embedded surface
+     * would put the picture over the transport bar with no z-order able to move
+     * it — the two are not in the same compositor. The same reason libVLC is
+     * driven through `vmem` here.
+     *
+     * Attached once, before anything plays. mpv picks its video output when it
+     * first opens a file, and a render context created after that moment
+     * renders the NEXT file rather than this one.
+     */
+    override fun videoFrameSink(sink: VideoFrameSink) {
+        require(renderContext == null) { "a frame sink is attached once, before playback" }
+        this.sink = sink
+
+        val params = MpvRenderParams().string(MpvRenderParamType.API_TYPE, MPV_RENDER_API_TYPE_SW)
+        val holder = PointerByReference()
+        val created: Int = mpv.mpv_render_context_create(holder, handle, params.pack())
+        require(created >= 0) { "libmpv would not create a software renderer: ${mpv.mpv_error_string(created)}" }
+
+        renderParams = params
+        renderContext = holder.value
+        renderer.scheduleAtFixedRate(::renderFrame, 0L, FRAME_MS, TimeUnit.MILLISECONDS)
+    }
+
+    /**
      * Every property that has anything to say about renditions, verbatim.
      *
      * For a failure message and for a person at a terminal. "No renditions" has
@@ -301,6 +337,11 @@ public class MpvVideoBackend internal constructor(
     public fun release() {
         if (released) return
         released = true
+        renderer.shutdown()
+        renderer.awaitTermination(POLL_MS * SHUTDOWN_POLLS, TimeUnit.MILLISECONDS)
+        renderContext?.let(mpv::mpv_render_context_free)
+        renderContext = null
+        renderParams = null
         poller.shutdown()
         poller.awaitTermination(POLL_MS * SHUTDOWN_POLLS, TimeUnit.MILLISECONDS)
         mpv.mpv_terminate_destroy(handle)
@@ -316,45 +357,149 @@ public class MpvVideoBackend internal constructor(
     private fun poll() {
         if (released) return
         try {
-            val duration: Double = number("duration") ?: 0.0
-            if (duration > 0.0 && !announcedMetadata) {
-                announcedMetadata = true
-                lastDuration = duration
-                bus.emit(BackendEvents.LOADED_METADATA)
-                bus.emit(BackendEvents.CAN_PLAY)
-            }
-
-            val paused: Boolean = flag("pause")
-            if (lastPaused != paused) {
-                lastPaused = paused
-                bus.emit(if (paused) BackendEvents.PAUSE else BackendEvents.PLAY)
-                if (!paused) bus.emit(BackendEvents.PLAYING)
-            }
-
-            // Stalled, which mpv calls waiting for the cache. `waiting` on the
-            // way in only: the media element emits nothing on the way out and
-            // the player above reads `playing` for that.
-            val waiting: Boolean = flag("paused-for-cache")
-            if (waiting && !lastWaiting) bus.emit(BackendEvents.WAITING)
-            lastWaiting = waiting
-
-            val now: Double = number("time-pos") ?: return
-            if (now != lastTime) {
-                lastTime = now
-                bus.emit(BackendEvents.TIME_UPDATE, now)
-            }
+            announceMetadataOnce()
+            val paused: Boolean = announcePlayState()
+            announceStall()
+            announceTime()
 
             // Adaptation, on the same clock as the events. Only while something
             // is actually playing: ticking a stopped engine would pick a rung
             // from a measurement of nothing.
             if (!paused) ladder.tick()
 
-            val ended: Boolean = flag("eof-reached")
-            if (ended && !lastEnded) bus.emit(BackendEvents.ENDED)
-            lastEnded = ended
+            announceEnd()
         } catch (failure: RuntimeException) {
             bus.emit(BackendEvents.STREAM_ERROR, failure.message)
         }
+    }
+
+    private fun announceMetadataOnce() {
+        val duration: Double = number(DURATION) ?: 0.0
+        if (duration <= 0.0 || announcedMetadata) return
+
+        announcedMetadata = true
+        lastDuration = duration
+        bus.emit(BackendEvents.LOADED_METADATA)
+        bus.emit(BackendEvents.CAN_PLAY)
+    }
+
+    // Returns whether it is paused, which the adaptation step also needs — read
+    // once rather than twice, because two reads of a live property can disagree.
+    private fun announcePlayState(): Boolean {
+        val paused: Boolean = flag(PAUSE)
+        if (lastPaused == paused) return paused
+
+        lastPaused = paused
+        bus.emit(if (paused) BackendEvents.PAUSE else BackendEvents.PLAY)
+        if (!paused) bus.emit(BackendEvents.PLAYING)
+        return paused
+    }
+
+    // Stalled, which mpv calls waiting for the cache. `waiting` on the way in
+    // only: the media element emits nothing on the way out and the player above
+    // reads `playing` for that.
+    private fun announceStall() {
+        val waiting: Boolean = flag("paused-for-cache")
+        if (waiting && !lastWaiting) bus.emit(BackendEvents.WAITING)
+        lastWaiting = waiting
+    }
+
+    private fun announceTime() {
+        val now: Double = number("time-pos") ?: return
+        if (now == lastTime) return
+
+        lastTime = now
+        bus.emit(BackendEvents.TIME_UPDATE, now)
+    }
+
+    private fun announceEnd() {
+        val ended: Boolean = flag("eof-reached")
+        if (ended && !lastEnded) bus.emit(BackendEvents.ENDED)
+        lastEnded = ended
+    }
+
+    // ---- the picture -------------------------------------------------------
+
+    private var sink: VideoFrameSink? = null
+    private var renderContext: Pointer? = null
+    private var renderParams: MpvRenderParams? = null
+
+    // The buffer mpv draws into, reused. A fresh allocation per frame is eight
+    // megabytes per 1080p frame handed to the collector twenty-four times a
+    // second, which is what collapsed frame delivery the last time a desktop
+    // path here allocated per frame.
+    private var pixels: Memory? = null
+    private var pixelWidth: Int = 0
+    private var pixelHeight: Int = 0
+
+    private val renderer: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "nomercy-mpv-render").apply { isDaemon = true }
+    }
+
+    // One frame, at the size mpv says the video is.
+    //
+    // The SIZE comes from the engine rather than from the view: a render into a
+    // buffer of the wrong shape is not an error mpv reports, it is a picture
+    // with a diagonal tear that reads as a decoder fault. The view scales
+    // afterwards, which it does for libVLC too.
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    private fun renderFrame() {
+        val context: Pointer = renderContext ?: return
+        val target: VideoFrameSink = sink ?: return
+        if (released) return
+
+        try {
+            drawInto(context, target)
+        } catch (failure: RuntimeException) {
+            bus.emit(BackendEvents.STREAM_ERROR, failure.message)
+        }
+    }
+
+    private fun drawInto(context: Pointer, target: VideoFrameSink) {
+        val width: Int = number("video-params/w")?.toInt() ?: 0
+        val height: Int = number("video-params/h")?.toInt() ?: 0
+        if (width <= 0 || height <= 0) return report("no picture yet: video-params is ${width}x$height")
+
+        val buffer: Memory = bufferFor(width, height, target)
+        val stride: Long = width.toLong() * BYTES_PER_PIXEL
+        val params = MpvRenderParams()
+            .ints(MpvRenderParamType.SW_SIZE, width, height)
+            .string(MpvRenderParamType.SW_FORMAT, MPV_SW_FORMAT_BGRA)
+            .size(MpvRenderParamType.SW_STRIDE, stride)
+            .pointer(MpvRenderParamType.SW_POINTER, buffer)
+
+        val drawn: Int = mpv.mpv_render_context_render(context, params.pack())
+        if (drawn < 0) {
+            return report("render refused: ${mpv.mpv_error_string(drawn)} at ${width}x$height stride $stride")
+        }
+
+        target.display(buffer.getByteBuffer(0, buffer.size()))
+    }
+
+    // Why the picture is not moving, said once per distinct reason.
+    //
+    // Sixty times a second is not a log, so each reason is printed the first
+    // time it happens and never again. Without this the render loop had exactly
+    // two observable states — a picture and a black rectangle — and the black
+    // one covers "no video track", "mpv refused the render", "the sink was
+    // never attached" and "the video output is null", which is the one it
+    // actually was.
+    private val reported: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+
+    private fun report(reason: String) {
+        if (reported.add(reason)) println("[mpv-render] $reason")
+    }
+
+    private fun sameSize(width: Int, height: Int): Boolean = width == pixelWidth && height == pixelHeight
+
+    private fun bufferFor(width: Int, height: Int, target: VideoFrameSink): Memory {
+        val existing: Memory? = pixels
+        if (existing != null && sameSize(width, height)) return existing
+
+        pixelWidth = width
+        pixelHeight = height
+        target.format(width, height)
+        return Memory(width.toLong() * height * BYTES_PER_PIXEL).also { fresh -> pixels = fresh }
     }
 
     // ---- property helpers --------------------------------------------------
@@ -363,7 +508,7 @@ public class MpvVideoBackend internal constructor(
 
     private fun number(name: String): Double? = property(name)?.toDoubleOrNull()
 
-    private fun flag(name: String): Boolean = property(name) == "yes"
+    private fun flag(name: String): Boolean = property(name) == YES
 
     // The indices in `track-list` of one type, so the mapping below reads a
     // field at a time rather than parsing a node structure this binding
@@ -382,6 +527,19 @@ public class MpvVideoBackend internal constructor(
         const val VOLUME_SCALE: Double = 100.0
         const val BITS_PER_BYTE: Double = 8.0
         const val DEFAULT_CHANNELS: Int = 2
+
+        // mpv's booleans are the strings, and its pause property is read and
+        // written in six places.
+        const val PAUSE: String = "pause"
+        const val DURATION: String = "duration"
+        const val YES: String = "yes"
+        const val NO: String = "no"
+        const val BYTES_PER_PIXEL: Int = 4
+
+        // ~60 a second. mpv renders the frame that is due, so asking more often
+        // than the display refreshes costs a memcpy and asking less often drops
+        // frames the decoder produced.
+        const val FRAME_MS: Long = 16L
 
         val RENDITION_PROPERTIES: List<String> = listOf(
             "edition-list/count",
@@ -406,14 +564,24 @@ public class MpvVideoBackend internal constructor(
         // host's home directory — a player whose behaviour depends on the
         // developer's ~/.config/mpv is a player nobody can reproduce a bug on.
         val HEADLESS_OPTIONS: List<Pair<String, String>> = listOf(
-            "vo" to "null",
-            "terminal" to "no",
-            "osc" to "no",
+            // libmpv, not null. The software render API draws through the
+            // "libmpv" video output and nothing else: with vo=null mpv decodes,
+            // reports its playhead and renders subtitles into the audio-only
+            // path, and mpv_render_context_render returns success having drawn
+            // nothing — a black picture with a running clock and live captions,
+            // photographed exactly once before this line was written.
+            //
+            // It still touches no window system. vo=libmpv displays through
+            // whatever render context is attached, and until one is it displays
+            // nowhere, which is what the headless gate needs.
+            "vo" to "libmpv",
+            "terminal" to NO,
+            "osc" to NO,
             "osd-level" to "0",
-            "config" to "no",
-            "load-scripts" to "no",
-            "idle" to "yes",
-            "keep-open" to "yes",
+            "config" to NO,
+            "load-scripts" to NO,
+            "idle" to YES,
+            "keep-open" to YES,
         )
     }
 }

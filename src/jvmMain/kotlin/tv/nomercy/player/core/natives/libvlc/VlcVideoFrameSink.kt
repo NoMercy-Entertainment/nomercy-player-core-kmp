@@ -23,17 +23,17 @@ import java.nio.ByteBuffer
  * keeping is copied out before [display] returns. Holding it instead draws
  * whatever the decoder happens to be writing next.
  */
-public interface VlcVideoFrameSink {
+public interface VlcVideoFrameSink : tv.nomercy.player.core.ports.VideoFrameSink {
 
     /**
      * A new picture size, before the first frame of it. The pixels arrive as
      * BGRA — libVLC's RV32 on a little-endian machine — packed with no padding
      * between rows.
      */
-    public fun format(width: Int, height: Int)
+    override fun format(width: Int, height: Int)
 
     /** One complete frame, positioned at zero. */
-    public fun display(picture: ByteBuffer)
+    override fun display(picture: ByteBuffer)
 
     /**
      * Forget the picture. Called when a new item is opened, before it has
@@ -47,6 +47,6 @@ public interface VlcVideoFrameSink {
      *
      * Defaulted, because a sink that has nothing to forget is not broken.
      */
-    public fun clear() {
+    override fun clear() {
     }
 }

@@ -3362,6 +3362,9 @@ public abstract interface class tv/nomercy/player/core/natives/libmpv/LibMpv : c
 	public abstract fun mpv_free (Lcom/sun/jna/Pointer;)V
 	public abstract fun mpv_get_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;)Lcom/sun/jna/Pointer;
 	public abstract fun mpv_initialize (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)I
+	public abstract fun mpv_render_context_create (Lcom/sun/jna/ptr/PointerByReference;Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Lcom/sun/jna/Pointer;)I
+	public abstract fun mpv_render_context_free (Lcom/sun/jna/Pointer;)V
+	public abstract fun mpv_render_context_render (Lcom/sun/jna/Pointer;Lcom/sun/jna/Pointer;)I
 	public abstract fun mpv_set_option_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
 	public abstract fun mpv_set_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
 	public abstract fun mpv_terminate_destroy (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)V
@@ -3400,7 +3403,7 @@ public final class tv/nomercy/player/core/natives/libvlc/VlcMediaPlayer {
 	public final fun videoFrameSink (Ltv/nomercy/player/core/natives/libvlc/VlcVideoFrameSink;)V
 }
 
-public abstract interface class tv/nomercy/player/core/natives/libvlc/VlcVideoFrameSink {
+public abstract interface class tv/nomercy/player/core/natives/libvlc/VlcVideoFrameSink : tv/nomercy/player/core/ports/VideoFrameSink {
 	public fun clear ()V
 	public abstract fun display (Ljava/nio/ByteBuffer;)V
 	public abstract fun format (II)V
@@ -5561,6 +5564,10 @@ public final class tv/nomercy/player/core/ports/FormFactor : java/lang/Enum {
 	public static fun values ()[Ltv/nomercy/player/core/ports/FormFactor;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/FrameSourceBackend {
+	public abstract fun videoFrameSink (Ltv/nomercy/player/core/ports/VideoFrameSink;)V
+}
+
 public abstract interface class tv/nomercy/player/core/ports/FullscreenController {
 	public abstract fun enter (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun exit (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -5781,13 +5788,19 @@ public final class tv/nomercy/player/core/ports/MpvEditionTitle {
 	public final fun parse (Ljava/lang/String;)Ltv/nomercy/player/core/ports/QualityLevel;
 }
 
-public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
+public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/player/core/ports/FrameSourceBackend, tv/nomercy/player/core/ports/VideoBackend {
 	public static final field BITS_PER_BYTE D
+	public static final field BYTES_PER_PIXEL I
 	public static final field DEFAULT_CHANNELS I
+	public static final field DURATION Ljava/lang/String;
+	public static final field FRAME_MS J
 	public static final field MILLIS_PER_SECOND D
+	public static final field NO Ljava/lang/String;
+	public static final field PAUSE Ljava/lang/String;
 	public static final field POLL_MS J
 	public static final field SHUTDOWN_POLLS J
 	public static final field VOLUME_SCALE D
+	public static final field YES Ljava/lang/String;
 	public fun <init> ()V
 	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
@@ -5822,6 +5835,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun subtitleTracks ()Ljava/util/List;
 	public fun surfaceSize (II)V
 	public fun unmute ()V
+	public fun videoFrameSink (Ltv/nomercy/player/core/ports/VideoFrameSink;)V
 	public fun volume ()F
 	public fun volume (F)V
 }
@@ -6551,6 +6565,16 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun surfaceSize (Ltv/nomercy/player/core/ports/VideoBackend;II)V
 }
 
+public abstract interface class tv/nomercy/player/core/ports/VideoFrameSink {
+	public fun clear ()V
+	public abstract fun display (Ljava/nio/ByteBuffer;)V
+	public abstract fun format (II)V
+}
+
+public final class tv/nomercy/player/core/ports/VideoFrameSink$DefaultImpls {
+	public static fun clear (Ltv/nomercy/player/core/ports/VideoFrameSink;)V
+}
+
 public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
 	public abstract fun isVisible ()Z
 	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
@@ -6610,7 +6634,7 @@ public final class tv/nomercy/player/core/ports/VlcjAudioBackend : tv/nomercy/pl
 	public fun volume (F)V
 }
 
-public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
+public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/player/core/ports/FrameSourceBackend, tv/nomercy/player/core/ports/VideoBackend {
 	public static final field Companion Ltv/nomercy/player/core/ports/VlcjVideoBackend$Companion;
 	public fun <init> ()V
 	public fun <init> (Ltv/nomercy/player/core/natives/libvlc/VlcInstance;)V
@@ -6648,6 +6672,7 @@ public final class tv/nomercy/player/core/ports/VlcjVideoBackend : tv/nomercy/pl
 	public fun subtitleTracks ()Ljava/util/List;
 	public fun surfaceSize (II)V
 	public fun unmute ()V
+	public fun videoFrameSink (Ltv/nomercy/player/core/ports/VideoFrameSink;)V
 	public fun volume ()F
 	public fun volume (F)V
 }

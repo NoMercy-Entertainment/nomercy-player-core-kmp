@@ -9,9 +9,11 @@
 package tv.nomercy.player.core.natives.libmpv
 
 import com.sun.jna.Library
+import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.PointerType
+import com.sun.jna.ptr.PointerByReference
 
 /**
  * libmpv, as much of it as a player needs.
@@ -51,6 +53,11 @@ public object MpvFormat {
     public const val DOUBLE: Int = 5
 }
 
+// The names are C's, verbatim, and the interface is as wide as the API a player
+// needs. A binding that renamed mpv_get_property_string to getPropertyString
+// would be one more thing to translate when reading mpv's own documentation
+// beside this file.
+@Suppress("FunctionNaming", "ComplexInterface")
 public interface LibMpv : Library {
 
     public fun mpv_create(): MpvHandle?
@@ -98,6 +105,27 @@ public interface LibMpv : Library {
      * pointer-returning overload can be used where that matters.
      */
     public fun mpv_free(data: Pointer)
+
+    // ---- the render API ----------------------------------------------------
+    //
+    // Software rendering, not OpenGL. Skiko already runs SOFTWARE on this
+    // desktop and the picture has to reach a Compose bitmap either way, so a GL
+    // context would be a texture created to be read straight back — and a GL
+    // vout on the desktop is a native child window that Compose cannot compose.
+
+    /**
+     * Creates a render context. [params] is a contiguous array of
+     * `mpv_render_param` terminated by a zeroed one.
+     *
+     * Returns 0 on success. The context and the handle are separate lifetimes:
+     * the context must be freed BEFORE the handle it was made from.
+     */
+    public fun mpv_render_context_create(context: PointerByReference, handle: MpvHandle, params: Pointer): Int
+
+    /** Draws the current frame into whatever the params point at. */
+    public fun mpv_render_context_render(context: Pointer, params: Pointer): Int
+
+    public fun mpv_render_context_free(context: Pointer)
 
     public companion object {
         /**
