@@ -553,7 +553,7 @@ tasks.withType<Test>().configureEach {
     // test JVM does not inherit the shell's -D flags, so a property set on the
     // command line reached nothing and the gates skipped themselves while
     // reporting green.
-    for (name in listOf("jna.library.path", "nomercy.mpv.fixture", "nomercy.mpv.master")) {
+    for (name in listOf("jna.library.path", "nomercy.mpv.fixture", "nomercy.mpv.master", "nomercy.mpv.fixtures", "nomercy.mpv.openMs")) {
         providers.gradleProperty(name).orNull?.let { value -> systemProperty(name, value) }
         System.getProperty(name)?.let { value -> systemProperty(name, value) }
     }
