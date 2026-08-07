@@ -8,6 +8,9 @@
 
 package tv.nomercy.player.core.events
 
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
+
 // Kotlin mirror of the web EventEmitter
 // (packages/nomercy-player-core/src/adapters/event-bus/default.ts). Listeners
 // are stored insertion-ordered per event name; emit() snapshots that list
@@ -34,6 +37,11 @@ public class EventEmitter<E> {
     // A plain list, not a synchronised one. The player dispatches on one thread
     // by contract; a lock here would suggest it does not.
     private val dispatchStack: MutableList<String> = mutableListOf()
+
+    // The stack is pushed and popped from whatever thread dispatched, and an
+    // ArrayList is not safe under that. A bare isNotEmpty() check ahead of the
+    // pop is check-then-act, which failed the same way one index later:/n    // `Index 28 out of bounds for length 28`.
+    private val dispatchLock: SynchronizedObject = SynchronizedObject()
 
     // Called with (eventName, error) when a listener throws. Default is
     // swallow-and-continue, mirroring the web path's console.error; a host
@@ -90,11 +98,11 @@ public class EventEmitter<E> {
         timeoutMs: Long = DEFAULT_BEFORE_TIMEOUT_MS,
     ): BeforeDispatchResult<T> {
         val event: BeforeEvent<T> = BeforeEvent(data)
-        dispatchStack += key.name
+        pushDispatch(key.name)
         try {
             return runBefore(key.name, event, timeoutMs)
         } finally {
-            dispatchStack.removeAt(dispatchStack.lastIndex)
+            popDispatch()
         }
     }
 
@@ -134,7 +142,7 @@ public class EventEmitter<E> {
     @Suppress("TooGenericExceptionCaught")
     public fun <T> dispatchBeforeSync(key: EventKey<BeforeEvent<T>>, data: T): BeforeDispatchResult<T> {
         val event: BeforeEvent<T> = BeforeEvent(data)
-        dispatchStack += key.name
+        pushDispatch(key.name)
         try {
             runListeners(key.name, event)
 
@@ -152,7 +160,7 @@ public class EventEmitter<E> {
                 reason = if (prevented) PreventReason.ListenerPrevented else null,
             )
         } finally {
-            dispatchStack.removeAt(dispatchStack.lastIndex)
+            popDispatch()
         }
     }
 
@@ -221,7 +229,7 @@ public class EventEmitter<E> {
     // registered handler, however it fails, must not stop the remaining ones.
     // Broad Throwable is intentional, not an oversight.
     @Suppress("TooGenericExceptionCaught")
-    public fun dispatching(): List<String> = dispatchStack.toList()
+    public fun dispatching(): List<String> = synchronized(dispatchLock) { dispatchStack.toList() }
 
     // removeAt(lastIndex) rather than removeLast(), and this is not a style
     // preference. On JVM target 21 Kotlin resolves MutableList.removeLast() to
@@ -235,7 +243,7 @@ public class EventEmitter<E> {
     // every dispatch on it died with NoSuchMethodError. That is 271 of 697
     // tests, and in a shipped build it would be the whole event system.
     private fun dispatch(name: String, data: Any?) {
-        dispatchStack += name
+        pushDispatch(name)
         try {
             deliver(name, data)
         } finally {
@@ -252,8 +260,21 @@ public class EventEmitter<E> {
             // The stack only backs `dispatching()`, a re-entrancy read for
             // diagnostics, so an interleaved pop costs a wrong name in a
             // debug list. Taking the whole bus down for it is the worse trade.
-            if (dispatchStack.isNotEmpty()) dispatchStack.removeAt(dispatchStack.lastIndex)
+            popDispatch()
         }
+    }
+
+    // One pop for all three dispatch paths.
+    //
+    // The guard existed at `dispatch` and at neither `dispatchBefore` nor
+    // `dispatchBeforeSync`, so the crash it was written to stop still arrived
+    // through the other two — `Index -1 out of bounds for length 10`, reached
+    // from cycleAudioTrack, which had nothing to do with it. A rule enforced at
+    // one of three call sites is not enforced.
+    private fun pushDispatch(name: String): Unit = synchronized(dispatchLock) { dispatchStack += name }
+
+    private fun popDispatch(): Unit = synchronized(dispatchLock) {
+        if (dispatchStack.isNotEmpty()) dispatchStack.removeAt(dispatchStack.lastIndex)
     }
 
     @Suppress("TooGenericExceptionCaught")

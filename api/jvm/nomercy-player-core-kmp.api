@@ -2901,7 +2901,10 @@ public final class tv/nomercy/player/core/input/InputAdapterKt {
 }
 
 public final class tv/nomercy/player/core/input/KeyBindingTable {
-	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public static final field Companion Ltv/nomercy/player/core/input/KeyBindingTable$Companion;
+	public static final field DEFAULT_COOLDOWN_MS J
+	public fun <init> (JLkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (JLkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun bind (Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public final fun bind (Ltv/nomercy/player/core/input/PlayerKey;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;)V
 	public static synthetic fun bind$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
@@ -2913,6 +2916,9 @@ public final class tv/nomercy/player/core/input/KeyBindingTable {
 	public static synthetic fun replace$default (Ltv/nomercy/player/core/input/KeyBindingTable;Ltv/nomercy/player/core/input/KeyCombo;JLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)V
 	public final fun snapshot ()Ljava/util/Map;
 	public final fun unbind (Ltv/nomercy/player/core/input/KeyCombo;)V
+}
+
+public final class tv/nomercy/player/core/input/KeyBindingTable$Companion {
 }
 
 public final class tv/nomercy/player/core/input/KeyCombo {
@@ -2933,8 +2939,8 @@ public final class tv/nomercy/player/core/input/KeyComboKt {
 }
 
 public abstract class tv/nomercy/player/core/input/KeyHandlerPlugin : tv/nomercy/player/core/plugin/Plugin {
-	public fun <init> (Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/input/KeyHandlerScope;)V
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/input/KeyHandlerScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/input/KeyHandlerScope;ZJLkotlin/jvm/functions/Function1;Z)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/input/KeyHandlerScope;ZJLkotlin/jvm/functions/Function1;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected abstract fun addDefaults ()V
 	public fun bind (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 	public fun bindings ()Ljava/util/Map;

@@ -15,7 +15,22 @@ package tv.nomercy.player.core.input
 // minutes from a press somebody meant as one step. It is timestamp arithmetic
 // rather than a coroutine, so a binding table has no lifecycle and nothing to
 // dispose.
-public class KeyBindingTable(private val nowMs: () -> Long) {
+public class KeyBindingTable(
+    /**
+     * What a binding waits, when it does not say.
+     *
+     * The reference throttles at the PLUGIN level and defaults to 300ms, which
+     * is what stops a held arrow key from seeking a film to its end in a
+     * second. Every binding here defaulted to zero and nothing set otherwise,
+     * so a held key repeated at the keyboard's own rate.
+     */
+    private val defaultCooldownMs: Long = DEFAULT_COOLDOWN_MS,
+    // Last, so a caller writing the clock as a trailing lambda still binds it to
+    // the clock. Added after it, every existing call site silently handed its
+    // lambda to the cooldown instead — and a Long is not a function, so the
+    // whole suite stopped compiling rather than quietly misbehaving.
+    private val nowMs: () -> Long,
+) {
 
     private val bindings: MutableMap<String, Binding> = mutableMapOf()
 
@@ -26,7 +41,7 @@ public class KeyBindingTable(private val nowMs: () -> Long) {
     // film out from under whoever was reading the menu.
     public fun bind(
         combo: KeyCombo,
-        cooldownMs: Long = 0,
+        cooldownMs: Long = defaultCooldownMs,
         enabled: () -> Boolean = { true },
         action: () -> Unit,
     ) {
@@ -35,7 +50,7 @@ public class KeyBindingTable(private val nowMs: () -> Long) {
 
     public fun bind(
         key: PlayerKey,
-        cooldownMs: Long = 0,
+        cooldownMs: Long = defaultCooldownMs,
         enabled: () -> Boolean = { true },
         action: () -> Unit,
     ): Unit = bind(key.asCombo(), cooldownMs, enabled, action)
@@ -45,7 +60,7 @@ public class KeyBindingTable(private val nowMs: () -> Long) {
     // no reason anybody could explain.
     public fun replace(
         combo: KeyCombo,
-        cooldownMs: Long = 0,
+        cooldownMs: Long = defaultCooldownMs,
         enabled: () -> Boolean = { true },
         action: () -> Unit,
     ) {
@@ -91,4 +106,9 @@ public class KeyBindingTable(private val nowMs: () -> Long) {
         val enabled: () -> Boolean,
         val action: () -> Unit,
     )
+
+    public companion object {
+        /** The reference's default throttle, in milliseconds. */
+        public const val DEFAULT_COOLDOWN_MS: Long = 300
+    }
 }

@@ -49,15 +49,45 @@ public abstract class KeyHandlerPlugin<O : Any>(
      * own keyboard UI passes [KeyHandlerScope.Container].
      */
     public val scope: KeyHandlerScope = KeyHandlerScope.Window,
+    /**
+     * Whether the default bindings are installed at all.
+     *
+     * The reference's `extend`: true keeps them and merges a consumer's on top,
+     * false clears them so a fully custom set can be built. Without it a
+     * consumer wanting its own scheme had to unbind the defaults one at a time,
+     * by name, and stay in step with every default the library later added.
+     */
+    private val extend: Boolean = true,
+    /**
+     * Minimum milliseconds between consecutive fires. The reference's
+     * `cooldownMs`, default 300, zero to disable.
+     */
+    cooldownMs: Long = KeyBindingTable.DEFAULT_COOLDOWN_MS,
+    /**
+     * Called before any binding fires; false suppresses the press.
+     *
+     * The reference's `when`, for the states where shortcuts must not run at
+     * all — a modal, a chat overlay, a text field. Without it a consumer had to
+     * disable the whole plugin and re-enable it, which loses every binding it
+     * had rebound.
+     */
+    private val gate: ((KeyCombo) -> Boolean)? = null,
+    /**
+     * Silently ignore the hardware media keys.
+     *
+     * The reference's `disableMediaControls`, for a page where the OS or
+     * another player should own them.
+     */
+    private val disableMediaControls: Boolean = false,
 ) : Plugin<O>() {
 
-    protected val bindings: KeyBindingTable = KeyBindingTable(nowMs)
+    protected val bindings: KeyBindingTable = KeyBindingTable(cooldownMs, nowMs)
 
     // Installed at registration rather than at the first press, so a chrome can
     // ask what is bound in order to draw a help sheet before anybody has pressed
     // anything.
     override fun use() {
-        addDefaults()
+        if (extend) addDefaults()
     }
 
     protected abstract fun addDefaults()
@@ -65,9 +95,18 @@ public abstract class KeyHandlerPlugin<O : Any>(
     // Whether the press was ours. A platform passes this back to the system when
     // it is false, which is what leaves the volume keys and the back button
     // working.
-    public open fun handle(combo: KeyCombo): Boolean = bindings.handle(combo)
+    public open fun handle(combo: KeyCombo): Boolean {
+        // The gate first, then the media-key filter, then the table. Both
+        // answer false so the press goes back to the platform rather than being
+        // swallowed — a shortcut suppressed while a modal is open must still let
+        // the modal have the key.
+        if (gate?.invoke(combo) == false) return false
+        if (disableMediaControls && combo.canonical in MEDIA_KEYS) return false
 
-    public open fun handle(key: PlayerKey): Boolean = bindings.handle(key)
+        return bindings.handle(combo)
+    }
+
+    public open fun handle(key: PlayerKey): Boolean = handle(key.asCombo())
 
     // Rebinding, from outside the plugin.
     //
@@ -98,6 +137,22 @@ public abstract class KeyHandlerPlugin<O : Any>(
     // A snapshot, so a chrome can draw a help sheet. Mutating what comes back
     // does not touch the live table, which is what the reference promises.
     public open fun bindings(): Map<String, () -> Unit> = bindings.snapshot()
+
+    private companion object {
+        // The W3C hardware media keys the reference names, and only those. A
+        // list rather than a prefix test because `MediaPlay` and `MediaPlayer`
+        // are not the same thing.
+        val MEDIA_KEYS: Set<String> = setOf(
+            "MediaPlay",
+            "MediaPause",
+            "MediaPlayPause",
+            "MediaStop",
+            "MediaRewind",
+            "MediaFastForward",
+            "MediaTrackNext",
+            "MediaTrackPrevious",
+        )
+    }
 }
 
 // `shift+ArrowLeft` and `Shift+arrowleft` are the same binding.

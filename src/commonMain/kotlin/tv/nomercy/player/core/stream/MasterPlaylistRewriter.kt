@@ -12,6 +12,11 @@ import tv.nomercy.player.core.media.DynamicRange
 import tv.nomercy.player.core.media.QualityDescriptor
 
 private const val STREAM_INF = "#EXT-X-STREAM-INF:"
+
+// The prefixes a CODECS entry uses for a video track. Prefixes, because the
+// rest of each entry is a profile and level: avc1.4d401f.
+private val VIDEO_CODECS: List<String> =
+    listOf("avc1", "avc3", "hvc1", "hev1", "vp8", "vp9", "vp09", "av01", "dvh1", "dvhe")
 private const val I_FRAME_STREAM_INF = "#EXT-X-I-FRAME-STREAM-INF:"
 
 // Rewrites an HLS master playlist so the engine only sees renditions the device
@@ -69,15 +74,48 @@ public object MasterPlaylistRewriter {
         // nothing else in the player believed in, opened it first, and got a
         // 404. The film played its audio and drew its subtitles over a black
         // rectangle.
-        val declaresResolution: Boolean = attributesOf(lines[index]).containsKey("RESOLUTION")
+        // A variant with no resolution AND a codec list naming only audio is an
+        // audio-only rung, and it is dropped.
+        //
+        // Keeping it is what broke Apple's BipBop, the one demuxed stream in the
+        // testbed: gear0 declares CODECS="mp4a.40.2" at 41 kbps with no
+        // RESOLUTION, and a narrowed playlist ending in it had libVLC open it and
+        // play the sound over a black rectangle with the clock running. Every
+        // other item is muxed, which is why nothing else showed it.
+        //
+        // Declared, not guessed. A rung with no codecs at all is an unknown and
+        // stays: dropping it would discard a rendition on the strength of an
+        // attribute the server chose not to send, which is the reasoning this
+        // rule was written with and is still right for that case.
+        val attributes: Map<String, String> = attributesOf(lines[index])
+        val declaresResolution: Boolean = attributes.containsKey("RESOLUTION")
         val descriptor: QualityDescriptor? = descriptorOf(lines[index])
-        val keepThis: Boolean = if (descriptor == null) !declaresResolution else descriptor in wanted
+        val keepThis: Boolean = when {
+            descriptor != null -> descriptor in wanted
+            declaresResolution -> false
+            else -> !isAudioOnly(attributes)
+        }
 
         if (keepThis) {
             out.add(lines[index])
             if (uriIndex < lines.size) out.add(lines[uriIndex])
         }
         return uriIndex + 1
+    }
+
+    /**
+     * Whether a variant's CODECS list names audio and nothing else.
+     *
+     * False when it declares no codecs, because that is an unknown rather than
+     * an audio track.
+     */
+    private fun isAudioOnly(attributes: Map<String, String>): Boolean {
+        val codecs: String = attributes["CODECS"]?.trim('"') ?: return false
+        if (codecs.isBlank()) return false
+
+        return codecs.split(',')
+            .map { it.trim().lowercase() }
+            .none { codec -> VIDEO_CODECS.any { codec.startsWith(it) } }
     }
 
     // An I-frame variant is the trick-play track a scrubber previews with, not a
