@@ -25,10 +25,19 @@ import tv.nomercy.player.core.ports.VideoBackend
  */
 public object VideoEngines {
 
-    /** Every engine this build knows how to construct, in preference order. */
+    /**
+     * Every engine this build knows how to construct, in preference order.
+     *
+     * mpv leads because it is now the proven one: twenty of twenty testbed
+     * fixtures decode and seek through it, every rendition of a master playlist
+     * is selectable — the thing libVLC 3 cannot do at all — and it draws to the
+     * screen from its own bundled payload. libVLC stays registered behind it so
+     * a machine with no libmpv payload still plays, which is what side by side
+     * is for.
+     */
     public val registered: List<VideoEngineProvider> = listOf(
-        VlcVideoEngineProvider,
         MpvVideoEngineProvider,
+        VlcVideoEngineProvider,
     )
 
     /**

@@ -89,7 +89,9 @@ class VideoEnginesTest {
     fun bothEnginesAreRegisteredWhetherOrNotThisMachineCanRunThem() {
         // Side by side is the point of this stage: mpv has to be selectable on
         // a machine that has it, without VLC being removed first.
-        assertEquals(listOf(VLC, MPV), VideoEngines.registered.map { provider -> provider.id })
+        // mpv first: it is the proven engine now, and libVLC stays behind it so
+        // a machine with no libmpv payload still plays.
+        assertEquals(listOf(MPV, VLC), VideoEngines.registered.map { provider -> provider.id })
         assertNull(VideoEngines.byId(UNKNOWN))
     }
 }
