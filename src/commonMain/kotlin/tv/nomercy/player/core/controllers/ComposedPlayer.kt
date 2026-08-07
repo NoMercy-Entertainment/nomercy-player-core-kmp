@@ -10,6 +10,7 @@ package tv.nomercy.player.core.controllers
 
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
@@ -323,6 +324,9 @@ public open class ComposedPlayer(
     // this one would outlive the player that owns the work.
     protected val playerScope: CoroutineScope = scope ?: CoroutineScope(SupervisorJob())
 
+    // Whether dispose may cancel it. A scope handed in belongs to the caller.
+    private val ownsScope: Boolean = scope == null
+
     public val plugins: PluginRegistry = PluginRegistry(this, KIT_VERSION, playerScope)
 
     // The contract's `plugins()` — the registered plugins themselves.
@@ -502,6 +506,19 @@ public open class ComposedPlayer(
 
     public open suspend fun dispose(opts: ActionOptions = ActionOptions()) {
         lifecycle.dispose(opts)
+
+        // The scope dies with the player, and nothing was cancelling it.
+        //
+        // Every launch on it — an auto-advance, a default-track selection, a
+        // sidecar fetch — outlived the player that started it, so work carried
+        // on against a disposed one and a failure surfaced wherever that
+        // coroutine happened to land. In tests that is the NEXT test, as
+        // "uncaught exceptions before the test started"; in an app it is a
+        // handler firing after the screen it belonged to is gone.
+        //
+        // Only when this player owns it. A scope passed in belongs to the
+        // caller and cancelling it would take down whatever else is on it.
+        if (ownsScope) playerScope.cancel()
     }
 
     public open fun phase(): PlayerPhase = context.phase
