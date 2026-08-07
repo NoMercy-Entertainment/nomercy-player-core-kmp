@@ -3353,6 +3353,37 @@ public final class tv/nomercy/player/core/natives/NativeRuntimes {
 	public final fun whyUnavailable (Ltv/nomercy/player/core/natives/NativeRuntimeKind;)Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/natives/libmpv/LibMpv : com/sun/jna/Library {
+	public static final field Companion Ltv/nomercy/player/core/natives/libmpv/LibMpv$Companion;
+	public abstract fun mpv_command (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;[Ljava/lang/String;)I
+	public abstract fun mpv_create ()Ltv/nomercy/player/core/natives/libmpv/MpvHandle;
+	public abstract fun mpv_error_string (I)Ljava/lang/String;
+	public abstract fun mpv_get_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun mpv_initialize (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)I
+	public abstract fun mpv_set_option_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
+	public abstract fun mpv_set_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
+	public abstract fun mpv_terminate_destroy (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)V
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/LibMpv$Companion {
+	public final fun getSONAME ()Ljava/lang/String;
+	public final fun load ()Ltv/nomercy/player/core/natives/libmpv/LibMpv;
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvFormat {
+	public static final field DOUBLE I
+	public static final field FLAG I
+	public static final field INSTANCE Ltv/nomercy/player/core/natives/libmpv/MpvFormat;
+	public static final field INT64 I
+	public static final field NONE I
+	public static final field STRING I
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvHandle : com/sun/jna/PointerType {
+	public fun <init> ()V
+	public fun <init> (Lcom/sun/jna/Pointer;)V
+}
+
 public final class tv/nomercy/player/core/natives/libvlc/VlcInstance {
 	public fun <init> ()V
 	public final fun release ()V
