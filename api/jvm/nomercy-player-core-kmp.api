@@ -2887,6 +2887,10 @@ public final class tv/nomercy/player/core/events/VolumeChange {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/i18n/LanguageDisplayNameKt {
+	public static final fun languageDisplayName (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/input/DesktopInputAdapterKt {
 	public static final fun defaultInputAdapter ()Ltv/nomercy/player/core/input/InputAdapter;
 }
