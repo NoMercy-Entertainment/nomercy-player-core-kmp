@@ -51,6 +51,14 @@
       "bundle": true
     },
     {
+      "kind": "LIB_MPV",
+      "platform": "LINUX_X64",
+      "version": "0.35.1",
+      "sha256": "e72ec587e6469d52206900b8a3463be0da3a921e955e2021d1600c23cebf115b",
+      "marker": "libmpv.so.2",
+      "bundle": true
+    },
+    {
       "kind": "LIB_ASS",
       "platform": "WINDOWS_X64",
       "version": "0.17.5",

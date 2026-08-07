@@ -41,6 +41,7 @@ data class NativePayload(
         else -> "libvlc"
     }
     val platformId: String get() = if (platform == "WINDOWS_X64") "windows-x64" else "linux-x64"
+
     val fileName: String get() = "$slug-$version-$platformId.tar.gz"
     val repository: String get() = if (kind == "LIB_ASS") "nomercy-libass" else "nomercy-player-core-kmp"
     val tag: String get() = if (kind == "LIB_ASS") "v$version" else "natives-$slug-$version"

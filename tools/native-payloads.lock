@@ -52,9 +52,20 @@ libvlc.macos-x64.sha256=
 # against. Until then this is a development payload and the LGPL build is the
 # open item, for both engines rather than for this one.
 
+# Two versions, because the two platforms take libmpv from two places: the
+# Windows payload is upstream's dev package and the Linux one is Debian's
+# libmpv2. A single number would name one of them wrongly.
 libmpv.version=2026.06.10
+libmpv.linux-x64.version=0.35.1
 
 libmpv.windows-x64.kind=7z
 libmpv.windows-x64.source=https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-dev-x86_64-20260610-git-304426c.7z
 libmpv.windows-x64.sha256=8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a866367f71cc9
 
+# Linux has no portable libmpv build either, and for the same reason libVLC has
+# none: the project ships source and the distributions ship packages. So it is
+# assembled in a container from Debian's own package plus every non-glibc shared
+# object it pulls in, and the container is the pin.
+libmpv.linux-x64.kind=container
+libmpv.linux-x64.source=debian:bookworm-slim
+libmpv.linux-x64.sha256=

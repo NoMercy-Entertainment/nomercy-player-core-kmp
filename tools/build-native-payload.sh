@@ -42,7 +42,10 @@ pin() {
   sed -n "s/^${key//./\\.}=//p" "$lock" | head -1
 }
 
-version="$(pin "$payload.version")"
+# A platform may pin its own, because one payload can come from two upstreams:
+# libmpv is upstream's dev package on Windows and Debian's package on Linux.
+version="$(pin "$payload.$platform.version")"
+[ -n "$version" ] || version="$(pin "$payload.version")"
 kind="$(pin "$payload.$platform.kind")"
 source_url="$(pin "$payload.$platform.source")"
 source_sha="$(pin "$payload.$platform.sha256")"
@@ -195,8 +198,14 @@ build_linux() {
   # The container writes the finished archive to stdout, so the whole payload —
   # symlinks included — arrives as one file and never has to survive a bind
   # mount onto a filesystem that cannot represent it.
+  # One assembler per payload: libmpv has no plugin tree and no cache, so
+  # the two scripts share the dependency closure and differ in everything
+  # else.
+  local assembler="native-payload-linux.sh"
+  [ "$payload" = "libmpv" ] && assembler="native-payload-linux-mpv.sh"
+
   MSYS_NO_PATHCONV=1 docker run --rm -i \
-    -v "$here/tools/native-payload-linux.sh:/assemble.sh:ro" \
+    -v "$here/tools/$assembler:/assemble.sh:ro" \
     "$image" bash /assemble.sh "$STAMP_EPOCH" "$version" > "$out"
 
   echo "$digest" > "$work/provenance.txt"
