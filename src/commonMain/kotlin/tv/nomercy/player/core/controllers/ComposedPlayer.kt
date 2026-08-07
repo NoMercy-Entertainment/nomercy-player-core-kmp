@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import kotlin.random.Random
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.Deferred
@@ -322,7 +323,27 @@ public open class ComposedPlayer(
     // handlers that need to start suspending work — a segment window seeking
     // back on a loop, a crossfade handing over — and a second scope built beside
     // this one would outlive the player that owns the work.
-    protected val playerScope: CoroutineScope = scope ?: CoroutineScope(SupervisorJob())
+    // With a handler, because a library's scope must not be able to kill its
+    // host. A bare SupervisorJob sends an uncaught failure to the thread's
+    // default handler, and on a Compose Desktop app that is the thread the UI
+    // is drawn on — logic keeps running and nothing paints again, which reads
+    // as a dead window rather than as a coroutine that threw.
+    //
+    // Reported through the same error channel a listener throw uses, so it
+    // arrives somewhere a consumer is already looking.
+    protected val playerScope: CoroutineScope = scope ?: CoroutineScope(
+        SupervisorJob() + CoroutineExceptionHandler { _, failure ->
+            context.emit(
+                CoreEvents.Error,
+                PlayerError(
+                    code = CoreErrorCodes.CLEANUP_FAILED,
+                    scope = ErrorScope.core(),
+                    message = "A player coroutine failed: ${failure.message ?: failure::class.simpleName}",
+                    cause = failure,
+                ).asEvent(),
+            )
+        },
+    )
 
     // Whether dispose may cancel it. A scope handed in belongs to the caller.
     private val ownsScope: Boolean = scope == null
