@@ -41,6 +41,12 @@ public enum class NativeRuntimeKind(
     // libVLC and its plugins: the desktop decoder.
     LIB_VLC("libvlc", "nomercy-player-core-kmp", "natives-libvlc-"),
 
+    // libmpv: the desktop decoder libVLC is being replaced by. Registered here
+    // before any archive is published on purpose — the engine provider asks this
+    // table why it cannot run, and "no libmpv payload is published for this
+    // host" is a better answer than a linker error.
+    LIB_MPV("libmpv", "nomercy-player-core-kmp", "natives-libmpv-"),
+
     // libass: styled ASS and SSA subtitles, the ones that carry positioning,
     // fonts and karaoke. Without it those render as plain text or not at all.
     LIB_ASS("libass", "nomercy-libass", "v"),

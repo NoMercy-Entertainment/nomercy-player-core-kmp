@@ -68,8 +68,17 @@ public interface LibMpv : Library {
 
     public fun mpv_set_property_string(handle: MpvHandle, name: String, data: String): Int
 
-    /** Null when the property is unset or unknown. The caller frees nothing: JNA copies. */
-    public fun mpv_get_property_string(handle: MpvHandle, name: String): String?
+    /**
+     * Null when the property is unset or unknown. libmpv allocated the bytes and
+     * the CALLER frees them with [mpv_free].
+     *
+     * A `Pointer` rather than a `String`, which is what this was: JNA copies a
+     * returned `char*` into a Kotlin string and forgets the original, so every
+     * call leaked. That is invisible in a test that reads one property and
+     * costs an evening's memory in a poll loop asking for the playhead four
+     * times a second. Use [property] rather than calling this directly.
+     */
+    public fun mpv_get_property_string(handle: MpvHandle, name: String): Pointer?
 
     /**
      * A command is an argv, NUL-terminated. `loadfile`, `seek`, `stop` — the
@@ -78,6 +87,17 @@ public interface LibMpv : Library {
     public fun mpv_command(handle: MpvHandle, args: Array<String?>): Int
 
     public fun mpv_error_string(error: Int): String
+
+    /**
+     * Frees a string libmpv allocated.
+     *
+     * Only [mpv_get_property_string]'s result needs it, and JNA hides that:
+     * mapping the return as `String` makes JNA copy the bytes and forget the
+     * pointer, so the original leaks once per call. A poll loop asking for the
+     * playhead four times a second leaks all evening. Declared here so the
+     * pointer-returning overload can be used where that matters.
+     */
+    public fun mpv_free(data: Pointer)
 
     public companion object {
         /**
@@ -95,5 +115,22 @@ public interface LibMpv : Library {
         }
 
         public fun load(): LibMpv = Native.load(SONAME, LibMpv::class.java)
+    }
+}
+
+/**
+ * A property as a string, copied out and freed.
+ *
+ * Every read of a libmpv property goes through here. The pair of calls is easy
+ * to write once and easy to forget the second half of, and forgetting it is a
+ * leak rather than a failure — nothing reports it and nothing breaks until the
+ * machine is out of memory.
+ */
+public fun LibMpv.property(handle: MpvHandle, name: String): String? {
+    val pointer: Pointer = mpv_get_property_string(handle, name) ?: return null
+    return try {
+        pointer.getString(0)
+    } finally {
+        mpv_free(pointer)
     }
 }

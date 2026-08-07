@@ -3340,6 +3340,7 @@ public final class tv/nomercy/player/core/natives/HostPlatform$Companion {
 
 public final class tv/nomercy/player/core/natives/NativeRuntimeKind : java/lang/Enum {
 	public static final field LIB_ASS Ltv/nomercy/player/core/natives/NativeRuntimeKind;
+	public static final field LIB_MPV Ltv/nomercy/player/core/natives/NativeRuntimeKind;
 	public static final field LIB_VLC Ltv/nomercy/player/core/natives/NativeRuntimeKind;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/natives/NativeRuntimeKind;
@@ -3358,7 +3359,8 @@ public abstract interface class tv/nomercy/player/core/natives/libmpv/LibMpv : c
 	public abstract fun mpv_command (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;[Ljava/lang/String;)I
 	public abstract fun mpv_create ()Ltv/nomercy/player/core/natives/libmpv/MpvHandle;
 	public abstract fun mpv_error_string (I)Ljava/lang/String;
-	public abstract fun mpv_get_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;)Ljava/lang/String;
+	public abstract fun mpv_free (Lcom/sun/jna/Pointer;)V
+	public abstract fun mpv_get_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;)Lcom/sun/jna/Pointer;
 	public abstract fun mpv_initialize (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)I
 	public abstract fun mpv_set_option_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
 	public abstract fun mpv_set_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
@@ -3368,6 +3370,10 @@ public abstract interface class tv/nomercy/player/core/natives/libmpv/LibMpv : c
 public final class tv/nomercy/player/core/natives/libmpv/LibMpv$Companion {
 	public final fun getSONAME ()Ljava/lang/String;
 	public final fun load ()Ltv/nomercy/player/core/natives/libmpv/LibMpv;
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/LibMpvBindingKt {
+	public static final fun property (Ltv/nomercy/player/core/natives/libmpv/LibMpv;Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/natives/libmpv/MpvFormat {
@@ -5719,6 +5725,49 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
+public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
+	public static final field BITS_PER_BYTE D
+	public static final field DEFAULT_CHANNELS I
+	public static final field MILLIS_PER_SECOND D
+	public static final field POLL_MS J
+	public static final field SHUTDOWN_POLLS J
+	public static final field VOLUME_SCALE D
+	public fun <init> ()V
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
+	public fun audioTrack (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public fun audioTracks ()Ljava/util/List;
+	public fun bandwidthEstimate ()I
+	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
+	public fun currentTime ()D
+	public fun currentTime (D)V
+	public fun duration ()D
+	public fun getCanToneMapHdrToSdr ()Z
+	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
+	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun mute ()V
+	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun pause ()V
+	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playbackRate ()D
+	public fun playbackRate (D)V
+	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
+	public fun qualityLevels ()Ljava/util/List;
+	public final fun release ()V
+	public fun seekableRanges ()Ljava/util/List;
+	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
+	public fun stop ()V
+	public fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
+	public fun subtitleTrack (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
+	public fun subtitleTracks ()Ljava/util/List;
+	public fun surfaceSize (II)V
+	public fun unmute ()V
+	public fun volume ()F
+	public fun volume (F)V
+}
+
 public abstract interface class tv/nomercy/player/core/ports/NetworkMonitor {
 	public abstract fun downlinkMbps ()Ljava/lang/Double;
 	public abstract fun isOnline ()Z
@@ -6645,6 +6694,68 @@ public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransport : t
 
 public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransportKt {
 	public static final fun smtcStatusOf (Ltv/nomercy/player/core/ports/TransportPlaybackState;)Ltv/nomercy/player/core/ports/desktop/SmtcStatus;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/engines/EngineSelection {
+}
+
+public final class tv/nomercy/player/core/ports/engines/EngineSelection$Chosen : tv/nomercy/player/core/ports/engines/EngineSelection {
+	public fun <init> (Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;
+	public final fun copy (Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;)Ltv/nomercy/player/core/ports/engines/EngineSelection$Chosen;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/engines/EngineSelection$Chosen;Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/engines/EngineSelection$Chosen;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProvider ()Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/engines/EngineSelection$None : tv/nomercy/player/core/ports/engines/EngineSelection {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/EngineSelection$None;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/engines/EngineSelection$None;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/engines/EngineSelection$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/engines/MpvVideoEngineProvider : tv/nomercy/player/core/ports/engines/VideoEngineProvider {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/engines/MpvVideoEngineProvider;
+	public fun create ()Ltv/nomercy/player/core/ports/VideoBackend;
+	public fun getId ()Ljava/lang/String;
+	public fun isAvailable ()Z
+	public fun whyUnavailable ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/engines/VideoEngineProvider {
+	public abstract fun create ()Ltv/nomercy/player/core/ports/VideoBackend;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun isAvailable ()Z
+	public abstract fun whyUnavailable ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/engines/VideoEngines {
+	public static final field ENVIRONMENT Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/engines/VideoEngines;
+	public static final field PROPERTY Ljava/lang/String;
+	public final fun byId (Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;
+	public final fun create (Ljava/lang/String;)Ltv/nomercy/player/core/ports/VideoBackend;
+	public static synthetic fun create$default (Ltv/nomercy/player/core/ports/engines/VideoEngines;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/VideoBackend;
+	public final fun getRegistered ()Ljava/util/List;
+	public final fun requestedId ()Ljava/lang/String;
+	public final fun select (Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
+	public static synthetic fun select$default (Ltv/nomercy/player/core/ports/engines/VideoEngines;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
+	public final fun selectFrom (Ljava/util/List;Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
+}
+
+public final class tv/nomercy/player/core/ports/engines/VlcVideoEngineProvider : tv/nomercy/player/core/ports/engines/VideoEngineProvider {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/engines/VlcVideoEngineProvider;
+	public fun create ()Ltv/nomercy/player/core/ports/VideoBackend;
+	public fun getId ()Ljava/lang/String;
+	public fun isAvailable ()Z
+	public fun whyUnavailable ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/stream/ClientCapabilities {

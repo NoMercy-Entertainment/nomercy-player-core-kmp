@@ -46,7 +46,10 @@ class LibMpvBindingTest {
             // which is the whole difference from libVLC 3.
             assertEquals(0, mpv.mpv_set_property_string(handle, "edition", "2"), "edition rejected")
 
-            val idle: String? = mpv.mpv_get_property_string(handle, "idle-active")
+            // Through the helper, which copies the string out and frees what
+            // libmpv allocated. Reading the pointer directly and letting JNA
+            // convert it leaks the original on every call.
+            val idle: String? = mpv.property(handle, "idle-active")
             assertTrue(idle == "yes" || idle == "no", "idle-active came back as $idle")
         } finally {
             mpv.mpv_terminate_destroy(handle)

@@ -23,6 +23,10 @@ internal fun interface PayloadFinishing {
         // which is the opposite of a map that silently answers "nothing".
         fun of(kind: NativeRuntimeKind): PayloadFinishing = when (kind) {
             NativeRuntimeKind.LIB_VLC -> VlcPluginCache
+            // libmpv is one shared library with its dependencies statically
+            // linked, so there is no plugin index to build and nothing to do
+            // on arrival.
+            NativeRuntimeKind.LIB_MPV -> None
             NativeRuntimeKind.LIB_ASS -> None
         }
 
