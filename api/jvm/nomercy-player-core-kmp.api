@@ -2933,16 +2933,26 @@ public final class tv/nomercy/player/core/input/KeyComboKt {
 }
 
 public abstract class tv/nomercy/player/core/input/KeyHandlerPlugin : tv/nomercy/player/core/plugin/Plugin {
-	public fun <init> (Lkotlin/jvm/functions/Function0;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/input/KeyHandlerScope;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/input/KeyHandlerScope;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected abstract fun addDefaults ()V
 	public fun bind (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 	public fun bindings ()Ljava/util/Map;
 	protected final fun getBindings ()Ltv/nomercy/player/core/input/KeyBindingTable;
+	public final fun getScope ()Ltv/nomercy/player/core/input/KeyHandlerScope;
 	public fun handle (Ltv/nomercy/player/core/input/KeyCombo;)Z
 	public fun handle (Ltv/nomercy/player/core/input/PlayerKey;)Z
 	public fun replace (Ljava/lang/String;Lkotlin/jvm/functions/Function0;)V
 	public fun unbind (Ljava/lang/String;)V
 	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/input/KeyHandlerScope : java/lang/Enum {
+	public static final field Container Ltv/nomercy/player/core/input/KeyHandlerScope;
+	public static final field Window Ltv/nomercy/player/core/input/KeyHandlerScope;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/input/KeyHandlerScope;
+	public static fun values ()[Ltv/nomercy/player/core/input/KeyHandlerScope;
 }
 
 public final class tv/nomercy/player/core/input/PlayerKey : java/lang/Enum {

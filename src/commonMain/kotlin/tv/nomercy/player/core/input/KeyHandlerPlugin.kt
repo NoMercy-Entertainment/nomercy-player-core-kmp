@@ -10,6 +10,28 @@ package tv.nomercy.player.core.input
 
 import tv.nomercy.player.core.plugin.Plugin
 
+/**
+ * Where key presses are picked up.
+ *
+ * The reference's `scope`, which is `'document' | 'container' | HTMLElement`
+ * and defaults to `'document'` — global, firing whether or not anything in the
+ * player has focus.
+ *
+ * The port had no counterpart and behaved as `Container` always, because the
+ * only delivery it had was an `onKeyEvent` on the chrome's focusable. That is
+ * why clicking any control outside the player — a route button, a playlist row
+ * — stopped every shortcut working: focus moved and the keys had nowhere to
+ * arrive. On the web the same click changes nothing, because the listener is on
+ * the document.
+ */
+public enum class KeyHandlerScope {
+    /** Anywhere in the window. The reference's `'document'`, and the default. */
+    Window,
+
+    /** Only while the player or one of its children holds focus. */
+    Container,
+}
+
 // The half of key handling that is the same everywhere.
 //
 // A television and a desktop disagree about what the arrow keys do and agree
@@ -21,6 +43,12 @@ import tv.nomercy.player.core.plugin.Plugin
 // before should be able to add to this rather than fork it.
 public abstract class KeyHandlerPlugin<O : Any>(
     nowMs: () -> Long,
+    /**
+     * Where presses are picked up. [KeyHandlerScope.Window] by default, which is
+     * what the reference defaults to; a consumer embedding the player beside its
+     * own keyboard UI passes [KeyHandlerScope.Container].
+     */
+    public val scope: KeyHandlerScope = KeyHandlerScope.Window,
 ) : Plugin<O>() {
 
     protected val bindings: KeyBindingTable = KeyBindingTable(nowMs)

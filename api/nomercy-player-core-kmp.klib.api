@@ -144,6 +144,17 @@ final enum class tv.nomercy.player.core.errors/Severity : kotlin/Enum<tv.nomercy
     }
 }
 
+final enum class tv.nomercy.player.core.input/KeyHandlerScope : kotlin/Enum<tv.nomercy.player.core.input/KeyHandlerScope> { // tv.nomercy.player.core.input/KeyHandlerScope|null[0]
+    enum entry Container // tv.nomercy.player.core.input/KeyHandlerScope.Container|null[0]
+    enum entry Window // tv.nomercy.player.core.input/KeyHandlerScope.Window|null[0]
+
+    final val entries // tv.nomercy.player.core.input/KeyHandlerScope.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.input/KeyHandlerScope> // tv.nomercy.player.core.input/KeyHandlerScope.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.input/KeyHandlerScope // tv.nomercy.player.core.input/KeyHandlerScope.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.input/KeyHandlerScope> // tv.nomercy.player.core.input/KeyHandlerScope.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.input/PlayerKey : kotlin/Enum<tv.nomercy.player.core.input/PlayerKey> { // tv.nomercy.player.core.input/PlayerKey|null[0]
     enum entry AudioTrack // tv.nomercy.player.core.input/PlayerKey.AudioTrack|null[0]
     enum entry Back // tv.nomercy.player.core.input/PlayerKey.Back|null[0]
@@ -1465,10 +1476,12 @@ sealed interface tv.nomercy.player.core.ports/HdrDecision { // tv.nomercy.player
 }
 
 abstract class <#A: kotlin/Any> tv.nomercy.player.core.input/KeyHandlerPlugin : tv.nomercy.player.core.plugin/Plugin<#A> { // tv.nomercy.player.core.input/KeyHandlerPlugin|null[0]
-    constructor <init>(kotlin/Function0<kotlin/Long>) // tv.nomercy.player.core.input/KeyHandlerPlugin.<init>|<init>(kotlin.Function0<kotlin.Long>){}[0]
+    constructor <init>(kotlin/Function0<kotlin/Long>, tv.nomercy.player.core.input/KeyHandlerScope = ...) // tv.nomercy.player.core.input/KeyHandlerPlugin.<init>|<init>(kotlin.Function0<kotlin.Long>;tv.nomercy.player.core.input.KeyHandlerScope){}[0]
 
     final val bindings // tv.nomercy.player.core.input/KeyHandlerPlugin.bindings|{}bindings[0]
         final fun <get-bindings>(): tv.nomercy.player.core.input/KeyBindingTable // tv.nomercy.player.core.input/KeyHandlerPlugin.bindings.<get-bindings>|<get-bindings>(){}[0]
+    final val scope // tv.nomercy.player.core.input/KeyHandlerPlugin.scope|{}scope[0]
+        final fun <get-scope>(): tv.nomercy.player.core.input/KeyHandlerScope // tv.nomercy.player.core.input/KeyHandlerPlugin.scope.<get-scope>|<get-scope>(){}[0]
 
     abstract fun addDefaults() // tv.nomercy.player.core.input/KeyHandlerPlugin.addDefaults|addDefaults(){}[0]
     open fun bind(kotlin/String, kotlin/Function0<kotlin/Unit>) // tv.nomercy.player.core.input/KeyHandlerPlugin.bind|bind(kotlin.String;kotlin.Function0<kotlin.Unit>){}[0]
