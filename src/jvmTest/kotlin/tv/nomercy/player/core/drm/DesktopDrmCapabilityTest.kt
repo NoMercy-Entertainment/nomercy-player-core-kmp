@@ -17,9 +17,9 @@ import kotlin.test.assertTrue
 // The shared matrix test describes the shape; this one pins the actual class, so
 // a change to it that contradicts the matrix reddens the build rather than
 // quietly disagreeing with a test that never sees it.
-class VlcjDrmCapabilityTest {
+class DesktopDrmCapabilityTest {
 
-    private val desktop = VlcjDrmCapability()
+    private val desktop = DesktopDrmCapability()
 
     @Test
     fun itPlaysTheSchemeThatNeedsNoKeyBox() {

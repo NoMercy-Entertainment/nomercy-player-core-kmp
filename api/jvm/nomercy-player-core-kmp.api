@@ -911,6 +911,11 @@ public final class tv/nomercy/player/core/drm/ClearOnly : tv/nomercy/player/core
 	public fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z
 }
 
+public final class tv/nomercy/player/core/drm/DesktopDrmCapability : tv/nomercy/player/core/drm/DrmCapability {
+	public fun <init> ()V
+	public fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z
+}
+
 public abstract interface class tv/nomercy/player/core/drm/DrmBindingResult {
 }
 
@@ -1070,11 +1075,6 @@ public final class tv/nomercy/player/core/drm/KeyRequest {
 
 public abstract interface class tv/nomercy/player/core/drm/StudioDrmBinding {
 	public abstract fun prepare (Ltv/nomercy/player/core/drm/DrmConfig;)Ltv/nomercy/player/core/drm/DrmBindingResult;
-}
-
-public final class tv/nomercy/player/core/drm/VlcjDrmCapability : tv/nomercy/player/core/drm/DrmCapability {
-	public fun <init> ()V
-	public fun supports (Ltv/nomercy/player/core/drm/DrmScheme;)Z
 }
 
 public final class tv/nomercy/player/core/dsp/AudioSpectrum {
