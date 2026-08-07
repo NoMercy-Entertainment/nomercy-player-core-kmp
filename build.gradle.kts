@@ -546,6 +546,18 @@ mavenPublishing {
 //
 // Found by editing one on purpose and watching nothing happen.
 tasks.withType<Test>().configureEach {
+    // Where a native engine lives on the machine running the tests, and which
+    // fixtures the engine gates should open.
+    //
+    // Forwarded rather than read from the environment inside the test: a Gradle
+    // test JVM does not inherit the shell's -D flags, so a property set on the
+    // command line reached nothing and the gates skipped themselves while
+    // reporting green.
+    for (name in listOf("jna.library.path", "nomercy.mpv.fixture", "nomercy.mpv.master")) {
+        providers.gradleProperty(name).orNull?.let { value -> systemProperty(name, value) }
+        System.getProperty(name)?.let { value -> systemProperty(name, value) }
+    }
+
     inputs.files(
         fileTree("contract") { include("*.json") },
         fileTree("scenarios") { include("*.json") },

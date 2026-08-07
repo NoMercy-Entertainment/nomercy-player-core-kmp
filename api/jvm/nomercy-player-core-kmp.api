@@ -4992,6 +4992,23 @@ public final class tv/nomercy/player/core/plugins/message/MessagePluginKt {
 	public static final field DEFAULT_MESSAGE_MS J
 }
 
+public final class tv/nomercy/player/core/ports/AdaptiveLadder {
+	public static final field CLIMB_MARGIN D
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/AdaptiveLadder;
+	public final fun pick (Ljava/util/List;IIIZLtv/nomercy/player/core/ports/QualityLevel;)Ltv/nomercy/player/core/ports/QualityLevel;
+	public static synthetic fun pick$default (Ltv/nomercy/player/core/ports/AdaptiveLadder;Ljava/util/List;IIIZLtv/nomercy/player/core/ports/QualityLevel;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/QualityLevel;
+}
+
+public final class tv/nomercy/player/core/ports/AdaptiveLadderDriver {
+	public fun <init> (Ltv/nomercy/player/core/ports/VideoBackend;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/VideoBackend;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun choose (Ltv/nomercy/player/core/ports/QualityLevel;)V
+	public final fun getApplied ()Ltv/nomercy/player/core/ports/QualityLevel;
+	public final fun getMode ()Ltv/nomercy/player/core/ports/QualityMode;
+	public final fun surfaceSize (II)V
+	public final fun tick ()Ltv/nomercy/player/core/ports/QualityLevel;
+}
+
 public final class tv/nomercy/player/core/ports/AlwaysVisible : tv/nomercy/player/core/ports/VisibilityMonitor {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/AlwaysVisible;
 	public fun isVisible ()Z
@@ -5725,6 +5742,45 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
+public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/player/core/ports/AudioBackend {
+	public static final field MILLIS_PER_SECOND D
+	public fun <init> ()V
+	public fun audioGraph ()Ltv/nomercy/player/core/ports/AudioDspGraph;
+	public fun bandwidthEstimate ()I
+	public fun buffered ()D
+	public fun bufferedRanges ()Ljava/util/List;
+	public fun crossfade (JLtv/nomercy/player/core/ports/CrossfadeCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun currentTime ()D
+	public fun currentTime (D)V
+	public fun disposeSecondary ()V
+	public fun duration ()D
+	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun loadSecondary (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun mute ()V
+	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun pause ()V
+	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun playbackRate ()D
+	public fun playbackRate (D)V
+	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun release ()V
+	public fun secondaryGain ()F
+	public fun secondaryGain (F)V
+	public fun seekableRanges ()Ljava/util/List;
+	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
+	public fun stop ()V
+	public fun supportsCrossfade ()Z
+	public fun unmute ()V
+	public fun volume ()F
+	public fun volume (F)V
+}
+
+public final class tv/nomercy/player/core/ports/MpvEditionTitle {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/MpvEditionTitle;
+	public final fun parse (Ljava/lang/String;)Ltv/nomercy/player/core/ports/QualityLevel;
+}
+
 public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/player/core/ports/VideoBackend {
 	public static final field BITS_PER_BYTE D
 	public static final field DEFAULT_CHANNELS I
@@ -5741,8 +5797,10 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun bufferedRanges ()Ljava/util/List;
 	public fun currentTime ()D
 	public fun currentTime (D)V
+	public final fun describeRenditions ()Ljava/lang/String;
 	public fun duration ()D
 	public fun getCanToneMapHdrToSdr ()Z
+	public final fun getLadder ()Ltv/nomercy/player/core/ports/AdaptiveLadderDriver;
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V

@@ -4888,6 +4888,19 @@ final class tv.nomercy.player.core.ports/AVPlayerVideoBackend : tv.nomercy.playe
     final suspend fun play() // tv.nomercy.player.core.ports/AVPlayerVideoBackend.play|play(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/AdaptiveLadderDriver { // tv.nomercy.player.core.ports/AdaptiveLadderDriver|null[0]
+    constructor <init>(tv.nomercy.player.core.ports/VideoBackend, kotlin/Function0<kotlin/Boolean> = ...) // tv.nomercy.player.core.ports/AdaptiveLadderDriver.<init>|<init>(tv.nomercy.player.core.ports.VideoBackend;kotlin.Function0<kotlin.Boolean>){}[0]
+
+    final var applied // tv.nomercy.player.core.ports/AdaptiveLadderDriver.applied|{}applied[0]
+        final fun <get-applied>(): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/AdaptiveLadderDriver.applied.<get-applied>|<get-applied>(){}[0]
+    final var mode // tv.nomercy.player.core.ports/AdaptiveLadderDriver.mode|{}mode[0]
+        final fun <get-mode>(): tv.nomercy.player.core.ports/QualityMode // tv.nomercy.player.core.ports/AdaptiveLadderDriver.mode.<get-mode>|<get-mode>(){}[0]
+
+    final fun choose(tv.nomercy.player.core.ports/QualityLevel?) // tv.nomercy.player.core.ports/AdaptiveLadderDriver.choose|choose(tv.nomercy.player.core.ports.QualityLevel?){}[0]
+    final fun surfaceSize(kotlin/Int, kotlin/Int) // tv.nomercy.player.core.ports/AdaptiveLadderDriver.surfaceSize|surfaceSize(kotlin.Int;kotlin.Int){}[0]
+    final fun tick(): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/AdaptiveLadderDriver.tick|tick(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/AppleDspGraph : tv.nomercy.player.core.ports/AudioDspGraph { // tv.nomercy.player.core.ports/AppleDspGraph|null[0]
     constructor <init>(kotlin/Int = ..., kotlin/Int = ...) // tv.nomercy.player.core.ports/AppleDspGraph.<init>|<init>(kotlin.Int;kotlin.Int){}[0]
 
@@ -7118,6 +7131,13 @@ final object tv.nomercy.player.core.ports/AVTrackMapper { // tv.nomercy.player.c
     final fun isForced(kotlin.collections/List<kotlin/String>): kotlin/Boolean // tv.nomercy.player.core.ports/AVTrackMapper.isForced|isForced(kotlin.collections.List<kotlin.String>){}[0]
     final fun labelOf(kotlin/String?, kotlin/String?): kotlin/String // tv.nomercy.player.core.ports/AVTrackMapper.labelOf|labelOf(kotlin.String?;kotlin.String?){}[0]
     final fun languageOf(kotlin/String?): kotlin/String // tv.nomercy.player.core.ports/AVTrackMapper.languageOf|languageOf(kotlin.String?){}[0]
+}
+
+final object tv.nomercy.player.core.ports/AdaptiveLadder { // tv.nomercy.player.core.ports/AdaptiveLadder|null[0]
+    final const val CLIMB_MARGIN // tv.nomercy.player.core.ports/AdaptiveLadder.CLIMB_MARGIN|{}CLIMB_MARGIN[0]
+        final fun <get-CLIMB_MARGIN>(): kotlin/Double // tv.nomercy.player.core.ports/AdaptiveLadder.CLIMB_MARGIN.<get-CLIMB_MARGIN>|<get-CLIMB_MARGIN>(){}[0]
+
+    final fun pick(kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel>, kotlin/Int, kotlin/Int = ..., kotlin/Int = ..., kotlin/Boolean = ..., tv.nomercy.player.core.ports/QualityLevel? = ...): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.ports/AdaptiveLadder.pick|pick(kotlin.collections.List<tv.nomercy.player.core.ports.QualityLevel>;kotlin.Int;kotlin.Int;kotlin.Int;kotlin.Boolean;tv.nomercy.player.core.ports.QualityLevel?){}[0]
 }
 
 final object tv.nomercy.player.core.ports/AlwaysVisible : tv.nomercy.player.core.ports/VisibilityMonitor { // tv.nomercy.player.core.ports/AlwaysVisible|null[0]

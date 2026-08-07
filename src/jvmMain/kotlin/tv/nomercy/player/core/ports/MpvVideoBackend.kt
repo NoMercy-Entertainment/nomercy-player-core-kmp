@@ -226,14 +226,7 @@ public class MpvVideoBackend internal constructor(
     override fun qualityLevels(): List<QualityLevel> {
         val count: Int = property("edition-list/count")?.toIntOrNull() ?: 0
         return (0 until count).map { index ->
-            val title: String = property("edition-list/$index/title").orEmpty()
-            QualityLevel(
-                height = HEIGHT.find(title)?.groupValues?.get(1)?.toIntOrNull() ?: 0,
-                bitrate = BITRATE.find(title)?.groupValues?.get(1)?.toIntOrNull() ?: 0,
-                codec = "",
-                width = WIDTH.find(title)?.groupValues?.get(1)?.toIntOrNull(),
-                label = title.takeIf { it.isNotBlank() },
-            )
+            MpvEditionTitle.parse(property("edition-list/$index/title").orEmpty())
         }
     }
 
@@ -255,6 +248,42 @@ public class MpvVideoBackend internal constructor(
         val index: Int = level?.let { wanted -> qualityLevels().indexOf(wanted) } ?: -1
         mpv.mpv_set_property_string(handle, "edition", if (index >= 0) index.toString() else "auto")
     }
+
+    /**
+     * The space the picture is drawn in.
+     *
+     * Handed to the ladder rather than to mpv. mpv will play any rendition it is
+     * given at any surface size, so a pane smaller than the ladder is not an
+     * engine problem — it is a rung nobody should be paying for, which is
+     * exactly the decision [AdaptiveLadderDriver] makes. libVLC needed a reopen
+     * with a rewritten playlist for the same effect because it cannot be told
+     * which variant to take.
+     */
+    override fun surfaceSize(widthPx: Int, heightPx: Int) {
+        ladder.surfaceSize(widthPx, heightPx)
+    }
+
+    /**
+     * Adaptation, which mpv does not do.
+     *
+     * mpv selects a variant exactly and then stays on it, so without this a
+     * stream opened on a good connection would sit on whichever rung it started
+     * with for the whole film. The driver is ticked from the same poll that
+     * produces the event spine — one clock, and no timer this class owns that a
+     * consumer cannot stop.
+     */
+    public val ladder: AdaptiveLadderDriver = AdaptiveLadderDriver(this)
+
+    /**
+     * Every property that has anything to say about renditions, verbatim.
+     *
+     * For a failure message and for a person at a terminal. "No renditions" has
+     * several causes — the stream never opened, the demuxer exposes variants
+     * under a different name, the master was a media playlist all along — and
+     * they are indistinguishable from a count of zero.
+     */
+    public fun describeRenditions(): String = RENDITION_PROPERTIES
+        .joinToString(", ") { name -> "$name=${property(name)}" }
 
     // ---- events ------------------------------------------------------------
 
@@ -315,6 +344,11 @@ public class MpvVideoBackend internal constructor(
                 bus.emit(BackendEvents.TIME_UPDATE, now)
             }
 
+            // Adaptation, on the same clock as the events. Only while something
+            // is actually playing: ticking a stopped engine would pick a rung
+            // from a measurement of nothing.
+            if (!paused) ladder.tick()
+
             val ended: Boolean = flag("eof-reached")
             if (ended && !lastEnded) bus.emit(BackendEvents.ENDED)
             lastEnded = ended
@@ -348,6 +382,18 @@ public class MpvVideoBackend internal constructor(
         const val VOLUME_SCALE: Double = 100.0
         const val BITS_PER_BYTE: Double = 8.0
         const val DEFAULT_CHANNELS: Int = 2
+
+        val RENDITION_PROPERTIES: List<String> = listOf(
+            "edition-list/count",
+            "editions",
+            "current-edition",
+            "track-list/count",
+            "hls-bitrate",
+            "video-params/w",
+            "video-params/h",
+            "file-format",
+            "path",
+        )
 
         // A variant's own attributes, as mpv puts them in the edition title:
         // "1280x720" and a bandwidth in bits per second. Five digits or more so
