@@ -37,3 +37,24 @@ libvlc.macos-arm64.sha256=
 libvlc.macos-x64.kind=dmg
 libvlc.macos-x64.source=https://get.videolan.org/vlc/3.0.23/macosx/vlc-3.0.23-intel64.dmg
 libvlc.macos-x64.sha256=
+
+# libmpv, the engine replacing libVLC on the desktop.
+#
+# The upstream redistributable, unmodified: shinchiro's mpv-winbuild-cmake
+# publishes a dev package carrying libmpv-2.dll and the headers, which is what
+# every Windows consumer of libmpv builds against.
+#
+# LICENCE, stated plainly rather than discovered later. That build is GPL, the
+# same footing the libVLC payload beside it is on today — VideoLAN's own
+# redistributable is GPL through its plugin set. tools/vlc-lgpl.dockerfile
+# exists to replace one of them from source with --disable-gpl and libmpv needs
+# the same treatment before either is published in a library that others link
+# against. Until then this is a development payload and the LGPL build is the
+# open item, for both engines rather than for this one.
+
+libmpv.version=2026.06.10
+
+libmpv.windows-x64.kind=7z
+libmpv.windows-x64.source=https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-dev-x86_64-20260610-git-304426c.7z
+libmpv.windows-x64.sha256=8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a866367f71cc9
+

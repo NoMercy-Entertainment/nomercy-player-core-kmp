@@ -43,6 +43,14 @@
       "bundle": true
     },
     {
+      "kind": "LIB_MPV",
+      "platform": "WINDOWS_X64",
+      "version": "2026.06.10",
+      "sha256": "4dd33af27e55ff716ccbdfcd8524427545a38f69be7fc6a7aa5402e4dee1ce69",
+      "marker": "libmpv-2.dll",
+      "bundle": true
+    },
+    {
       "kind": "LIB_ASS",
       "platform": "WINDOWS_X64",
       "version": "0.17.5",

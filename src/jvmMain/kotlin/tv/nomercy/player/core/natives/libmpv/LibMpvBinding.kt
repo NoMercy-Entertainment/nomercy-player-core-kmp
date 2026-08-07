@@ -9,11 +9,14 @@
 package tv.nomercy.player.core.natives.libmpv
 
 import com.sun.jna.Library
+import com.sun.jna.NativeLibrary
 import com.sun.jna.Memory
 import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.PointerType
 import com.sun.jna.ptr.PointerByReference
+import tv.nomercy.player.core.natives.NativeRuntimeKind
+import tv.nomercy.player.core.natives.NativeRuntimes
 
 /**
  * libmpv, as much of it as a player needs.
@@ -142,7 +145,24 @@ public interface LibMpv : Library {
             else -> "mpv.so.2"
         }
 
-        public fun load(): LibMpv = Native.load(SONAME, LibMpv::class.java)
+        /**
+         * The bundled payload first, then whatever the machine has.
+         *
+         * Without this a consumer of the library has to install libmpv by hand
+         * and point `jna.library.path` at it, which is precisely the "a library
+         * that only works on a machine somebody already configured" problem the
+         * payload store exists to remove — and it is how the desktop came to
+         * draw a black rectangle on a stock Windows box.
+         *
+         * The system copy is still reachable: nothing here removes a search
+         * path, so a developer with their own build on the path keeps using it.
+         */
+        public fun load(): LibMpv {
+            NativeRuntimes.directory(NativeRuntimeKind.LIB_MPV)?.let { payload ->
+                NativeLibrary.addSearchPath(SONAME, payload.absolutePath)
+            }
+            return Native.load(SONAME, LibMpv::class.java)
+        }
     }
 }
 

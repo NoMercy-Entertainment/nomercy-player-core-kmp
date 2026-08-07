@@ -35,7 +35,11 @@ data class NativePayload(
     val marker: String,
     val bundle: Boolean,
 ) {
-    val slug: String get() = if (kind == "LIB_ASS") "libass" else "libvlc"
+    val slug: String get() = when (kind) {
+        "LIB_ASS" -> "libass"
+        "LIB_MPV" -> "libmpv"
+        else -> "libvlc"
+    }
     val platformId: String get() = if (platform == "WINDOWS_X64") "windows-x64" else "linux-x64"
     val fileName: String get() = "$slug-$version-$platformId.tar.gz"
     val repository: String get() = if (kind == "LIB_ASS") "nomercy-libass" else "nomercy-player-core-kmp"
@@ -191,7 +195,12 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // produces its own and the host's is always available locally —
             // which is what matters here, because the machine running this is
             // the machine whose desktop has to play.
-            val command: List<String> = if (payload.kind == "LIB_VLC") {
+            // libmpv is built here too, from the upstream dev package: one DLL
+            // out of a 7z, no plugin tree and no cache, so unlike libVLC it can
+            // be produced on any host rather than only its own.
+            val command: List<String> = if (payload.kind == "LIB_MPV") {
+                listOf("bash", "tools/build-native-payload.sh", "libmpv", payload.platformId, "build/payloads")
+            } else if (payload.kind == "LIB_VLC") {
                 if (payload.platform != hostPlatform) {
                     logger.lifecycle(
                         "bundleNativePayloads: skipping ${payload.fileName} — " +
@@ -221,7 +230,10 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
 
             // The build script writes where it was told; move it into the
             // resource tree the loader reads from.
-            if (payload.kind == "LIB_VLC") {
+            // Both BUILT payloads land where the script was told to write and
+            // are moved into the resource tree the loader reads from. Only the
+            // fetched one arrives at its destination directly.
+            if (payload.kind == "LIB_VLC" || payload.kind == "LIB_MPV") {
                 JavaFile(projectRoot, "build/payloads/${payload.fileName}").copyTo(destination, overwrite = true)
             }
 
@@ -236,7 +248,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // from identical inputs. Its trust anchor is the UPSTREAM digest,
             // which tools/native-payloads.lock pins and the script verifies
             // before it unpacks anything.
-            if (payload.kind != "LIB_VLC") {
+            if (payload.kind != "LIB_VLC" && payload.kind != "LIB_MPV") {
                 val actual: String = digestOf(destination)
                 check(actual == payload.sha256) {
                     "digest mismatch for ${payload.fileName}: expected ${payload.sha256} but got $actual"

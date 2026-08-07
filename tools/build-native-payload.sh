@@ -121,6 +121,57 @@ generate_windows_cache() {
 }
 
 # ---------------------------------------------------------------------------
+# libmpv on Windows: one DLL and its headers out of the upstream dev package.
+#
+# No plugin tree and no cache to generate — libmpv links its decoders in, which
+# is the whole reason its payload is one file where libVLC's is three hundred
+# and sixty-four.
+# ---------------------------------------------------------------------------
+build_windows_mpv() {
+  local archive="$cache/$(basename "$source_url")"
+  fetch_verified "$source_url" "$source_sha" "$archive"
+
+  local unpacked="$work/upstream"
+  mkdir -p "$unpacked"
+
+  # 7z, because that is what upstream publishes. Windows ships bsdtar, which
+  # reads a great many formats and not this one, so the extractor is looked for
+  # rather than assumed — a payload build that silently produced an empty stage
+  # would pack an archive with no engine in it.
+  #
+  # Several places, because PATH under a Gradle exec is not the PATH in a
+  # terminal: the same lookup that found 7z by name when this was run by hand
+  # found nothing when the build ran it, and the payload build failed on a
+  # machine that has 7-Zip installed.
+  local seven=""
+  local candidate
+  # Both mount prefixes, because the shell the BUILD runs is not the shell a
+  # person runs: ProcessBuilder("bash") on Windows finds WSL's bash, where the
+  # C drive is /mnt/c and Git Bash's /c does not exist at all.
+  for candidate in 7z 7za                    "C:/Program Files/7-Zip/7z.exe" "C:/Program Files (x86)/7-Zip/7z.exe"                    "/mnt/c/Program Files/7-Zip/7z.exe" "/mnt/c/Program Files (x86)/7-Zip/7z.exe"; do
+    if command -v "$candidate" > /dev/null 2>&1; then seven="$candidate"; break; fi
+    if [ -x "$candidate" ]; then seven="$candidate"; break; fi
+  done
+  [ -n "$seven" ] || { echo "7z is required to unpack $(basename "$archive")"; exit 1; }
+  "$seven" x -y -o"$unpacked" "$archive" > /dev/null
+
+  local dll
+  dll="$(find "$unpacked" -name "libmpv-2.dll" | head -1)"
+  [ -n "$dll" ] || { echo "no libmpv-2.dll inside $(basename "$archive")"; exit 1; }
+  cp "$dll" "$stage/"
+
+  # The headers travel with it. They are what the binding was corrected
+  # against — the render parameter numbers were wrong from memory and right
+  # from render.h — and a payload without them makes that check need a
+  # download.
+  local include
+  include="$(find "$unpacked" -type d -name mpv | head -1)"
+  [ -n "$include" ] && cp -r "$include" "$stage/include-mpv"
+
+  stamp_tree
+}
+
+# ---------------------------------------------------------------------------
 # Linux: no official portable build exists, so the payload is assembled inside a
 # container from the distribution's own VLC packages, and then closed over —
 # every shared object the VLC libraries need is copied in beside them, except
@@ -190,6 +241,29 @@ stamp_tree() {
 }
 
 write_notice() {
+  # libmpv carries its own, because it is a different project under a different
+  # licence and a notice naming VideoLAN beside an mpv binary is worse than no
+  # notice at all.
+  if [ "$payload" = "libmpv" ]; then
+    cat > "$stage/NOTICE-NoMercy.txt" <<EOF
+This directory contains an unmodified redistribution of libmpv, version
+$version, built by the mpv-winbuild-cmake project and published at
+$source_url
+
+mpv is licensed under the GNU General Public License, version 2 or later; parts
+of it are LGPL. This build is GPL. Sources for mpv are at
+https://github.com/mpv-player/mpv and the build recipe that produced this
+binary is at https://github.com/shinchiro/mpv-winbuild-cmake.
+
+Nothing here is modified. libmpv is loaded as a shared library and is not
+linked into any NoMercy binary, so it can be replaced: put a directory
+containing your own build on the payload override described in the NoMercy
+player documentation and the player will load yours instead of this one.
+EOF
+    touch -d "$STAMP_DATE" "$stage/NOTICE-NoMercy.txt"
+    return
+  fi
+
   cat > "$stage/NOTICE-NoMercy.txt" <<EOF
 This directory contains an unmodified redistribution of libVLC and its plugins,
 built from the official VideoLAN release for $platform, version $version.
@@ -220,6 +294,7 @@ packed=no
 
 case "$kind" in
   zip) build_windows ;;
+  7z) build_windows_mpv ;;
   container) build_linux ;;
   dmg) build_macos ;;
   *) echo "unknown payload kind: $kind"; exit 1 ;;
