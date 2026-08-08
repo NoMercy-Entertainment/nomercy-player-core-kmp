@@ -50,7 +50,12 @@ class LibMpvAndroidTest {
         // must never come back is null — that was the state where the payload
         // was silently unavailable and libmpv was asked for by a name with two
         // extensions on it.
-        assertEquals(expected, HostPlatform.current())
+        assertEquals(
+            expected,
+            HostPlatform.current(),
+            "os.name=${System.getProperty("os.name")} os.arch=${System.getProperty("os.arch")} " +
+                "vm=${System.getProperty("java.vm.name")} abis=${android.os.Build.SUPPORTED_ABIS.joinToString()}",
+        )
     }
 
     // The archive has to be IN the artifact. A catalogue entry for a payload

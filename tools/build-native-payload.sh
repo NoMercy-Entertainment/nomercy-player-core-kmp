@@ -200,9 +200,20 @@ build_macos_mpv() {
 build_android_mpv() {
   command -v docker >/dev/null || { echo "docker is required to build the android payload"; exit 1; }
 
-  local image="nomercy/libmpv-android:build"
+  # The ABI mpv-android's buildscripts name, which is not the one Android names.
+  # Two of the three devices on this desk are armeabi-v7a only — a Galaxy A13 and
+  # a Nokia streaming box — so an arm64-only payload is untestable on the fleet
+  # and unusable on the television.
+  local abi
+  case "$platform" in
+    android-arm64) abi=arm64 ;;
+    android-arm) abi=armv7l ;;
+    *) echo "unknown android platform $platform"; exit 1 ;;
+  esac
+
+  local image="nomercy/libmpv-android:$abi"
   echo "── building $image (this takes tens of minutes on a cold cache)"
-  docker build -f "$here/$source_url" -t "$image" --target payload "$here" >&2
+  docker build -f "$here/$source_url" --build-arg "ABIS=$abi" -t "$image" --target payload "$here" >&2
 
   # A scratch image has no shell, so it cannot be `docker run`. Creating a
   # container from it never starts anything, and `docker export` then hands us

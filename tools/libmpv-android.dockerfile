@@ -99,7 +99,13 @@ RUN mkdir -p /payload && \
 # libmpv.so carries a DT_NEEDED for it and an app that does not ship one gets
 # `dlopen failed: library "libc++_shared.so" not found` — measured on a phone,
 # after the payload had already extracted correctly.
-RUN find / -name "libc++_shared.so" -path "*${ABIS}*" -o -name "libc++_shared.so" -path "*aarch64*"       | head -1 | xargs -I{} cp {} /payload/ &&     test -f /payload/libc++_shared.so
+# Selected by the NDK TRIPLE, not by a pattern with an -o in it.
+#
+# The first version was `-name X -path "*$ABIS*" -o -name X -path "*aarch64*"`,
+# and find's -o binds looser than the implicit -a, so the second clause matched
+# on its own — the armv7 payload shipped the 64-bit runtime and the phone said
+# `libc++_shared.so is 64-bit instead of 32-bit`.
+RUN triple="$(case "${ABIS}" in         arm64) echo aarch64-linux-android ;;         armv7l) echo arm-linux-androideabi ;;         x86_64) echo x86_64-linux-android ;;         *) echo "unknown abi ${ABIS}" >&2; exit 1 ;;       esac)" &&     find / -type f -name "libc++_shared.so" -path "*/$triple/*" -print -quit       | xargs -I{} cp {} /payload/ &&     test -f /payload/libc++_shared.so
 
 # Stripped here, where the NDK that produced them is, rather than on the host.
 #

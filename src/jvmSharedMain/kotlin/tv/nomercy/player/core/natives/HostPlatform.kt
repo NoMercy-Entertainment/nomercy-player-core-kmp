@@ -70,12 +70,14 @@ public enum class HostPlatform(public val id: String) {
         private fun archOf(osArch: String): Arch? = when (osArch) {
             "amd64", "x86_64", "x64" -> Arch.X64
             "aarch64", "arm64" -> Arch.ARM64
-            // 32-bit ARM, which is most of the Android fleet and not a rarity:
-            // of three devices on this desk two are armeabi-v7a only — a Galaxy
-            // A13 and a Nokia streaming box. A phone reporting this and getting
-            // null was the whole payload silently unavailable.
-            "arm", "armv7l", "armv7", "aarch32" -> Arch.ARM
-            else -> null
+            // Any 32-bit ARM, by SHAPE rather than by a list of spellings.
+            //
+            // The list was the bug. It held armv7l and the Galaxy A13 reports
+            // "armv8l" — an ARMv8 core running the 32-bit ABI — so the device
+            // fell through to null, the payload was silently unavailable, and
+            // nothing said why. The next device will invent another number and
+            // this has to already be right for it.
+            else -> if (osArch.startsWith("arm") || osArch == "aarch32") Arch.ARM else null
         }
 
         // ART still answers "Dalvik" for java.vm.name, and has since KitKat.

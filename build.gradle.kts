@@ -40,6 +40,7 @@ data class NativePayload(
         "WINDOWS_X64" -> "windows-x64"
         "MACOS_ARM64" -> "macos-arm64"
         "ANDROID_ARM64" -> "android-arm64"
+        "ANDROID_ARM" -> "android-arm"
         else -> "linux-x64"
     }
 

@@ -32,6 +32,7 @@
 libmpv.version=2026.06.10
 libmpv.linux-x64.version=0.35.1
 libmpv.android-arm64.version=0.41.0
+libmpv.android-arm.version=0.41.0
 
 libmpv.windows-x64.kind=7z
 libmpv.windows-x64.source=https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-dev-x86_64-20260610-git-304426c.7z
@@ -58,6 +59,10 @@ libmpv.linux-x64.sha256=
 libmpv.android-arm64.kind=android-container
 libmpv.android-arm64.source=tools/libmpv-android.dockerfile
 libmpv.android-arm64.sha256=
+
+libmpv.android-arm.kind=android-container
+libmpv.android-arm.source=tools/libmpv-android.dockerfile
+libmpv.android-arm.sha256=
 
 libmpv.macos-arm64.kind=brew
 libmpv.macos-arm64.source=homebrew/core/mpv
