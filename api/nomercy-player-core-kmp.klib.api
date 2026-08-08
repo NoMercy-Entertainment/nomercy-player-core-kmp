@@ -1335,6 +1335,24 @@ abstract interface tv.nomercy.player.core.plugin/VolumeCommands { // tv.nomercy.
     abstract fun volume(kotlin/Int) // tv.nomercy.player.core.plugin/VolumeCommands.volume|volume(kotlin.Int){}[0]
 }
 
+abstract interface tv.nomercy.player.core.plugins.cast/CastSession : tv.nomercy.player.core.plugins.cast/CastTransport { // tv.nomercy.player.core.plugins.cast/CastSession|null[0]
+    abstract fun deviceName(): kotlin/String? // tv.nomercy.player.core.plugins.cast/CastSession.deviceName|deviceName(){}[0]
+    abstract fun isConnected(): kotlin/Boolean // tv.nomercy.player.core.plugins.cast/CastSession.isConnected|isConnected(){}[0]
+    abstract fun observe(kotlin/Function1<tv.nomercy.player.core.plugins.cast/CastSenderEvents, kotlin/Unit>): kotlin/Function0<kotlin/Unit> // tv.nomercy.player.core.plugins.cast/CastSession.observe|observe(kotlin.Function1<tv.nomercy.player.core.plugins.cast.CastSenderEvents,kotlin.Unit>){}[0]
+    abstract suspend fun connect() // tv.nomercy.player.core.plugins.cast/CastSession.connect|connect(){}[0]
+    abstract suspend fun disconnect() // tv.nomercy.player.core.plugins.cast/CastSession.disconnect|disconnect(){}[0]
+    abstract suspend fun load(tv.nomercy.player.core.plugins.cast/CastMediaInfo, kotlin/Double) // tv.nomercy.player.core.plugins.cast/CastSession.load|load(tv.nomercy.player.core.plugins.cast.CastMediaInfo;kotlin.Double){}[0]
+}
+
+abstract interface tv.nomercy.player.core.plugins.cast/CastTransport { // tv.nomercy.player.core.plugins.cast/CastTransport|null[0]
+    abstract suspend fun pause() // tv.nomercy.player.core.plugins.cast/CastTransport.pause|pause(){}[0]
+    abstract suspend fun play() // tv.nomercy.player.core.plugins.cast/CastTransport.play|play(){}[0]
+    abstract suspend fun seekTo(kotlin/Double) // tv.nomercy.player.core.plugins.cast/CastTransport.seekTo|seekTo(kotlin.Double){}[0]
+    abstract suspend fun setMuted(kotlin/Boolean) // tv.nomercy.player.core.plugins.cast/CastTransport.setMuted|setMuted(kotlin.Boolean){}[0]
+    abstract suspend fun setVolume(kotlin/Double) // tv.nomercy.player.core.plugins.cast/CastTransport.setVolume|setVolume(kotlin.Double){}[0]
+    abstract suspend fun stop() // tv.nomercy.player.core.plugins.cast/CastTransport.stop|stop(){}[0]
+}
+
 abstract interface tv.nomercy.player.core.plugins.cast/ChromeCastMediaCtors { // tv.nomercy.player.core.plugins.cast/ChromeCastMediaCtors|null[0]
     abstract fun genericMediaMetadata(): tv.nomercy.player.core.plugins.cast/CastMediaMetadata // tv.nomercy.player.core.plugins.cast/ChromeCastMediaCtors.genericMediaMetadata|genericMediaMetadata(){}[0]
     abstract fun loadRequest(tv.nomercy.player.core.plugins.cast/CastMediaInfo): kotlin.collections/Map<kotlin/String, kotlin/Any?> // tv.nomercy.player.core.plugins.cast/ChromeCastMediaCtors.loadRequest|loadRequest(tv.nomercy.player.core.plugins.cast.CastMediaInfo){}[0]
@@ -8069,6 +8087,39 @@ open class tv.nomercy.player.core.plugins.audio/WaveformVisualization : tv.nomer
     }
 }
 
+open class tv.nomercy.player.core.plugins.cast/CastSenderPlugin : tv.nomercy.player.core.plugin/Plugin<tv.nomercy.player.core.plugins.cast/CastSenderOptions> { // tv.nomercy.player.core.plugins.cast/CastSenderPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.plugin/TransportCommands, tv.nomercy.player.core.plugin/VolumeCommands, tv.nomercy.player.core.plugins.cast/CastSession? = ..., tv.nomercy.player.core.plugins.cast/CastSenderOptions = ...) // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.<init>|<init>(tv.nomercy.player.core.plugin.TransportCommands;tv.nomercy.player.core.plugin.VolumeCommands;tv.nomercy.player.core.plugins.cast.CastSession?;tv.nomercy.player.core.plugins.cast.CastSenderOptions){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+    open val options // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.options|{}options[0]
+        open fun <get-options>(): tv.nomercy.player.core.plugins.cast/CastSenderOptions // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.options.<get-options>|<get-options>(){}[0]
+
+    final fun isConnected(): kotlin/Boolean // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.isConnected|isConnected(){}[0]
+    final fun remotePosition(): kotlin/Double // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.remotePosition|remotePosition(){}[0]
+    final suspend fun cast(tv.nomercy.player.core.plugins.cast/CastMediaInfo, kotlin/Double) // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.cast|cast(tv.nomercy.player.core.plugins.cast.CastMediaInfo;kotlin.Double){}[0]
+    final suspend fun connect() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.connect|connect(){}[0]
+    final suspend fun disconnect() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.disconnect|disconnect(){}[0]
+    final suspend fun pause() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.pause|pause(){}[0]
+    final suspend fun play() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.play|play(){}[0]
+    final suspend fun seekTo(kotlin/Double) // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.seekTo|seekTo(kotlin.Double){}[0]
+    final suspend fun setMuted(kotlin/Boolean) // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.setMuted|setMuted(kotlin.Boolean){}[0]
+    final suspend fun setVolume(kotlin/Int) // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.setVolume|setVolume(kotlin.Int){}[0]
+    final suspend fun stop() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.stop|stop(){}[0]
+    open fun dispose() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.dispose|dispose(){}[0]
+    open fun use() // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.use|use(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest|null[0]
+        final const val DEFAULT_CONTENT_TYPE // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest.DEFAULT_CONTENT_TYPE|{}DEFAULT_CONTENT_TYPE[0]
+            final fun <get-DEFAULT_CONTENT_TYPE>(): kotlin/String // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest.DEFAULT_CONTENT_TYPE.<get-DEFAULT_CONTENT_TYPE>|<get-DEFAULT_CONTENT_TYPE>(){}[0]
+
+        final val id // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.cast/CastSenderPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
 open class tv.nomercy.player.core.plugins.embed/EmbedPlugin : tv.nomercy.player.core.plugin/Plugin<tv.nomercy.player.core.plugins.embed/EmbedOptions> { // tv.nomercy.player.core.plugins.embed/EmbedPlugin|null[0]
     constructor <init>(tv.nomercy.player.core.plugin/TransportCommands, tv.nomercy.player.core.plugin/VolumeCommands, tv.nomercy.player.core.ports/EmbedTransport? = ..., tv.nomercy.player.core.plugins.embed/EmbedOptions = ...) // tv.nomercy.player.core.plugins.embed/EmbedPlugin.<init>|<init>(tv.nomercy.player.core.plugin.TransportCommands;tv.nomercy.player.core.plugin.VolumeCommands;tv.nomercy.player.core.ports.EmbedTransport?;tv.nomercy.player.core.plugins.embed.EmbedOptions){}[0]
 
@@ -8904,6 +8955,33 @@ final object tv.nomercy.player.core.plugins.canvas/CanvasEvents { // tv.nomercy.
         final fun <get-Resized>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.canvas/CanvasSize> // tv.nomercy.player.core.plugins.canvas/CanvasEvents.Resized.<get-Resized>|<get-Resized>(){}[0]
     final val ResizedOnPlayer // tv.nomercy.player.core.plugins.canvas/CanvasEvents.ResizedOnPlayer|{}ResizedOnPlayer[0]
         final fun <get-ResizedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.canvas/CanvasSize> // tv.nomercy.player.core.plugins.canvas/CanvasEvents.ResizedOnPlayer.<get-ResizedOnPlayer>|<get-ResizedOnPlayer>(){}[0]
+}
+
+final object tv.nomercy.player.core.plugins.cast/CastSenderEventKeys { // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys|null[0]
+    final val Connected // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Connected|{}Connected[0]
+        final fun <get-Connected>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.Connected> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Connected.<get-Connected>|<get-Connected>(){}[0]
+    final val ConnectedOnPlayer // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.ConnectedOnPlayer|{}ConnectedOnPlayer[0]
+        final fun <get-ConnectedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.Connected> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.ConnectedOnPlayer.<get-ConnectedOnPlayer>|<get-ConnectedOnPlayer>(){}[0]
+    final val Disconnected // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Disconnected|{}Disconnected[0]
+        final fun <get-Disconnected>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Disconnected.<get-Disconnected>|<get-Disconnected>(){}[0]
+    final val DisconnectedOnPlayer // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.DisconnectedOnPlayer|{}DisconnectedOnPlayer[0]
+        final fun <get-DisconnectedOnPlayer>(): tv.nomercy.player.core.events/EventKey<kotlin/Unit> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.DisconnectedOnPlayer.<get-DisconnectedOnPlayer>|<get-DisconnectedOnPlayer>(){}[0]
+    final val Failed // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Failed|{}Failed[0]
+        final fun <get-Failed>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.Failed> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Failed.<get-Failed>|<get-Failed>(){}[0]
+    final val FailedOnPlayer // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.FailedOnPlayer|{}FailedOnPlayer[0]
+        final fun <get-FailedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.Failed> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.FailedOnPlayer.<get-FailedOnPlayer>|<get-FailedOnPlayer>(){}[0]
+    final val MediaChanged // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.MediaChanged|{}MediaChanged[0]
+        final fun <get-MediaChanged>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.MediaChanged> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.MediaChanged.<get-MediaChanged>|<get-MediaChanged>(){}[0]
+    final val MediaChangedOnPlayer // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.MediaChangedOnPlayer|{}MediaChangedOnPlayer[0]
+        final fun <get-MediaChangedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.MediaChanged> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.MediaChangedOnPlayer.<get-MediaChangedOnPlayer>|<get-MediaChangedOnPlayer>(){}[0]
+    final val RemoteState // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.RemoteState|{}RemoteState[0]
+        final fun <get-RemoteState>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.RemoteState> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.RemoteState.<get-RemoteState>|<get-RemoteState>(){}[0]
+    final val RemoteStateOnPlayer // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.RemoteStateOnPlayer|{}RemoteStateOnPlayer[0]
+        final fun <get-RemoteStateOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.RemoteState> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.RemoteStateOnPlayer.<get-RemoteStateOnPlayer>|<get-RemoteStateOnPlayer>(){}[0]
+    final val Unsupported // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Unsupported|{}Unsupported[0]
+        final fun <get-Unsupported>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.Unsupported> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.Unsupported.<get-Unsupported>|<get-Unsupported>(){}[0]
+    final val UnsupportedOnPlayer // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.UnsupportedOnPlayer|{}UnsupportedOnPlayer[0]
+        final fun <get-UnsupportedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.cast/CastSenderEvents.Unsupported> // tv.nomercy.player.core.plugins.cast/CastSenderEventKeys.UnsupportedOnPlayer.<get-UnsupportedOnPlayer>|<get-UnsupportedOnPlayer>(){}[0]
 }
 
 final object tv.nomercy.player.core.plugins.leader/TabLeaderEvents { // tv.nomercy.player.core.plugins.leader/TabLeaderEvents|null[0]

@@ -5345,6 +5345,22 @@ public final class tv/nomercy/player/core/plugins/cast/CastPlaybackState : java/
 	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
 }
 
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEventKeys {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/cast/CastSenderEventKeys;
+	public final fun getConnected ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getConnectedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getDisconnected ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getDisconnectedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getFailed ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getFailedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getMediaChanged ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getMediaChangedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getRemoteState ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getRemoteStateOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getUnsupported ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getUnsupportedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+}
+
 public abstract interface class tv/nomercy/player/core/plugins/cast/CastSenderEvents {
 }
 
@@ -5435,6 +5451,40 @@ public final class tv/nomercy/player/core/plugins/cast/CastSenderOptions {
 	public fun toString ()Ljava/lang/String;
 }
 
+public class tv/nomercy/player/core/plugins/cast/CastSenderPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field DEFAULT_CONTENT_TYPE Ljava/lang/String;
+	public static final field Manifest Ltv/nomercy/player/core/plugins/cast/CastSenderPlugin$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Ltv/nomercy/player/core/plugin/VolumeCommands;Ltv/nomercy/player/core/plugins/cast/CastSession;Ltv/nomercy/player/core/plugins/cast/CastSenderOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Ltv/nomercy/player/core/plugin/VolumeCommands;Ltv/nomercy/player/core/plugins/cast/CastSession;Ltv/nomercy/player/core/plugins/cast/CastSenderOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun cast (Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun disconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun dispose ()V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public synthetic fun getOptions ()Ljava/lang/Object;
+	public fun getOptions ()Ltv/nomercy/player/core/plugins/cast/CastSenderOptions;
+	public final fun isConnected ()Z
+	public final fun pause (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun remotePosition ()D
+	public final fun seekTo (DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setMuted (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun setVolume (ILkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun stop (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/cast/CastSenderTranslationKey : java/lang/Enum {
 	public static final field CASTING Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
 	public static final field CAST_TO Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
@@ -5448,6 +5498,15 @@ public final class tv/nomercy/player/core/plugins/cast/CastSenderTranslationKey 
 	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
 }
 
+public abstract interface class tv/nomercy/player/core/plugins/cast/CastSession : tv/nomercy/player/core/plugins/cast/CastTransport {
+	public abstract fun connect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun deviceName ()Ljava/lang/String;
+	public abstract fun disconnect (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun isConnected ()Z
+	public abstract fun load (Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun observe (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function0;
+}
+
 public final class tv/nomercy/player/core/plugins/cast/CastStreamType : java/lang/Enum {
 	public static final field BUFFERED Ltv/nomercy/player/core/plugins/cast/CastStreamType;
 	public static final field LIVE Ltv/nomercy/player/core/plugins/cast/CastStreamType;
@@ -5455,6 +5514,15 @@ public final class tv/nomercy/player/core/plugins/cast/CastStreamType : java/lan
 	public final fun getId ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastStreamType;
 	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+}
+
+public abstract interface class tv/nomercy/player/core/plugins/cast/CastTransport {
+	public abstract fun pause (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun seekTo (DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setMuted (ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun setVolume (DLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun stop (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public abstract interface class tv/nomercy/player/core/plugins/cast/ChromeCastMediaCtors {

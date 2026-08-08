@@ -108,12 +108,11 @@ class TypeSurfaceConformanceTest {
      * when this list is empty, and the number in the failure message is the only
      * honest answer to "how far along is it".
      *
-     * 28 of 203 at the time of writing, against a method-name check that read
-     * 94% on the same source. Methods are a name and an arity; these are what a
-     * consumer programs against.
+     * EMPTY. Every type the web trio exports has a counterpart here, and the
+     * fifteen in [webOnly] each name the native capability that replaces them.
+     * A gap appearing now fails the build on the day it appears.
      */
     private val notPortedYet: Set<String> = setOf(
-        "CastSenderPlugin",
     )
 
     @Test
