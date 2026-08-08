@@ -1248,6 +1248,30 @@ public final class tv/nomercy/player/core/dsp/EqBand {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/dsp/EqBandFrequency {
+}
+
+public final class tv/nomercy/player/core/dsp/EqBandFrequency$Hertz : tv/nomercy/player/core/dsp/EqBandFrequency {
+	public static final synthetic fun box-impl (I)Ltv/nomercy/player/core/dsp/EqBandFrequency$Hertz;
+	public static fun constructor-impl (I)I
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (ILjava/lang/Object;)Z
+	public static final fun equals-impl0 (II)Z
+	public final fun getValue ()I
+	public fun hashCode ()I
+	public static fun hashCode-impl (I)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (I)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()I
+}
+
+public final class tv/nomercy/player/core/dsp/EqBandFrequency$Preamp : tv/nomercy/player/core/dsp/EqBandFrequency {
+	public static final field INSTANCE Ltv/nomercy/player/core/dsp/EqBandFrequency$Preamp;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/dsp/EqBands {
 	public static final field INSTANCE Ltv/nomercy/player/core/dsp/EqBands;
 	public final fun getDEFAULT ()Ljava/util/List;
@@ -3619,13 +3643,64 @@ public final class tv/nomercy/player/core/player/AudioTrackState$Companion {
 	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/player/AudioTrackState;
 }
 
-public final class tv/nomercy/player/core/player/BackendLoaderState : java/lang/Enum {
-	public static final field PAUSED Ltv/nomercy/player/core/player/BackendLoaderState;
-	public static final field RUNNING Ltv/nomercy/player/core/player/BackendLoaderState;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getId ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/player/BackendLoaderState;
-	public static fun values ()[Ltv/nomercy/player/core/player/BackendLoaderState;
+public final class tv/nomercy/player/core/player/BasePlayerConfig {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/ports/LogLevel;Ltv/nomercy/player/core/ports/Logger;Ljava/lang/String;Ljava/lang/Double;Ltv/nomercy/player/core/ports/AuthConfig;Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ltv/nomercy/player/core/ports/Storage;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;ZZLjava/lang/Long;Ltv/nomercy/player/core/player/OfflineBehaviour;Ljava/util/List;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/LogLevel;Ltv/nomercy/player/core/ports/Logger;Ljava/lang/String;Ljava/lang/Double;Ltv/nomercy/player/core/ports/AuthConfig;Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ltv/nomercy/player/core/ports/Storage;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;ZZLjava/lang/Long;Ltv/nomercy/player/core/player/OfflineBehaviour;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/LogLevel;
+	public final fun component10 ()Ltv/nomercy/player/core/ports/Storage;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/lang/Long;
+	public final fun component13 ()Ljava/lang/Long;
+	public final fun component14 ()Z
+	public final fun component15 ()Z
+	public final fun component16 ()Ljava/lang/Long;
+	public final fun component17 ()Ltv/nomercy/player/core/player/OfflineBehaviour;
+	public final fun component18 ()Ljava/util/List;
+	public final fun component2 ()Ltv/nomercy/player/core/ports/Logger;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/Double;
+	public final fun component5 ()Ltv/nomercy/player/core/ports/AuthConfig;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/util/Map;
+	public final fun component8 ()Ltv/nomercy/player/core/ports/TranslationLoader;
+	public final fun component9 ()Lkotlin/jvm/functions/Function2;
+	public final fun copy (Ltv/nomercy/player/core/ports/LogLevel;Ltv/nomercy/player/core/ports/Logger;Ljava/lang/String;Ljava/lang/Double;Ltv/nomercy/player/core/ports/AuthConfig;Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ltv/nomercy/player/core/ports/Storage;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;ZZLjava/lang/Long;Ltv/nomercy/player/core/player/OfflineBehaviour;Ljava/util/List;)Ltv/nomercy/player/core/player/BasePlayerConfig;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/player/BasePlayerConfig;Ltv/nomercy/player/core/ports/LogLevel;Ltv/nomercy/player/core/ports/Logger;Ljava/lang/String;Ljava/lang/Double;Ltv/nomercy/player/core/ports/AuthConfig;Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ltv/nomercy/player/core/ports/Storage;Ljava/util/List;Ljava/lang/Long;Ljava/lang/Long;ZZLjava/lang/Long;Ltv/nomercy/player/core/player/OfflineBehaviour;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/player/BasePlayerConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAuth ()Ltv/nomercy/player/core/ports/AuthConfig;
+	public final fun getBaseUrl ()Ljava/lang/String;
+	public final fun getControls ()Z
+	public final fun getCueParsers ()Ljava/util/List;
+	public final fun getDefaultVolume ()Ljava/lang/Double;
+	public final fun getInactivityMs ()Ljava/lang/Long;
+	public final fun getLanguage ()Ljava/lang/String;
+	public final fun getLoadTranslations ()Ltv/nomercy/player/core/ports/TranslationLoader;
+	public final fun getLogLevel ()Ltv/nomercy/player/core/ports/LogLevel;
+	public final fun getLogger ()Ltv/nomercy/player/core/ports/Logger;
+	public final fun getMetricsIntervalMs ()Ljava/lang/Long;
+	public final fun getOnMissingTranslation ()Lkotlin/jvm/functions/Function2;
+	public final fun getOnOffline ()Ltv/nomercy/player/core/player/OfflineBehaviour;
+	public final fun getPauseWhenHidden ()Z
+	public final fun getPlugins ()Ljava/util/List;
+	public final fun getProgressIntervalMs ()Ljava/lang/Long;
+	public final fun getStorage ()Ltv/nomercy/player/core/ports/Storage;
+	public final fun getTranslations ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/player/BasePlaylistItem {
+	public abstract fun getId ()Ljava/lang/String;
+	public fun getImage ()Ljava/lang/String;
+	public fun getTitle ()Ljava/lang/String;
+	public fun getUrl ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/player/BasePlaylistItem$DefaultImpls {
+	public static fun getImage (Ltv/nomercy/player/core/player/BasePlaylistItem;)Ljava/lang/String;
+	public static fun getTitle (Ltv/nomercy/player/core/player/BasePlaylistItem;)Ljava/lang/String;
+	public static fun getUrl (Ltv/nomercy/player/core/player/BasePlaylistItem;)Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/player/BufferState : java/lang/Enum, tv/nomercy/player/core/player/TokenEnum {
@@ -3659,78 +3734,6 @@ public final class tv/nomercy/player/core/player/CastState : java/lang/Enum, tv/
 
 public final class tv/nomercy/player/core/player/CastState$Companion {
 	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/player/CastState;
-}
-
-public abstract interface class tv/nomercy/player/core/player/EqBandFrequency {
-}
-
-public final class tv/nomercy/player/core/player/EqBandFrequency$Hertz : tv/nomercy/player/core/player/EqBandFrequency {
-	public static final synthetic fun box-impl (I)Ltv/nomercy/player/core/player/EqBandFrequency$Hertz;
-	public static fun constructor-impl (I)I
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (ILjava/lang/Object;)Z
-	public static final fun equals-impl0 (II)Z
-	public final fun getValue ()I
-	public fun hashCode ()I
-	public static fun hashCode-impl (I)I
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (I)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()I
-}
-
-public final class tv/nomercy/player/core/player/EqBandFrequency$Preamp : tv/nomercy/player/core/player/EqBandFrequency {
-	public static final field INSTANCE Ltv/nomercy/player/core/player/EqBandFrequency$Preamp;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class tv/nomercy/player/core/player/MediaListEvent : java/lang/Enum {
-	public static final field APPEND Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field CHANGE Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field CLEAR Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field INSERT Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field ITEM Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field MOVE Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field PREPEND Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field REMOVE Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field SHUFFLE Ltv/nomercy/player/core/player/MediaListEvent;
-	public static final field SORT Ltv/nomercy/player/core/player/MediaListEvent;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public final fun getId ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/player/MediaListEvent;
-	public static fun values ()[Ltv/nomercy/player/core/player/MediaListEvent;
-}
-
-public abstract interface class tv/nomercy/player/core/player/MessageInput {
-	public abstract fun getText ()Ljava/lang/String;
-}
-
-public final class tv/nomercy/player/core/player/MessageInput$Text : tv/nomercy/player/core/player/MessageInput {
-	public static final synthetic fun box-impl (Ljava/lang/String;)Ltv/nomercy/player/core/player/MessageInput$Text;
-	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
-	public fun equals (Ljava/lang/Object;)Z
-	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
-	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
-	public fun getText ()Ljava/lang/String;
-	public fun hashCode ()I
-	public static fun hashCode-impl (Ljava/lang/String;)I
-	public fun toString ()Ljava/lang/String;
-	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
-	public final synthetic fun unbox-impl ()Ljava/lang/String;
-}
-
-public final class tv/nomercy/player/core/player/MessageInput$Timed : tv/nomercy/player/core/player/MessageInput {
-	public fun <init> (Ljava/lang/String;J)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()J
-	public final fun copy (Ljava/lang/String;J)Ltv/nomercy/player/core/player/MessageInput$Timed;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/player/MessageInput$Timed;Ljava/lang/String;JILjava/lang/Object;)Ltv/nomercy/player/core/player/MessageInput$Timed;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDurationMs ()J
-	public fun getText ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class tv/nomercy/player/core/player/MutationGuards {
@@ -3786,6 +3789,16 @@ public final class tv/nomercy/player/core/player/NetworkState : java/lang/Enum, 
 
 public final class tv/nomercy/player/core/player/NetworkState$Companion {
 	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/player/NetworkState;
+}
+
+public final class tv/nomercy/player/core/player/OfflineBehaviour : java/lang/Enum {
+	public static final field CONTINUE_BUFFERED Ltv/nomercy/player/core/player/OfflineBehaviour;
+	public static final field IGNORE Ltv/nomercy/player/core/player/OfflineBehaviour;
+	public static final field PAUSE Ltv/nomercy/player/core/player/OfflineBehaviour;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/player/OfflineBehaviour;
+	public static fun values ()[Ltv/nomercy/player/core/player/OfflineBehaviour;
 }
 
 public final class tv/nomercy/player/core/player/OfflinePolicy : java/lang/Enum, tv/nomercy/player/core/player/TokenEnum {
@@ -4126,6 +4139,14 @@ public final class tv/nomercy/player/core/player/WakeLockPolicy$Companion {
 	public final fun fromToken (Ljava/lang/String;)Ltv/nomercy/player/core/player/WakeLockPolicy;
 }
 
+public abstract interface class tv/nomercy/player/core/player/WithCurrentItem {
+	public abstract fun item ()Ltv/nomercy/player/core/player/BasePlaylistItem;
+	public abstract fun item (I)V
+	public abstract fun item (Ljava/lang/String;)V
+	public abstract fun item (Lkotlin/jvm/functions/Function1;)V
+	public abstract fun item (Ltv/nomercy/player/core/player/BasePlaylistItem;)V
+}
+
 public final class tv/nomercy/player/core/plugin/BrowseNode {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZ)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -4350,6 +4371,32 @@ public final class tv/nomercy/player/core/plugin/PluginAdvisoryNotice {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugin/PluginCtorWithId {
+	public fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;)V
+	public synthetic fun <init> (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/reflect/KClass;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/Integer;
+	public final fun copy (Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;)Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Lkotlin/reflect/KClass;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/lang/String;Ljava/lang/Integer;ILjava/lang/Object;)Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDescription ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getMinCoreVersion ()Ljava/lang/String;
+	public final fun getPriority ()Ljava/lang/Integer;
+	public final fun getReplaces ()Ljava/lang/String;
+	public final fun getRequires ()Ljava/util/List;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugin/PluginErrorCodes {
 	public static final field DISPOSE_FAILED Ljava/lang/String;
 	public static final field DUPLICATE_ID Ljava/lang/String;
@@ -4483,6 +4530,37 @@ public final class tv/nomercy/player/core/plugin/PluginRegistry {
 	public final fun remove (Ljava/lang/String;)V
 }
 
+public abstract interface class tv/nomercy/player/core/plugin/PluginSpec {
+	public abstract fun getPlugin ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginSpec$Bare : tv/nomercy/player/core/plugin/PluginSpec {
+	public static final synthetic fun box-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Ltv/nomercy/player/core/plugin/PluginSpec$Bare;
+	public static fun constructor-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Z
+	public fun getPlugin ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+}
+
+public final class tv/nomercy/player/core/plugin/PluginSpec$WithOptions : tv/nomercy/player/core/plugin/PluginSpec {
+	public fun <init> (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ljava/lang/Object;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ljava/lang/Object;)Ltv/nomercy/player/core/plugin/PluginSpec$WithOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugin/PluginSpec$WithOptions;Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ljava/lang/Object;ILjava/lang/Object;)Ltv/nomercy/player/core/plugin/PluginSpec$WithOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOpts ()Ljava/lang/Object;
+	public fun getPlugin ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugin/PluginState {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/Object;Ljava/util/Map;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZLjava/lang/Object;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -4501,6 +4579,40 @@ public final class tv/nomercy/player/core/plugin/PluginState {
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/plugin/RequireSpec {
+	public abstract fun getPlugin ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+}
+
+public final class tv/nomercy/player/core/plugin/RequireSpec$Detailed : tv/nomercy/player/core/plugin/RequireSpec {
+	public fun <init> (Ltv/nomercy/player/core/plugin/PluginCtorWithId;ZLjava/lang/String;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/PluginCtorWithId;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ltv/nomercy/player/core/plugin/PluginCtorWithId;ZLjava/lang/String;)Ltv/nomercy/player/core/plugin/RequireSpec$Detailed;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugin/RequireSpec$Detailed;Ltv/nomercy/player/core/plugin/PluginCtorWithId;ZLjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugin/RequireSpec$Detailed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMinVersion ()Ljava/lang/String;
+	public final fun getOptional ()Z
+	public fun getPlugin ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugin/RequireSpec$Required : tv/nomercy/player/core/plugin/RequireSpec {
+	public static final synthetic fun box-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Ltv/nomercy/player/core/plugin/RequireSpec$Required;
+	public static fun constructor-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ltv/nomercy/player/core/plugin/PluginCtorWithId;Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Z
+	public fun getPlugin ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ltv/nomercy/player/core/plugin/PluginCtorWithId;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ltv/nomercy/player/core/plugin/PluginCtorWithId;
 }
 
 public final class tv/nomercy/player/core/plugin/Requirement {
@@ -4632,6 +4744,58 @@ public final class tv/nomercy/player/core/plugins/audio/BeatReading {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBeat ()Ljava/lang/Boolean;
 	public final fun getBpm ()Ljava/lang/Double;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/plugins/audio/EqualizerEvents {
+}
+
+public final class tv/nomercy/player/core/plugins/audio/EqualizerEvents$BandChanged : tv/nomercy/player/core/plugins/audio/EqualizerEvents {
+	public fun <init> (Ltv/nomercy/player/core/dsp/EqBand;)V
+	public final fun component1 ()Ltv/nomercy/player/core/dsp/EqBand;
+	public final fun copy (Ltv/nomercy/player/core/dsp/EqBand;)Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$BandChanged;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$BandChanged;Ltv/nomercy/player/core/dsp/EqBand;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$BandChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBand ()Ltv/nomercy/player/core/dsp/EqBand;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/EqualizerEvents$Changed : tv/nomercy/player/core/plugins/audio/EqualizerEvents {
+	public fun <init> (Ljava/util/List;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$Changed;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$Changed;Ljava/util/List;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$Changed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBands ()Ljava/util/List;
+	public final fun getSelectedPreset ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/EqualizerEvents$PresetChanged : tv/nomercy/player/core/plugins/audio/EqualizerEvents {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$PresetChanged;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$PresetChanged;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$PresetChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/EqualizerEvents$Ready : tv/nomercy/player/core/plugins/audio/EqualizerEvents {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$Ready;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/EqualizerEvents$Saved : tv/nomercy/player/core/plugins/audio/EqualizerEvents {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/EqualizerEvents$Saved;
+	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -5071,6 +5235,10 @@ public final class tv/nomercy/player/core/plugins/canvas/CanvasPluginKt {
 	public static final field DEFAULT_CANVAS_FPS I
 }
 
+public abstract interface class tv/nomercy/player/core/plugins/canvas/CanvasRenderFn {
+	public abstract fun render (Ljava/lang/Object;DD)V
+}
+
 public abstract interface class tv/nomercy/player/core/plugins/canvas/CanvasRenderer {
 	public abstract fun render (Ljava/lang/Object;DD)V
 }
@@ -5097,6 +5265,203 @@ public final class tv/nomercy/player/core/plugins/canvas/CompositeMode : java/la
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/canvas/CompositeMode;
 	public static fun values ()[Ltv/nomercy/player/core/plugins/canvas/CompositeMode;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy : java/lang/Enum {
+	public static final field ORIGIN_SCOPED Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+	public static final field PAGE_SCOPED Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+	public static final field TAB_AND_ORIGIN_SCOPED Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastConfig {
+	public fun <init> ()V
+	public fun <init> (ZLjava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;ZLjava/lang/String;Ljava/lang/Long;)V
+	public synthetic fun <init> (ZLjava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;ZLjava/lang/String;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/Long;
+	public final fun copy (ZLjava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;ZLjava/lang/String;Ljava/lang/Long;)Ltv/nomercy/player/core/plugins/cast/CastConfig;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastConfig;ZLjava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;ZLjava/lang/String;Ljava/lang/Long;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastConfig;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAutoJoinPolicy ()Ltv/nomercy/player/core/plugins/cast/CastAutoJoinPolicy;
+	public final fun getAutoLoad ()Z
+	public final fun getLoadTimeoutMs ()Ljava/lang/Long;
+	public final fun getReceiverApplicationId ()Ljava/lang/String;
+	public final fun getResumeSavedSession ()Z
+	public final fun getScriptUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastMediaInfo {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;Ltv/nomercy/player/core/plugins/cast/CastStreamType;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;Ltv/nomercy/player/core/plugins/cast/CastStreamType;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;
+	public final fun component4 ()Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+	public final fun component5 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;Ltv/nomercy/player/core/plugins/cast/CastStreamType;Ljava/util/Map;)Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;Ljava/lang/String;Ljava/lang/String;Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;Ltv/nomercy/player/core/plugins/cast/CastStreamType;Ljava/util/Map;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContentId ()Ljava/lang/String;
+	public final fun getContentType ()Ljava/lang/String;
+	public final fun getExtras ()Ljava/util/Map;
+	public final fun getMetadata ()Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;
+	public final fun getStreamType ()Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastMediaMetadata {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;)Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getExtras ()Ljava/util/Map;
+	public final fun getTitle ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastPlaybackState : java/lang/Enum {
+	public static final field BUFFERING Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+	public static final field PAUSED Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+	public static final field PLAYING Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+}
+
+public abstract interface class tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEvents$Connected : tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Connected;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Connected;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Connected;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDeviceName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEvents$Disconnected : tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Disconnected;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEvents$Failed : tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+	public fun <init> (Ljava/lang/Throwable;)V
+	public final fun component1 ()Ljava/lang/Throwable;
+	public final fun copy (Ljava/lang/Throwable;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Failed;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEvents$MediaChanged : tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$MediaChanged;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$MediaChanged;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$MediaChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContentId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEvents$RemoteState : tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+	public fun <init> (DLtv/nomercy/player/core/plugins/cast/CastPlaybackState;)V
+	public final fun component1 ()D
+	public final fun component2 ()Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+	public final fun copy (DLtv/nomercy/player/core/plugins/cast/CastPlaybackState;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$RemoteState;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$RemoteState;DLtv/nomercy/player/core/plugins/cast/CastPlaybackState;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$RemoteState;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getState ()Ltv/nomercy/player/core/plugins/cast/CastPlaybackState;
+	public final fun getTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderEvents$Unsupported : tv/nomercy/player/core/plugins/cast/CastSenderEvents {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Unsupported;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Unsupported;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastSenderEvents$Unsupported;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;ZLjava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;ZLjava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Z
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;ZLjava/lang/String;Z)Ltv/nomercy/player/core/plugins/cast/CastSenderOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/cast/CastSenderOptions;Ljava/lang/String;ZLjava/lang/String;ZLjava/lang/String;ZILjava/lang/Object;)Ltv/nomercy/player/core/plugins/cast/CastSenderOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChromecastAppId ()Ljava/lang/String;
+	public final fun getCustomReceiverNamespace ()Ljava/lang/String;
+	public final fun getDefaultContentType ()Ljava/lang/String;
+	public final fun getEnableAirPlay ()Z
+	public final fun getLive ()Z
+	public final fun getResumeLocalOnDisconnect ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastSenderTranslationKey : java/lang/Enum {
+	public static final field CASTING Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static final field CAST_TO Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static final field CONNECTED_TO Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static final field CONNECTING Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static final field DISCONNECT Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static final field UNAVAILABLE Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getKey ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastSenderTranslationKey;
+}
+
+public final class tv/nomercy/player/core/plugins/cast/CastStreamType : java/lang/Enum {
+	public static final field BUFFERED Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+	public static final field LIVE Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+	public static fun values ()[Ltv/nomercy/player/core/plugins/cast/CastStreamType;
+}
+
+public abstract interface class tv/nomercy/player/core/plugins/cast/ChromeCastMediaCtors {
+	public abstract fun genericMediaMetadata ()Ltv/nomercy/player/core/plugins/cast/CastMediaMetadata;
+	public abstract fun loadRequest (Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;)Ljava/util/Map;
+	public abstract fun mediaInfo (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/plugins/cast/CastMediaInfo;
+	public abstract fun streamType (Ltv/nomercy/player/core/plugins/cast/CastStreamType;)Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/plugins/embed/EmbedAction : java/lang/Enum {
@@ -5474,6 +5839,37 @@ public final class tv/nomercy/player/core/plugins/message/Message {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/plugins/message/MessageInput {
+	public abstract fun getText ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/message/MessageInput$Text : tv/nomercy/player/core/plugins/message/MessageInput {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/message/MessageInput$Text;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/message/MessageInput$Timed : tv/nomercy/player/core/plugins/message/MessageInput {
+	public fun <init> (Ljava/lang/String;J)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun copy (Ljava/lang/String;J)Ltv/nomercy/player/core/plugins/message/MessageInput$Timed;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/message/MessageInput$Timed;Ljava/lang/String;JILjava/lang/Object;)Ltv/nomercy/player/core/plugins/message/MessageInput$Timed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationMs ()J
+	public fun getText ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/message/MessageOptions {
 	public fun <init> ()V
 	public fun <init> (J)V
@@ -5715,6 +6111,10 @@ public final class tv/nomercy/player/core/ports/AuthConfig {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/AuthHeaderProvider {
+	public abstract fun authorizationFor (Ljava/lang/String;)Ljava/lang/String;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/AuthHeaderValue {
 }
 
@@ -5748,6 +6148,61 @@ public final class tv/nomercy/player/core/ports/BackendEvents {
 	public static final field STREAM_ERROR Ljava/lang/String;
 	public static final field TIME_UPDATE Ljava/lang/String;
 	public static final field WAITING Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/BackendId {
+	public static final synthetic fun box-impl (Ljava/lang/String;)Ltv/nomercy/player/core/ports/BackendId;
+	public static fun constructor-impl (Ljava/lang/String;)Ljava/lang/String;
+	public fun equals (Ljava/lang/Object;)Z
+	public static fun equals-impl (Ljava/lang/String;Ljava/lang/Object;)Z
+	public static final fun equals-impl0 (Ljava/lang/String;Ljava/lang/String;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public static fun hashCode-impl (Ljava/lang/String;)I
+	public fun toString ()Ljava/lang/String;
+	public static fun toString-impl (Ljava/lang/String;)Ljava/lang/String;
+	public final synthetic fun unbox-impl ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/BackendLifecycleBridgeOptions {
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/util/List;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun component2 ()Lkotlin/jvm/functions/Function1;
+	public final fun component3 ()Lkotlin/jvm/functions/Function0;
+	public final fun component4 ()Lkotlin/jvm/functions/Function0;
+	public final fun component5 ()Lkotlin/jvm/functions/Function0;
+	public final fun component6 ()Lkotlin/jvm/functions/Function0;
+	public final fun component7 ()Lkotlin/jvm/functions/Function0;
+	public final fun component8 ()Lkotlin/jvm/functions/Function0;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/util/List;)Ltv/nomercy/player/core/ports/BackendLifecycleBridgeOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/BackendLifecycleBridgeOptions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/util/List;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/BackendLifecycleBridgeOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOnPause ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnPlay ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnPlayEvent ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnPlaying ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnReset ()Lkotlin/jvm/functions/Function0;
+	public final fun getPauseGuard ()Lkotlin/jvm/functions/Function0;
+	public final fun getResetEvents ()Ljava/util/List;
+	public final fun getSetPlaying ()Lkotlin/jvm/functions/Function1;
+	public fun hashCode ()I
+	public final fun isPlaying ()Lkotlin/jvm/functions/Function0;
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/BackendLifecycleSource {
+	public abstract fun on (Ltv/nomercy/player/core/ports/MinimalBackendEvent;Lkotlin/jvm/functions/Function1;)V
+}
+
+public final class tv/nomercy/player/core/ports/BackendLoaderState : java/lang/Enum {
+	public static final field PAUSED Ltv/nomercy/player/core/ports/BackendLoaderState;
+	public static final field RUNNING Ltv/nomercy/player/core/ports/BackendLoaderState;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/BackendLoaderState;
+	public static fun values ()[Ltv/nomercy/player/core/ports/BackendLoaderState;
 }
 
 public final class tv/nomercy/player/core/ports/BackendState : java/lang/Enum {
@@ -6044,6 +6499,18 @@ public final class tv/nomercy/player/core/ports/DefaultPreloadStrategy : tv/nome
 	public fun shouldPreload (Ltv/nomercy/player/core/ports/PreloadContext;)Z
 }
 
+public abstract interface class tv/nomercy/player/core/ports/DefaultTranslator {
+	public abstract fun addTranslations (Ljava/lang/String;Ljava/util/Map;)V
+	public abstract fun language ()Ljava/lang/String;
+	public abstract fun setLanguage (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public abstract fun translate (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public static synthetic fun translate$default (Ltv/nomercy/player/core/ports/DefaultTranslator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/DefaultTranslator$DefaultImpls {
+	public static synthetic fun translate$default (Ltv/nomercy/player/core/ports/DefaultTranslator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/ports/DefaultTranslatorOptions {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;)V
@@ -6221,6 +6688,10 @@ public final class tv/nomercy/player/core/ports/ExternalRoute {
 	public final fun getName ()Ljava/lang/String;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/Fetch {
+	public abstract fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class tv/nomercy/player/core/ports/FetchOptions {
@@ -6496,6 +6967,23 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
+public final class tv/nomercy/player/core/ports/MediaListEvent : java/lang/Enum {
+	public static final field APPEND Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field CHANGE Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field CLEAR Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field INSERT Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field ITEM Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field MOVE Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field PREPEND Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field REMOVE Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field SHUFFLE Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static final field SORT Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/MediaListEvent;
+	public static fun values ()[Ltv/nomercy/player/core/ports/MediaListEvent;
+}
+
 public final class tv/nomercy/player/core/ports/MethodOverride {
 	public static final field CONSUMER Ljava/lang/String;
 	public static final field Companion Ltv/nomercy/player/core/ports/MethodOverride$Companion;
@@ -6512,6 +7000,40 @@ public final class tv/nomercy/player/core/ports/MethodOverride {
 }
 
 public final class tv/nomercy/player/core/ports/MethodOverride$Companion {
+}
+
+public final class tv/nomercy/player/core/ports/MinimalBackendEvent : java/lang/Enum {
+	public static final field CAN_PLAY Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field ENCRYPTED Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field ENDED Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field ERROR Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field LOADED_METADATA Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field LOAD_START Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field PAUSE Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field PLAY Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field PLAYING Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field RATE_CHANGE Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field STALLED Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field TIME_UPDATE Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static final field WAITING Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public static fun values ()[Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+}
+
+public final class tv/nomercy/player/core/ports/MinimalBackendEventPayload {
+	public fun <init> (Ltv/nomercy/player/core/ports/MinimalBackendEvent;Ljava/lang/Object;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MinimalBackendEvent;Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Ltv/nomercy/player/core/ports/MinimalBackendEvent;Ljava/lang/Object;)Ltv/nomercy/player/core/ports/MinimalBackendEventPayload;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/MinimalBackendEventPayload;Ltv/nomercy/player/core/ports/MinimalBackendEvent;Ljava/lang/Object;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/MinimalBackendEventPayload;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ljava/lang/Object;
+	public final fun getEvent ()Ltv/nomercy/player/core/ports/MinimalBackendEvent;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/player/core/ports/AudioBackend {
@@ -6624,6 +7146,10 @@ public final class tv/nomercy/player/core/ports/NetworkSnapshot {
 	public final fun getType ()Ltv/nomercy/player/core/ports/NetworkType;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/NetworkTranslationLoader {
+	public abstract fun load (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
 public final class tv/nomercy/player/core/ports/NetworkTranslationLoaderOptions {
@@ -6772,6 +7298,16 @@ public final class tv/nomercy/player/core/ports/PlatformEnvironment {
 
 public final class tv/nomercy/player/core/ports/PlatformKt {
 	public static final fun defaultPlatform ()Ltv/nomercy/player/core/ports/Platform;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/PlayerBackend {
+	public fun mediaElement ()Ljava/lang/Object;
+	public fun outputNode ()Ljava/lang/Object;
+}
+
+public final class tv/nomercy/player/core/ports/PlayerBackend$DefaultImpls {
+	public static fun mediaElement (Ltv/nomercy/player/core/ports/PlayerBackend;)Ljava/lang/Object;
+	public static fun outputNode (Ltv/nomercy/player/core/ports/PlayerBackend;)Ljava/lang/Object;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/PlayerExperimental {
@@ -7071,6 +7607,41 @@ public final class tv/nomercy/player/core/ports/StreamCapabilities {
 	public fun toString ()Ljava/lang/String;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/StreamErrorPayload {
+}
+
+public final class tv/nomercy/player/core/ports/StreamErrorPayload$Media : tv/nomercy/player/core/ports/StreamErrorPayload {
+	public fun <init> (ILjava/lang/String;)V
+	public synthetic fun <init> (ILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;)Ltv/nomercy/player/core/ports/StreamErrorPayload$Media;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamErrorPayload$Media;ILjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamErrorPayload$Media;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()I
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamErrorPayload$Stream : tv/nomercy/player/core/ports/StreamErrorPayload {
+	public fun <init> (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Z
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamErrorPayload$Stream;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamErrorPayload$Stream;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamErrorPayload$Stream;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFatal ()Z
+	public final fun getKind ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/ports/StreamEvent : java/lang/Enum {
 	public static final field Companion Ltv/nomercy/player/core/ports/StreamEvent$Companion;
 	public static final field ENCRYPTED Ltv/nomercy/player/core/ports/StreamEvent;
@@ -7087,6 +7658,86 @@ public final class tv/nomercy/player/core/ports/StreamEvent : java/lang/Enum {
 
 public final class tv/nomercy/player/core/ports/StreamEvent$Companion {
 	public final fun of (Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamEvent;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public abstract fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+}
+
+public final class tv/nomercy/player/core/ports/StreamEventPayloadMap$Encrypted : tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$Encrypted;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamEventPayloadMap$Encrypted;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$Encrypted;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+	public final fun getKeySystem ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamEventPayloadMap$Failed : tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public fun <init> (Ltv/nomercy/player/core/ports/StreamErrorPayload;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/StreamErrorPayload;
+	public final fun copy (Ltv/nomercy/player/core/ports/StreamErrorPayload;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$Failed;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamEventPayloadMap$Failed;Ltv/nomercy/player/core/ports/StreamErrorPayload;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$Failed;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ltv/nomercy/player/core/ports/StreamErrorPayload;
+	public fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamEventPayloadMap$FragmentLoaded : tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public fun <init> (Ljava/lang/String;Ljava/lang/Double;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;Ljava/lang/Double;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$FragmentLoaded;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamEventPayloadMap$FragmentLoaded;Ljava/lang/String;Ljava/lang/Double;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$FragmentLoaded;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDurationSeconds ()Ljava/lang/Double;
+	public fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamEventPayloadMap$LevelConsidered : tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public fun <init> (ILjava/lang/String;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (ILjava/lang/String;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$LevelConsidered;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamEventPayloadMap$LevelConsidered;ILjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$LevelConsidered;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+	public final fun getLevel ()I
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamEventPayloadMap$LevelSwitched : tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public fun <init> (ILjava/lang/Integer;Ljava/lang/Integer;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/lang/Integer;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun copy (ILjava/lang/Integer;Ljava/lang/Integer;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$LevelSwitched;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/StreamEventPayloadMap$LevelSwitched;ILjava/lang/Integer;Ljava/lang/Integer;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/StreamEventPayloadMap$LevelSwitched;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBitrate ()Ljava/lang/Integer;
+	public fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+	public final fun getHeight ()Ljava/lang/Integer;
+	public final fun getLevel ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/StreamEventPayloadMap$ManifestLoaded : tv/nomercy/player/core/ports/StreamEventPayloadMap {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/StreamEventPayloadMap$ManifestLoaded;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getEvent ()Ltv/nomercy/player/core/ports/StreamEvent;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/StreamFactory {

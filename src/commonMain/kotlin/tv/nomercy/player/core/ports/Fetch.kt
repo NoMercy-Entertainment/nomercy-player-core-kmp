@@ -8,6 +8,22 @@
 
 package tv.nomercy.player.core.ports
 
+/**
+ * The player's own HTTP requests.
+ *
+ * Suspending rather than callback-based, because every caller is already inside
+ * a coroutine and a callback would make each one build its own bridge back —
+ * several bridges, several ways of handling a cancellation.
+ *
+ * This is what the PLAYER fetches: manifests it parses itself, subtitles,
+ * artwork, translations. Media segments never come through here on a native
+ * engine — the engine downloads those itself, which is what AuthHeaderProvider
+ * exists for.
+ */
+public fun interface Fetch {
+    public suspend fun fetch(url: String, options: FetchOptions): FetchResponse
+}
+
 // One HTTP request, as much of it as a plugin is allowed to decide. The token,
 // the refresh-and-retry and the base URL are the host's business, which is why
 // there is no auth header here for a plugin to get wrong.

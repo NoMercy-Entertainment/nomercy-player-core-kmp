@@ -65,6 +65,13 @@ class TypeSurfaceConformanceTest {
         "MediaElementBackend" to "VideoBackend; per-engine actual replaces it",
         "DomBridgeHandler" to "no DOM to bridge to",
 
+        // The event map. The web's BaseEventMap pairs each event NAME with its
+        // payload type at compile time; here that pairing is CoreEvents, whose
+        // every entry is an EventKey<Payload>. Same guarantee, expressed the way
+        // Kotlin expresses it — a listener still cannot subscribe to `time` and
+        // receive a track.
+        "BaseEventMap" to "CoreEvents: EventKey<Payload> per event",
+
         // Vite's import.meta.glob. Kotlin has no build-time module glob; the
         // translator loads from resources.
         "GlobModule" to NO_MODULE_GLOB,
@@ -106,34 +113,7 @@ class TypeSurfaceConformanceTest {
      * consumer programs against.
      */
     private val notPortedYet: Set<String> = setOf(
-        "AuthHeaderProvider",
-        "BackendId",
-        "BackendLifecycleBridgeOptions",
-        "BackendLifecycleSource",
-        "BaseEventMap",
-        "BasePlayerConfig",
-        "BasePlaylistItem",
-        "CanvasRenderFn",
-        "CastConfig",
-        "CastMediaInfo",
-        "CastMediaMetadata",
-        "CastSenderEvents",
-        "CastSenderOptions",
         "CastSenderPlugin",
-        "CastSenderTranslationKey",
-        "ChromeCastMediaCtors",
-        "DefaultTranslator",
-        "EqualizerEvents",
-        "IFetch",
-        "IPlayerBackend",
-        "MinimalBackendEventPayload",
-        "NetworkTranslationLoader",
-        "PluginCtorWithId",
-        "PluginSpec",
-        "RequireSpec",
-        "StreamErrorPayload",
-        "StreamEventPayloadMap",
-        "WithCurrentItem",
     )
 
     @Test

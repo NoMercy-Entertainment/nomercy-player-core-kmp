@@ -8,8 +8,6 @@
 
 package tv.nomercy.player.core.plugins.embed
 
-import tv.nomercy.player.core.errors.ErrorScope
-import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.player.ActionOptions
 
 /**
@@ -60,38 +58,3 @@ public sealed interface EmbedForwardedEvent {
         override val name: String = "error"
     }
 }
-
-/**
- * One forwarded event on the wire.
- *
- * [type] is fixed and is the whole point of it: a host page receives messages
- * from every frame and every script on it, and a discriminator it can check
- * first is what stops it parsing somebody else's traffic as ours.
- */
-public data class EmbedEventMessage(
-    val name: String,
-    val data: EmbedForwardedEvent,
-) {
-    public val type: String = EVENT_TYPE
-
-    public companion object {
-        public const val EVENT_TYPE: String = "nm:event"
-    }
-}
-
-/**
- * A player error, flattened for a host that cannot receive an exception.
- *
- * [context] is a map of strings rather than the error's own payload, because
- * this crosses to another origin: an object graph carrying engine handles or a
- * file path is a leak, and one that cannot be serialised silently becomes the
- * empty object on the far side.
- */
-public data class EmbedSerializedError(
-    val code: String,
-    val severity: Severity,
-    val scope: ErrorScope,
-    val message: String? = null,
-    val suggestion: String? = null,
-    val context: Map<String, String> = emptyMap(),
-)

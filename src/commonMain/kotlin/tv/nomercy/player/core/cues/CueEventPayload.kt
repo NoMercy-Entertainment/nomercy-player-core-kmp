@@ -27,15 +27,3 @@ public data class CueWindow(
     val end: Double,
     val payload: Any?,
 )
-
-/**
- * One word of a lyric line, with when it lands.
- *
- * Word timings are what make a lyric highlight follow the singer rather than
- * jump a line at a time, and they are per word because that is the resolution
- * the format carries.
- */
-public data class LrcWordCue(
-    val start: Double,
-    val text: String,
-)
