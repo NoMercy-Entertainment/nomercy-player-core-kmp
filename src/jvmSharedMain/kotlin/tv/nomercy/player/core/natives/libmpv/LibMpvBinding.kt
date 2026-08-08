@@ -143,7 +143,7 @@ public interface LibMpv : Library {
         public val SONAME: String = when {
             System.getProperty("os.name").startsWith("Windows", ignoreCase = true) -> "libmpv-2"
             System.getProperty("os.name").startsWith("Mac", ignoreCase = true) -> "mpv.2"
-            HostPlatform.current() == HostPlatform.ANDROID_ARM64 -> "mpv"
+            HostPlatform.isAndroid() -> "mpv"
             else -> "mpv.so.2"
         }
 
@@ -157,6 +157,11 @@ public interface LibMpv : Library {
         // finds them by soname afterwards. Order matters — a library loaded
         // before the one it needs fails on its own DT_NEEDED.
         private val ANDROID_DEPENDENCIES: List<String> = listOf(
+            // The NDK's C++ runtime first, because everything else needs it and
+            // nothing on the device provides it. mpv-android links it
+            // dynamically, so libmpv.so carries a DT_NEEDED that fails with a
+            // message naming a library no Android system has ever had.
+            "libc++_shared.so",
             "libavutil.so",
             "libswresample.so",
             "libswscale.so",
@@ -182,7 +187,7 @@ public interface LibMpv : Library {
             NativeRuntimes.directory(NativeRuntimeKind.LIB_MPV)?.let { payload ->
                 NativeLibrary.addSearchPath(SONAME, payload.absolutePath)
 
-                if (HostPlatform.current() == HostPlatform.ANDROID_ARM64) {
+                if (HostPlatform.isAndroid()) {
                     ANDROID_DEPENDENCIES.forEach { name ->
                         val library: java.io.File = java.io.File(payload, name)
                         if (library.isFile) System.load(library.absolutePath)

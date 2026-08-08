@@ -49,7 +49,7 @@
       "kind": "LIB_MPV",
       "platform": "ANDROID_ARM64",
       "version": "0.41.0",
-      "sha256": "ced3bd0d0e7be92c0f244f91989114b4f04589c2c34b26d59476f9d3462b24a4",
+      "sha256": "eda13cb2f521efca184e2a399e30ed510c3510e0e8760f93404cd193e8bd38ff",
       "marker": "libmpv.so",
       "bundle": true
     },

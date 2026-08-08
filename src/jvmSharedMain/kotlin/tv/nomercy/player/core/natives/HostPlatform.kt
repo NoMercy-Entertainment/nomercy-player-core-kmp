@@ -23,6 +23,7 @@ public enum class HostPlatform(public val id: String) {
     MACOS_X64("macos-x64"),
     MACOS_ARM64("macos-arm64"),
     ANDROID_ARM64("android-arm64"),
+    ANDROID_ARM("android-arm"),
     ;
 
     public companion object {
@@ -45,8 +46,12 @@ public enum class HostPlatform(public val id: String) {
             // the desktop payload, whose libraries are linked against glibc and
             // load on nothing. The VM is what tells them apart: ART still
             // reports itself as Dalvik.
-            if (vmName.contains("dalvik", ignoreCase = true) || vmName.contains("art", ignoreCase = true)) {
-                return if (arch == Arch.ARM64) ANDROID_ARM64 else null
+            if (isAndroid(vmName)) {
+                return when (arch) {
+                    Arch.ARM64 -> ANDROID_ARM64
+                    Arch.ARM -> ANDROID_ARM
+                    else -> null
+                }
             }
 
             return when {
@@ -65,9 +70,21 @@ public enum class HostPlatform(public val id: String) {
         private fun archOf(osArch: String): Arch? = when (osArch) {
             "amd64", "x86_64", "x64" -> Arch.X64
             "aarch64", "arm64" -> Arch.ARM64
+            // 32-bit ARM, which is most of the Android fleet and not a rarity:
+            // of three devices on this desk two are armeabi-v7a only — a Galaxy
+            // A13 and a Nokia streaming box. A phone reporting this and getting
+            // null was the whole payload silently unavailable.
+            "arm", "armv7l", "armv7", "aarch32" -> Arch.ARM
             else -> null
         }
+
+        // ART still answers "Dalvik" for java.vm.name, and has since KitKat.
+        // Exposed because the library loader needs the same answer BEFORE a
+        // platform can be resolved — asking HostPlatform there was circular and
+        // produced a library name of "libmpv.so.2.so".
+        internal fun isAndroid(vmName: String = System.getProperty("java.vm.name").orEmpty()): Boolean =
+            vmName.contains("dalvik", ignoreCase = true) || vmName.contains("art", ignoreCase = true)
     }
 
-    private enum class Arch { X64, ARM64 }
+    private enum class Arch { X64, ARM64, ARM }
 }

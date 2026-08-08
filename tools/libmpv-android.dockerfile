@@ -93,6 +93,14 @@ RUN mkdir -p /payload && \
       | xargs -0 -I{} cp -n {} /payload/ 2>/dev/null; \
     test -f /payload/libmpv.so
 
+# libc++_shared, out of the NDK that built them.
+#
+# mpv-android links against the NDK's C++ runtime rather than statically, so
+# libmpv.so carries a DT_NEEDED for it and an app that does not ship one gets
+# `dlopen failed: library "libc++_shared.so" not found` — measured on a phone,
+# after the payload had already extracted correctly.
+RUN find / -name "libc++_shared.so" -path "*${ABIS}*" -o -name "libc++_shared.so" -path "*aarch64*"       | head -1 | xargs -I{} cp {} /payload/ &&     test -f /payload/libc++_shared.so
+
 # Stripped here, where the NDK that produced them is, rather than on the host.
 #
 # Unstripped the set is 108 MB against 30 MB stripped, and the debug information

@@ -150,8 +150,33 @@ internal object NativePayloadStore {
     // share the same libVLC rather than unpacking sixty megabytes each, and a
     // per-application directory under Program Files would need an installer and
     // administrator rights to write.
+    // Reflected rather than imported, because this file is shared with the JVM
+    // target where android.content.Context does not exist. The alternative is a
+    // second copy of the whole store per target, which is how two copies of one
+    // rule start disagreeing.
+    private fun androidCacheRoot(): File? {
+        if (!HostPlatform.isAndroid()) return null
+
+        return runCatching {
+            val environment = Class.forName("tv.nomercy.player.core.ports.PlatformEnvironment")
+            val instance = environment.getField("INSTANCE").get(null)
+            val context = environment.getMethod("requireContext").invoke(instance)
+            val android = context.javaClass.getMethod("getAndroidContext").invoke(context)
+            android.javaClass.getMethod("getCacheDir").invoke(android) as File
+        }.getOrNull()
+    }
+
     private fun cacheRoot(): File {
         System.getProperty("nomercy.player.natives.cache")?.let { override -> return File(override) }
+
+        // Android has no home directory, and the XDG branch below would resolve
+        // to "/.cache/nomercy/player-natives" — the filesystem ROOT, which an
+        // app cannot write to. Measured on a phone: the payload was packaged,
+        // the platform resolved, and the install failed on a lock file at "/".
+        // An app's own cache directory is the only place it may write, and
+        // dlopen from there is allowed.
+        androidCacheRoot()?.let { cache -> return File(cache, "natives") }
+
         val home: String = System.getProperty("user.home")
         val os: String = System.getProperty("os.name").orEmpty().lowercase()
         return when {

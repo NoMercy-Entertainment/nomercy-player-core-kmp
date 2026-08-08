@@ -3396,6 +3396,7 @@ public final class tv/nomercy/player/core/media/UsableRung {
 }
 
 public final class tv/nomercy/player/core/natives/HostPlatform : java/lang/Enum {
+	public static final field ANDROID_ARM Ltv/nomercy/player/core/natives/HostPlatform;
 	public static final field ANDROID_ARM64 Ltv/nomercy/player/core/natives/HostPlatform;
 	public static final field Companion Ltv/nomercy/player/core/natives/HostPlatform$Companion;
 	public static final field LINUX_ARM64 Ltv/nomercy/player/core/natives/HostPlatform;
