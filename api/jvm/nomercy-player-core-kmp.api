@@ -4974,6 +4974,25 @@ public final class tv/nomercy/player/core/plugins/embed/EmbedCommand {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/embed/EmbedEventMessage {
+	public static final field Companion Ltv/nomercy/player/core/plugins/embed/EmbedEventMessage$Companion;
+	public static final field EVENT_TYPE Ljava/lang/String;
+	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent;
+	public final fun copy (Ljava/lang/String;Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent;)Ltv/nomercy/player/core/plugins/embed/EmbedEventMessage;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedEventMessage;Ljava/lang/String;Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedEventMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getData ()Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedEventMessage$Companion {
+}
+
 public final class tv/nomercy/player/core/plugins/embed/EmbedEventName : java/lang/Enum {
 	public static final field ENDED Ltv/nomercy/player/core/plugins/embed/EmbedEventName;
 	public static final field ERROR Ltv/nomercy/player/core/plugins/embed/EmbedEventName;
@@ -4987,6 +5006,102 @@ public final class tv/nomercy/player/core/plugins/embed/EmbedEventName : java/la
 	public final fun getWire ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/embed/EmbedEventName;
 	public static fun values ()[Ltv/nomercy/player/core/plugins/embed/EmbedEventName;
+}
+
+public abstract interface class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public abstract fun getName ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Ended : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Ended;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Error : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public fun <init> (Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;
+	public final fun copy (Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Error;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Error;Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Error;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Mute : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public fun <init> (Z)V
+	public final fun component1 ()Z
+	public final fun copy (Z)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Mute;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Mute;ZILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Mute;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMuted ()Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Pause : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/player/ActionOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/player/ActionOptions;
+	public final fun copy (Ltv/nomercy/player/core/player/ActionOptions;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Pause;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Pause;Ltv/nomercy/player/core/player/ActionOptions;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Pause;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public final fun getOptions ()Ltv/nomercy/player/core/player/ActionOptions;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Play : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/player/ActionOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/player/ActionOptions;
+	public final fun copy (Ltv/nomercy/player/core/player/ActionOptions;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Play;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Play;Ltv/nomercy/player/core/player/ActionOptions;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Play;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public final fun getOptions ()Ltv/nomercy/player/core/player/ActionOptions;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Ready : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Ready;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Time : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Time;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Time;DILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Time;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getName ()Ljava/lang/String;
+	public final fun getTime ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Volume : tv/nomercy/player/core/plugins/embed/EmbedForwardedEvent {
+	public fun <init> (D)V
+	public final fun component1 ()D
+	public final fun copy (D)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Volume;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Volume;DILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedForwardedEvent$Volume;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLevel ()D
+	public fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/plugins/embed/EmbedOptions {
@@ -5037,6 +5152,28 @@ public final class tv/nomercy/player/core/plugins/embed/EmbedProtocolKt {
 	public static final field EMBED_COMMAND_TYPE Ljava/lang/String;
 	public static final field EMBED_EVENT_TYPE Ljava/lang/String;
 	public static final fun getDEFAULT_EMBED_EVENTS ()Ljava/util/List;
+}
+
+public final class tv/nomercy/player/core/plugins/embed/EmbedSerializedError {
+	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ltv/nomercy/player/core/errors/ErrorScope;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)V
+	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ltv/nomercy/player/core/errors/ErrorScope;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ltv/nomercy/player/core/errors/Severity;
+	public final fun component3 ()Ltv/nomercy/player/core/errors/ErrorScope;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/util/Map;
+	public final fun copy (Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ltv/nomercy/player/core/errors/ErrorScope;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;)Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;Ljava/lang/String;Ltv/nomercy/player/core/errors/Severity;Ltv/nomercy/player/core/errors/ErrorScope;Ljava/lang/String;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/embed/EmbedSerializedError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getContext ()Ljava/util/Map;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getScope ()Ltv/nomercy/player/core/errors/ErrorScope;
+	public final fun getSeverity ()Ltv/nomercy/player/core/errors/Severity;
+	public final fun getSuggestion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/plugins/keys/KeyHandlerOptions {

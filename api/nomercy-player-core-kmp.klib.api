@@ -1570,6 +1570,119 @@ sealed interface tv.nomercy.player.core.plugins.audio/VisualizationEvents { // t
     }
 }
 
+sealed interface tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent|null[0]
+    abstract val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.name|{}name[0]
+        abstract fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.name.<get-name>|<get-name>(){}[0]
+
+    final class Error : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error|null[0]
+        constructor <init>(tv.nomercy.player.core.plugins.embed/EmbedSerializedError) // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.<init>|<init>(tv.nomercy.player.core.plugins.embed.EmbedSerializedError){}[0]
+
+        final val error // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.error|{}error[0]
+            final fun <get-error>(): tv.nomercy.player.core.plugins.embed/EmbedSerializedError // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.error.<get-error>|<get-error>(){}[0]
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.name.<get-name>|<get-name>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.plugins.embed/EmbedSerializedError // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.component1|component1(){}[0]
+        final fun copy(tv.nomercy.player.core.plugins.embed/EmbedSerializedError = ...): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.copy|copy(tv.nomercy.player.core.plugins.embed.EmbedSerializedError){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Error.toString|toString(){}[0]
+    }
+
+    final class Mute : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute|null[0]
+        constructor <init>(kotlin/Boolean) // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.<init>|<init>(kotlin.Boolean){}[0]
+
+        final val muted // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.muted|{}muted[0]
+            final fun <get-muted>(): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.muted.<get-muted>|<get-muted>(){}[0]
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.name.<get-name>|<get-name>(){}[0]
+
+        final fun component1(): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.component1|component1(){}[0]
+        final fun copy(kotlin/Boolean = ...): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.copy|copy(kotlin.Boolean){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Mute.toString|toString(){}[0]
+    }
+
+    final class Pause : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause|null[0]
+        constructor <init>(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.<init>|<init>(tv.nomercy.player.core.player.ActionOptions){}[0]
+
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.name.<get-name>|<get-name>(){}[0]
+        final val options // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.options|{}options[0]
+            final fun <get-options>(): tv.nomercy.player.core.player/ActionOptions // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.options.<get-options>|<get-options>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.player/ActionOptions // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.component1|component1(){}[0]
+        final fun copy(tv.nomercy.player.core.player/ActionOptions = ...): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.copy|copy(tv.nomercy.player.core.player.ActionOptions){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Pause.toString|toString(){}[0]
+    }
+
+    final class Play : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play|null[0]
+        constructor <init>(tv.nomercy.player.core.player/ActionOptions = ...) // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.<init>|<init>(tv.nomercy.player.core.player.ActionOptions){}[0]
+
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.name.<get-name>|<get-name>(){}[0]
+        final val options // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.options|{}options[0]
+            final fun <get-options>(): tv.nomercy.player.core.player/ActionOptions // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.options.<get-options>|<get-options>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.player/ActionOptions // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.component1|component1(){}[0]
+        final fun copy(tv.nomercy.player.core.player/ActionOptions = ...): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.copy|copy(tv.nomercy.player.core.player.ActionOptions){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Play.toString|toString(){}[0]
+    }
+
+    final class Time : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time|null[0]
+        constructor <init>(kotlin/Double) // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.<init>|<init>(kotlin.Double){}[0]
+
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.name.<get-name>|<get-name>(){}[0]
+        final val time // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.time|{}time[0]
+            final fun <get-time>(): kotlin/Double // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.time.<get-time>|<get-time>(){}[0]
+
+        final fun component1(): kotlin/Double // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.component1|component1(){}[0]
+        final fun copy(kotlin/Double = ...): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.copy|copy(kotlin.Double){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Time.toString|toString(){}[0]
+    }
+
+    final class Volume : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume|null[0]
+        constructor <init>(kotlin/Double) // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.<init>|<init>(kotlin.Double){}[0]
+
+        final val level // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.level|{}level[0]
+            final fun <get-level>(): kotlin/Double // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.level.<get-level>|<get-level>(){}[0]
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.name.<get-name>|<get-name>(){}[0]
+
+        final fun component1(): kotlin/Double // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.component1|component1(){}[0]
+        final fun copy(kotlin/Double = ...): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.copy|copy(kotlin.Double){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Volume.toString|toString(){}[0]
+    }
+
+    final object Ended : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ended|null[0]
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ended.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ended.name.<get-name>|<get-name>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ended.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ended.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ended.toString|toString(){}[0]
+    }
+
+    final object Ready : tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent { // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ready|null[0]
+        final val name // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ready.name|{}name[0]
+            final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ready.name.<get-name>|<get-name>(){}[0]
+
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ready.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ready.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent.Ready.toString|toString(){}[0]
+    }
+}
+
 sealed interface tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState|null[0]
     final class Available : tv.nomercy.player.core.ports/ExternalPlaybackState { // tv.nomercy.player.core.ports/ExternalPlaybackState.Available|null[0]
         constructor <init>(kotlin/Boolean, tv.nomercy.player.core.ports/ExternalRoute?) // tv.nomercy.player.core.ports/ExternalPlaybackState.Available.<init>|<init>(kotlin.Boolean;tv.nomercy.player.core.ports.ExternalRoute?){}[0]
@@ -5045,6 +5158,29 @@ final class tv.nomercy.player.core.plugins.embed/EmbedCommand { // tv.nomercy.pl
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedCommand.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.embed/EmbedEventMessage { // tv.nomercy.player.core.plugins.embed/EmbedEventMessage|null[0]
+    constructor <init>(kotlin/String, tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent) // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.<init>|<init>(kotlin.String;tv.nomercy.player.core.plugins.embed.EmbedForwardedEvent){}[0]
+
+    final val data // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.data|{}data[0]
+        final fun <get-data>(): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.data.<get-data>|<get-data>(){}[0]
+    final val name // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.name|{}name[0]
+        final fun <get-name>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.name.<get-name>|<get-name>(){}[0]
+    final val type // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.type|{}type[0]
+        final fun <get-type>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., tv.nomercy.player.core.plugins.embed/EmbedForwardedEvent = ...): tv.nomercy.player.core.plugins.embed/EmbedEventMessage // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.copy|copy(kotlin.String;tv.nomercy.player.core.plugins.embed.EmbedForwardedEvent){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.toString|toString(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.Companion|null[0]
+        final const val EVENT_TYPE // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.Companion.EVENT_TYPE|{}EVENT_TYPE[0]
+            final fun <get-EVENT_TYPE>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedEventMessage.Companion.EVENT_TYPE.<get-EVENT_TYPE>|<get-EVENT_TYPE>(){}[0]
+    }
+}
+
 final class tv.nomercy.player.core.plugins.embed/EmbedOptions { // tv.nomercy.player.core.plugins.embed/EmbedOptions|null[0]
     constructor <init>(kotlin.collections/List<kotlin/String> = ..., kotlin.collections/List<tv.nomercy.player.core.plugins.embed/EmbedEventName> = ...) // tv.nomercy.player.core.plugins.embed/EmbedOptions.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<tv.nomercy.player.core.plugins.embed.EmbedEventName>){}[0]
 
@@ -5059,6 +5195,34 @@ final class tv.nomercy.player.core.plugins.embed/EmbedOptions { // tv.nomercy.pl
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedOptions.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.embed/EmbedSerializedError { // tv.nomercy.player.core.plugins.embed/EmbedSerializedError|null[0]
+    constructor <init>(kotlin/String, tv.nomercy.player.core.errors/Severity, tv.nomercy.player.core.errors/ErrorScope, kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...) // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.<init>|<init>(kotlin.String;tv.nomercy.player.core.errors.Severity;tv.nomercy.player.core.errors.ErrorScope;kotlin.String?;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+
+    final val code // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.code|{}code[0]
+        final fun <get-code>(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.code.<get-code>|<get-code>(){}[0]
+    final val context // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.context|{}context[0]
+        final fun <get-context>(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.context.<get-context>|<get-context>(){}[0]
+    final val message // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.message|{}message[0]
+        final fun <get-message>(): kotlin/String? // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.message.<get-message>|<get-message>(){}[0]
+    final val scope // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.scope|{}scope[0]
+        final fun <get-scope>(): tv.nomercy.player.core.errors/ErrorScope // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.scope.<get-scope>|<get-scope>(){}[0]
+    final val severity // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.severity|{}severity[0]
+        final fun <get-severity>(): tv.nomercy.player.core.errors/Severity // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.severity.<get-severity>|<get-severity>(){}[0]
+    final val suggestion // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.suggestion|{}suggestion[0]
+        final fun <get-suggestion>(): kotlin/String? // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.suggestion.<get-suggestion>|<get-suggestion>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.errors/Severity // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.component2|component2(){}[0]
+    final fun component3(): tv.nomercy.player.core.errors/ErrorScope // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.component3|component3(){}[0]
+    final fun component4(): kotlin/String? // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.component5|component5(){}[0]
+    final fun component6(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.component6|component6(){}[0]
+    final fun copy(kotlin/String = ..., tv.nomercy.player.core.errors/Severity = ..., tv.nomercy.player.core.errors/ErrorScope = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ...): tv.nomercy.player.core.plugins.embed/EmbedSerializedError // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.copy|copy(kotlin.String;tv.nomercy.player.core.errors.Severity;tv.nomercy.player.core.errors.ErrorScope;kotlin.String?;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedSerializedError.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.plugins.keys/KeyPress { // tv.nomercy.player.core.plugins.keys/KeyPress|null[0]
