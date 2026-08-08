@@ -96,7 +96,7 @@ class TypeSurfaceConformanceTest {
      * when this list is empty, and the number in the failure message is the only
      * honest answer to "how far along is it".
      *
-     * 71 of 203 at the time of writing, against a method-name check that read
+     * 60 of 203 at the time of writing, against a method-name check that read
      * 94% on the same source. Methods are a name and an arity; these are what a
      * consumer programs against.
      */
@@ -112,7 +112,6 @@ class TypeSurfaceConformanceTest {
         "BaseEventMap",
         "BasePlayerConfig",
         "BasePlaylistItem",
-        "CanPlayResult",
         "CanvasRenderFn",
         "CastConfig",
         "CastMediaInfo",
@@ -123,9 +122,6 @@ class TypeSurfaceConformanceTest {
         "CastSenderTranslationKey",
         "ChromeCastMediaCtors",
         "CueEventPayload",
-        "CurrentAudioTrackSelection",
-        "CurrentQualitySelection",
-        "CurrentSubtitleSelection",
         "DefaultTranslator",
         "DefaultTranslatorOptions",
         "DisplayRangeProbe",
@@ -141,9 +137,6 @@ class TypeSurfaceConformanceTest {
         "ISubtitleRenderer",
         "KeyBindings",
         "KeyHandlerOptions",
-        "LogLevel",
-        "LogSink",
-        "LoggerOptions",
         "LrcWordCue",
         "MediaListEvent",
         "MediaSessionMetadata",
@@ -158,14 +151,10 @@ class TypeSurfaceConformanceTest {
         "PluginSpec",
         "PreventedReason",
         "RequireSpec",
-        "SidecarSubtitleInput",
         "SpectrumEvents",
         "SpectrumOptions",
-        "StreamCapabilities",
         "StreamErrorPayload",
-        "StreamEvent",
         "StreamEventPayloadMap",
-        "StreamInterceptor",
         "TranslationLoader",
         "VTTSpritePayload",
         "VTTSubtitlePayload",
