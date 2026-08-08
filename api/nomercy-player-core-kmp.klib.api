@@ -2273,6 +2273,58 @@ final class tv.nomercy.player.core.cues/VttSubtitlePayload : tv.nomercy.player.c
     final fun toString(): kotlin/String // tv.nomercy.player.core.cues/VttSubtitlePayload.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.device/PlaybackCapabilities { // tv.nomercy.player.core.device/PlaybackCapabilities|null[0]
+    constructor <init>(kotlin.collections/List<kotlin/String> = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Int? = ..., kotlin/Int? = ..., kotlin/Boolean = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int? = ..., kotlin/String? = ...) // tv.nomercy.player.core.device/PlaybackCapabilities.<init>|<init>(kotlin.collections.List<kotlin.String>;kotlin.collections.List<kotlin.String>;kotlin.Int?;kotlin.Int?;kotlin.Boolean;kotlin.Int;kotlin.Int;kotlin.Int?;kotlin.String?){}[0]
+
+    final val audioCodecs // tv.nomercy.player.core.device/PlaybackCapabilities.audioCodecs|{}audioCodecs[0]
+        final fun <get-audioCodecs>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.device/PlaybackCapabilities.audioCodecs.<get-audioCodecs>|<get-audioCodecs>(){}[0]
+    final val dolbyVision // tv.nomercy.player.core.device/PlaybackCapabilities.dolbyVision|{}dolbyVision[0]
+        final fun <get-dolbyVision>(): kotlin/Int // tv.nomercy.player.core.device/PlaybackCapabilities.dolbyVision.<get-dolbyVision>|<get-dolbyVision>(){}[0]
+    final val hdrSupport // tv.nomercy.player.core.device/PlaybackCapabilities.hdrSupport|{}hdrSupport[0]
+        final fun <get-hdrSupport>(): kotlin/Boolean // tv.nomercy.player.core.device/PlaybackCapabilities.hdrSupport.<get-hdrSupport>|<get-hdrSupport>(){}[0]
+    final val maxAudioChannels // tv.nomercy.player.core.device/PlaybackCapabilities.maxAudioChannels|{}maxAudioChannels[0]
+        final fun <get-maxAudioChannels>(): kotlin/Int? // tv.nomercy.player.core.device/PlaybackCapabilities.maxAudioChannels.<get-maxAudioChannels>|<get-maxAudioChannels>(){}[0]
+    final val maxVideoHeight // tv.nomercy.player.core.device/PlaybackCapabilities.maxVideoHeight|{}maxVideoHeight[0]
+        final fun <get-maxVideoHeight>(): kotlin/Int? // tv.nomercy.player.core.device/PlaybackCapabilities.maxVideoHeight.<get-maxVideoHeight>|<get-maxVideoHeight>(){}[0]
+    final val notes // tv.nomercy.player.core.device/PlaybackCapabilities.notes|{}notes[0]
+        final fun <get-notes>(): kotlin/String? // tv.nomercy.player.core.device/PlaybackCapabilities.notes.<get-notes>|<get-notes>(){}[0]
+    final val playerBufferCapMb // tv.nomercy.player.core.device/PlaybackCapabilities.playerBufferCapMb|{}playerBufferCapMb[0]
+        final fun <get-playerBufferCapMb>(): kotlin/Int? // tv.nomercy.player.core.device/PlaybackCapabilities.playerBufferCapMb.<get-playerBufferCapMb>|<get-playerBufferCapMb>(){}[0]
+    final val ramTier // tv.nomercy.player.core.device/PlaybackCapabilities.ramTier|{}ramTier[0]
+        final fun <get-ramTier>(): kotlin/Int // tv.nomercy.player.core.device/PlaybackCapabilities.ramTier.<get-ramTier>|<get-ramTier>(){}[0]
+    final val videoCodecs // tv.nomercy.player.core.device/PlaybackCapabilities.videoCodecs|{}videoCodecs[0]
+        final fun <get-videoCodecs>(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.device/PlaybackCapabilities.videoCodecs.<get-videoCodecs>|<get-videoCodecs>(){}[0]
+
+    final fun component1(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.device/PlaybackCapabilities.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.device/PlaybackCapabilities.component2|component2(){}[0]
+    final fun component3(): kotlin/Int? // tv.nomercy.player.core.device/PlaybackCapabilities.component3|component3(){}[0]
+    final fun component4(): kotlin/Int? // tv.nomercy.player.core.device/PlaybackCapabilities.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // tv.nomercy.player.core.device/PlaybackCapabilities.component5|component5(){}[0]
+    final fun component6(): kotlin/Int // tv.nomercy.player.core.device/PlaybackCapabilities.component6|component6(){}[0]
+    final fun component7(): kotlin/Int // tv.nomercy.player.core.device/PlaybackCapabilities.component7|component7(){}[0]
+    final fun component8(): kotlin/Int? // tv.nomercy.player.core.device/PlaybackCapabilities.component8|component8(){}[0]
+    final fun component9(): kotlin/String? // tv.nomercy.player.core.device/PlaybackCapabilities.component9|component9(){}[0]
+    final fun copy(kotlin.collections/List<kotlin/String> = ..., kotlin.collections/List<kotlin/String> = ..., kotlin/Int? = ..., kotlin/Int? = ..., kotlin/Boolean = ..., kotlin/Int = ..., kotlin/Int = ..., kotlin/Int? = ..., kotlin/String? = ...): tv.nomercy.player.core.device/PlaybackCapabilities // tv.nomercy.player.core.device/PlaybackCapabilities.copy|copy(kotlin.collections.List<kotlin.String>;kotlin.collections.List<kotlin.String>;kotlin.Int?;kotlin.Int?;kotlin.Boolean;kotlin.Int;kotlin.Int;kotlin.Int?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.device/PlaybackCapabilities.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.device/PlaybackCapabilities.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.device/PlaybackCapabilities.toString|toString(){}[0]
+
+    final object $serializer : kotlinx.serialization.internal/GeneratedSerializer<tv.nomercy.player.core.device/PlaybackCapabilities> { // tv.nomercy.player.core.device/PlaybackCapabilities.$serializer|null[0]
+        final val descriptor // tv.nomercy.player.core.device/PlaybackCapabilities.$serializer.descriptor|{}descriptor[0]
+            final fun <get-descriptor>(): kotlinx.serialization.descriptors/SerialDescriptor // tv.nomercy.player.core.device/PlaybackCapabilities.$serializer.descriptor.<get-descriptor>|<get-descriptor>(){}[0]
+
+        final fun childSerializers(): kotlin/Array<kotlinx.serialization/KSerializer<*>> // tv.nomercy.player.core.device/PlaybackCapabilities.$serializer.childSerializers|childSerializers(){}[0]
+        final fun deserialize(kotlinx.serialization.encoding/Decoder): tv.nomercy.player.core.device/PlaybackCapabilities // tv.nomercy.player.core.device/PlaybackCapabilities.$serializer.deserialize|deserialize(kotlinx.serialization.encoding.Decoder){}[0]
+        final fun serialize(kotlinx.serialization.encoding/Encoder, tv.nomercy.player.core.device/PlaybackCapabilities) // tv.nomercy.player.core.device/PlaybackCapabilities.$serializer.serialize|serialize(kotlinx.serialization.encoding.Encoder;tv.nomercy.player.core.device.PlaybackCapabilities){}[0]
+    }
+
+    final object Companion { // tv.nomercy.player.core.device/PlaybackCapabilities.Companion|null[0]
+        final val $childSerializers // tv.nomercy.player.core.device/PlaybackCapabilities.Companion.$childSerializers|{}$childSerializers[0]
+
+        final fun serializer(): kotlinx.serialization/KSerializer<tv.nomercy.player.core.device/PlaybackCapabilities> // tv.nomercy.player.core.device/PlaybackCapabilities.Companion.serializer|serializer(){}[0]
+    }
+}
+
 final class tv.nomercy.player.core.device/SafeAreaInsets { // tv.nomercy.player.core.device/SafeAreaInsets|null[0]
     constructor <init>(kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ..., kotlin/Float = ...) // tv.nomercy.player.core.device/SafeAreaInsets.<init>|<init>(kotlin.Float;kotlin.Float;kotlin.Float;kotlin.Float){}[0]
 
@@ -6510,6 +6562,53 @@ final object tv.nomercy.player.core.cues/VttSubtitleCueParser : tv.nomercy.playe
     final fun parse(kotlin/String, kotlin/String?): kotlin.collections/List<tv.nomercy.player.core.cues/Cue<tv.nomercy.player.core.cues/VttSubtitlePayload>> // tv.nomercy.player.core.cues/VttSubtitleCueParser.parse|parse(kotlin.String;kotlin.String?){}[0]
 }
 
+final object tv.nomercy.player.core.device/DeviceRamTier { // tv.nomercy.player.core.device/DeviceRamTier|null[0]
+    final const val HIGH_RAM // tv.nomercy.player.core.device/DeviceRamTier.HIGH_RAM|{}HIGH_RAM[0]
+        final fun <get-HIGH_RAM>(): kotlin/Int // tv.nomercy.player.core.device/DeviceRamTier.HIGH_RAM.<get-HIGH_RAM>|<get-HIGH_RAM>(){}[0]
+    final const val LOW_RAM // tv.nomercy.player.core.device/DeviceRamTier.LOW_RAM|{}LOW_RAM[0]
+        final fun <get-LOW_RAM>(): kotlin/Int // tv.nomercy.player.core.device/DeviceRamTier.LOW_RAM.<get-LOW_RAM>|<get-LOW_RAM>(){}[0]
+    final const val STANDARD // tv.nomercy.player.core.device/DeviceRamTier.STANDARD|{}STANDARD[0]
+        final fun <get-STANDARD>(): kotlin/Int // tv.nomercy.player.core.device/DeviceRamTier.STANDARD.<get-STANDARD>|<get-STANDARD>(){}[0]
+}
+
+final object tv.nomercy.player.core.device/DolbyVisionProfile { // tv.nomercy.player.core.device/DolbyVisionProfile|null[0]
+    final const val NONE // tv.nomercy.player.core.device/DolbyVisionProfile.NONE|{}NONE[0]
+        final fun <get-NONE>(): kotlin/Int // tv.nomercy.player.core.device/DolbyVisionProfile.NONE.<get-NONE>|<get-NONE>(){}[0]
+    final const val PROFILE_5 // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_5|{}PROFILE_5[0]
+        final fun <get-PROFILE_5>(): kotlin/Int // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_5.<get-PROFILE_5>|<get-PROFILE_5>(){}[0]
+    final const val PROFILE_7 // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_7|{}PROFILE_7[0]
+        final fun <get-PROFILE_7>(): kotlin/Int // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_7.<get-PROFILE_7>|<get-PROFILE_7>(){}[0]
+    final const val PROFILE_8_1 // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_8_1|{}PROFILE_8_1[0]
+        final fun <get-PROFILE_8_1>(): kotlin/Int // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_8_1.<get-PROFILE_8_1>|<get-PROFILE_8_1>(){}[0]
+    final const val PROFILE_8_2 // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_8_2|{}PROFILE_8_2[0]
+        final fun <get-PROFILE_8_2>(): kotlin/Int // tv.nomercy.player.core.device/DolbyVisionProfile.PROFILE_8_2.<get-PROFILE_8_2>|<get-PROFILE_8_2>(){}[0]
+}
+
+final object tv.nomercy.player.core.device/PlaybackCodec { // tv.nomercy.player.core.device/PlaybackCodec|null[0]
+    final const val AAC // tv.nomercy.player.core.device/PlaybackCodec.AAC|{}AAC[0]
+        final fun <get-AAC>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.AAC.<get-AAC>|<get-AAC>(){}[0]
+    final const val AC3 // tv.nomercy.player.core.device/PlaybackCodec.AC3|{}AC3[0]
+        final fun <get-AC3>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.AC3.<get-AC3>|<get-AC3>(){}[0]
+    final const val AV1 // tv.nomercy.player.core.device/PlaybackCodec.AV1|{}AV1[0]
+        final fun <get-AV1>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.AV1.<get-AV1>|<get-AV1>(){}[0]
+    final const val DTS // tv.nomercy.player.core.device/PlaybackCodec.DTS|{}DTS[0]
+        final fun <get-DTS>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.DTS.<get-DTS>|<get-DTS>(){}[0]
+    final const val EAC3 // tv.nomercy.player.core.device/PlaybackCodec.EAC3|{}EAC3[0]
+        final fun <get-EAC3>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.EAC3.<get-EAC3>|<get-EAC3>(){}[0]
+    final const val FLAC // tv.nomercy.player.core.device/PlaybackCodec.FLAC|{}FLAC[0]
+        final fun <get-FLAC>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.FLAC.<get-FLAC>|<get-FLAC>(){}[0]
+    final const val H264 // tv.nomercy.player.core.device/PlaybackCodec.H264|{}H264[0]
+        final fun <get-H264>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.H264.<get-H264>|<get-H264>(){}[0]
+    final const val HEVC // tv.nomercy.player.core.device/PlaybackCodec.HEVC|{}HEVC[0]
+        final fun <get-HEVC>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.HEVC.<get-HEVC>|<get-HEVC>(){}[0]
+    final const val OPUS // tv.nomercy.player.core.device/PlaybackCodec.OPUS|{}OPUS[0]
+        final fun <get-OPUS>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.OPUS.<get-OPUS>|<get-OPUS>(){}[0]
+    final const val TRUEHD // tv.nomercy.player.core.device/PlaybackCodec.TRUEHD|{}TRUEHD[0]
+        final fun <get-TRUEHD>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.TRUEHD.<get-TRUEHD>|<get-TRUEHD>(){}[0]
+    final const val VP9 // tv.nomercy.player.core.device/PlaybackCodec.VP9|{}VP9[0]
+        final fun <get-VP9>(): kotlin/String // tv.nomercy.player.core.device/PlaybackCodec.VP9.<get-VP9>|<get-VP9>(){}[0]
+}
+
 final object tv.nomercy.player.core.drm/ClearOnly : tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/ClearOnly|null[0]
     final fun supports(tv.nomercy.player.core.drm/DrmScheme): kotlin/Boolean // tv.nomercy.player.core.drm/ClearOnly.supports|supports(tv.nomercy.player.core.drm.DrmScheme){}[0]
 }
@@ -7439,6 +7538,7 @@ final fun tv.nomercy.player.core.cues/parseVttSubtitles(kotlin/String): kotlin.c
 final fun tv.nomercy.player.core.cues/parseVttTimestamp(kotlin/String): kotlin/Double? // tv.nomercy.player.core.cues/parseVttTimestamp|parseVttTimestamp(kotlin.String){}[0]
 final fun tv.nomercy.player.core.device/platformDeviceCapabilities(tv.nomercy.player.core.ports/PlatformContext): tv.nomercy.player.core.device/DeviceCapabilities // tv.nomercy.player.core.device/platformDeviceCapabilities|platformDeviceCapabilities(tv.nomercy.player.core.ports.PlatformContext){}[0]
 final fun tv.nomercy.player.core.device/platformOverscan(tv.nomercy.player.core.ports/PlatformContext): tv.nomercy.player.core.device/SafeAreaInsets // tv.nomercy.player.core.device/platformOverscan|platformOverscan(tv.nomercy.player.core.ports.PlatformContext){}[0]
+final fun tv.nomercy.player.core.device/platformPlaybackCapabilities(): tv.nomercy.player.core.device/PlaybackCapabilities // tv.nomercy.player.core.device/platformPlaybackCapabilities|platformPlaybackCapabilities(){}[0]
 final fun tv.nomercy.player.core.dsp/perceptualGain(kotlin/Float): kotlin/Float // tv.nomercy.player.core.dsp/perceptualGain|perceptualGain(kotlin.Float){}[0]
 final fun tv.nomercy.player.core.errors/browserPolicyError(kotlin/String, kotlin/String, kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/BrowserPolicyError // tv.nomercy.player.core.errors/browserPolicyError|browserPolicyError(kotlin.String;kotlin.String;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/MediaFormatError // tv.nomercy.player.core.errors/mediaFormatError|mediaFormatError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]

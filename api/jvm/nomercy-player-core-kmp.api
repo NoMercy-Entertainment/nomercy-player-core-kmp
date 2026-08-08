@@ -830,6 +830,22 @@ public final class tv/nomercy/player/core/device/DeviceCapabilities$DefaultImpls
 	public static fun getPrefersFocusNavigation (Ltv/nomercy/player/core/device/DeviceCapabilities;)Z
 }
 
+public final class tv/nomercy/player/core/device/DeviceRamTier {
+	public static final field HIGH_RAM I
+	public static final field INSTANCE Ltv/nomercy/player/core/device/DeviceRamTier;
+	public static final field LOW_RAM I
+	public static final field STANDARD I
+}
+
+public final class tv/nomercy/player/core/device/DolbyVisionProfile {
+	public static final field INSTANCE Ltv/nomercy/player/core/device/DolbyVisionProfile;
+	public static final field NONE I
+	public static final field PROFILE_5 I
+	public static final field PROFILE_7 I
+	public static final field PROFILE_8_1 I
+	public static final field PROFILE_8_2 I
+}
+
 public final class tv/nomercy/player/core/device/FormFactor : java/lang/Enum {
 	public static final field Desktop Ltv/nomercy/player/core/device/FormFactor;
 	public static final field Phone Ltv/nomercy/player/core/device/FormFactor;
@@ -838,6 +854,70 @@ public final class tv/nomercy/player/core/device/FormFactor : java/lang/Enum {
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/device/FormFactor;
 	public static fun values ()[Ltv/nomercy/player/core/device/FormFactor;
+}
+
+public final class tv/nomercy/player/core/device/PlaybackCapabilities {
+	public static final field Companion Ltv/nomercy/player/core/device/PlaybackCapabilities$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZIILjava/lang/Integer;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZIILjava/lang/Integer;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Ljava/lang/Integer;
+	public final fun component5 ()Z
+	public final fun component6 ()I
+	public final fun component7 ()I
+	public final fun component8 ()Ljava/lang/Integer;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZIILjava/lang/Integer;Ljava/lang/String;)Ltv/nomercy/player/core/device/PlaybackCapabilities;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/device/PlaybackCapabilities;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZIILjava/lang/Integer;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/device/PlaybackCapabilities;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudioCodecs ()Ljava/util/List;
+	public final fun getDolbyVision ()I
+	public final fun getHdrSupport ()Z
+	public final fun getMaxAudioChannels ()Ljava/lang/Integer;
+	public final fun getMaxVideoHeight ()Ljava/lang/Integer;
+	public final fun getNotes ()Ljava/lang/String;
+	public final fun getPlayerBufferCapMb ()Ljava/lang/Integer;
+	public final fun getRamTier ()I
+	public final fun getVideoCodecs ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class tv/nomercy/player/core/device/PlaybackCapabilities$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Ltv/nomercy/player/core/device/PlaybackCapabilities$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltv/nomercy/player/core/device/PlaybackCapabilities;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltv/nomercy/player/core/device/PlaybackCapabilities;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class tv/nomercy/player/core/device/PlaybackCapabilities$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class tv/nomercy/player/core/device/PlaybackCapabilities_jvmKt {
+	public static final fun platformPlaybackCapabilities ()Ltv/nomercy/player/core/device/PlaybackCapabilities;
+}
+
+public final class tv/nomercy/player/core/device/PlaybackCodec {
+	public static final field AAC Ljava/lang/String;
+	public static final field AC3 Ljava/lang/String;
+	public static final field AV1 Ljava/lang/String;
+	public static final field DTS Ljava/lang/String;
+	public static final field EAC3 Ljava/lang/String;
+	public static final field FLAC Ljava/lang/String;
+	public static final field H264 Ljava/lang/String;
+	public static final field HEVC Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/PlaybackCodec;
+	public static final field OPUS Ljava/lang/String;
+	public static final field TRUEHD Ljava/lang/String;
+	public static final field VP9 Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/device/SafeAreaInsets {
