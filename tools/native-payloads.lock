@@ -69,3 +69,12 @@ libmpv.windows-x64.sha256=8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a86
 libmpv.linux-x64.kind=container
 libmpv.linux-x64.source=debian:bookworm-slim
 libmpv.linux-x64.sha256=
+
+# macOS has no prebuilt libmpv anybody publishes: mpv ships source, the app
+# bundles that exist are years stale, and there is no equivalent of VideoLAN's
+# .dmg. So it is Homebrew's build on the Mac itself, closed over and re-pointed
+# at itself with install_name_tool — the container is not an option, because the
+# tools that read and rewrite a Mach-O dependency list only run on macOS.
+libmpv.macos-arm64.kind=brew
+libmpv.macos-arm64.source=homebrew/core/mpv
+libmpv.macos-arm64.sha256=

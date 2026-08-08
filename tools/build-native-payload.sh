@@ -216,6 +216,19 @@ build_linux() {
 # macOS: VLC ships as a .dmg carrying VLC.app. hdiutil is macOS-only, so this
 # path only runs there.
 # ---------------------------------------------------------------------------
+# libmpv on macOS: Homebrew's build, closed over and re-pointed at itself.
+#
+# On the Mac, always. otool and install_name_tool are macOS-only, and a Mach-O
+# dependency closure cannot be computed anywhere else — which is the same reason
+# the libVLC macOS payload is built there and not in a container.
+build_macos_mpv() {
+  [ "$(uname -s)" = "Darwin" ] || { echo "the macos libmpv payload must be built on macOS"; exit 1; }
+
+  local prefix="${HOMEBREW_PREFIX:-$HOME/homebrew}"
+  bash "$here/tools/native-payload-macos-mpv.sh" "$STAMP_EPOCH" "$version" "$prefix" "$stage"
+  packed=no
+}
+
 build_macos() {
   [ "$(uname -s)" = "Darwin" ] || { echo "the macos payload must be built on macOS"; exit 1; }
   local archive="$cache/$(basename "$source_url")"
@@ -304,6 +317,7 @@ packed=no
 case "$kind" in
   zip) build_windows ;;
   7z) build_windows_mpv ;;
+  brew) build_macos_mpv ;;
   container) build_linux ;;
   dmg) build_macos ;;
   *) echo "unknown payload kind: $kind"; exit 1 ;;
