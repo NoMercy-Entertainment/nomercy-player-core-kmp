@@ -597,6 +597,19 @@ final enum class tv.nomercy.player.core.plugins.embed/EmbedEventName : kotlin/En
     final fun values(): kotlin/Array<tv.nomercy.player.core.plugins.embed/EmbedEventName> // tv.nomercy.player.core.plugins.embed/EmbedEventName.values|values#static(){}[0]
 }
 
+final enum class tv.nomercy.player.core.plugins.keys/KeyScope : kotlin/Enum<tv.nomercy.player.core.plugins.keys/KeyScope> { // tv.nomercy.player.core.plugins.keys/KeyScope|null[0]
+    enum entry CONTAINER // tv.nomercy.player.core.plugins.keys/KeyScope.CONTAINER|null[0]
+    enum entry DOCUMENT // tv.nomercy.player.core.plugins.keys/KeyScope.DOCUMENT|null[0]
+
+    final val entries // tv.nomercy.player.core.plugins.keys/KeyScope.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.plugins.keys/KeyScope> // tv.nomercy.player.core.plugins.keys/KeyScope.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val id // tv.nomercy.player.core.plugins.keys/KeyScope.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.keys/KeyScope.id.<get-id>|<get-id>(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.plugins.keys/KeyScope // tv.nomercy.player.core.plugins.keys/KeyScope.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.plugins.keys/KeyScope> // tv.nomercy.player.core.plugins.keys/KeyScope.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.plugins.leader/LeaderLostAction : kotlin/Enum<tv.nomercy.player.core.plugins.leader/LeaderLostAction> { // tv.nomercy.player.core.plugins.leader/LeaderLostAction|null[0]
     enum entry MUTE // tv.nomercy.player.core.plugins.leader/LeaderLostAction.MUTE|null[0]
     enum entry PAUSE // tv.nomercy.player.core.plugins.leader/LeaderLostAction.PAUSE|null[0]
@@ -1944,6 +1957,39 @@ final class <#A: kotlin/Any?> tv.nomercy.player.core.media/MediaListRemove { // 
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.media/MediaListRemove.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.media/MediaListRemove.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.media/MediaListRemove.toString|toString(){}[0]
+}
+
+final class <#A: kotlin/Any?> tv.nomercy.player.core.plugins.keys/KeyHandlerOptions { // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions|null[0]
+    constructor <init>(tv.nomercy.player.core.plugins.keys/KeyScope = ..., kotlin.collections/Map<kotlin/String, kotlin/Function1<#A, kotlin/Unit>> = ..., kotlin/Boolean = ..., kotlin/Function1<tv.nomercy.player.core.plugins.keys/KeyPress, kotlin/Boolean>? = ..., kotlin/Long = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.<init>|<init>(tv.nomercy.player.core.plugins.keys.KeyScope;kotlin.collections.Map<kotlin.String,kotlin.Function1<1:0,kotlin.Unit>>;kotlin.Boolean;kotlin.Function1<tv.nomercy.player.core.plugins.keys.KeyPress,kotlin.Boolean>?;kotlin.Long;kotlin.Boolean){}[0]
+
+    final val bindings // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.bindings|{}bindings[0]
+        final fun <get-bindings>(): kotlin.collections/Map<kotlin/String, kotlin/Function1<#A, kotlin/Unit>> // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.bindings.<get-bindings>|<get-bindings>(){}[0]
+    final val cooldownMs // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.cooldownMs|{}cooldownMs[0]
+        final fun <get-cooldownMs>(): kotlin/Long // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.cooldownMs.<get-cooldownMs>|<get-cooldownMs>(){}[0]
+    final val disableMediaControls // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.disableMediaControls|{}disableMediaControls[0]
+        final fun <get-disableMediaControls>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.disableMediaControls.<get-disableMediaControls>|<get-disableMediaControls>(){}[0]
+    final val extend // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.extend|{}extend[0]
+        final fun <get-extend>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.extend.<get-extend>|<get-extend>(){}[0]
+    final val scope // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.scope|{}scope[0]
+        final fun <get-scope>(): tv.nomercy.player.core.plugins.keys/KeyScope // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.scope.<get-scope>|<get-scope>(){}[0]
+    final val whenAllowed // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.whenAllowed|{}whenAllowed[0]
+        final fun <get-whenAllowed>(): kotlin/Function1<tv.nomercy.player.core.plugins.keys/KeyPress, kotlin/Boolean>? // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.whenAllowed.<get-whenAllowed>|<get-whenAllowed>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.plugins.keys/KeyScope // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin/Function1<#A, kotlin/Unit>> // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.component3|component3(){}[0]
+    final fun component4(): kotlin/Function1<tv.nomercy.player.core.plugins.keys/KeyPress, kotlin/Boolean>? // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.component4|component4(){}[0]
+    final fun component5(): kotlin/Long // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.component6|component6(){}[0]
+    final fun copy(tv.nomercy.player.core.plugins.keys/KeyScope = ..., kotlin.collections/Map<kotlin/String, kotlin/Function1<#A, kotlin/Unit>> = ..., kotlin/Boolean = ..., kotlin/Function1<tv.nomercy.player.core.plugins.keys/KeyPress, kotlin/Boolean>? = ..., kotlin/Long = ..., kotlin/Boolean = ...): tv.nomercy.player.core.plugins.keys/KeyHandlerOptions<#A> // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.copy|copy(tv.nomercy.player.core.plugins.keys.KeyScope;kotlin.collections.Map<kotlin.String,kotlin.Function1<1:0,kotlin.Unit>>;kotlin.Boolean;kotlin.Function1<tv.nomercy.player.core.plugins.keys.KeyPress,kotlin.Boolean>?;kotlin.Long;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.toString|toString(){}[0]
+
+    final object Companion { // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.Companion|null[0]
+        final const val DEFAULT_COOLDOWN_MS // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.Companion.DEFAULT_COOLDOWN_MS|{}DEFAULT_COOLDOWN_MS[0]
+            final fun <get-DEFAULT_COOLDOWN_MS>(): kotlin/Long // tv.nomercy.player.core.plugins.keys/KeyHandlerOptions.Companion.DEFAULT_COOLDOWN_MS.<get-DEFAULT_COOLDOWN_MS>|<get-DEFAULT_COOLDOWN_MS>(){}[0]
+    }
 }
 
 final class <#A: tv.nomercy.player.core.media/PlaylistItem> tv.nomercy.player.core.media/MediaList { // tv.nomercy.player.core.media/MediaList|null[0]
@@ -5015,6 +5061,34 @@ final class tv.nomercy.player.core.plugins.embed/EmbedOptions { // tv.nomercy.pl
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.embed/EmbedOptions.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.keys/KeyPress { // tv.nomercy.player.core.plugins.keys/KeyPress|null[0]
+    constructor <init>(kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.plugins.keys/KeyPress.<init>|<init>(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+
+    final val alt // tv.nomercy.player.core.plugins.keys/KeyPress.alt|{}alt[0]
+        final fun <get-alt>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.alt.<get-alt>|<get-alt>(){}[0]
+    final val ctrl // tv.nomercy.player.core.plugins.keys/KeyPress.ctrl|{}ctrl[0]
+        final fun <get-ctrl>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.ctrl.<get-ctrl>|<get-ctrl>(){}[0]
+    final val key // tv.nomercy.player.core.plugins.keys/KeyPress.key|{}key[0]
+        final fun <get-key>(): kotlin/String // tv.nomercy.player.core.plugins.keys/KeyPress.key.<get-key>|<get-key>(){}[0]
+    final val meta // tv.nomercy.player.core.plugins.keys/KeyPress.meta|{}meta[0]
+        final fun <get-meta>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.meta.<get-meta>|<get-meta>(){}[0]
+    final val repeat // tv.nomercy.player.core.plugins.keys/KeyPress.repeat|{}repeat[0]
+        final fun <get-repeat>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.repeat.<get-repeat>|<get-repeat>(){}[0]
+    final val shift // tv.nomercy.player.core.plugins.keys/KeyPress.shift|{}shift[0]
+        final fun <get-shift>(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.shift.<get-shift>|<get-shift>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugins.keys/KeyPress.component1|component1(){}[0]
+    final fun component2(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.component2|component2(){}[0]
+    final fun component3(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.component4|component4(){}[0]
+    final fun component5(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.component5|component5(){}[0]
+    final fun component6(): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.component6|component6(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.plugins.keys/KeyPress // tv.nomercy.player.core.plugins.keys/KeyPress.copy|copy(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.keys/KeyPress.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.keys/KeyPress.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.keys/KeyPress.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugins.leader/TabLeaderOptions { // tv.nomercy.player.core.plugins.leader/TabLeaderOptions|null[0]
     constructor <init>(tv.nomercy.player.core.plugins.leader/LeaderLostAction = ..., kotlin/Boolean = ..., kotlin/String? = ...) // tv.nomercy.player.core.plugins.leader/TabLeaderOptions.<init>|<init>(tv.nomercy.player.core.plugins.leader.LeaderLostAction;kotlin.Boolean;kotlin.String?){}[0]
 
@@ -5061,6 +5135,51 @@ final class tv.nomercy.player.core.plugins.message/MessageOptions { // tv.nomerc
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.message/MessageOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.message/MessageOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.message/MessageOptions.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.session/MediaImage { // tv.nomercy.player.core.plugins.session/MediaImage|null[0]
+    constructor <init>(kotlin/String, kotlin/String? = ..., kotlin/String? = ...) // tv.nomercy.player.core.plugins.session/MediaImage.<init>|<init>(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+
+    final val sizes // tv.nomercy.player.core.plugins.session/MediaImage.sizes|{}sizes[0]
+        final fun <get-sizes>(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaImage.sizes.<get-sizes>|<get-sizes>(){}[0]
+    final val src // tv.nomercy.player.core.plugins.session/MediaImage.src|{}src[0]
+        final fun <get-src>(): kotlin/String // tv.nomercy.player.core.plugins.session/MediaImage.src.<get-src>|<get-src>(){}[0]
+    final val type // tv.nomercy.player.core.plugins.session/MediaImage.type|{}type[0]
+        final fun <get-type>(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaImage.type.<get-type>|<get-type>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.plugins.session/MediaImage.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaImage.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaImage.component3|component3(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/String? = ..., kotlin/String? = ...): tv.nomercy.player.core.plugins.session/MediaImage // tv.nomercy.player.core.plugins.session/MediaImage.copy|copy(kotlin.String;kotlin.String?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.session/MediaImage.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.session/MediaImage.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.session/MediaImage.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.session/MediaSessionMetadata { // tv.nomercy.player.core.plugins.session/MediaSessionMetadata|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/List<tv.nomercy.player.core.plugins.session/MediaImage> = ...) // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.<init>|<init>(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.collections.List<tv.nomercy.player.core.plugins.session.MediaImage>){}[0]
+
+    final val album // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.album|{}album[0]
+        final fun <get-album>(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.album.<get-album>|<get-album>(){}[0]
+    final val artist // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.artist|{}artist[0]
+        final fun <get-artist>(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.artist.<get-artist>|<get-artist>(){}[0]
+    final val artwork // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.artwork|{}artwork[0]
+        final fun <get-artwork>(): kotlin.collections/List<tv.nomercy.player.core.plugins.session/MediaImage> // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.artwork.<get-artwork>|<get-artwork>(){}[0]
+    final val title // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.title|{}title[0]
+        final fun <get-title>(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.title.<get-title>|<get-title>(){}[0]
+
+    final fun component1(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.component1|component1(){}[0]
+    final fun component2(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.component2|component2(){}[0]
+    final fun component3(): kotlin/String? // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.component3|component3(){}[0]
+    final fun component4(): kotlin.collections/List<tv.nomercy.player.core.plugins.session/MediaImage> // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.component4|component4(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/String? = ..., kotlin/String? = ..., kotlin.collections/List<tv.nomercy.player.core.plugins.session/MediaImage> = ...): tv.nomercy.player.core.plugins.session/MediaSessionMetadata // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.copy|copy(kotlin.String?;kotlin.String?;kotlin.String?;kotlin.collections.List<tv.nomercy.player.core.plugins.session.MediaImage>){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.session/MediaSessionMetadata.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.session/MediaSessionOptions { // tv.nomercy.player.core.plugins.session/MediaSessionOptions|null[0]
+    constructor <init>() // tv.nomercy.player.core.plugins.session/MediaSessionOptions.<init>|<init>(){}[0]
 }
 
 final class tv.nomercy.player.core.ports/AVPlayerAudioBackend : tv.nomercy.player.core.ports/AudioBackend { // tv.nomercy.player.core.ports/AVPlayerAudioBackend|null[0]
