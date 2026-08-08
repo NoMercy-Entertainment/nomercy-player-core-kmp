@@ -35,11 +35,7 @@ data class NativePayload(
     val marker: String,
     val bundle: Boolean,
 ) {
-    val slug: String get() = when (kind) {
-        "LIB_ASS" -> "libass"
-        "LIB_MPV" -> "libmpv"
-        else -> "libvlc"
-    }
+    val slug: String get() = if (kind == "LIB_ASS") "libass" else "libmpv"
     val platformId: String get() = when (platform) {
         "WINDOWS_X64" -> "windows-x64"
         "MACOS_ARM64" -> "macos-arm64"
@@ -207,7 +203,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // A macOS payload can only be assembled on macOS: otool and
             // install_name_tool are the tools that read and rewrite a Mach-O
             // dependency list, and neither exists anywhere else. Its own runner
-            // produces it, the same way libVLC's per-platform payloads are.
+            // produces it.
             if (payload.kind == "LIB_MPV" && payload.platform.startsWith("MACOS") && hostPlatform != payload.platform) {
                 logger.lifecycle(
                     "bundleNativePayloads: skipping ${payload.fileName} — " +
@@ -218,16 +214,6 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
 
             val command: List<String> = if (payload.kind == "LIB_MPV") {
                 listOf("bash", "tools/build-native-payload.sh", "libmpv", payload.platformId, "build/payloads")
-            } else if (payload.kind == "LIB_VLC") {
-                if (payload.platform != hostPlatform) {
-                    logger.lifecycle(
-                        "bundleNativePayloads: skipping ${payload.fileName} — " +
-                            "vlc-cache-gen is native to ${payload.platformId} and this host is not it. " +
-                            "Its own runner produces it.",
-                    )
-                    continue
-                }
-                listOf("bash", "tools/build-native-payload.sh", "libvlc", payload.platformId, "build/payloads")
             } else {
                 listOf(
                     "gh", "release", "download", payload.tag,
@@ -251,7 +237,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // Both BUILT payloads land where the script was told to write and
             // are moved into the resource tree the loader reads from. Only the
             // fetched one arrives at its destination directly.
-            if (payload.kind == "LIB_VLC" || payload.kind == "LIB_MPV") {
+            if (payload.kind == "LIB_MPV") {
                 JavaFile(projectRoot, "build/payloads/${payload.fileName}").copyTo(destination, overwrite = true)
             }
 
@@ -266,7 +252,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // from identical inputs. Its trust anchor is the UPSTREAM digest,
             // which tools/native-payloads.lock pins and the script verifies
             // before it unpacks anything.
-            if (payload.kind != "LIB_VLC" && payload.kind != "LIB_MPV") {
+            if (payload.kind != "LIB_MPV") {
                 val actual: String = digestOf(destination)
                 check(actual == payload.sha256) {
                     "digest mismatch for ${payload.fileName}: expected ${payload.sha256} but got $actual"
@@ -415,10 +401,10 @@ kotlin {
             implementation(libs.okhttp)
             implementation(libs.kotlinx.coroutines.android)
         }
-        // The desktop engine. libVLC decodes practically everything, which is
+        // The desktop engine. libmpv decodes practically everything, which is
         // what a desktop client needs when the file came off a disc rip, and it
         // is bound through its own C API rather than through a wrapper — see
-        // tv.nomercy.player.core.natives.libvlc. JNA is what calls it.
+        // tv.nomercy.player.core.natives.libmpv. JNA is what calls it.
         jvmMain {
             kotlin.srcDir(generateNativeCatalogue)
             resources.srcDir(bundleNativePayloads)

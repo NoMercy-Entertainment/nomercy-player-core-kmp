@@ -66,11 +66,11 @@ class NativeArchivesTest {
             libass.url,
         )
 
-        val libvlc = assertNotNull(NativeArchives.of(NativeRuntimeKind.LIB_VLC, HostPlatform.WINDOWS_X64))
+        val libmpv = assertNotNull(NativeArchives.of(NativeRuntimeKind.LIB_MPV, HostPlatform.WINDOWS_X64))
         assertEquals(
             "https://github.com/NoMercy-Entertainment/nomercy-player-core-kmp/releases/download/" +
-                "natives-libvlc-3.0.23/libvlc-3.0.23-windows-x64.tar.gz",
-            libvlc.url,
+                "natives-libmpv-2026.06.10/libmpv-2026.06.10-windows-x64.tar.gz",
+            libmpv.url,
         )
     }
 }

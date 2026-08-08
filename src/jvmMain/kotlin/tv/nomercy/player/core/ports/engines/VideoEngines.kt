@@ -13,11 +13,11 @@ import tv.nomercy.player.core.ports.VideoBackend
 /**
  * Which desktop engine a player gets, and why.
  *
- * libmpv is replacing libVLC, and the two have to run side by side while that is
- * proven: the same fixtures, the same contract tests, on the same machine. A
- * registry rather than a constructor call at the call site, because the choice
+ * A registry rather than a constructor call at the call site, because the choice
  * belongs to whoever is running the build and not to the one file that happened
- * to name an engine first.
+ * to name an engine first. libmpv replaced libVLC through this seam: the two ran
+ * side by side against the same fixtures on the same machine until mpv was
+ * proven, and only then was the other deleted.
  *
  * The order in [registered] is the preference order. It is deliberately not
  * alphabetical and not "newest first": an engine leads only once it is proven on
@@ -28,16 +28,17 @@ public object VideoEngines {
     /**
      * Every engine this build knows how to construct, in preference order.
      *
-     * mpv leads because it is now the proven one: twenty of twenty testbed
-     * fixtures decode and seek through it, every rendition of a master playlist
-     * is selectable — the thing libVLC 3 cannot do at all — and it draws to the
-     * screen from its own bundled payload. libVLC stays registered behind it so
-     * a machine with no libmpv payload still plays, which is what side by side
-     * is for.
+     * One, now that libVLC is gone: mpv covers Windows, Linux and macOS, and it
+     * answers the question libVLC 3 could not — which rendition of a master
+     * playlist to play. The registry stays a list rather than collapsing to a
+     * constructor call, because the reason it exists is that this WILL happen
+     * again: an engine arrives, runs beside the incumbent while it is proven,
+     * and one of the two is then deleted. Collapsing it would mean rebuilding
+     * the seam the next time, and rebuilding it under time pressure is how the
+     * silent-fallback bug gets written.
      */
     public val registered: List<VideoEngineProvider> = listOf(
         MpvVideoEngineProvider,
-        VlcVideoEngineProvider,
     )
 
     /**

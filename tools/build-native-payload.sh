@@ -81,47 +81,6 @@ fetch_verified() {
   echo "── upstream digest $actual"
 }
 
-# ---------------------------------------------------------------------------
-# Windows: the official redistributable zip, which already contains libvlc,
-# libvlccore, every plugin and vlc-cache-gen. Nothing is compiled here.
-# ---------------------------------------------------------------------------
-build_windows() {
-  local archive="$cache/$(basename "$source_url")"
-  fetch_verified "$source_url" "$source_sha" "$archive"
-
-  local unpacked="$work/upstream"
-  mkdir -p "$unpacked"
-  unzip -q -o "$archive" -d "$unpacked"
-  local root
-  root="$(find "$unpacked" -maxdepth 1 -mindepth 1 -type d | head -1)"
-
-  cp "$root/libvlc.dll" "$root/libvlccore.dll" "$stage/"
-  cp -r "$root/plugins" "$stage/plugins"
-  cp "$root/COPYING.txt" "$root/AUTHORS.txt" "$root/THANKS.txt" "$stage/"
-  # Kept so the cache can be regenerated on the machine that owns the payload,
-  # which is the recovery path when a packaging step rewrites timestamps.
-  cp "$root/vlc-cache-gen.exe" "$stage/"
-
-  stamp_tree
-  generate_windows_cache
-}
-
-# vlc-cache-gen is a Windows binary and only runs on Windows. A payload built on
-# any other host is still correct, it just launches slower — so this warns and
-# continues rather than failing, and the warning names the consequence.
-generate_windows_cache() {
-  if [ "$(uname -s)" != "MINGW64_NT-10.0" ] && [ "${OS:-}" != "Windows_NT" ]; then
-    echo "!! not a Windows host: plugins.dat NOT generated, this payload will"
-    echo "!! index 363 plugins on every launch. Build it on Windows for the cache."
-    return
-  fi
-  echo "── generating plugins.dat"
-  ( cd "$stage" && ./vlc-cache-gen.exe plugins )
-  [ -f "$stage/plugins/plugins.dat" ] || { echo "vlc-cache-gen produced no cache"; exit 1; }
-  # The cache itself gets the same fixed timestamp; only the plugins' own
-  # timestamps are what it recorded, and those are already frozen.
-  touch -d "$STAMP_DATE" "$stage/plugins/plugins.dat"
-}
 
 # ---------------------------------------------------------------------------
 # libmpv on Windows: one DLL and its headers out of the upstream dev package.
@@ -180,9 +139,21 @@ build_windows_mpv() {
 # every shared object the VLC libraries need is copied in beside them, except
 # the ones every glibc system already has. Without that closure the payload
 # loads on the machine that built it and nowhere else.
+
 # ---------------------------------------------------------------------------
-build_linux() {
+# macOS: VLC ships as a .dmg carrying VLC.app. hdiutil is macOS-only, so this
+# path only runs there.
+# ---------------------------------------------------------------------------
+# Linux: assembled in a container from the distribution's own package, because
+# nobody publishes a portable libmpv build either.
+#
+# The container writes the finished archive to stdout, so the whole payload —
+# symlinks included — arrives as one file and never has to survive a bind mount
+# onto a filesystem that cannot represent one.
+# ---------------------------------------------------------------------------
+build_linux_mpv() {
   command -v docker >/dev/null || { echo "docker is required to build the linux payload"; exit 1; }
+
   local image="$source_url"
   local digest
   digest="$(docker image inspect --format '{{index .RepoDigests 0}}' "$image" 2>/dev/null || true)"
@@ -194,27 +165,14 @@ build_linux() {
 
   # A real script file rather than an inline heredoc: a container step written
   # into a string is a step nobody can run on its own when it breaks.
-  #
-  # The container writes the finished archive to stdout, so the whole payload —
-  # symlinks included — arrives as one file and never has to survive a bind
-  # mount onto a filesystem that cannot represent it.
-  # One assembler per payload: libmpv has no plugin tree and no cache, so
-  # the two scripts share the dependency closure and differ in everything
-  # else.
-  local assembler="native-payload-linux.sh"
-  [ "$payload" = "libmpv" ] && assembler="native-payload-linux-mpv.sh"
-
   MSYS_NO_PATHCONV=1 docker run --rm -i \
-    -v "$here/tools/$assembler:/assemble.sh:ro" \
+    -v "$here/tools/native-payload-linux-mpv.sh:/assemble.sh:ro" \
     "$image" bash /assemble.sh "$STAMP_EPOCH" "$version" > "$out"
 
   echo "$digest" > "$work/provenance.txt"
   packed=yes
 }
 
-# ---------------------------------------------------------------------------
-# macOS: VLC ships as a .dmg carrying VLC.app. hdiutil is macOS-only, so this
-# path only runs there.
 # ---------------------------------------------------------------------------
 # libmpv on macOS: Homebrew's build, closed over and re-pointed at itself.
 #
@@ -229,32 +187,6 @@ build_macos_mpv() {
   packed=no
 }
 
-build_macos() {
-  [ "$(uname -s)" = "Darwin" ] || { echo "the macos payload must be built on macOS"; exit 1; }
-  local archive="$cache/$(basename "$source_url")"
-  fetch_verified "$source_url" "$source_sha" "$archive"
-
-  local mount="$work/mnt"
-  mkdir -p "$mount"
-  hdiutil attach -nobrowse -readonly -mountpoint "$mount" "$archive" >/dev/null
-  trap 'hdiutil detach "$mount" >/dev/null 2>&1 || true' EXIT
-
-  local app="$mount/VLC.app/Contents/MacOS"
-  mkdir -p "$stage/lib"
-  cp "$app/lib/libvlc.dylib" "$app/lib/libvlccore.dylib" "$stage/lib/"
-  cp -R "$app/plugins" "$stage/plugins"
-  cp "$mount/VLC.app/Contents/Resources/COPYING.txt" "$stage/" 2>/dev/null || true
-  hdiutil detach "$mount" >/dev/null
-  trap - EXIT
-
-  stamp_tree
-  # VLC's macOS build ships a cache generator inside the bundle.
-  if [ -x "$app/../lib/vlc/vlc-cache-gen" ]; then
-    "$app/../lib/vlc/vlc-cache-gen" "$stage/plugins"
-    touch -d "$STAMP_DATE" "$stage/plugins/plugins.dat"
-  fi
-}
-
 # Every file, one timestamp. Directories too: a tar records theirs and an
 # extractor restores them.
 stamp_tree() {
@@ -263,10 +195,6 @@ stamp_tree() {
 }
 
 write_notice() {
-  # libmpv carries its own, because it is a different project under a different
-  # licence and a notice naming VideoLAN beside an mpv binary is worse than no
-  # notice at all.
-  if [ "$payload" = "libmpv" ]; then
     cat > "$stage/NOTICE-NoMercy.txt" <<EOF
 This directory contains an unmodified redistribution of libmpv, version
 $version, built by the mpv-winbuild-cmake project and published at
@@ -282,44 +210,17 @@ linked into any NoMercy binary, so it can be replaced: put a directory
 containing your own build on the payload override described in the NoMercy
 player documentation and the player will load yours instead of this one.
 EOF
-    touch -d "$STAMP_DATE" "$stage/NOTICE-NoMercy.txt"
-    return
-  fi
-
-  cat > "$stage/NOTICE-NoMercy.txt" <<EOF
-This directory contains an unmodified redistribution of libVLC and its plugins,
-built from the official VideoLAN release for $platform, version $version.
-
-libVLC and libVLCcore are licensed under the GNU Lesser General Public License,
-version 2.1 or later. The plugin set carries a mixture of licences; COPYING.txt
-in this directory is VideoLAN's own licence text for this distribution, and
-AUTHORS.txt and THANKS.txt are its attribution files, both shipped verbatim.
-
-Nothing here is modified. The binaries are exactly the bytes VideoLAN published;
-the only files this project adds are this notice and plugins/plugins.dat, which
-is a generated index of the plugins beside it and contains no code.
-
-Sources for these binaries are available from VideoLAN at
-https://www.videolan.org/vlc/download-sources.html and, for the exact release,
-https://download.videolan.org/pub/videolan/vlc/$version/.
-
-Because libVLC is loaded as a shared library and is not linked into any NoMercy
-binary, it can be replaced: put a directory containing your own build of libVLC
-on the payload override described in the NoMercy player documentation, and the
-player will load yours instead of this one.
-EOF
   touch -d "$STAMP_DATE" "$stage/NOTICE-NoMercy.txt"
+
 }
 
 out="$outdir/$payload-$version-$platform.tar.gz"
 packed=no
 
 case "$kind" in
-  zip) build_windows ;;
   7z) build_windows_mpv ;;
+  container) build_linux_mpv ;;
   brew) build_macos_mpv ;;
-  container) build_linux ;;
-  dmg) build_macos ;;
   *) echo "unknown payload kind: $kind"; exit 1 ;;
 esac
 

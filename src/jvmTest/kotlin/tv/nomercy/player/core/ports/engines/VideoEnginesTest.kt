@@ -38,7 +38,7 @@ class VideoEnginesTest {
         // The failure this whole seam exists to prevent. Asking for mpv and
         // silently getting VLC is how a migration reports itself green while
         // never having run once — every fixture passes, on the old engine.
-        val decision: EngineSelection = select(MPV, StubEngine(VLC, true), StubEngine(MPV, false))
+        val decision: EngineSelection = select(MPV, StubEngine(OTHER, true), StubEngine(MPV, false))
 
         val refusal = decision as? EngineSelection.None
         assertTrue(refusal != null, "an unavailable request was quietly satisfied by another engine")
@@ -47,7 +47,7 @@ class VideoEnginesTest {
 
     @Test
     fun anExplicitRequestWinsOverPreferenceOrder() {
-        val decision: EngineSelection = select(MPV, StubEngine(VLC, true), StubEngine(MPV, true))
+        val decision: EngineSelection = select(MPV, StubEngine(OTHER, true), StubEngine(MPV, true))
 
         assertEquals(MPV, (decision as EngineSelection.Chosen).provider.id)
     }
@@ -56,21 +56,21 @@ class VideoEnginesTest {
     fun withNoRequestTheFirstAvailableEngineIsChosen() {
         // Preference order, not registration order by accident: an engine leads
         // only once it is proven, so the fallback has to be the one that plays.
-        val decision: EngineSelection = select(null, StubEngine(VLC, false), StubEngine(MPV, true))
+        val decision: EngineSelection = select(null, StubEngine(OTHER, false), StubEngine(MPV, true))
 
         assertEquals(MPV, (decision as EngineSelection.Chosen).provider.id)
     }
 
     @Test
     fun anUnknownIdIsSaidOutLoud() {
-        val decision: EngineSelection = select(UNKNOWN, StubEngine(VLC, true))
+        val decision: EngineSelection = select(UNKNOWN, StubEngine(OTHER, true))
 
         assertTrue((decision as EngineSelection.None).reason.contains(UNKNOWN))
     }
 
     @Test
     fun aRequestArrivesFromAConfigFileWithWhitespaceOnIt() {
-        val decision: EngineSelection = select("  MPV \n", StubEngine(VLC, true), StubEngine(MPV, true))
+        val decision: EngineSelection = select("  MPV \n", StubEngine(OTHER, true), StubEngine(MPV, true))
 
         assertEquals(MPV, (decision as EngineSelection.Chosen).provider.id)
     }
@@ -79,23 +79,26 @@ class VideoEnginesTest {
     fun noEngineAtAllReportsEveryReason() {
         // A desktop with nothing installed has to be able to say why, per
         // engine. "Playback failed" sends a developer looking in the player.
-        val decision: EngineSelection = select(null, StubEngine(VLC, false), StubEngine(MPV, false))
+        val decision: EngineSelection = select(null, StubEngine(OTHER, false), StubEngine(MPV, false))
 
         val reason: String = (decision as EngineSelection.None).reason
-        assertTrue(reason.contains(VLC) && reason.contains(MPV), "not every engine was accounted for: $reason")
+        assertTrue(reason.contains(OTHER) && reason.contains(MPV), "not every engine was accounted for: $reason")
     }
 
     @Test
-    fun bothEnginesAreRegisteredWhetherOrNotThisMachineCanRunThem() {
-        // Side by side is the point of this stage: mpv has to be selectable on
-        // a machine that has it, without VLC being removed first.
-        // mpv first: it is the proven engine now, and libVLC stays behind it so
-        // a machine with no libmpv payload still plays.
-        assertEquals(listOf(MPV, VLC), VideoEngines.registered.map { provider -> provider.id })
+    fun theRegistryHoldsTheEnginesThisBuildCanConstruct() {
+        // One, since libVLC was deleted. The registry is still a list because
+        // the next engine will arrive the same way this one did — registered
+        // beside the incumbent, proven against the same fixtures, and only then
+        // does one of the two go.
+        assertEquals(listOf(MPV), VideoEngines.registered.map { provider -> provider.id })
         assertNull(VideoEngines.byId(UNKNOWN))
     }
 }
 
-private const val VLC = "vlc"
 private const val MPV = "mpv"
+
+// A second engine that is not registered in this build, so the selection rules
+// can be driven with two of them however many are really there.
+private const val OTHER = "vlc"
 private const val UNKNOWN = "gstreamer"

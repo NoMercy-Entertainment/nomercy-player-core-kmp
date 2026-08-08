@@ -18,30 +18,17 @@
     "named has never existed, there is no system VLC on a stock Windows box,",
     "and the desktop drew a black rectangle with nothing logged.",
     "",
-    "libass is fetched from its release; libVLC is BUILT at build time from the",
-    "upstream VideoLAN redistributable by tools/build-native-payload.sh, which",
-    "is published for every platform and needs no release of ours. That script",
-    "regenerates plugins.dat with vlc-cache-gen, a native binary, so a payload",
-    "can only be built ON the platform it targets — each one is produced by its",
-    "own runner and the host's is always available locally."
+    "libass is fetched from its release; libmpv is BUILT at build time by",
+    "tools/build-native-payload.sh from the upstream each platform has one of:",
+    "the dev package on Windows, Debian's in a container on Linux, Homebrew on",
+    "the Mac. Only the macOS payload is host-locked, because a Mach-O",
+    "dependency closure needs otool and install_name_tool.",
+    "",
+    "libVLC was here until libmpv replaced it. It is not a fallback that was",
+    "kept: an engine nothing constructs is an engine nobody tests, and its",
+    "payload was sixty megabytes of plugins."
   ],
   "payloads": [
-    {
-      "kind": "LIB_VLC",
-      "platform": "WINDOWS_X64",
-      "version": "3.0.23",
-      "sha256": "c159cf42bf11a1cebb2c820805443773e33414526d9aae13783497a7344a2e0f",
-      "marker": "libvlc.dll",
-      "bundle": true
-    },
-    {
-      "kind": "LIB_VLC",
-      "platform": "LINUX_X64",
-      "version": "3.0.23",
-      "sha256": "3501b673bc6f87a563951e119f3746109080adc2277a63cb33bf2b7134140fef",
-      "marker": "libvlc.so.5",
-      "bundle": true
-    },
     {
       "kind": "LIB_MPV",
       "platform": "WINDOWS_X64",

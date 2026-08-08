@@ -11,34 +11,8 @@
 #
 #   tools/build-native-payload.sh libvlc windows-x64
 
-libvlc.version=3.0.23
-
-# The official redistributable, unmodified. Digest published by VideoLAN at
-# https://get.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.zip.sha256
-libvlc.windows-x64.kind=zip
-libvlc.windows-x64.source=https://get.videolan.org/vlc/3.0.23/win64/vlc-3.0.23-win64.zip
-libvlc.windows-x64.sha256=992d19dbd0b8a7cde9167d2f7780b1ef6f92acc8a71acfa736101a21f35181e1
-
-# Linux has no official portable build: VideoLAN ships source and distro
-# packages, and a payload assembled from .deb files inherits that distro's
-# shared-library graph — which is the opposite of self-contained. So Linux is
-# built in a container from the distribution's own packages plus every
-# non-glibc shared object they pull in, and the container is the pin.
-libvlc.linux-x64.kind=container
-libvlc.linux-x64.source=debian:bookworm-slim
-libvlc.linux-x64.sha256=
-
-# macOS ships VLC as a .dmg carrying VLC.app. Extracting it needs hdiutil,
-# which needs macOS, so this payload is built on the Mac host and nowhere else.
-libvlc.macos-arm64.kind=dmg
-libvlc.macos-arm64.source=https://get.videolan.org/vlc/3.0.23/macosx/vlc-3.0.23-arm64.dmg
-libvlc.macos-arm64.sha256=
-
-libvlc.macos-x64.kind=dmg
-libvlc.macos-x64.source=https://get.videolan.org/vlc/3.0.23/macosx/vlc-3.0.23-intel64.dmg
-libvlc.macos-x64.sha256=
-
-# libmpv, the engine replacing libVLC on the desktop.
+# libmpv, the desktop engine. It replaced libVLC, whose entries were removed
+# with the engine itself.
 #
 # The upstream redistributable, unmodified: shinchiro's mpv-winbuild-cmake
 # publishes a dev package carrying libmpv-2.dll and the headers, which is what

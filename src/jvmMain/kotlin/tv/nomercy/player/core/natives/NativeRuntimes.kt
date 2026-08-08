@@ -17,7 +17,7 @@ import java.util.EnumMap
 // A KMP library that only works on a machine somebody already configured is not
 // a library, it is a set of instructions. Android gets its decoder inside the
 // AAR and Apple gets its subtitle renderer inside the XCFramework; the JVM
-// target was the one still asking the user to install VLC by hand, and styled
+// target was the one still asking the user to install an engine by hand, and styled
 // subtitles were silently doing nothing unless the machine happened to have
 // libass. Both holes are the same hole: a native dependency that arrives
 // through the machine instead of through the dependency.
@@ -38,13 +38,9 @@ public enum class NativeRuntimeKind(
     internal val repository: String,
     private val tagPrefix: String,
 ) {
-    // libVLC and its plugins: the desktop decoder.
-    LIB_VLC("libvlc", "nomercy-player-core-kmp", "natives-libvlc-"),
-
-    // libmpv: the desktop decoder libVLC is being replaced by. Registered here
-    // before any archive is published on purpose — the engine provider asks this
-    // table why it cannot run, and "no libmpv payload is published for this
-    // host" is a better answer than a linker error.
+    // libmpv: the desktop decoder. It replaced libVLC, and the engine provider
+    // asks this table why it cannot run — "no libmpv payload is published for
+    // this host" is a better answer than a linker error.
     LIB_MPV("libmpv", "nomercy-player-core-kmp", "natives-libmpv-"),
 
     // libass: styled ASS and SSA subtitles, the ones that carry positioning,
@@ -61,9 +57,9 @@ public object NativeRuntimes {
     // this machine and nothing pre-staged.
     //
     // Null is not a failure to report as a crash. Every caller has a fallback —
-    // libVLC falls back to a system install, libass falls back to unstyled
-    // subtitles — and the reason is available separately for anything that
-    // wants to say why.
+    // libmpv falls back to whatever the machine has on its library path, libass
+    // falls back to unstyled subtitles — and the reason is available separately
+    // for anything that wants to say why.
     public fun directory(kind: NativeRuntimeKind): File? = resolved(kind).directory
 
     // Why [directory] answered null, in a sentence a developer can act on.
