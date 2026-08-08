@@ -26,6 +26,19 @@ import java.nio.ByteBuffer
  */
 public interface VideoFrameSink {
 
+    /**
+     * The byte order this sink wants its pixels in.
+     *
+     * Asked rather than assumed, because the answer is not the same on every
+     * platform and getting it wrong is invisible in code and obvious on screen.
+     * Skia on a little-endian desktop and libVLC's RV32 both want BGRA;
+     * Android's ARGB_8888 is RGBA in memory. An engine that renders BGRA into
+     * an Android bitmap produces a picture with its reds and blues exchanged,
+     * which reads like a colour-management problem and is a one-word format
+     * string. Defaulted to the desktop's order so no existing sink changes.
+     */
+    public val pixelOrder: PixelOrder get() = PixelOrder.BGRA
+
     /** A new picture size, before the first frame of it. */
     public fun format(width: Int, height: Int)
 
@@ -53,6 +66,18 @@ public interface VideoFrameSink {
  * surface named one engine's type and an mpv backend could play with nowhere to
  * draw — which is the state the frame path was in for exactly one commit.
  */
+/**
+ * The two four-byte orders a sink on any of our platforms asks for.
+ *
+ * Named by the order the bytes sit in memory, not by the order a constant
+ * spells them: the fourth byte is padding an engine leaves alone, so `bgr0`
+ * and `rgb0` are what mpv is asked for and what the sinks receive.
+ */
+public enum class PixelOrder(public val mpvSwFormat: String) {
+    BGRA("bgr0"),
+    RGBA("rgb0"),
+}
+
 public interface FrameSourceBackend {
 
     /**

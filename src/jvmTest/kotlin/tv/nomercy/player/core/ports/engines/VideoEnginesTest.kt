@@ -24,9 +24,11 @@ class VideoEnginesTest {
     private class StubEngine(
         override val id: String,
         private val available: Boolean,
+        private val refuses: String? = null,
     ) : VideoEngineProvider {
         override fun isAvailable(): Boolean = available
         override fun whyUnavailable(): String? = if (available) null else "$id is not installed here"
+        override fun canDecode(codec: String?): Boolean = refuses == null || codec != refuses
         override fun create(): Nothing = error("no engine is constructed in this test")
     }
 
@@ -94,8 +96,38 @@ class VideoEnginesTest {
         assertEquals(listOf(MPV), VideoEngines.registered.map { provider -> provider.id })
         assertNull(VideoEngines.byId(UNKNOWN))
     }
+
+    // The Hi10P case, as a decision rather than as a device.
+    //
+    // A phone's AVC decoders stop at High profile, so the leading engine cannot
+    // open a High 10 stream at all — and the failure is a black picture with no
+    // error, which is why this has to be decided before playback rather than
+    // discovered during it.
+    @Test
+    fun aCodecTheLeadingEngineCannotDecodeGoesToOneThatCan() {
+        val hardware = StubEngine(OTHER, available = true, refuses = HIGH_10)
+        val software = StubEngine(MPV, available = true)
+        val both: List<VideoEngineProvider> = listOf(hardware, software)
+
+        val ordinary = VideoEngines.selectFrom(both.filter { it.canDecode("avc1.640028") }, null)
+        assertEquals(OTHER, (ordinary as EngineSelection.Chosen).provider.id)
+
+        val tenBit = VideoEngines.selectFrom(both.filter { it.canDecode(HIGH_10) }, null)
+        assertEquals(MPV, (tenBit as EngineSelection.Chosen).provider.id)
+    }
+
+    // An explicit request still wins, and is still refused rather than swapped
+    // when it cannot run. Somebody who asked for one engine and got another has
+    // no way to tell.
+    @Test
+    fun anExplicitRequestOutranksWhatTheCodecWouldHaveChosen() {
+        val decision: EngineSelection = VideoEngines.selectFor(HIGH_10, requested = "nothing-registered")
+
+        assertTrue(decision is EngineSelection.None, "an unregistered request was satisfied by the codec rule")
+    }
 }
 
+private const val HIGH_10 = "avc1.6E0028"
 private const val MPV = "mpv"
 
 // A second engine that is not registered in this build, so the selection rules

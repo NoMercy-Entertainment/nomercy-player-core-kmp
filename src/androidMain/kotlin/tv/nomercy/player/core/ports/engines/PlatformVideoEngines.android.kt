@@ -8,9 +8,14 @@
 
 package tv.nomercy.player.core.ports.engines
 
+import android.media.MediaCodecInfo
+import android.media.MediaCodecInfo.CodecProfileLevel
+import android.media.MediaCodecInfo.CodecProfileLevel.AVCProfileHigh10
+import android.media.MediaCodecList
 import tv.nomercy.player.core.ports.ExoPlayerVideoBackend
 import tv.nomercy.player.core.ports.PlatformEnvironment
 import tv.nomercy.player.core.ports.VideoBackend
+import tv.nomercy.player.core.stream.AvcCodecString
 
 internal actual val platformVideoEngines: List<VideoEngineProvider> = listOf(ExoVideoEngineProvider)
 
@@ -35,6 +40,33 @@ public object ExoVideoEngineProvider : VideoEngineProvider {
     public override fun isAvailable(): Boolean = true
 
     public override fun whyUnavailable(): String? = null
+
+    /**
+     * Asked of the device, not assumed.
+     *
+     * A phone's decoders are a fixed list and every phone's list is different,
+     * so the question "can this play here" has a real answer and MediaCodecList
+     * holds it. Hardcoding "Android cannot do High 10" would be true of every
+     * device measured so far and would still be the wrong shape — the day one
+     * ships that can, this would route it to a software decoder forever.
+     *
+     * Only AVC is checked, because AVC is where the gap is: HEVC Main 10 and
+     * VP9 Profile 2 are widely supported and both carry 10-bit fine.
+     */
+    public override fun canDecode(codec: String?): Boolean {
+        val profile: Int = AvcCodecString.profileIdc(codec) ?: return true
+        if (profile != AvcCodecString.HIGH_10) return true
+
+        return decoderProfiles().any { level -> level.profile == AVCProfileHigh10 }
+    }
+
+    private fun decoderProfiles(): List<CodecProfileLevel> =
+        MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos
+            .filterNot(MediaCodecInfo::isEncoder)
+            .filter { info -> info.supportedTypes.any { type -> type.equals(AVC, ignoreCase = true) } }
+            .flatMap { info -> info.getCapabilitiesForType(AVC).profileLevels.asList() }
+
+    private const val AVC: String = "video/avc"
 
     public override fun create(): VideoBackend =
         ExoPlayerVideoBackend(PlatformEnvironment.requireContext().androidContext)

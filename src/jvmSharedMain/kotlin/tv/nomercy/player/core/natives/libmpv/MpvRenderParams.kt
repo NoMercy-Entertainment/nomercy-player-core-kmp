@@ -133,22 +133,6 @@ internal object MpvRenderParamType {
 internal const val MPV_RENDER_API_TYPE_SW: String = "sw"
 
 /**
- * Four bytes per pixel, blue first, alpha ignored.
- *
- * mpv names its software formats by BYTE ORDER and accepts exactly four:
- * `rgb0`, `bgr0`, `0bgr`, `0rgb`. "bgra" is not one of them, and passing it
- * fails the whole render call with "invalid parameter" — a message that says
- * nothing about which parameter and sends you looking at the size.
- *
- * The same order libVLC's RV32 produces on a little-endian machine, which is
- * what [tv.nomercy.player.core.natives.libvlc.VlcVideoFrameSink] already
- * documents and what the Compose sink already unpacks. Choosing a different one
- * here would mean two pixel orders in one desktop and a picture with the reds
- * and blues swapped on whichever engine lost the argument.
- */
-internal const val MPV_SW_FORMAT_BGRA: String = "bgr0"
-
-/**
  * `mpv_render_param` as JNA sees it: an int and a pointer, padded by the ABI.
  *
  * `@Structure.FieldOrder` is not optional. Without it JNA orders the fields by

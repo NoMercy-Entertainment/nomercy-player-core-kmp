@@ -7324,6 +7324,14 @@ final object tv.nomercy.player.core.ports/UrlResolution { // tv.nomercy.player.c
     final fun resolve(kotlin/String, kotlin/String?): tv.nomercy.player.core.ports/ResolvedUrl // tv.nomercy.player.core.ports/UrlResolution.resolve|resolve(kotlin.String;kotlin.String?){}[0]
 }
 
+final object tv.nomercy.player.core.stream/AvcCodecString { // tv.nomercy.player.core.stream/AvcCodecString|null[0]
+    final const val HIGH_10 // tv.nomercy.player.core.stream/AvcCodecString.HIGH_10|{}HIGH_10[0]
+        final fun <get-HIGH_10>(): kotlin/Int // tv.nomercy.player.core.stream/AvcCodecString.HIGH_10.<get-HIGH_10>|<get-HIGH_10>(){}[0]
+
+    final fun isHigh10(kotlin/String?): kotlin/Boolean // tv.nomercy.player.core.stream/AvcCodecString.isHigh10|isHigh10(kotlin.String?){}[0]
+    final fun profileIdc(kotlin/String?): kotlin/Int? // tv.nomercy.player.core.stream/AvcCodecString.profileIdc|profileIdc(kotlin.String?){}[0]
+}
+
 final object tv.nomercy.player.core.stream/MasterPlaylistRewriter { // tv.nomercy.player.core.stream/MasterPlaylistRewriter|null[0]
     final fun descriptorOf(kotlin/String): tv.nomercy.player.core.media/QualityDescriptor? // tv.nomercy.player.core.stream/MasterPlaylistRewriter.descriptorOf|descriptorOf(kotlin.String){}[0]
     final fun rewrite(kotlin/String, kotlin.collections/Collection<tv.nomercy.player.core.media/QualityDescriptor>): kotlin/String // tv.nomercy.player.core.stream/MasterPlaylistRewriter.rewrite|rewrite(kotlin.String;kotlin.collections.Collection<tv.nomercy.player.core.media.QualityDescriptor>){}[0]

@@ -5933,6 +5933,15 @@ public abstract interface class tv/nomercy/player/core/ports/PipController {
 	public abstract fun subscribe (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 }
 
+public final class tv/nomercy/player/core/ports/PixelOrder : java/lang/Enum {
+	public static final field BGRA Ltv/nomercy/player/core/ports/PixelOrder;
+	public static final field RGBA Ltv/nomercy/player/core/ports/PixelOrder;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getMpvSwFormat ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/PixelOrder;
+	public static fun values ()[Ltv/nomercy/player/core/ports/PixelOrder;
+}
+
 public abstract interface class tv/nomercy/player/core/ports/Platform {
 	public fun getAudioOutput ()Ltv/nomercy/player/core/ports/AudioOutputRouter;
 	public abstract fun getCapabilities ()Ltv/nomercy/player/core/ports/CapabilitiesProbe;
@@ -6549,10 +6558,12 @@ public abstract interface class tv/nomercy/player/core/ports/VideoFrameSink {
 	public fun clear ()V
 	public abstract fun display (Ljava/nio/ByteBuffer;)V
 	public abstract fun format (II)V
+	public fun getPixelOrder ()Ltv/nomercy/player/core/ports/PixelOrder;
 }
 
 public final class tv/nomercy/player/core/ports/VideoFrameSink$DefaultImpls {
 	public static fun clear (Ltv/nomercy/player/core/ports/VideoFrameSink;)V
+	public static fun getPixelOrder (Ltv/nomercy/player/core/ports/VideoFrameSink;)Ltv/nomercy/player/core/ports/PixelOrder;
 }
 
 public abstract interface class tv/nomercy/player/core/ports/VisibilityMonitor {
@@ -6684,6 +6695,7 @@ public final class tv/nomercy/player/core/ports/engines/EngineSelection$None : t
 
 public final class tv/nomercy/player/core/ports/engines/MpvVideoEngineProvider : tv/nomercy/player/core/ports/engines/VideoEngineProvider {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/engines/MpvVideoEngineProvider;
+	public fun canDecode (Ljava/lang/String;)Z
 	public fun create ()Ltv/nomercy/player/core/ports/VideoBackend;
 	public fun getId ()Ljava/lang/String;
 	public fun isAvailable ()Z
@@ -6691,10 +6703,15 @@ public final class tv/nomercy/player/core/ports/engines/MpvVideoEngineProvider :
 }
 
 public abstract interface class tv/nomercy/player/core/ports/engines/VideoEngineProvider {
+	public fun canDecode (Ljava/lang/String;)Z
 	public abstract fun create ()Ltv/nomercy/player/core/ports/VideoBackend;
 	public abstract fun getId ()Ljava/lang/String;
 	public abstract fun isAvailable ()Z
 	public abstract fun whyUnavailable ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/engines/VideoEngineProvider$DefaultImpls {
+	public static fun canDecode (Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;Ljava/lang/String;)Z
 }
 
 public final class tv/nomercy/player/core/ports/engines/VideoEngines {
@@ -6704,11 +6721,22 @@ public final class tv/nomercy/player/core/ports/engines/VideoEngines {
 	public final fun byId (Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/VideoEngineProvider;
 	public final fun create (Ljava/lang/String;)Ltv/nomercy/player/core/ports/VideoBackend;
 	public static synthetic fun create$default (Ltv/nomercy/player/core/ports/engines/VideoEngines;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/VideoBackend;
+	public final fun createFor (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/VideoBackend;
+	public static synthetic fun createFor$default (Ltv/nomercy/player/core/ports/engines/VideoEngines;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/VideoBackend;
 	public final fun getRegistered ()Ljava/util/List;
 	public final fun requestedId ()Ljava/lang/String;
 	public final fun select (Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
 	public static synthetic fun select$default (Ltv/nomercy/player/core/ports/engines/VideoEngines;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
+	public final fun selectFor (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
+	public static synthetic fun selectFor$default (Ltv/nomercy/player/core/ports/engines/VideoEngines;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
 	public final fun selectFrom (Ljava/util/List;Ljava/lang/String;)Ltv/nomercy/player/core/ports/engines/EngineSelection;
+}
+
+public final class tv/nomercy/player/core/stream/AvcCodecString {
+	public static final field HIGH_10 I
+	public static final field INSTANCE Ltv/nomercy/player/core/stream/AvcCodecString;
+	public final fun isHigh10 (Ljava/lang/String;)Z
+	public final fun profileIdc (Ljava/lang/String;)Ljava/lang/Integer;
 }
 
 public final class tv/nomercy/player/core/stream/ClientCapabilities {

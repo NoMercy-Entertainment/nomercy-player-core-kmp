@@ -82,6 +82,37 @@ public object VideoEngines {
      * test happens to run on; the decision is not, and it has to be the same on
      * a desktop with both and a desktop with neither.
      */
+    /**
+     * The engine for a stream that declares [codec], honouring an explicit
+     * request first.
+     *
+     * This is what makes a Hi10P file play on a phone without anybody setting a
+     * flag. Android's decoders stop at AVC High profile, so a High 10 stream
+     * has nothing on the device that will open it — and the failure is a black
+     * picture rather than an error, which is the worst shape a failure can
+     * take. Asking each engine whether it can decode the thing, before choosing
+     * one, turns that into a decode by the engine that can.
+     *
+     * An explicit request still wins and is still refused rather than swapped
+     * when it cannot run. Somebody who asked for ExoPlayer and got mpv would
+     * have no way to tell.
+     */
+    public fun selectFor(codec: String?, requested: String? = requestedId()): EngineSelection =
+        if (requested != null) {
+            selectFrom(registered, requested)
+        } else {
+            val able: List<VideoEngineProvider> = registered.filter { provider -> provider.canDecode(codec) }
+            if (able.isEmpty()) {
+                EngineSelection.None("no registered video engine decodes \"$codec\"")
+            } else {
+                selectFrom(able, null)
+            }
+        }
+
+    /** The engine for a stream declaring [codec], built, or null when none can. */
+    public fun createFor(codec: String?, requested: String? = requestedId()): VideoBackend? =
+        (selectFor(codec, requested) as? EngineSelection.Chosen)?.provider?.create()
+
     public fun selectFrom(engines: List<VideoEngineProvider>, requested: String?): EngineSelection {
         val asked: String? = requested?.trim()?.lowercase()?.takeIf { it.isNotEmpty() }
         if (asked != null) {

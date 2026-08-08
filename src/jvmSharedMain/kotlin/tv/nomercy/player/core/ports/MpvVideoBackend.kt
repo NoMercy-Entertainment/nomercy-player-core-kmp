@@ -16,7 +16,6 @@ import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 import tv.nomercy.player.core.natives.libmpv.LibMpv
 import tv.nomercy.player.core.natives.libmpv.MPV_RENDER_API_TYPE_SW
-import tv.nomercy.player.core.natives.libmpv.MPV_SW_FORMAT_BGRA
 import tv.nomercy.player.core.natives.libmpv.MpvRenderParams
 import tv.nomercy.player.core.natives.libmpv.MpvRenderParamType
 import tv.nomercy.player.core.natives.libmpv.MpvHandle
@@ -464,7 +463,7 @@ public class MpvVideoBackend internal constructor(
         val stride: Long = width.toLong() * BYTES_PER_PIXEL
         val params = MpvRenderParams()
             .ints(MpvRenderParamType.SW_SIZE, width, height)
-            .string(MpvRenderParamType.SW_FORMAT, MPV_SW_FORMAT_BGRA)
+            .string(MpvRenderParamType.SW_FORMAT, target.pixelOrder.mpvSwFormat)
             .size(MpvRenderParamType.SW_STRIDE, stride)
             .pointer(MpvRenderParamType.SW_POINTER, buffer)
 
