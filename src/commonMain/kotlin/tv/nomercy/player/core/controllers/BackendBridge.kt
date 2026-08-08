@@ -76,7 +76,7 @@ public class BackendBridge(
         // An engine that learns its length late says so here.
         listen(backend, CanonicalBackendEvent.DURATION_CHANGE) {
             val duration: Double = backend.duration()
-            if (duration > 0.0 && duration != ctx.internalDuration) {
+            if (duration.isALength() && duration != ctx.internalDuration) {
                 ctx.internalDuration = duration
                 ctx.emit(CoreEvents.Duration, duration)
             }
@@ -85,7 +85,7 @@ public class BackendBridge(
         listen(backend, CanonicalBackendEvent.LOADED_METADATA) {
             announceLoaded(backend)
             val duration: Double = backend.duration()
-            if (duration > 0.0) {
+            if (duration.isALength()) {
                 ctx.internalDuration = duration
                 ctx.emit(CoreEvents.Duration, duration)
             }
@@ -179,7 +179,7 @@ public class BackendBridge(
         val time: Double = backend.currentTime()
         val duration: Double = backend.duration()
         ctx.internalCurrentTime = time
-        if (duration > 0.0) ctx.internalDuration = duration
+        if (duration.isALength()) ctx.internalDuration = duration
 
         // A position that advances is the engine saying it is being fed, so
         // it is also the end of a stall.
@@ -354,6 +354,20 @@ public class BackendBridge(
         handlers.add(event to handler)
     }
 }
+
+/**
+ * Whether what the engine reported is a length the player can publish.
+ *
+ * Infinity is what a live stream reports, and it satisfies `> 0.0` — which is
+ * what the three guards here used to say. Published, it reaches a progress bar
+ * as a denominator that makes every position zero, so the bar never moves; and
+ * latched into the player's own duration it reaches the ending-soon window and
+ * the preload trigger, which both subtract from it.
+ *
+ * The web writes this branch down in `duration-resolution.test.ts`, and it was
+ * the one part of that module the port did not carry over.
+ */
+private fun Double.isALength(): Boolean = isFinite() && this > 0.0
 
 // What the web writes into these two payloads for a plain media element. The
 // desktop and mobile engines are all "media" from a consumer's point of view;

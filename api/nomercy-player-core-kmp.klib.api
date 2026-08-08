@@ -1397,13 +1397,6 @@ abstract interface tv.nomercy.player.core.ports/Clock { // tv.nomercy.player.cor
     abstract fun now(): kotlin/Long // tv.nomercy.player.core.ports/Clock.now|now(){}[0]
 }
 
-abstract interface tv.nomercy.player.core.ports/DefaultTranslator { // tv.nomercy.player.core.ports/DefaultTranslator|null[0]
-    abstract fun addTranslations(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>) // tv.nomercy.player.core.ports/DefaultTranslator.addTranslations|addTranslations(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
-    abstract fun language(): kotlin/String // tv.nomercy.player.core.ports/DefaultTranslator.language|language(){}[0]
-    abstract fun translate(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String> = ...): kotlin/String // tv.nomercy.player.core.ports/DefaultTranslator.translate|translate(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
-    abstract suspend fun setLanguage(kotlin/String) // tv.nomercy.player.core.ports/DefaultTranslator.setLanguage|setLanguage(kotlin.String){}[0]
-}
-
 abstract interface tv.nomercy.player.core.ports/EmbedTransport { // tv.nomercy.player.core.ports/EmbedTransport|null[0]
     abstract fun receive(kotlin/Function1<tv.nomercy.player.core.ports/EmbedMessage, kotlin/Unit>): tv.nomercy.player.core.events/Subscription // tv.nomercy.player.core.ports/EmbedTransport.receive|receive(kotlin.Function1<tv.nomercy.player.core.ports.EmbedMessage,kotlin.Unit>){}[0]
     abstract fun send(kotlin/String) // tv.nomercy.player.core.ports/EmbedTransport.send|send(kotlin.String){}[0]
@@ -5122,6 +5115,44 @@ final class tv.nomercy.player.core.events/VolumeChange { // tv.nomercy.player.co
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/VolumeChange.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.i18n/DefaultTranslator : tv.nomercy.player.core.ports/Translator { // tv.nomercy.player.core.i18n/DefaultTranslator|null[0]
+    constructor <init>(tv.nomercy.player.core.i18n/DefaultTranslatorOptions = ..., tv.nomercy.player.core.ports/LanguageMatcher = ...) // tv.nomercy.player.core.i18n/DefaultTranslator.<init>|<init>(tv.nomercy.player.core.i18n.DefaultTranslatorOptions;tv.nomercy.player.core.ports.LanguageMatcher){}[0]
+
+    final fun addTranslations(kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>>) // tv.nomercy.player.core.i18n/DefaultTranslator.addTranslations|addTranslations(kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>>){}[0]
+    final fun dispose() // tv.nomercy.player.core.i18n/DefaultTranslator.dispose|dispose(){}[0]
+    final fun language(): kotlin/String // tv.nomercy.player.core.i18n/DefaultTranslator.language|language(){}[0]
+    final fun removeTranslations(kotlin/String, kotlin/String?) // tv.nomercy.player.core.i18n/DefaultTranslator.removeTranslations|removeTranslations(kotlin.String;kotlin.String?){}[0]
+    final fun t(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>): kotlin/String // tv.nomercy.player.core.i18n/DefaultTranslator.t|t(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>){}[0]
+    final fun translation(kotlin/String, kotlin/String): kotlin/String? // tv.nomercy.player.core.i18n/DefaultTranslator.translation|translation(kotlin.String;kotlin.String){}[0]
+    final fun translation(kotlin/String, kotlin/String, kotlin/String) // tv.nomercy.player.core.i18n/DefaultTranslator.translation|translation(kotlin.String;kotlin.String;kotlin.String){}[0]
+    final suspend fun language(kotlin/String) // tv.nomercy.player.core.i18n/DefaultTranslator.language|language(kotlin.String){}[0]
+}
+
+final class tv.nomercy.player.core.i18n/DefaultTranslatorOptions { // tv.nomercy.player.core.i18n/DefaultTranslatorOptions|null[0]
+    constructor <init>(kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> = ..., tv.nomercy.player.core.ports/TranslationLoader? = ..., kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? = ..., kotlin/String? = ...) // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.<init>|<init>(kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>>;tv.nomercy.player.core.ports.TranslationLoader?;kotlin.Function2<kotlin.String,kotlin.String,kotlin.String>?;kotlin.String?){}[0]
+
+    final val fallbackLanguage // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.fallbackLanguage|{}fallbackLanguage[0]
+        final fun <get-fallbackLanguage>(): kotlin/String? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.fallbackLanguage.<get-fallbackLanguage>|<get-fallbackLanguage>(){}[0]
+    final val language // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.language|{}language[0]
+        final fun <get-language>(): kotlin/String? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.language.<get-language>|<get-language>(){}[0]
+    final val loadTranslations // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.loadTranslations|{}loadTranslations[0]
+        final fun <get-loadTranslations>(): tv.nomercy.player.core.ports/TranslationLoader? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.loadTranslations.<get-loadTranslations>|<get-loadTranslations>(){}[0]
+    final val onMissingTranslation // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.onMissingTranslation|{}onMissingTranslation[0]
+        final fun <get-onMissingTranslation>(): kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.onMissingTranslation.<get-onMissingTranslation>|<get-onMissingTranslation>(){}[0]
+    final val translations // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.translations|{}translations[0]
+        final fun <get-translations>(): kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.translations.<get-translations>|<get-translations>(){}[0]
+
+    final fun component1(): kotlin/String? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.component1|component1(){}[0]
+    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.component2|component2(){}[0]
+    final fun component3(): tv.nomercy.player.core.ports/TranslationLoader? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.component3|component3(){}[0]
+    final fun component4(): kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.component4|component4(){}[0]
+    final fun component5(): kotlin/String? // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.component5|component5(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> = ..., tv.nomercy.player.core.ports/TranslationLoader? = ..., kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? = ..., kotlin/String? = ...): tv.nomercy.player.core.i18n/DefaultTranslatorOptions // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.copy|copy(kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>>;tv.nomercy.player.core.ports.TranslationLoader?;kotlin.Function2<kotlin.String,kotlin.String,kotlin.String>?;kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.i18n/DefaultTranslatorOptions.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.input/KeyBindingTable { // tv.nomercy.player.core.input/KeyBindingTable|null[0]
     constructor <init>(kotlin/Long = ..., kotlin/Function0<kotlin/Long>) // tv.nomercy.player.core.input/KeyBindingTable.<init>|<init>(kotlin.Long;kotlin.Function0<kotlin.Long>){}[0]
 
@@ -6677,31 +6708,6 @@ final class tv.nomercy.player.core.ports/DefaultPreloadStrategy : tv.nomercy.pla
     final fun assetsToPreload(tv.nomercy.player.core.media/PlaylistItem): kotlin.collections/List<tv.nomercy.player.core.ports/PreloadAsset> // tv.nomercy.player.core.ports/DefaultPreloadStrategy.assetsToPreload|assetsToPreload(tv.nomercy.player.core.media.PlaylistItem){}[0]
     final fun cancel() // tv.nomercy.player.core.ports/DefaultPreloadStrategy.cancel|cancel(){}[0]
     final fun shouldPreload(tv.nomercy.player.core.ports/PreloadContext): kotlin/Boolean // tv.nomercy.player.core.ports/DefaultPreloadStrategy.shouldPreload|shouldPreload(tv.nomercy.player.core.ports.PreloadContext){}[0]
-}
-
-final class tv.nomercy.player.core.ports/DefaultTranslatorOptions { // tv.nomercy.player.core.ports/DefaultTranslatorOptions|null[0]
-    constructor <init>(kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> = ..., tv.nomercy.player.core.ports/TranslationLoader? = ..., kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? = ..., kotlin/String? = ...) // tv.nomercy.player.core.ports/DefaultTranslatorOptions.<init>|<init>(kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>>;tv.nomercy.player.core.ports.TranslationLoader?;kotlin.Function2<kotlin.String,kotlin.String,kotlin.String>?;kotlin.String?){}[0]
-
-    final val fallbackLanguage // tv.nomercy.player.core.ports/DefaultTranslatorOptions.fallbackLanguage|{}fallbackLanguage[0]
-        final fun <get-fallbackLanguage>(): kotlin/String? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.fallbackLanguage.<get-fallbackLanguage>|<get-fallbackLanguage>(){}[0]
-    final val language // tv.nomercy.player.core.ports/DefaultTranslatorOptions.language|{}language[0]
-        final fun <get-language>(): kotlin/String? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.language.<get-language>|<get-language>(){}[0]
-    final val loadTranslations // tv.nomercy.player.core.ports/DefaultTranslatorOptions.loadTranslations|{}loadTranslations[0]
-        final fun <get-loadTranslations>(): tv.nomercy.player.core.ports/TranslationLoader? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.loadTranslations.<get-loadTranslations>|<get-loadTranslations>(){}[0]
-    final val onMissingTranslation // tv.nomercy.player.core.ports/DefaultTranslatorOptions.onMissingTranslation|{}onMissingTranslation[0]
-        final fun <get-onMissingTranslation>(): kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.onMissingTranslation.<get-onMissingTranslation>|<get-onMissingTranslation>(){}[0]
-    final val translations // tv.nomercy.player.core.ports/DefaultTranslatorOptions.translations|{}translations[0]
-        final fun <get-translations>(): kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> // tv.nomercy.player.core.ports/DefaultTranslatorOptions.translations.<get-translations>|<get-translations>(){}[0]
-
-    final fun component1(): kotlin/String? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.component1|component1(){}[0]
-    final fun component2(): kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> // tv.nomercy.player.core.ports/DefaultTranslatorOptions.component2|component2(){}[0]
-    final fun component3(): tv.nomercy.player.core.ports/TranslationLoader? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.component3|component3(){}[0]
-    final fun component4(): kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.component4|component4(){}[0]
-    final fun component5(): kotlin/String? // tv.nomercy.player.core.ports/DefaultTranslatorOptions.component5|component5(){}[0]
-    final fun copy(kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>> = ..., tv.nomercy.player.core.ports/TranslationLoader? = ..., kotlin/Function2<kotlin/String, kotlin/String, kotlin/String>? = ..., kotlin/String? = ...): tv.nomercy.player.core.ports/DefaultTranslatorOptions // tv.nomercy.player.core.ports/DefaultTranslatorOptions.copy|copy(kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>>;tv.nomercy.player.core.ports.TranslationLoader?;kotlin.Function2<kotlin.String,kotlin.String,kotlin.String>?;kotlin.String?){}[0]
-    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/DefaultTranslatorOptions.equals|equals(kotlin.Any?){}[0]
-    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/DefaultTranslatorOptions.hashCode|hashCode(){}[0]
-    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/DefaultTranslatorOptions.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.ports/Device { // tv.nomercy.player.core.ports/Device|null[0]
@@ -8856,6 +8862,10 @@ final object tv.nomercy.player.core.events/PreventReason { // tv.nomercy.player.
         final fun <get-ListenerPrevented>(): kotlin/String // tv.nomercy.player.core.events/PreventReason.ListenerPrevented.<get-ListenerPrevented>|<get-ListenerPrevented>(){}[0]
 }
 
+final object tv.nomercy.player.core.i18n/Bcp47FallbackChain : tv.nomercy.player.core.ports/LanguageMatcher { // tv.nomercy.player.core.i18n/Bcp47FallbackChain|null[0]
+    final fun candidatesFor(kotlin/String): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.i18n/Bcp47FallbackChain.candidatesFor|candidatesFor(kotlin.String){}[0]
+}
+
 final object tv.nomercy.player.core.media/TitleTokens { // tv.nomercy.player.core.media/TitleTokens|null[0]
     final fun interpolate(kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/Function2<kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/String>, kotlin/String>): kotlin/String // tv.nomercy.player.core.media/TitleTokens.interpolate|interpolate(kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.Function2<kotlin.String,kotlin.collections.Map<kotlin.String,kotlin.String>,kotlin.String>){}[0]
 }
@@ -9320,6 +9330,10 @@ final fun tv.nomercy.player.core.errors/mediaFormatError(kotlin/String, kotlin/S
 final fun tv.nomercy.player.core.errors/pluginError(kotlin/String, kotlin/String, tv.nomercy.player.core.errors/Severity = ..., kotlin/String? = ..., kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/PluginError // tv.nomercy.player.core.errors/pluginError|pluginError(kotlin.String;kotlin.String;tv.nomercy.player.core.errors.Severity;kotlin.String?;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/resourceError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/ResourceError // tv.nomercy.player.core.errors/resourceError|resourceError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
 final fun tv.nomercy.player.core.errors/stateError(kotlin/String, kotlin/String, kotlin.collections/Map<kotlin/String, kotlin/Any?> = ...): tv.nomercy.player.core.errors/StateError // tv.nomercy.player.core.errors/stateError|stateError(kotlin.String;kotlin.String;kotlin.collections.Map<kotlin.String,kotlin.Any?>){}[0]
+final fun tv.nomercy.player.core.format/clampVolume(kotlin/Double): kotlin/Int // tv.nomercy.player.core.format/clampVolume|clampVolume(kotlin.Double){}[0]
+final fun tv.nomercy.player.core.format/formatDuration(kotlin/Double?): kotlin/String // tv.nomercy.player.core.format/formatDuration|formatDuration(kotlin.Double?){}[0]
+final fun tv.nomercy.player.core.format/formatDuration(kotlin/String?): kotlin/String // tv.nomercy.player.core.format/formatDuration|formatDuration(kotlin.String?){}[0]
+final fun tv.nomercy.player.core.format/formatSeconds(kotlin/Double): kotlin/String // tv.nomercy.player.core.format/formatSeconds|formatSeconds(kotlin.Double){}[0]
 final fun tv.nomercy.player.core.i18n/languageDisplayName(kotlin/String?, kotlin/String): kotlin/String? // tv.nomercy.player.core.i18n/languageDisplayName|languageDisplayName(kotlin.String?;kotlin.String){}[0]
 final fun tv.nomercy.player.core.input/defaultInputAdapter(): tv.nomercy.player.core.input/InputAdapter // tv.nomercy.player.core.input/defaultInputAdapter|defaultInputAdapter(){}[0]
 final fun tv.nomercy.player.core.input/keyCombo(kotlin/String, kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., kotlin/Boolean = ...): tv.nomercy.player.core.input/KeyCombo // tv.nomercy.player.core.input/keyCombo|keyCombo(kotlin.String;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean;kotlin.Boolean){}[0]

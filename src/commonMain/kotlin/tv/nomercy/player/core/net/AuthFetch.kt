@@ -70,18 +70,18 @@ public sealed interface FetchSignal {
 public object HttpFailure {
 
     public fun codeForClientError(status: Int): String = when (status) {
-        404 -> CoreErrorCodes.NOT_FOUND
-        408 -> CoreErrorCodes.REQUEST_TIMEOUT
-        410 -> CoreErrorCodes.GONE
-        429 -> CoreErrorCodes.RATE_LIMITED
+        HttpStatus.NOT_FOUND -> CoreErrorCodes.NOT_FOUND
+        HttpStatus.REQUEST_TIMEOUT -> CoreErrorCodes.REQUEST_TIMEOUT
+        HttpStatus.GONE -> CoreErrorCodes.GONE
+        HttpStatus.TOO_MANY_REQUESTS -> CoreErrorCodes.RATE_LIMITED
         else -> CoreErrorCodes.CLIENT_ERROR
     }
 
     public fun codeForServerError(status: Int): String = when (status) {
-        500 -> CoreErrorCodes.SERVER_ERROR
-        502 -> CoreErrorCodes.BAD_GATEWAY
-        503 -> CoreErrorCodes.SERVICE_UNAVAILABLE
-        504 -> CoreErrorCodes.GATEWAY_TIMEOUT
+        HttpStatus.INTERNAL_SERVER_ERROR -> CoreErrorCodes.SERVER_ERROR
+        HttpStatus.BAD_GATEWAY -> CoreErrorCodes.BAD_GATEWAY
+        HttpStatus.SERVICE_UNAVAILABLE -> CoreErrorCodes.SERVICE_UNAVAILABLE
+        HttpStatus.GATEWAY_TIMEOUT -> CoreErrorCodes.GATEWAY_TIMEOUT
         else -> CoreErrorCodes.SERVER_ERROR_OTHER
     }
 }
@@ -212,23 +212,23 @@ public class AuthFetch(
     ): Outcome {
         val status: Int = response.status
 
-        if (status == 401) return unauthenticated(status, refreshesUsed)
+        if (status == HttpStatus.UNAUTHORIZED) return unauthenticated(status, refreshesUsed)
 
-        if (status == 403) {
+        if (status == HttpStatus.FORBIDDEN) {
             return Outcome.Fail(
                 authError(
                     CoreErrorCodes.FORBIDDEN,
-                    403,
+                    HttpStatus.FORBIDDEN,
                     "forbidden (403) — authenticated but not authorized for this resource",
                 ),
             )
         }
 
-        if (status in 400..499) {
+        if (status in HttpStatus.CLIENT_ERRORS) {
             return Outcome.Fail(netError(HttpFailure.codeForClientError(status), status, "HTTP $status"))
         }
 
-        if (status >= 500) {
+        if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
             return Outcome.Again(
                 reason = "http-5xx",
                 delayMs = retry.delayMs(attempt),

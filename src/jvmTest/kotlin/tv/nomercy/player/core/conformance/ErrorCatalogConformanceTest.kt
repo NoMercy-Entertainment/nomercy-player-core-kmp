@@ -84,19 +84,15 @@ private val NATIVE_ONLY_CODES = setOf(
     "core:stream/no-video-track",
 )
 
-// Plugin-namespaced codes with no native raise site.
+// `plugin:canvas/not-mounted` used to be waived here, in a set documented as
+// something "the cross-repo parity report reads". It was private, so nothing
+// outside this file could ever have read it, and nothing in the tree named it.
 //
-// Kept apart from WEB_ONLY because the gate below measures core's namespace
-// only — a plugin: code listed there is excused against a set it was never
-// compared to, which the ledger-honesty test catches. The cross-repo parity
-// report reads this one.
-private val PLUGIN_WEB_ONLY = setOf(
-    // Raised when the web plugin's canvas() is called before use() mounted an
-    // element. There is no element here: the drawing surface belongs to the
-    // host and arrives as a parameter each frame, so there is no moment at
-    // which the plugin holds an unmounted one.
-    "plugin:canvas/not-mounted",
-)
+// The waiver itself still holds and is not lost: the web raises that code when
+// canvas() is called before use() mounted an element, and there is no element
+// here — the drawing surface belongs to the host and arrives as a parameter
+// each frame, so the plugin never holds an unmounted one. The gate below
+// measures core's namespace, which a `plugin:` code is not in.
 
 // Real failures of subsystems this port has not reached. Every one is a code
 // core will raise once the subsystem lands, which is why they are listed by

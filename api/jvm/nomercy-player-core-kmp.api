@@ -3026,6 +3026,57 @@ public final class tv/nomercy/player/core/events/VolumeChange {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/format/ClampVolumeKt {
+	public static final fun clampVolume (D)I
+}
+
+public final class tv/nomercy/player/core/format/DurationTextKt {
+	public static final fun formatDuration (Ljava/lang/Double;)Ljava/lang/String;
+	public static final fun formatDuration (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun formatSeconds (D)Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/i18n/Bcp47FallbackChain : tv/nomercy/player/core/ports/LanguageMatcher {
+	public static final field INSTANCE Ltv/nomercy/player/core/i18n/Bcp47FallbackChain;
+	public fun candidatesFor (Ljava/lang/String;)Ljava/util/List;
+}
+
+public final class tv/nomercy/player/core/i18n/DefaultTranslator : tv/nomercy/player/core/ports/Translator {
+	public static final field DEFAULT_LANGUAGE Ljava/lang/String;
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/i18n/DefaultTranslatorOptions;Ltv/nomercy/player/core/ports/LanguageMatcher;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/i18n/DefaultTranslatorOptions;Ltv/nomercy/player/core/ports/LanguageMatcher;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun addTranslations (Ljava/util/Map;)V
+	public fun dispose ()V
+	public fun language ()Ljava/lang/String;
+	public fun language (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun removeTranslations (Ljava/lang/String;Ljava/lang/String;)V
+	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
+	public fun translation (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public fun translation (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+}
+
+public final class tv/nomercy/player/core/i18n/DefaultTranslatorOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/Map;
+	public final fun component3 ()Ltv/nomercy/player/core/ports/TranslationLoader;
+	public final fun component4 ()Lkotlin/jvm/functions/Function2;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;)Ltv/nomercy/player/core/i18n/DefaultTranslatorOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/i18n/DefaultTranslatorOptions;Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/i18n/DefaultTranslatorOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFallbackLanguage ()Ljava/lang/String;
+	public final fun getLanguage ()Ljava/lang/String;
+	public final fun getLoadTranslations ()Ltv/nomercy/player/core/ports/TranslationLoader;
+	public final fun getOnMissingTranslation ()Lkotlin/jvm/functions/Function2;
+	public final fun getTranslations ()Ljava/util/Map;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/i18n/LanguageDisplayNameKt {
 	public static final fun languageDisplayName (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 }
@@ -6565,39 +6616,6 @@ public final class tv/nomercy/player/core/ports/DefaultPreloadStrategy : tv/nome
 	public fun assetsToPreload (Ltv/nomercy/player/core/media/PlaylistItem;)Ljava/util/List;
 	public fun cancel ()V
 	public fun shouldPreload (Ltv/nomercy/player/core/ports/PreloadContext;)Z
-}
-
-public abstract interface class tv/nomercy/player/core/ports/DefaultTranslator {
-	public abstract fun addTranslations (Ljava/lang/String;Ljava/util/Map;)V
-	public abstract fun language ()Ljava/lang/String;
-	public abstract fun setLanguage (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public abstract fun translate (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
-	public static synthetic fun translate$default (Ltv/nomercy/player/core/ports/DefaultTranslator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
-}
-
-public final class tv/nomercy/player/core/ports/DefaultTranslator$DefaultImpls {
-	public static synthetic fun translate$default (Ltv/nomercy/player/core/ports/DefaultTranslator;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
-}
-
-public final class tv/nomercy/player/core/ports/DefaultTranslatorOptions {
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/Map;
-	public final fun component3 ()Ltv/nomercy/player/core/ports/TranslationLoader;
-	public final fun component4 ()Lkotlin/jvm/functions/Function2;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;)Ltv/nomercy/player/core/ports/DefaultTranslatorOptions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/DefaultTranslatorOptions;Ljava/lang/String;Ljava/util/Map;Ltv/nomercy/player/core/ports/TranslationLoader;Lkotlin/jvm/functions/Function2;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/DefaultTranslatorOptions;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFallbackLanguage ()Ljava/lang/String;
-	public final fun getLanguage ()Ljava/lang/String;
-	public final fun getLoadTranslations ()Ltv/nomercy/player/core/ports/TranslationLoader;
-	public final fun getOnMissingTranslation ()Lkotlin/jvm/functions/Function2;
-	public final fun getTranslations ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/DesktopDisplayKt {
