@@ -30,9 +30,12 @@ mkdir -p "$out"
 root="$prefix/opt/mpv/lib"
 [ -f "$root/libmpv.dylib" ] || { log "no libmpv.dylib under $root"; exit 1; }
 
-# The real file, not the version symlink chain: a payload of symlinks pointing
-# at a Homebrew that is not there is a payload of dangling links.
-cp -L "$root/libmpv.dylib" "$out/libmpv.dylib"
+# The VERSIONED file, once. libmpv.dylib is a symlink to libmpv.2.dylib, and
+# dereferencing both names copies four and a half megabytes of the same library
+# twice — measured: 65 MB with the duplicate, and the loader only ever opens the
+# versioned name, which is what JNA asks for as "mpv.2".
+versioned="$(basename "$(readlink "$root/libmpv.dylib" 2>/dev/null || echo libmpv.dylib)")"
+cp -L "$root/$versioned" "$out/$versioned"
 
 # Everything it needs, transitively, except what macOS itself provides. System
 # libraries live under /usr/lib and /System and must NOT be copied: two copies

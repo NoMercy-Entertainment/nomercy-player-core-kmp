@@ -40,7 +40,11 @@ data class NativePayload(
         "LIB_MPV" -> "libmpv"
         else -> "libvlc"
     }
-    val platformId: String get() = if (platform == "WINDOWS_X64") "windows-x64" else "linux-x64"
+    val platformId: String get() = when (platform) {
+        "WINDOWS_X64" -> "windows-x64"
+        "MACOS_ARM64" -> "macos-arm64"
+        else -> "linux-x64"
+    }
 
     val fileName: String get() = "$slug-$version-$platformId.tar.gz"
     val repository: String get() = if (kind == "LIB_ASS") "nomercy-libass" else "nomercy-player-core-kmp"
@@ -163,6 +167,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
         when {
             os.startsWith("windows") -> "WINDOWS_X64"
             os.contains("linux") -> "LINUX_X64"
+            os.contains("mac") -> "MACOS_ARM64"
             else -> "NONE"
         }
     }
@@ -199,6 +204,18 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // libmpv is built here too, from the upstream dev package: one DLL
             // out of a 7z, no plugin tree and no cache, so unlike libVLC it can
             // be produced on any host rather than only its own.
+            // A macOS payload can only be assembled on macOS: otool and
+            // install_name_tool are the tools that read and rewrite a Mach-O
+            // dependency list, and neither exists anywhere else. Its own runner
+            // produces it, the same way libVLC's per-platform payloads are.
+            if (payload.kind == "LIB_MPV" && payload.platform.startsWith("MACOS") && hostPlatform != payload.platform) {
+                logger.lifecycle(
+                    "bundleNativePayloads: skipping ${payload.fileName} — " +
+                        "a Mach-O closure needs macOS and this host is $hostPlatform.",
+                )
+                continue
+            }
+
             val command: List<String> = if (payload.kind == "LIB_MPV") {
                 listOf("bash", "tools/build-native-payload.sh", "libmpv", payload.platformId, "build/payloads")
             } else if (payload.kind == "LIB_VLC") {

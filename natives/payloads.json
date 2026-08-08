@@ -59,6 +59,14 @@
       "bundle": true
     },
     {
+      "kind": "LIB_MPV",
+      "platform": "MACOS_ARM64",
+      "version": "0.41.0",
+      "sha256": "5fcb4bc4eb910272d182582133efea4e6742658cb500cb16e5b0a240ea6fe7ba",
+      "marker": "libmpv.2.dylib",
+      "bundle": true
+    },
+    {
       "kind": "LIB_ASS",
       "platform": "WINDOWS_X64",
       "version": "0.17.5",
