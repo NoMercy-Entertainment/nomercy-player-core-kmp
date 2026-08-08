@@ -37,20 +37,3 @@ internal val SINTEL_MASTER: String = """
     #EXT-X-STREAM-INF:BANDWIDTH=2402870,RESOLUTION=3840x1635,CODECS="avc1.4D401E,mp4a.40.2",AUDIO="audio_aac",VIDEO-RANGE=PQ,NAME="3840x1635 HDR"
     video_3840x1635/video_3840x1635.m3u8
 """.trimIndent()
-
-// A fetch that answers from memory, so the narrowing is provable without a
-// network — and so a machine with no connection still runs the gate.
-internal class FakeHlsMasterFetch(
-    private val body: String?,
-) : HlsMasterFetch {
-
-    internal var asked: MutableList<String> = mutableListOf()
-
-    internal var sawHeaders: Map<String, String> = emptyMap()
-
-    override fun get(url: String, headers: Map<String, String>): String? {
-        asked.add(url)
-        sawHeaders = headers
-        return body
-    }
-}
