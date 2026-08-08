@@ -43,7 +43,7 @@ private class ThrowingFetcher(private val failures: Int) : Fetcher {
 
     override suspend fun fetch(url: String, opts: FetchOptions): FetchResponse {
         calls += 1
-        if (calls <= failures) throw IllegalStateException("no route to host")
+        if (calls <= failures) error("no route to host")
         return FetchResponse(status = 200, body = "ok")
     }
 }
@@ -55,7 +55,7 @@ private class ScriptedAuth(private val refreshes: Boolean, private val throws: B
 
     override suspend fun refresh(): Boolean {
         refreshCalls += 1
-        if (throws) throw IllegalStateException("refresh endpoint is down")
+        if (throws) error("refresh endpoint is down")
         return refreshes
     }
 }

@@ -186,15 +186,20 @@ public interface LibMpv : Library {
         public fun load(): LibMpv {
             NativeRuntimes.directory(NativeRuntimeKind.LIB_MPV)?.let { payload ->
                 NativeLibrary.addSearchPath(SONAME, payload.absolutePath)
-
-                if (HostPlatform.isAndroid()) {
-                    ANDROID_DEPENDENCIES.forEach { name ->
-                        val library: java.io.File = java.io.File(payload, name)
-                        if (library.isFile) System.load(library.absolutePath)
-                    }
-                }
+                if (HostPlatform.isAndroid()) loadAndroidDependencies(payload)
             }
             return Native.load(SONAME, LibMpv::class.java)
+        }
+
+        // Android resolves no transitive SONAMEs for a library loaded from a
+        // payload directory, so libmpv's own dependencies are loaded by hand and
+        // in order before it. Missing one surfaces as an UnsatisfiedLinkError
+        // naming libmpv rather than the library that was actually absent.
+        private fun loadAndroidDependencies(payload: java.io.File) {
+            ANDROID_DEPENDENCIES.forEach { name ->
+                val library: java.io.File = java.io.File(payload, name)
+                if (library.isFile) System.load(library.absolutePath)
+            }
         }
     }
 }

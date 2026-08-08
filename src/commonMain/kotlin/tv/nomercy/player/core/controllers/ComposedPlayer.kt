@@ -230,6 +230,13 @@ private const val UNTRANSLATED = ""
 // which platform refused.
 private const val LISTENER_PREVENTED: String = "listener-prevented"
 
+// The web's player has this surface, and a port that split it would be a
+// different library wearing the same name: every one of these methods is on
+// `nmplayer()` in the TypeScript, and a consumer moving over expects to find
+// them in one place. The seams that CAN move already have — the controllers
+// this class delegates to are exactly that split, and what remains is the
+// facade over them.
+@Suppress("LargeClass", "TooManyFunctions")
 public open class ComposedPlayer(
     backend: MediaBackend? = null,
     private val logger: Logger = SilentLogger,
@@ -1165,6 +1172,11 @@ public open class ComposedPlayer(
     // interface and core cannot deserialize into one — only the host knows what
     // its items are. Asking for the parser is honest about that; a default that
     // could not work would be a method that throws at runtime for everyone.
+    // Three throws for three distinguishable failures: the server refused it,
+    // the transport could not ask, and it arrived unreadable. A consumer shows
+    // a different message for each, so collapsing them loses the distinction
+    // the error codes exist to carry.
+    @Suppress("ThrowsCount")
     public open suspend fun loadQueue(url: String, parser: (String) -> List<PlaylistItem>) {
         context.emit(CoreEvents.PlaylistResolving, PlaylistResolvingPayload(url))
 

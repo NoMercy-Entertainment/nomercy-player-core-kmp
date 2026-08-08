@@ -53,5 +53,12 @@ public fun languageDisplayName(code: String?, locale: String): String? {
     val bcp47: String = ISO3_QUIRKS[code.lowercase()] ?: code
     val name: String? = platformLanguageName(bcp47, locale)
 
-    return name?.takeIf { it.isNotBlank() && !it.equals(bcp47, ignoreCase = true) && !it.equals(code, ignoreCase = true) }
+    // A platform that answers with the tag itself has not named the language,
+    // it has echoed the question — and "pt-BR" in a track menu is what the menu
+    // was showing before any of this existed.
+    return name?.takeIf { answer ->
+        answer.isNotBlank() &&
+            !answer.equals(bcp47, ignoreCase = true) &&
+            !answer.equals(code, ignoreCase = true)
+    }
 }

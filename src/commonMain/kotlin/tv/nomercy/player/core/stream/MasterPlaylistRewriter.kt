@@ -88,7 +88,7 @@ public object MasterPlaylistRewriter {
         // attribute the server chose not to send, which is the reasoning this
         // rule was written with and is still right for that case.
         val attributes: Map<String, String> = attributesOf(lines[index])
-        val declaresResolution: Boolean = attributes.containsKey("RESOLUTION")
+        val declaresResolution: Boolean = attributes.containsKey(RESOLUTION_ATTRIBUTE)
         val descriptor: QualityDescriptor? = descriptorOf(lines[index])
         val keepThis: Boolean = when {
             descriptor != null -> descriptor in wanted
@@ -169,10 +169,10 @@ public object MasterPlaylistRewriter {
     }
 
     private fun heightOf(attributes: Map<String, String>): Int? =
-        attributes["RESOLUTION"]?.substringAfter('x')?.toIntOrNull()
+        attributes[RESOLUTION_ATTRIBUTE]?.substringAfter('x')?.toIntOrNull()
 
     private fun widthOf(attributes: Map<String, String>): Int? =
-        attributes["RESOLUTION"]?.substringBefore('x')?.toIntOrNull()
+        attributes[RESOLUTION_ATTRIBUTE]?.substringBefore('x')?.toIntOrNull()
 
     // The spec's VIDEO-RANGE values. PQ covers HDR10 and Dolby Vision and the
     // playlist does not distinguish them — a client that needs to reads the
@@ -223,3 +223,6 @@ public object MasterPlaylistRewriter {
 
     private fun isUri(line: String): Boolean = line.isNotBlank() && !line.startsWith("#")
 }
+
+// The rung's pixel dimensions, `RESOLUTION=1920x1080`.
+private const val RESOLUTION_ATTRIBUTE = "RESOLUTION"

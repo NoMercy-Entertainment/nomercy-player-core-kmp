@@ -33,6 +33,9 @@ import tv.nomercy.player.core.ports.AudioDspGraph
 // dependency injection and keeps every engine method out of a plugin's reach.
 // A plugin that could call load() behind the player's back is a plugin that can
 // desynchronise the state every controller above depends on.
+// The web plugin's public surface, method for method. A consumer moving over
+// calls these names.
+@Suppress("TooManyFunctions")
 public open class EqualizerPlugin(
     private val graph: AudioDspGraph?,
     opts: EqualizerOptions,

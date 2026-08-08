@@ -254,6 +254,29 @@ public class PlayerContext(
     // that load is still settling — so readiness is reported after playback has
     // begun, not before it. Announcing from here would put it first and change
     // an ordering a chrome can see.
+    /**
+     * The engine that will play this item, or the reason it cannot be played.
+     *
+     * Both refusals used to be silence. An item with no url reached the engine
+     * as an empty string, and a player built without a backend took the load,
+     * recorded the item and played nothing — the caller was told the media was
+     * ready either way.
+     */
+    private fun engineFor(item: PlaylistItem): MediaBackend {
+        if (item.url.isBlank()) {
+            throw mediaFormatError(
+                CoreErrorCodes.MISSING_URL,
+                "load(item) requires item.url to be present.",
+                mapOf("id" to item.id),
+            )
+        }
+
+        return backend ?: throw stateError(
+            CoreErrorCodes.BACKEND_MISSING,
+            "No backend wired — backend() returned null.",
+        )
+    }
+
     internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
         // Announced before the engine sees anything, and refusable.
         //
@@ -281,23 +304,7 @@ public class PlayerContext(
         @Suppress("NAME_SHADOWING")
         val item: PlaylistItem = decision.data.item
 
-        // Both refusals used to be silence. An item with no url reached the
-        // engine as an empty string, and a player built without a backend took
-        // the load, recorded the item and played nothing — the caller was told
-        // the media was ready either way.
-        if (item.url.isBlank()) {
-            throw mediaFormatError(
-                CoreErrorCodes.MISSING_URL,
-                "load(item) requires item.url to be present.",
-                mapOf("id" to item.id),
-            )
-        }
-
-        val engine: MediaBackend = backend
-            ?: throw stateError(
-                CoreErrorCodes.BACKEND_MISSING,
-                "No backend wired — backend() returned null.",
-            )
+        val engine: MediaBackend = engineFor(item)
 
         val url: String = auth?.transformUrl(item.url) ?: item.url
 
@@ -307,7 +314,9 @@ public class PlayerContext(
         catch (cause: CancellationException) {
             throw cause
         }
-        catch (cause: Throwable) {
+        // Any failure loading is the load failing; the shape of it is the
+        // engine's business, not this bridge's.
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
             // What the engine refused, said in the ecosystem's words. A raw
             // engine exception names a decoder nobody outside this platform has
             // heard of.

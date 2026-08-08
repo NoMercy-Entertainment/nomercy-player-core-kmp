@@ -25,6 +25,8 @@ import tv.nomercy.player.core.ports.AudioDspGraph
 // Listeners are registered on the plugin rather than emitted through the host
 // bus. A frame arrives sixty times a second and carries two arrays; putting
 // that on the shared bus makes every listener in the player pay to ignore it.
+// The web plugin's public surface, method for method.
+@Suppress("TooManyFunctions")
 public open class SpectrumPlugin(
     private val graph: AudioDspGraph?,
     // The same instance the analysis was built with, which is what makes

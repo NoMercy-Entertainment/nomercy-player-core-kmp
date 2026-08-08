@@ -30,7 +30,7 @@ class StaleMediaPositionTest {
     // Wider than one interpolation step and far narrower than anything that
     // would hide the defect this file is about — a stale position is a whole
     // episode out, not a millisecond.
-    private val PLAYHEAD_TOLERANCE: Double = 0.05
+    private val playheadTolerance: Double = 0.05
 
     private fun FakeMediaBackend.tick(position: Double, total: Double) {
         currentTimeValue = position
@@ -47,7 +47,7 @@ class StaleMediaPositionTest {
         player.play()
 
         backend.tick(position = 1300.0, total = 1400.0)
-        assertEquals(1300.0, player.time(), PLAYHEAD_TOLERANCE)
+        assertEquals(1300.0, player.time(), playheadTolerance)
 
         val published: MutableList<TimeUpdate> = mutableListOf()
         player.on(CoreEvents.Time) { published += it }
@@ -80,6 +80,6 @@ class StaleMediaPositionTest {
         // four times a second. It read 12.001, which is the interpolator doing
         // exactly its job; the assertion was written against a model that only
         // moves when the engine speaks.
-        assertEquals(12.0, player.time(), PLAYHEAD_TOLERANCE)
+        assertEquals(12.0, player.time(), playheadTolerance)
     }
 }

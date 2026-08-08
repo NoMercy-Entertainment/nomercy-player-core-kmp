@@ -51,6 +51,10 @@ private const val UNKNOWN_ENGINE = "unknown"
 //
 // Found by running the shared conformance scenarios against the native player:
 // transport/play observed [beforePlay, phase, play] and stopped there.
+// One listener per engine event, and the engine has this many. Splitting by
+// count rather than by concern would put two halves of the same bridge in two
+// files and leave a reader hunting which one owns `pause`.
+@Suppress("TooManyFunctions")
 public class BackendBridge(
     private val ctx: PlayerContext,
     // Both nullable-by-default so a fixture can build a bridge without either.
@@ -91,33 +95,7 @@ public class BackendBridge(
             }
         }
 
-        listen(backend, CanonicalBackendEvent.PLAYING) {
-            ctx.playState = PlayState.PLAYING
-            ctx.bufferState = BufferState.IDLE
-            if (ctx.phase == PlayerPhase.STARTING) ctx.transitionPhase(PlayerPhase.PLAYING)
-            ctx.emit(CoreEvents.Playing, Unit)
-
-            // Once per item, after the first frame is actually on screen. A
-            // chrome waiting to take its poster down needs the frame to exist
-            // first, or it swaps a still image for a black one.
-            if (!announcedFirstFrame) {
-                announcedFirstFrame = true
-                ctx.emit(CoreEvents.FirstFrame, Unit)
-            }
-        }
-
-        // A stop the player did not ask for.
-        //
-        // Audio focus going to a call, headphones coming out, a media key the
-        // engine handled itself. The field was written and nothing was told, so
-        // every consumer went on showing playing: the chrome's button, the
-        // notification mirroring it, and the other devices on the account.
-        listen(backend, CanonicalBackendEvent.PAUSE) { announcePause() }
-
-        // The other half of the same bridge, for a start the player did not ask
-        // for — focus coming back, or that same media key.
-        listen(backend, CanonicalBackendEvent.PLAY) { announcePlay() }
-
+        attachTransport(backend)
         attachStreamFailures(backend)
 
         listen(backend, CanonicalBackendEvent.LOAD_START) {
@@ -347,6 +325,35 @@ public class BackendBridge(
                 duration = backend.duration(),
             ),
         )
+    }
+
+    // Playing, and the two stops the player did not ask for.
+    //
+    // Audio focus going to a call, headphones coming out, a media key the engine
+    // handled itself. The field was written and nothing was told, so every
+    // consumer went on showing playing: the chrome's button, the notification
+    // mirroring it, and the other devices on the account.
+    private fun attachTransport(backend: MediaBackend) {
+        listen(backend, CanonicalBackendEvent.PLAYING) {
+            ctx.playState = PlayState.PLAYING
+            ctx.bufferState = BufferState.IDLE
+            if (ctx.phase == PlayerPhase.STARTING) ctx.transitionPhase(PlayerPhase.PLAYING)
+            ctx.emit(CoreEvents.Playing, Unit)
+
+            // Once per item, after the first frame is actually on screen. A
+            // chrome waiting to take its poster down needs the frame to exist
+            // first, or it swaps a still image for a black one.
+            if (!announcedFirstFrame) {
+                announcedFirstFrame = true
+                ctx.emit(CoreEvents.FirstFrame, Unit)
+            }
+        }
+
+        listen(backend, CanonicalBackendEvent.PAUSE) { announcePause() }
+
+        // The other half of the same bridge, for a start the player did not ask
+        // for — focus coming back, or that same media key.
+        listen(backend, CanonicalBackendEvent.PLAY) { announcePlay() }
     }
 
     private fun listen(backend: MediaBackend, event: String, handler: (Any?) -> Unit) {

@@ -28,7 +28,7 @@ class FullSurfaceDivergenceTest {
     // One real edition title, as libmpv writes them. Copied from a run against
     // Apple's bipbop ladder rather than composed, because what this file is
     // about is what the engines ACTUALLY report.
-    private val EDITION_TITLE = "Bitrate: 650 kbps (h264 [Main] 640x480 29.9167 fps) (aac [LC] 2ch 22050 Hz)"
+    private val editionTitle = "Bitrate: 650 kbps (h264 [Main] 640x480 29.9167 fps) (aac [LC] 2ch 22050 Hz)"
 
 
     private val mixedLadder = listOf(
@@ -62,7 +62,7 @@ class FullSurfaceDivergenceTest {
         // mpv can say what the PLAYING stream is, through video-params, which
         // libVLC could not say at all. That is a different question from which
         // rung to climb to, and only the ladder question is asked here.
-        assertEquals(DynamicRange.SDR, MpvEditionTitle.parse(EDITION_TITLE).dynamicRange)
+        assertEquals(DynamicRange.SDR, MpvEditionTitle.parse(editionTitle).dynamicRange)
     }
 
     @Test
@@ -70,7 +70,7 @@ class FullSurfaceDivergenceTest {
         // Follows from the above rather than being a separate choice: a cap needs
         // to know which rungs are HDR, and on the desktop nothing is.
         val asDesktopSeesIt: List<QualityLevel> = mixedLadder.map {
-            it.copy(dynamicRange = MpvEditionTitle.parse(EDITION_TITLE).dynamicRange)
+            it.copy(dynamicRange = MpvEditionTitle.parse(editionTitle).dynamicRange)
         }
 
         assertEquals(
@@ -89,7 +89,7 @@ class FullSurfaceDivergenceTest {
         // The divergence that would silently break a preference restored across
         // platforms. A desktop engine names a codec h264 or hevc; a manifest
         // says avc1.640028 and hvc1.2.4.L153.B0; the library compares families.
-        assertEquals("h264", MpvEditionTitle.parse(EDITION_TITLE).codec)
+        assertEquals("h264", MpvEditionTitle.parse(editionTitle).codec)
         // Media3's half of this is asserted in the Android host tests, where
         // its mapper is visible. A divergence report split across two source
         // sets is the honest shape when the things diverging are per-platform.

@@ -49,6 +49,10 @@ private const val CURSOR_CHANGED = "cursor-changed"
 // One listener per question, matching the reference. `item` resets the cycle
 // and cancels whatever the outgoing item had in flight; `time` asks the two
 // strategies, and each fires at most once per item.
+// Preload, transition and the crossfade seam are one lifecycle: what is loaded
+// ahead, when it is swapped, and what happens in between. They share the state
+// that makes them correct together.
+@Suppress("TooManyFunctions")
 public class PreloadController(
     private val ctx: PlayerContext,
     private val queue: QueueController,

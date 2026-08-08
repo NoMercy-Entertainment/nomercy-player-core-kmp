@@ -107,6 +107,7 @@ public open class QueueController(private val ctx: PlayerContext) {
     // Moves the cursor and, once the player is running, loads what it landed
     // on. Before setup it only moves the cursor: a host building a queue ahead
     // of time should not trigger playback by choosing a starting track.
+    @Suppress("ReturnCount") // An unknown id, a refusal and a no-op are three different stops.
     public suspend fun item(id: String, autoplay: Boolean = false) {
         // Resolved first: without this, an id that is not in the queue leaves
         // the cursor alone and then reloads whatever was already playing.

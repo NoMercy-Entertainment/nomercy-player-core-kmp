@@ -103,20 +103,13 @@ public class AuthFetch(
     ): FetchResponse {
         onSignal(FetchSignal.Start(url))
 
-        var attempt = 0
-        var refreshesUsed = 0
-        var lastStatus: Int? = null
-        var lastError: NetworkError? = null
-
         // At least one attempt. attempts = 0 is "do not RETRY", which is not
         // "do not send" — reading it as the latter turns every no-retry policy
         // into a request that never left.
-        val maxAttempts: Int = maxOf(1, retry.attempts)
+        val ledger = RetryLedger(maxOf(1, retry.attempts))
 
-        while (attempt < maxAttempts) {
-            val outcome: Outcome = attemptOnce(url, opts, retry, attempt + 1, refreshesUsed)
-
-            when (outcome) {
+        while (ledger.hasAttemptLeft()) {
+            when (val outcome: Outcome = attemptOnce(url, opts, retry, ledger)) {
                 is Outcome.Done -> {
                     onSignal(FetchSignal.Complete(url, ok = true, status = outcome.response.status))
                     return outcome.response
@@ -127,20 +120,12 @@ public class AuthFetch(
                     throw outcome.error
                 }
 
-                is Outcome.Again -> {
-                    outcome.status?.let { lastStatus = it }
-                    outcome.terminal?.let { lastError = it }
-                    if (outcome.reason == UNAUTHENTICATED_RETRY) refreshesUsed += 1
-
-                    onSignal(FetchSignal.Retry(url, attempt + 1, outcome.reason, outcome.delayMs))
-                    if (outcome.consumesAttempt) attempt += 1
-                    delay(outcome.delayMs)
-                }
+                is Outcome.Again -> waitAndRecord(url, outcome, ledger)
             }
         }
 
-        onSignal(FetchSignal.Complete(url, ok = false, status = lastStatus))
-        throw lastError ?: netError(CoreErrorCodes.NETWORK_TIMEOUT, null, "fetch retry budget exhausted")
+        onSignal(FetchSignal.Complete(url, ok = false, status = ledger.lastStatus))
+        throw ledger.lastError ?: netError(CoreErrorCodes.NETWORK_TIMEOUT, null, "fetch retry budget exhausted")
     }
 
     /**
@@ -163,18 +148,32 @@ public class AuthFetch(
         catch (cause: CancellationException) {
             throw cause
         }
-        catch (cause: Throwable) {
+        // A parser can throw anything at all; that it threw IS the failure.
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
             throw netError(CoreErrorCodes.PARSE_FAILED, response.status, "response parser threw", cause)
         }
+    }
+
+    // What happens between one attempt and the next, and what the caller is
+    // told when the budget runs out.
+    private suspend fun waitAndRecord(url: String, outcome: Outcome.Again, ledger: RetryLedger) {
+        ledger.record(
+            status = outcome.status,
+            error = outcome.terminal,
+            refreshed = outcome.reason == UNAUTHENTICATED_RETRY,
+            consumesAttempt = outcome.consumesAttempt,
+        )
+        onSignal(FetchSignal.Retry(url, ledger.attemptNumber(), outcome.reason, outcome.delayMs))
+        delay(outcome.delayMs)
     }
 
     private suspend fun attemptOnce(
         url: String,
         opts: FetchOptions,
         retry: RetryConfig,
-        attempt: Int,
-        refreshesUsed: Int,
+        ledger: RetryLedger,
     ): Outcome {
+        val attempt: Int = ledger.attemptNumber()
         val signed: String = auth?.transformUrl(url) ?: url
         val request: FetchOptions = auth?.signRequest(signed, opts) ?: opts
 
@@ -192,7 +191,8 @@ public class AuthFetch(
         catch (cause: CancellationException) {
             throw cause
         }
-        catch (cause: Throwable) {
+        // A transport can throw anything; that it threw IS the network failure.
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
             return Outcome.Again(
                 reason = "network",
                 delayMs = retry.delayMs(attempt),
@@ -201,9 +201,13 @@ public class AuthFetch(
             )
         }
 
-        return classify(response, retry, attempt, refreshesUsed)
+        return classify(response, retry, attempt, ledger.refreshesUsed)
     }
 
+    // One return per HTTP outcome. Collapsing five named cases into a single
+    // expression would put the 401, the 403, the 4xx and the 5xx rules in one
+    // condition, which is where a reader stops being able to check them.
+    @Suppress("ReturnCount")
     private suspend fun classify(
         response: FetchResponse,
         retry: RetryConfig,
@@ -241,6 +245,9 @@ public class AuthFetch(
         return Outcome.Done(response)
     }
 
+    // Budget exhausted, refresh threw, refresh declined, refresh worked — four
+    // outcomes a caller must be able to tell apart from the code.
+    @Suppress("ReturnCount")
     private suspend fun unauthenticated(status: Int, refreshesUsed: Int): Outcome {
         if (refreshesUsed >= maxRefreshes) {
             return Outcome.Fail(authError(CoreErrorCodes.UNAUTHENTICATED, status, "authentication required (401)"))
@@ -252,7 +259,8 @@ public class AuthFetch(
         catch (cause: CancellationException) {
             throw cause
         }
-        catch (cause: Throwable) {
+        // A transport can throw anything; that it threw IS the network failure.
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
             return Outcome.Fail(authError(CoreErrorCodes.REFRESH_FAILED, status, "token refresh failed", cause))
         }
 
