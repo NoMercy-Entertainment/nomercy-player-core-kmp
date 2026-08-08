@@ -57,12 +57,23 @@ public actual fun platformClientCapabilities(): ClientCapabilities {
         .filter { (mime, _) -> supports(mime) }
         .map { (_, codec) -> codec }
 
-    // The measured gap this whole change exists for. No Android device's AVC
-    // decoder offers profile 110 — the Samsung answers
-    // `profile/levels: [ 8/32768 (High/5.1) ]`, which is High and stops there —
-    // so without libmpv the honest answer is no, and the server transcodes
-    // rather than the phone drawing black.
-    val tenBit: Boolean = software || TEN_BIT_PROFILES.any { (mime, profile) -> supports(mime, profile) }
+    // EVERY declared codec, not any of them, and the difference is a black
+    // screen.
+    //
+    // supports_10bit is ONE flag for ALL codecs on the server side —
+    // `bitDepthOk = video.BitDepth <= 8 || client.Supports10Bit`, with no codec
+    // in the condition. This phone decodes HEVC Main 10 and does NOT decode AVC
+    // High 10 (`profile/levels: [ 8/32768 (High/5.1) ]`, measured). Answering
+    // "any" would set the flag on the strength of HEVC, and a Hi10P AVC file
+    // would then win DirectPlay and draw nothing.
+    //
+    // So the flag is only as true as the weakest codec we listed. The cost is a
+    // 10-bit HEVC file transcoded that this device could have played; the cost
+    // the other way is a viewer looking at black with every log line green.
+    val tenBit: Boolean = software || video.isNotEmpty() && video.all { codec ->
+        TEN_BIT_PROFILES.filter { (_, listed) -> listed == codec }
+            .any { (mime, _) -> supports(mime, TEN_BIT_PROFILE_OF.getValue(mime)) }
+    }
 
     val metrics: DisplayMetrics = PlatformEnvironment.requireContext()
         .androidContext
@@ -99,7 +110,15 @@ private val VIDEO_MIME_TYPES: List<Pair<String, String>> = listOf(
     MediaFormat.MIMETYPE_VIDEO_AV1 to ClientCodec.AV1,
 )
 
-private val TEN_BIT_PROFILES: List<Pair<String, Int>> = listOf(
+// Which wire codec each 10-bit profile belongs to, so the flag can be answered
+// per codec even though the server's field is not.
+private val TEN_BIT_PROFILES: List<Pair<String, String>> = listOf(
+    MediaFormat.MIMETYPE_VIDEO_HEVC to ClientCodec.H265,
+    MediaFormat.MIMETYPE_VIDEO_AVC to ClientCodec.H264,
+    MediaFormat.MIMETYPE_VIDEO_AV1 to ClientCodec.AV1,
+)
+
+private val TEN_BIT_PROFILE_OF: Map<String, Int> = mapOf(
     MediaFormat.MIMETYPE_VIDEO_HEVC to HEVCProfileMain10,
     MediaFormat.MIMETYPE_VIDEO_AVC to AVCProfileHigh10,
     MediaFormat.MIMETYPE_VIDEO_AV1 to AV1ProfileMain10,

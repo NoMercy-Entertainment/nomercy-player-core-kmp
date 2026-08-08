@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
 class AvcCodecStringTest {
 
     @Test
-    fun `High 10 is read as profile 110`() {
+    fun high10IsReadAsProfile110() {
         assertEquals(AvcCodecString.HIGH_10, AvcCodecString.profileIdc("avc1.6E0028"))
         assertTrue(AvcCodecString.isHigh10("avc1.6E0028"))
     }
@@ -26,13 +26,13 @@ class AvcCodecStringTest {
     // can open the file. No-Rin's master playlist declared the first while the
     // stream was the second.
     @Test
-    fun `High is not High 10`() {
+    fun highIsNotHigh10() {
         assertEquals(0x64, AvcCodecString.profileIdc("avc1.640028"))
         assertFalse(AvcCodecString.isHigh10("avc1.640028"))
     }
 
     @Test
-    fun `case and avc3 are the same codec string`() {
+    fun caseAndAvc3AreTheSameCodecString() {
         assertTrue(AvcCodecString.isHigh10("AVC1.6e0028"))
         assertTrue(AvcCodecString.isHigh10("avc3.6E0028"))
     }
@@ -40,7 +40,7 @@ class AvcCodecStringTest {
     // Null rather than a default: "not AVC" must not be read as ordinary High
     // profile by a caller deciding which engine can open the file.
     @Test
-    fun `anything that is not an avc codec string has no profile`() {
+    fun anythingThatIsNotAnAvcCodecStringHasNoProfile() {
         assertNull(AvcCodecString.profileIdc("hev1.2.4.L120.90"))
         assertNull(AvcCodecString.profileIdc("mp4a.40.2"))
         assertNull(AvcCodecString.profileIdc("avc1"))

@@ -34,7 +34,7 @@ class ClientCapabilitiesTest {
     )
 
     @Test
-    fun `every key is spelled the way the server reads it`() {
+    fun everyKeyIsSpelledTheWayTheServerReadsIt() {
         val wire: String = capabilities.toJson()
 
         listOf(
@@ -56,7 +56,7 @@ class ClientCapabilitiesTest {
     // StringEnumConverter. Lowercase is the DEVICE HUB's vocabulary, which is a
     // different contract, and mixing them sends names one of the two drops.
     @Test
-    fun `codec names are the encoder enums spelling`() {
+    fun codecNamesAreTheEncoderEnumsSpelling() {
         val wire: String = capabilities.toJson()
 
         assertTrue(wire.contains("\"H264\""), wire)
@@ -67,7 +67,7 @@ class ClientCapabilitiesTest {
     // skips its bitrate gate at or below zero, and a throttled estimate here
     // forces live transcoding of compatible files over a LAN.
     @Test
-    fun `an unprobed client imposes no bitrate cap and claims nothing`() {
+    fun anUnprobedClientImposesNoBitrateCapAndClaimsNothing() {
         val blank = ClientCapabilities()
 
         assertEquals(0, blank.maxBitrateKbps)
@@ -80,7 +80,7 @@ class ClientCapabilitiesTest {
     // size gets a ladder built for that one panel, and the same television
     // through two clients has to get one decision.
     @Test
-    fun `resolutions clamp to the same three web clamps to`() {
+    fun resolutionsClampToTheSameThreeWebClampsTo() {
         assertEquals(ClientResolution.UHD, ClientResolution.clamp(5120))
         assertEquals(ClientResolution.UHD, ClientResolution.clamp(3840))
         assertEquals(ClientResolution.FHD, ClientResolution.clamp(2560))
