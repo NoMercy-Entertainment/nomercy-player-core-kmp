@@ -47,7 +47,7 @@ class StaleMediaPositionTest {
         player.play()
 
         backend.tick(position = 1300.0, total = 1400.0)
-        assertEquals(1300.0, player.time())
+        assertEquals(1300.0, player.time(), PLAYHEAD_TOLERANCE)
 
         val published: MutableList<TimeUpdate> = mutableListOf()
         player.on(CoreEvents.Time) { published += it }

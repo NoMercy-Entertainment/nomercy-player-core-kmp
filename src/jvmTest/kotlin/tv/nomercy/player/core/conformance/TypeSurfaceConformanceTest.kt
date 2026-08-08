@@ -83,6 +83,11 @@ class TypeSurfaceConformanceTest {
 
         // TypeScript's I-prefix on an interface, which Kotlin does not use.
         val HUNGARIAN_INTERFACE = Regex("^I[A-Z]\\w*$")
+
+        // A leading run of capitals, which Kotlin writes in title case. It stops
+        // before the capital that starts the next word: greedy, VTTSubtitlePayload
+        // gives Vttsubtitle rather than VttSubtitle and matches nothing.
+        val ACRONYM_PREFIX = Regex("^[A-Z]{2,}(?=[A-Z][a-z])")
     }
 
     private val webTypes = contract["types"]!!.jsonArray
@@ -96,19 +101,15 @@ class TypeSurfaceConformanceTest {
      * when this list is empty, and the number in the failure message is the only
      * honest answer to "how far along is it".
      *
-     * 49 of 203 at the time of writing, against a method-name check that read
+     * 28 of 203 at the time of writing, against a method-name check that read
      * 94% on the same source. Methods are a name and an arity; these are what a
      * consumer programs against.
      */
     private val notPortedYet: Set<String> = setOf(
-        "AriaLiveLevel",
-        "AuthConfig",
         "AuthHeaderProvider",
-        "AuthHeaderValue",
         "BackendId",
         "BackendLifecycleBridgeOptions",
         "BackendLifecycleSource",
-        "BackendLoaderState",
         "BaseEventMap",
         "BasePlayerConfig",
         "BasePlaylistItem",
@@ -121,34 +122,17 @@ class TypeSurfaceConformanceTest {
         "CastSenderPlugin",
         "CastSenderTranslationKey",
         "ChromeCastMediaCtors",
-        "CueEventPayload",
         "DefaultTranslator",
-        "DefaultTranslatorOptions",
-        "DisplayRangeProbe",
-        "EqBandFrequency",
         "EqualizerEvents",
-        "IEventBus",
         "IFetch",
-        "ILanguageMatcher",
         "IPlayerBackend",
-        "ISubtitleRenderer",
-        "LrcWordCue",
-        "MediaListEvent",
-        "MessageInput",
         "MinimalBackendEventPayload",
         "NetworkTranslationLoader",
-        "NetworkTranslationLoaderOptions",
-        "PlayerConstructorId",
-        "PlayerExperimental",
         "PluginCtorWithId",
         "PluginSpec",
-        "PreventedReason",
         "RequireSpec",
         "StreamErrorPayload",
         "StreamEventPayloadMap",
-        "TranslationLoader",
-        "VTTSpritePayload",
-        "VTTSubtitlePayload",
         "WithCurrentItem",
     )
 
@@ -212,7 +196,26 @@ class TypeSurfaceConformanceTest {
      * because it sends work at something already done.
      */
     private fun isPresent(webName: String, declared: Set<String>): Boolean =
-        webName in declared || kotlinName(webName) in declared
+        candidateNames(webName).any { candidate -> candidate in declared }
+
+    /**
+     * The names this type could carry in Kotlin.
+     *
+     * Two idioms, both real and both already in this port. TypeScript prefixes
+     * an interface with I and Kotlin does not, so `Clock` IS `IClock`. And
+     * Kotlin writes a leading acronym in title case, so `VttSubtitlePayload` IS
+     * `VTTSubtitlePayload` — scoring that one as missing had me write a second
+     * copy of a type the port already had, which broke the tests using the
+     * original.
+     */
+    private fun candidateNames(webName: String): Set<String> = buildSet<String> {
+        add(webName)
+        add(kotlinName(webName))
+        ACRONYM_PREFIX.find(webName)?.let { match ->
+            val acronym: String = match.value
+            add(acronym.first() + acronym.drop(1).lowercase() + webName.substring(acronym.length))
+        }
+    }
 
     private fun kotlinName(webName: String): String =
         if (HUNGARIAN_INTERFACE.matches(webName)) webName.substring(1) else webName
