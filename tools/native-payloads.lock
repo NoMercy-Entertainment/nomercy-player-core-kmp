@@ -31,6 +31,7 @@
 # libmpv2. A single number would name one of them wrongly.
 libmpv.version=2026.06.10
 libmpv.linux-x64.version=0.35.1
+libmpv.android-arm64.version=0.41.0
 
 libmpv.windows-x64.kind=7z
 libmpv.windows-x64.source=https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-dev-x86_64-20260610-git-304426c.7z
@@ -49,6 +50,15 @@ libmpv.linux-x64.sha256=
 # .dmg. So it is Homebrew's build on the Mac itself, closed over and re-pointed
 # at itself with install_name_tool — the container is not an option, because the
 # tools that read and rewrite a Mach-O dependency list only run on macOS.
+# Android takes libmpv from mpv-android's own buildscripts, in a container, and
+# the recipe is the pin. There is no package to take it from: Android's only
+# AVC decoders top out at High profile, so a stock device cannot decode Hi10P at
+# all, and every 10-bit anime file in a library needs a decoder we bring
+# ourselves. ffmpeg inside libmpv is that decoder.
+libmpv.android-arm64.kind=android-container
+libmpv.android-arm64.source=tools/libmpv-android.dockerfile
+libmpv.android-arm64.sha256=
+
 libmpv.macos-arm64.kind=brew
 libmpv.macos-arm64.source=homebrew/core/mpv
 libmpv.macos-arm64.sha256=

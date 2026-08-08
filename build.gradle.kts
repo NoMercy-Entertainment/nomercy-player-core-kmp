@@ -39,6 +39,7 @@ data class NativePayload(
     val platformId: String get() = when (platform) {
         "WINDOWS_X64" -> "windows-x64"
         "MACOS_ARM64" -> "macos-arm64"
+        "ANDROID_ARM64" -> "android-arm64"
         else -> "linux-x64"
     }
 
@@ -185,6 +186,20 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
         val target: JavaFile = outputDirectory.get().asFile.resolve("tv/nomercy/player/natives")
         target.mkdirs()
 
+        // Anything no longer in payloads.json goes.
+        //
+        // This directory is only ever added to, so removing an engine from the
+        // catalogue left its archive sitting here and it kept shipping: after
+        // libVLC was deleted, libvlc-3.0.23-windows-x64.tar.gz was still in the
+        // jar — sixty megabytes of an engine nothing can construct.
+        val wanted: Set<String> = bundled.map { payload -> payload.fileName }.toSet()
+        target.listFiles()?.forEach { file ->
+            if (file.isFile && file.name !in wanted) {
+                logger.lifecycle("bundleNativePayloads: dropping ${file.name} — no longer in payloads.json")
+                file.delete()
+            }
+        }
+
         for (payload in bundled) {
             val destination = JavaFile(target, payload.fileName)
             if (destination.isFile && digestOf(destination) == payload.sha256) continue
@@ -260,6 +275,32 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             }
         }
     }
+}
+
+// One bundle, split per target, because a target must not ship another's
+// payload.
+//
+// The archives all land in one directory because one task builds them, but the
+// jar and the AAR are different products: a desktop consumer downloading a
+// 14 MB Android payload is waste, and an APK carrying Windows DLLs is a hundred
+// and fifty megabytes of a phone's storage that can never be loaded on it. The
+// resource path inside each is identical, so the loader is unchanged.
+// Ant patterns rather than a predicate on the payload list: a Kotlin lambda
+// declared in a build script captures the script itself, and the configuration
+// cache refuses to serialise that. The name a payload is written under always
+// ends in its platform id, so a pattern says the same thing.
+val androidPayloadPattern = "**/*-android-*.tar.gz"
+
+val desktopNativePayloads: TaskProvider<Sync> = tasks.register<Sync>("desktopNativePayloads") {
+    from(bundleNativePayloads)
+    exclude(androidPayloadPattern)
+    into(layout.buildDirectory.dir("generated/natives/desktop"))
+}
+
+val androidNativePayloads: TaskProvider<Sync> = tasks.register<Sync>("androidNativePayloads") {
+    from(bundleNativePayloads)
+    include(androidPayloadPattern)
+    into(layout.buildDirectory.dir("generated/natives/android"))
 }
 
 // Both versions reach Kotlin through generation, never through a hand-typed
@@ -381,8 +422,35 @@ kotlin {
                 implementation(libs.kotlinx.atomicfu)
             }
         }
+        // Everything libmpv, shared by the JVM and Android targets.
+        //
+        // Android's only AVC decoders stop at High profile — measured off a
+        // phone: `c2.mtk.avc.decoder profile/levels: [ 8/32768 (High/5.1) ]` —
+        // so Hi10P, which is profile 110, cannot be decoded by anything the OS
+        // provides. Every 10-bit anime file in a library needs a decoder we
+        // bring ourselves, and the one we already ship on the desktop is the
+        // one to bring. Duplicating the binding per target would mean two
+        // bindings drifting apart against one C API.
+        val jvmSharedMain by creating {
+            dependsOn(commonMain.get())
+            kotlin.srcDir(generateNativeCatalogue)
+            dependencies {
+                implementation(libs.kotlinx.coroutines.core)
+            }
+        }
+
         // androidx.startup captures the application Context at process start so
         // it never has to appear in a common signature.
+        androidMain {
+            dependsOn(jvmSharedMain)
+            resources.srcDir(androidNativePayloads)
+            dependencies {
+                // JNA's Android build, which carries its own dispatch library
+                // per ABI. The plain jar carries desktop ones and would load on
+                // nothing.
+                implementation("net.java.dev.jna:jna:${libs.versions.jna.get()}@aar")
+            }
+        }
         androidMain.dependencies {
             implementation(libs.androidx.startup)
             // The Android engine. Media3 is what every Android client
@@ -406,8 +474,8 @@ kotlin {
         // is bound through its own C API rather than through a wrapper — see
         // tv.nomercy.player.core.natives.libmpv. JNA is what calls it.
         jvmMain {
-            kotlin.srcDir(generateNativeCatalogue)
-            resources.srcDir(bundleNativePayloads)
+            dependsOn(jvmSharedMain)
+            resources.srcDir(desktopNativePayloads)
             dependencies {
                 implementation(libs.jna)
             }
@@ -468,6 +536,7 @@ detekt {
         "src/tvosMain/kotlin",
         "src/jvmTest/kotlin",
         "src/jvmMain/kotlin",
+        "src/jvmSharedMain/kotlin",
         // The testing kit is a separate Gradle module and the same codebase.
         // It is also the module consumers read to learn what good use of this
         // library looks like, so holding it to a lower standard than the

@@ -93,5 +93,14 @@ RUN mkdir -p /payload && \
       | xargs -0 -I{} cp -n {} /payload/ 2>/dev/null; \
     test -f /payload/libmpv.so
 
+# Stripped here, where the NDK that produced them is, rather than on the host.
+#
+# Unstripped the set is 108 MB against 30 MB stripped, and the debug information
+# is only readable by the toolchain that emitted it — so the machine holding
+# that toolchain is the machine that should be doing this.
+RUN find /build/mpv-android/buildscripts -path "*toolchain*" -name "llvm-strip" | head -1 \
+      > /tmp/strip-path && \
+    xargs -a /tmp/strip-path -I{} sh -c '{} --strip-unneeded /payload/*.so'
+
 FROM scratch AS payload
 COPY --from=build /payload /

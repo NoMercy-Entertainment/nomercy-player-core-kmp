@@ -47,6 +47,14 @@
     },
     {
       "kind": "LIB_MPV",
+      "platform": "ANDROID_ARM64",
+      "version": "0.41.0",
+      "sha256": "ced3bd0d0e7be92c0f244f91989114b4f04589c2c34b26d59476f9d3462b24a4",
+      "marker": "libmpv.so",
+      "bundle": true
+    },
+    {
+      "kind": "LIB_MPV",
       "platform": "MACOS_ARM64",
       "version": "0.41.0",
       "sha256": "5fcb4bc4eb910272d182582133efea4e6742658cb500cb16e5b0a240ea6fe7ba",

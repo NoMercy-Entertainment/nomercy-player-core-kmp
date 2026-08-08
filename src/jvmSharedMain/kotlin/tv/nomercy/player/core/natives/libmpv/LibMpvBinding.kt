@@ -15,6 +15,7 @@ import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.PointerType
 import com.sun.jna.ptr.PointerByReference
+import tv.nomercy.player.core.natives.HostPlatform
 import tv.nomercy.player.core.natives.NativeRuntimeKind
 import tv.nomercy.player.core.natives.NativeRuntimes
 
@@ -142,8 +143,28 @@ public interface LibMpv : Library {
         public val SONAME: String = when {
             System.getProperty("os.name").startsWith("Windows", ignoreCase = true) -> "libmpv-2"
             System.getProperty("os.name").startsWith("Mac", ignoreCase = true) -> "mpv.2"
+            HostPlatform.current() == HostPlatform.ANDROID_ARM64 -> "mpv"
             else -> "mpv.so.2"
         }
+
+        // ffmpeg, in link order, before libmpv on Android.
+        //
+        // Debian and Homebrew hand us a libmpv with ffmpeg inside it; the
+        // mpv-android buildscripts hand us eight shared objects. Android's
+        // linker resolves a DT_NEEDED against libraries already loaded in the
+        // namespace, and it will not search a directory we extracted at run
+        // time, so each dependency is opened by absolute path first and libmpv
+        // finds them by soname afterwards. Order matters — a library loaded
+        // before the one it needs fails on its own DT_NEEDED.
+        private val ANDROID_DEPENDENCIES: List<String> = listOf(
+            "libavutil.so",
+            "libswresample.so",
+            "libswscale.so",
+            "libavcodec.so",
+            "libavformat.so",
+            "libavfilter.so",
+            "libavdevice.so",
+        )
 
         /**
          * The bundled payload first, then whatever the machine has.
@@ -160,6 +181,13 @@ public interface LibMpv : Library {
         public fun load(): LibMpv {
             NativeRuntimes.directory(NativeRuntimeKind.LIB_MPV)?.let { payload ->
                 NativeLibrary.addSearchPath(SONAME, payload.absolutePath)
+
+                if (HostPlatform.current() == HostPlatform.ANDROID_ARM64) {
+                    ANDROID_DEPENDENCIES.forEach { name ->
+                        val library: java.io.File = java.io.File(payload, name)
+                        if (library.isFile) System.load(library.absolutePath)
+                    }
+                }
             }
             return Native.load(SONAME, LibMpv::class.java)
         }

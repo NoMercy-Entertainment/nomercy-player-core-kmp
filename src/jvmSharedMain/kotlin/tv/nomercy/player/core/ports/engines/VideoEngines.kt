@@ -11,6 +11,20 @@ package tv.nomercy.player.core.ports.engines
 import tv.nomercy.player.core.ports.VideoBackend
 
 /**
+ * The engines a platform brings of its own, ahead of libmpv in preference.
+ *
+ * Empty on the desktop, where libmpv is the only engine. On Android it is
+ * ExoPlayer, and it leads because it decodes in hardware and libmpv does not —
+ * a phone playing an ordinary 8-bit file through a software decoder is a phone
+ * with a warm back and an hour less battery. libmpv is there for the files
+ * Android cannot decode at all, which is every Hi10P file in a library: the
+ * only AVC decoders a device offers stop at High profile, measured off a
+ * phone as `c2.mtk.avc.decoder profile/levels: [ 8/32768 (High/5.1) ]`, and
+ * Hi10P is profile 110.
+ */
+internal expect val platformVideoEngines: List<VideoEngineProvider>
+
+/**
  * Which desktop engine a player gets, and why.
  *
  * A registry rather than a constructor call at the call site, because the choice
@@ -37,9 +51,7 @@ public object VideoEngines {
      * the seam the next time, and rebuilding it under time pressure is how the
      * silent-fallback bug gets written.
      */
-    public val registered: List<VideoEngineProvider> = listOf(
-        MpvVideoEngineProvider,
-    )
+    public val registered: List<VideoEngineProvider> = platformVideoEngines + MpvVideoEngineProvider
 
     /**
      * The engine a consumer asked for by name, or null when nothing registered

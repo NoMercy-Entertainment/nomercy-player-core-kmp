@@ -22,6 +22,7 @@ public enum class HostPlatform(public val id: String) {
     LINUX_ARM64("linux-arm64"),
     MACOS_X64("macos-x64"),
     MACOS_ARM64("macos-arm64"),
+    ANDROID_ARM64("android-arm64"),
     ;
 
     public companion object {
@@ -32,11 +33,22 @@ public enum class HostPlatform(public val id: String) {
         public fun current(): HostPlatform? = of(
             System.getProperty("os.name").orEmpty(),
             System.getProperty("os.arch").orEmpty(),
+            System.getProperty("java.vm.name").orEmpty(),
         )
 
-        internal fun of(osName: String, osArch: String): HostPlatform? {
+        internal fun of(osName: String, osArch: String, vmName: String = ""): HostPlatform? {
             val os: String = osName.lowercase()
             val arch: Arch = archOf(osArch.lowercase()) ?: return null
+
+            // Android before Linux, because Android IS Linux as far as os.name
+            // is concerned — a phone answers "Linux"/"aarch64" and would take
+            // the desktop payload, whose libraries are linked against glibc and
+            // load on nothing. The VM is what tells them apart: ART still
+            // reports itself as Dalvik.
+            if (vmName.contains("dalvik", ignoreCase = true) || vmName.contains("art", ignoreCase = true)) {
+                return if (arch == Arch.ARM64) ANDROID_ARM64 else null
+            }
+
             return when {
                 os.startsWith("windows") -> if (arch == Arch.X64) WINDOWS_X64 else null
                 os.startsWith("mac") || os.startsWith("darwin") ->

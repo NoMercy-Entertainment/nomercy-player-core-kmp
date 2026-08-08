@@ -9,9 +9,6 @@
 package tv.nomercy.player.core.natives
 
 import java.io.File
-import java.util.concurrent.TimeUnit
-
-private const val CACHE_GEN_TIMEOUT_SECONDS: Long = 120L
 
 // The one thing a payload cannot carry, done on the machine that will load it.
 internal fun interface PayloadFinishing {

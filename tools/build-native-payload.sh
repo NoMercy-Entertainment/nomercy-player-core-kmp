@@ -187,6 +187,38 @@ build_macos_mpv() {
   packed=no
 }
 
+# ---------------------------------------------------------------------------
+# Android: mpv-android's own buildscripts, in a container, cross-compiled for
+# arm64.
+#
+# No NOTICE is written for this one by the generic path below, because the
+# staged tree is exported from the image whole and the container writes it —
+# see the dockerfile. What matters here is that the export is a `docker create`
+# and a `docker cp` rather than a bind mount: the build runs on Windows as
+# often as not, and a bind mount there flattens the execute bit these carry.
+# ---------------------------------------------------------------------------
+build_android_mpv() {
+  command -v docker >/dev/null || { echo "docker is required to build the android payload"; exit 1; }
+
+  local image="nomercy/libmpv-android:build"
+  echo "── building $image (this takes tens of minutes on a cold cache)"
+  docker build -f "$here/$source_url" -t "$image" --target payload "$here" >&2
+
+  # A scratch image has no shell, so it cannot be `docker run`. Creating a
+  # container from it never starts anything, and `docker export` then hands us
+  # its whole filesystem — which for this image is exactly the payload.
+  local container
+  container="$(docker create "$image" /nothing)"
+  docker export "$container" -o "$work/export.tar"
+  docker rm "$container" >/dev/null
+
+  tar -xf "$work/export.tar" -C "$stage" --wildcards '*.so'
+  rm -f "$work/export.tar"
+
+  [ -f "$stage/libmpv.so" ] || { echo "the image carried no libmpv.so"; exit 1; }
+  stamp_tree
+}
+
 # Every file, one timestamp. Directories too: a tar records theirs and an
 # extractor restores them.
 stamp_tree() {
@@ -197,8 +229,12 @@ stamp_tree() {
 write_notice() {
     cat > "$stage/NOTICE-NoMercy.txt" <<EOF
 This directory contains an unmodified redistribution of libmpv, version
-$version, built by the mpv-winbuild-cmake project and published at
-$source_url
+$version, built by $(case "$kind" in
+  7z) echo "the mpv-winbuild-cmake project and published at $source_url" ;;
+  brew) echo "Homebrew from $source_url" ;;
+  android-container) echo "mpv-android's buildscripts, in a container, from $source_url" ;;
+  *) echo "$source_url" ;;
+esac)
 
 mpv is licensed under the GNU General Public License, version 2 or later; parts
 of it are LGPL. This build is GPL. Sources for mpv are at
@@ -221,6 +257,7 @@ case "$kind" in
   7z) build_windows_mpv ;;
   container) build_linux_mpv ;;
   brew) build_macos_mpv ;;
+  android-container) build_android_mpv ;;
   *) echo "unknown payload kind: $kind"; exit 1 ;;
 esac
 
