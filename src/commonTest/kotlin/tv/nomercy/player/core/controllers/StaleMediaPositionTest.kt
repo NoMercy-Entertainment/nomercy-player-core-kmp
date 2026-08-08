@@ -27,6 +27,11 @@ import kotlin.test.assertTrue
 // opened marked as finished.
 class StaleMediaPositionTest {
 
+    // Wider than one interpolation step and far narrower than anything that
+    // would hide the defect this file is about — a stale position is a whole
+    // episode out, not a millisecond.
+    private val PLAYHEAD_TOLERANCE: Double = 0.05
+
     private fun FakeMediaBackend.tick(position: Double, total: Double) {
         currentTimeValue = position
         durationValue = total
@@ -70,6 +75,11 @@ class StaleMediaPositionTest {
 
         backend.tick(position = 12.0, total = 1400.0)
 
-        assertEquals(12.0, player.time())
+        // A tolerance, because the playhead INTERPOLATES between ticks — it is
+        // what keeps a time display moving smoothly on an engine that reports
+        // four times a second. It read 12.001, which is the interpolator doing
+        // exactly its job; the assertion was written against a model that only
+        // moves when the engine speaks.
+        assertEquals(12.0, player.time(), PLAYHEAD_TOLERANCE)
     }
 }
