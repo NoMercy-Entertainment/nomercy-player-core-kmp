@@ -96,7 +96,7 @@ class TypeSurfaceConformanceTest {
      * when this list is empty, and the number in the failure message is the only
      * honest answer to "how far along is it".
      *
-     * 60 of 203 at the time of writing, against a method-name check that read
+     * 56 of 203 at the time of writing, against a method-name check that read
      * 94% on the same source. Methods are a name and an arity; these are what a
      * consumer programs against.
      */
@@ -151,15 +151,11 @@ class TypeSurfaceConformanceTest {
         "PluginSpec",
         "PreventedReason",
         "RequireSpec",
-        "SpectrumEvents",
-        "SpectrumOptions",
         "StreamErrorPayload",
         "StreamEventPayloadMap",
         "TranslationLoader",
         "VTTSpritePayload",
         "VTTSubtitlePayload",
-        "VisualizationEvents",
-        "VisualizationOptions",
         "WithCurrentItem",
     )
 

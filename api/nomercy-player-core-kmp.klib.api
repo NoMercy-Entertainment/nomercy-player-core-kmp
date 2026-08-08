@@ -515,6 +515,34 @@ final enum class tv.nomercy.player.core.plugin/PluginRecoveryAction : kotlin/Enu
     }
 }
 
+final enum class tv.nomercy.player.core.plugins.audio/FftSize : kotlin/Enum<tv.nomercy.player.core.plugins.audio/FftSize> { // tv.nomercy.player.core.plugins.audio/FftSize|null[0]
+    enum entry SIZE_1024 // tv.nomercy.player.core.plugins.audio/FftSize.SIZE_1024|null[0]
+    enum entry SIZE_2048 // tv.nomercy.player.core.plugins.audio/FftSize.SIZE_2048|null[0]
+    enum entry SIZE_4096 // tv.nomercy.player.core.plugins.audio/FftSize.SIZE_4096|null[0]
+    enum entry SIZE_512 // tv.nomercy.player.core.plugins.audio/FftSize.SIZE_512|null[0]
+
+    final val bins // tv.nomercy.player.core.plugins.audio/FftSize.bins|{}bins[0]
+        final fun <get-bins>(): kotlin/Int // tv.nomercy.player.core.plugins.audio/FftSize.bins.<get-bins>|<get-bins>(){}[0]
+    final val entries // tv.nomercy.player.core.plugins.audio/FftSize.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.plugins.audio/FftSize> // tv.nomercy.player.core.plugins.audio/FftSize.entries.<get-entries>|<get-entries>#static(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.plugins.audio/FftSize // tv.nomercy.player.core.plugins.audio/FftSize.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.plugins.audio/FftSize> // tv.nomercy.player.core.plugins.audio/FftSize.values|values#static(){}[0]
+}
+
+final enum class tv.nomercy.player.core.plugins.audio/VisualizationTick : kotlin/Enum<tv.nomercy.player.core.plugins.audio/VisualizationTick> { // tv.nomercy.player.core.plugins.audio/VisualizationTick|null[0]
+    enum entry FRAME // tv.nomercy.player.core.plugins.audio/VisualizationTick.FRAME|null[0]
+    enum entry TIME // tv.nomercy.player.core.plugins.audio/VisualizationTick.TIME|null[0]
+
+    final val entries // tv.nomercy.player.core.plugins.audio/VisualizationTick.entries|#static{}entries[0]
+        final fun <get-entries>(): kotlin.enums/EnumEntries<tv.nomercy.player.core.plugins.audio/VisualizationTick> // tv.nomercy.player.core.plugins.audio/VisualizationTick.entries.<get-entries>|<get-entries>#static(){}[0]
+    final val id // tv.nomercy.player.core.plugins.audio/VisualizationTick.id|{}id[0]
+        final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationTick.id.<get-id>|<get-id>(){}[0]
+
+    final fun valueOf(kotlin/String): tv.nomercy.player.core.plugins.audio/VisualizationTick // tv.nomercy.player.core.plugins.audio/VisualizationTick.valueOf|valueOf#static(kotlin.String){}[0]
+    final fun values(): kotlin/Array<tv.nomercy.player.core.plugins.audio/VisualizationTick> // tv.nomercy.player.core.plugins.audio/VisualizationTick.values|values#static(){}[0]
+}
+
 final enum class tv.nomercy.player.core.plugins.canvas/CompositeMode : kotlin/Enum<tv.nomercy.player.core.plugins.canvas/CompositeMode> { // tv.nomercy.player.core.plugins.canvas/CompositeMode|null[0]
     enum entry CLEAR // tv.nomercy.player.core.plugins.canvas/CompositeMode.CLEAR|null[0]
     enum entry COMPOSITE // tv.nomercy.player.core.plugins.canvas/CompositeMode.COMPOSITE|null[0]
@@ -1467,6 +1495,65 @@ sealed interface tv.nomercy.player.core.player/MutationGuards { // tv.nomercy.pl
         final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.player/MutationGuards.None.equals|equals(kotlin.Any?){}[0]
         final fun hashCode(): kotlin/Int // tv.nomercy.player.core.player/MutationGuards.None.hashCode|hashCode(){}[0]
         final fun toString(): kotlin/String // tv.nomercy.player.core.player/MutationGuards.None.toString|toString(){}[0]
+    }
+}
+
+sealed interface tv.nomercy.player.core.plugins.audio/SpectrumEvents { // tv.nomercy.player.core.plugins.audio/SpectrumEvents|null[0]
+    final class Frame : tv.nomercy.player.core.plugins.audio/SpectrumEvents { // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame|null[0]
+        constructor <init>(tv.nomercy.player.core.plugins.audio/VisualizationFrame, tv.nomercy.player.core.plugins.audio/BandEnergy) // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.<init>|<init>(tv.nomercy.player.core.plugins.audio.VisualizationFrame;tv.nomercy.player.core.plugins.audio.BandEnergy){}[0]
+
+        final val energy // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.energy|{}energy[0]
+            final fun <get-energy>(): tv.nomercy.player.core.plugins.audio/BandEnergy // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.energy.<get-energy>|<get-energy>(){}[0]
+        final val frame // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.frame|{}frame[0]
+            final fun <get-frame>(): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.frame.<get-frame>|<get-frame>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.component1|component1(){}[0]
+        final fun component2(): tv.nomercy.player.core.plugins.audio/BandEnergy // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.component2|component2(){}[0]
+        final fun copy(tv.nomercy.player.core.plugins.audio/VisualizationFrame = ..., tv.nomercy.player.core.plugins.audio/BandEnergy = ...): tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.copy|copy(tv.nomercy.player.core.plugins.audio.VisualizationFrame;tv.nomercy.player.core.plugins.audio.BandEnergy){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumEvents.Frame.toString|toString(){}[0]
+    }
+
+    final class OptionsChanged : tv.nomercy.player.core.plugins.audio/SpectrumEvents { // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged|null[0]
+        constructor <init>(tv.nomercy.player.core.plugins.audio/SpectrumOptions) // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.<init>|<init>(tv.nomercy.player.core.plugins.audio.SpectrumOptions){}[0]
+
+        final val options // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.options|{}options[0]
+            final fun <get-options>(): tv.nomercy.player.core.plugins.audio/SpectrumOptions // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.options.<get-options>|<get-options>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.plugins.audio/SpectrumOptions // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.component1|component1(){}[0]
+        final fun copy(tv.nomercy.player.core.plugins.audio/SpectrumOptions = ...): tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.copy|copy(tv.nomercy.player.core.plugins.audio.SpectrumOptions){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumEvents.OptionsChanged.toString|toString(){}[0]
+    }
+}
+
+sealed interface tv.nomercy.player.core.plugins.audio/VisualizationEvents { // tv.nomercy.player.core.plugins.audio/VisualizationEvents|null[0]
+    final class Rendered : tv.nomercy.player.core.plugins.audio/VisualizationEvents { // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered|null[0]
+        constructor <init>(tv.nomercy.player.core.plugins.audio/VisualizationFrame) // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.<init>|<init>(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
+
+        final val frame // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.frame|{}frame[0]
+            final fun <get-frame>(): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.frame.<get-frame>|<get-frame>(){}[0]
+
+        final fun component1(): tv.nomercy.player.core.plugins.audio/VisualizationFrame // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.component1|component1(){}[0]
+        final fun copy(tv.nomercy.player.core.plugins.audio/VisualizationFrame = ...): tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.copy|copy(tv.nomercy.player.core.plugins.audio.VisualizationFrame){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Rendered.toString|toString(){}[0]
+    }
+
+    final class Unsupported : tv.nomercy.player.core.plugins.audio/VisualizationEvents { // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported|null[0]
+        constructor <init>(kotlin/String) // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.<init>|<init>(kotlin.String){}[0]
+
+        final val reason // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.reason|{}reason[0]
+            final fun <get-reason>(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.reason.<get-reason>|<get-reason>(){}[0]
+
+        final fun component1(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationEvents.Unsupported.toString|toString(){}[0]
     }
 }
 
@@ -4675,6 +4762,25 @@ final class tv.nomercy.player.core.plugins.audio/BandEnergies { // tv.nomercy.pl
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/BandEnergies.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.audio/BandEnergy { // tv.nomercy.player.core.plugins.audio/BandEnergy|null[0]
+    constructor <init>(kotlin/Double, kotlin/Double, kotlin/Double) // tv.nomercy.player.core.plugins.audio/BandEnergy.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+
+    final val bass // tv.nomercy.player.core.plugins.audio/BandEnergy.bass|{}bass[0]
+        final fun <get-bass>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergy.bass.<get-bass>|<get-bass>(){}[0]
+    final val mid // tv.nomercy.player.core.plugins.audio/BandEnergy.mid|{}mid[0]
+        final fun <get-mid>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergy.mid.<get-mid>|<get-mid>(){}[0]
+    final val treble // tv.nomercy.player.core.plugins.audio/BandEnergy.treble|{}treble[0]
+        final fun <get-treble>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergy.treble.<get-treble>|<get-treble>(){}[0]
+
+    final fun component1(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergy.component1|component1(){}[0]
+    final fun component2(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergy.component2|component2(){}[0]
+    final fun component3(): kotlin/Double // tv.nomercy.player.core.plugins.audio/BandEnergy.component3|component3(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ...): tv.nomercy.player.core.plugins.audio/BandEnergy // tv.nomercy.player.core.plugins.audio/BandEnergy.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/BandEnergy.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/BandEnergy.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/BandEnergy.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugins.audio/BeatReading { // tv.nomercy.player.core.plugins.audio/BeatReading|null[0]
     constructor <init>(kotlin/Boolean? = ..., kotlin/Double? = ...) // tv.nomercy.player.core.plugins.audio/BeatReading.<init>|<init>(kotlin.Boolean?;kotlin.Double?){}[0]
 
@@ -4735,6 +4841,28 @@ final class tv.nomercy.player.core.plugins.audio/MixerOptions { // tv.nomercy.pl
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/MixerOptions.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.audio/SpectrumOptions { // tv.nomercy.player.core.plugins.audio/SpectrumOptions|null[0]
+    constructor <init>(tv.nomercy.player.core.plugins.audio/FftSize? = ..., kotlin/Double? = ..., kotlin/Int? = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.plugins.audio/SpectrumOptions.<init>|<init>(tv.nomercy.player.core.plugins.audio.FftSize?;kotlin.Double?;kotlin.Int?;kotlin.Boolean){}[0]
+
+    final val fftSize // tv.nomercy.player.core.plugins.audio/SpectrumOptions.fftSize|{}fftSize[0]
+        final fun <get-fftSize>(): tv.nomercy.player.core.plugins.audio/FftSize? // tv.nomercy.player.core.plugins.audio/SpectrumOptions.fftSize.<get-fftSize>|<get-fftSize>(){}[0]
+    final val frameRate // tv.nomercy.player.core.plugins.audio/SpectrumOptions.frameRate|{}frameRate[0]
+        final fun <get-frameRate>(): kotlin/Int? // tv.nomercy.player.core.plugins.audio/SpectrumOptions.frameRate.<get-frameRate>|<get-frameRate>(){}[0]
+    final val smoothingTimeConstant // tv.nomercy.player.core.plugins.audio/SpectrumOptions.smoothingTimeConstant|{}smoothingTimeConstant[0]
+        final fun <get-smoothingTimeConstant>(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/SpectrumOptions.smoothingTimeConstant.<get-smoothingTimeConstant>|<get-smoothingTimeConstant>(){}[0]
+    final val stereo // tv.nomercy.player.core.plugins.audio/SpectrumOptions.stereo|{}stereo[0]
+        final fun <get-stereo>(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumOptions.stereo.<get-stereo>|<get-stereo>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.plugins.audio/FftSize? // tv.nomercy.player.core.plugins.audio/SpectrumOptions.component1|component1(){}[0]
+    final fun component2(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/SpectrumOptions.component2|component2(){}[0]
+    final fun component3(): kotlin/Int? // tv.nomercy.player.core.plugins.audio/SpectrumOptions.component3|component3(){}[0]
+    final fun component4(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumOptions.component4|component4(){}[0]
+    final fun copy(tv.nomercy.player.core.plugins.audio/FftSize? = ..., kotlin/Double? = ..., kotlin/Int? = ..., kotlin/Boolean = ...): tv.nomercy.player.core.plugins.audio/SpectrumOptions // tv.nomercy.player.core.plugins.audio/SpectrumOptions.copy|copy(tv.nomercy.player.core.plugins.audio.FftSize?;kotlin.Double?;kotlin.Int?;kotlin.Boolean){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/SpectrumOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/SpectrumOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumOptions.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugins.audio/VisualizationFrame { // tv.nomercy.player.core.plugins.audio/VisualizationFrame|null[0]
     constructor <init>(kotlin/DoubleArray, kotlin/DoubleArray, kotlin/Double, kotlin/Double, kotlin/Double, tv.nomercy.player.core.plugins.audio/BandEnergies, kotlin/Int, kotlin/Double, kotlin/Double, tv.nomercy.player.core.plugins.audio/BandEnergies, kotlin/Boolean? = ..., kotlin/Double? = ...) // tv.nomercy.player.core.plugins.audio/VisualizationFrame.<init>|<init>(kotlin.DoubleArray;kotlin.DoubleArray;kotlin.Double;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies;kotlin.Int;kotlin.Double;kotlin.Double;tv.nomercy.player.core.plugins.audio.BandEnergies;kotlin.Boolean?;kotlin.Double?){}[0]
 
@@ -4779,6 +4907,22 @@ final class tv.nomercy.player.core.plugins.audio/VisualizationFrame { // tv.nome
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationFrame.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationFrame.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationFrame.toString|toString(){}[0]
+}
+
+final class tv.nomercy.player.core.plugins.audio/VisualizationOptions { // tv.nomercy.player.core.plugins.audio/VisualizationOptions|null[0]
+    constructor <init>(kotlin/Boolean = ..., tv.nomercy.player.core.plugins.audio/VisualizationTick = ...) // tv.nomercy.player.core.plugins.audio/VisualizationOptions.<init>|<init>(kotlin.Boolean;tv.nomercy.player.core.plugins.audio.VisualizationTick){}[0]
+
+    final val clearBeforeRender // tv.nomercy.player.core.plugins.audio/VisualizationOptions.clearBeforeRender|{}clearBeforeRender[0]
+        final fun <get-clearBeforeRender>(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationOptions.clearBeforeRender.<get-clearBeforeRender>|<get-clearBeforeRender>(){}[0]
+    final val tick // tv.nomercy.player.core.plugins.audio/VisualizationOptions.tick|{}tick[0]
+        final fun <get-tick>(): tv.nomercy.player.core.plugins.audio/VisualizationTick // tv.nomercy.player.core.plugins.audio/VisualizationOptions.tick.<get-tick>|<get-tick>(){}[0]
+
+    final fun component1(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationOptions.component1|component1(){}[0]
+    final fun component2(): tv.nomercy.player.core.plugins.audio/VisualizationTick // tv.nomercy.player.core.plugins.audio/VisualizationOptions.component2|component2(){}[0]
+    final fun copy(kotlin/Boolean = ..., tv.nomercy.player.core.plugins.audio/VisualizationTick = ...): tv.nomercy.player.core.plugins.audio/VisualizationOptions // tv.nomercy.player.core.plugins.audio/VisualizationOptions.copy|copy(kotlin.Boolean;tv.nomercy.player.core.plugins.audio.VisualizationTick){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VisualizationOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VisualizationOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationOptions.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.plugins.canvas/CanvasFrame { // tv.nomercy.player.core.plugins.canvas/CanvasFrame|null[0]

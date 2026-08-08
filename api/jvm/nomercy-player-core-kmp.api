@@ -4446,6 +4446,21 @@ public final class tv/nomercy/player/core/plugins/audio/BandEnergies {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/audio/BandEnergy {
+	public fun <init> (DDD)V
+	public final fun component1 ()D
+	public final fun component2 ()D
+	public final fun component3 ()D
+	public final fun copy (DDD)Ltv/nomercy/player/core/plugins/audio/BandEnergy;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/BandEnergy;DDDILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/BandEnergy;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBass ()D
+	public final fun getMid ()D
+	public final fun getTreble ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/BeatReading {
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/Boolean;Ljava/lang/Double;)V
@@ -4528,6 +4543,17 @@ public final class tv/nomercy/player/core/plugins/audio/EqualizerPlugin$Manifest
 	public fun getVersion ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/audio/FftSize : java/lang/Enum {
+	public static final field SIZE_1024 Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public static final field SIZE_2048 Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public static final field SIZE_4096 Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public static final field SIZE_512 Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public final fun getBins ()I
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public static fun values ()[Ltv/nomercy/player/core/plugins/audio/FftSize;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/MixerEvents {
 	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/MixerEvents;
 	public final fun getGainChanged ()Ltv/nomercy/player/core/events/EventKey;
@@ -4592,6 +4618,52 @@ public final class tv/nomercy/player/core/plugins/audio/MixerPluginKt {
 	public static final field DEFAULT_MAX_GAIN_DB D
 }
 
+public abstract interface class tv/nomercy/player/core/plugins/audio/SpectrumEvents {
+}
+
+public final class tv/nomercy/player/core/plugins/audio/SpectrumEvents$Frame : tv/nomercy/player/core/plugins/audio/SpectrumEvents {
+	public fun <init> (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;Ltv/nomercy/player/core/plugins/audio/BandEnergy;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
+	public final fun component2 ()Ltv/nomercy/player/core/plugins/audio/BandEnergy;
+	public final fun copy (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;Ltv/nomercy/player/core/plugins/audio/BandEnergy;)Ltv/nomercy/player/core/plugins/audio/SpectrumEvents$Frame;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/SpectrumEvents$Frame;Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;Ltv/nomercy/player/core/plugins/audio/BandEnergy;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/SpectrumEvents$Frame;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getEnergy ()Ltv/nomercy/player/core/plugins/audio/BandEnergy;
+	public final fun getFrame ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/SpectrumEvents$OptionsChanged : tv/nomercy/player/core/plugins/audio/SpectrumEvents {
+	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;
+	public final fun copy (Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;)Ltv/nomercy/player/core/plugins/audio/SpectrumEvents$OptionsChanged;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/SpectrumEvents$OptionsChanged;Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/SpectrumEvents$OptionsChanged;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getOptions ()Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/SpectrumOptions {
+	public fun <init> ()V
+	public fun <init> (Ltv/nomercy/player/core/plugins/audio/FftSize;Ljava/lang/Double;Ljava/lang/Integer;Z)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugins/audio/FftSize;Ljava/lang/Double;Ljava/lang/Integer;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public final fun component2 ()Ljava/lang/Double;
+	public final fun component3 ()Ljava/lang/Integer;
+	public final fun component4 ()Z
+	public final fun copy (Ltv/nomercy/player/core/plugins/audio/FftSize;Ljava/lang/Double;Ljava/lang/Integer;Z)Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;Ltv/nomercy/player/core/plugins/audio/FftSize;Ljava/lang/Double;Ljava/lang/Integer;ZILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/SpectrumOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFftSize ()Ltv/nomercy/player/core/plugins/audio/FftSize;
+	public final fun getFrameRate ()Ljava/lang/Integer;
+	public final fun getSmoothingTimeConstant ()Ljava/lang/Double;
+	public final fun getStereo ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public class tv/nomercy/player/core/plugins/audio/SpectrumPlugin : tv/nomercy/player/core/plugin/Plugin {
 	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin$Manifest;
 	public fun <init> (Ltv/nomercy/player/core/ports/AudioDspGraph;)V
@@ -4629,6 +4701,31 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationErrorCodes 
 	public final fun getAll ()Ljava/util/Set;
 }
 
+public abstract interface class tv/nomercy/player/core/plugins/audio/VisualizationEvents {
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VisualizationEvents$Rendered : tv/nomercy/player/core/plugins/audio/VisualizationEvents {
+	public fun <init> (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)V
+	public final fun component1 ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
+	public final fun copy (Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;)Ltv/nomercy/player/core/plugins/audio/VisualizationEvents$Rendered;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/VisualizationEvents$Rendered;Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/VisualizationEvents$Rendered;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrame ()Ltv/nomercy/player/core/plugins/audio/VisualizationFrame;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VisualizationEvents$Unsupported : tv/nomercy/player/core/plugins/audio/VisualizationEvents {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/VisualizationEvents$Unsupported;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/VisualizationEvents$Unsupported;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/VisualizationEvents$Unsupported;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getReason ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 	public fun <init> ([D[DDDDLtv/nomercy/player/core/plugins/audio/BandEnergies;IDDLtv/nomercy/player/core/plugins/audio/BandEnergies;Ljava/lang/Boolean;Ljava/lang/Double;)V
 	public synthetic fun <init> ([D[DDDDLtv/nomercy/player/core/plugins/audio/BandEnergies;IDDLtv/nomercy/player/core/plugins/audio/BandEnergies;Ljava/lang/Boolean;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -4663,6 +4760,21 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationFrame {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/audio/VisualizationOptions {
+	public fun <init> ()V
+	public fun <init> (ZLtv/nomercy/player/core/plugins/audio/VisualizationTick;)V
+	public synthetic fun <init> (ZLtv/nomercy/player/core/plugins/audio/VisualizationTick;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Z
+	public final fun component2 ()Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
+	public final fun copy (ZLtv/nomercy/player/core/plugins/audio/VisualizationTick;)Ltv/nomercy/player/core/plugins/audio/VisualizationOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/VisualizationOptions;ZLtv/nomercy/player/core/plugins/audio/VisualizationTick;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/VisualizationOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClearBeforeRender ()Z
+	public final fun getTick ()Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract class tv/nomercy/player/core/plugins/audio/VisualizationPlugin : tv/nomercy/player/core/plugin/Plugin {
 	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/VisualizationPlugin$Manifest;
 	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;)V
@@ -4684,6 +4796,15 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationPlugin$Mani
 	public fun getRequires ()Ljava/util/List;
 	public fun getTranslations ()Ljava/util/Map;
 	public fun getVersion ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VisualizationTick : java/lang/Enum {
+	public static final field FRAME Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
+	public static final field TIME Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getId ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
+	public static fun values ()[Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
 }
 
 public class tv/nomercy/player/core/plugins/audio/WaveformVisualization : tv/nomercy/player/core/plugins/audio/VisualizationPlugin {
