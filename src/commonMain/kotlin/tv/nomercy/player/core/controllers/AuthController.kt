@@ -39,6 +39,25 @@ public open class AuthController {
     // signing writes nothing.
     public open suspend fun signRequest(url: String, request: FetchOptions): FetchOptions = request
 
+    // What the ENGINE must send with every request for this url.
+    //
+    // transformUrl is not enough on its own for HLS, and the gap is invisible
+    // until a real library is played: a manifest signed with a query parameter
+    // opens, and the child playlists and segments named inside it are resolved
+    // RELATIVE to it — which drops the query. Every request after the first
+    // then goes out unauthenticated, so the picture never arrives while the
+    // subtitles, which the player fetches itself, are perfect. Measured against
+    // a NoMercy server: master 200, child playlist 401.
+    //
+    // Given the url, because the answer differs per host. A player queues items
+    // from a signed-in server and from a public one in the same session, and a
+    // token attached to every request would hand the credential to whoever
+    // hosts the public file.
+    //
+    // Empty by default, and merged with whatever the caller passed rather than
+    // replacing it.
+    public open fun requestHeaders(url: String): Map<String, String> = emptyMap()
+
     // Get a fresh token, when the one held has stopped working.
     //
     // Suspending and returning nothing: the controller holds whatever it needs

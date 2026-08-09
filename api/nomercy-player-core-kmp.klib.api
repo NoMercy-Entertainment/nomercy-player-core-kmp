@@ -7558,6 +7558,7 @@ open class <#A: kotlin/Any> tv.nomercy.player.core.plugins.canvas/CanvasPlugin :
 open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.player.core.controllers/AuthController|null[0]
     constructor <init>() // tv.nomercy.player.core.controllers/AuthController.<init>|<init>(){}[0]
 
+    open fun requestHeaders(kotlin/String): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.controllers/AuthController.requestHeaders|requestHeaders(kotlin.String){}[0]
     open fun transformUrl(kotlin/String): kotlin/String // tv.nomercy.player.core.controllers/AuthController.transformUrl|transformUrl(kotlin.String){}[0]
     open suspend fun refresh(): kotlin/Boolean // tv.nomercy.player.core.controllers/AuthController.refresh|refresh(){}[0]
     open suspend fun signRequest(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchOptions // tv.nomercy.player.core.controllers/AuthController.signRequest|signRequest(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]

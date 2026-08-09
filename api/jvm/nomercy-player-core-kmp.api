@@ -66,6 +66,7 @@ public final class tv/nomercy/player/core/controllers/ActivityController {
 public class tv/nomercy/player/core/controllers/AuthController {
 	public fun <init> ()V
 	public fun refresh (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun requestHeaders (Ljava/lang/String;)Ljava/util/Map;
 	public fun signRequest (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
 }

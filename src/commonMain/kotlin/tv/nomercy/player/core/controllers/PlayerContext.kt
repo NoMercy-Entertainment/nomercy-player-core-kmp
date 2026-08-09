@@ -308,8 +308,20 @@ public class PlayerContext(
 
         val url: String = auth?.transformUrl(item.url) ?: item.url
 
+        // The engine's own requests, authorised.
+        //
+        // The url is signed above and that covers exactly one request: an HLS
+        // engine resolves the child playlists and segments named inside the
+        // manifest relative to it, which drops a query parameter, so everything
+        // after the first request goes out bare. Asked per url so a public item
+        // in the same queue is fetched with nothing attached.
+        val authorised: LoadOptions = auth?.requestHeaders(url)
+            ?.takeIf { headers -> headers.isNotEmpty() }
+            ?.let { headers -> opts.copy(headers = opts.headers + headers) }
+            ?: opts
+
         try {
-            engine.load(url, opts)
+            engine.load(url, authorised)
         }
         catch (cause: CancellationException) {
             throw cause
