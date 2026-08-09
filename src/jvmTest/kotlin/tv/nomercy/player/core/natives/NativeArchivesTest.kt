@@ -59,10 +59,16 @@ class NativeArchivesTest {
     // origin back.
     @Test
     fun eachKindResolvesToTheRepositoryThatPublishesIt() {
+        // The version comes from the entry rather than being typed here. What
+        // this test is for is the REPOSITORY and the tag shape -- a payload
+        // published by nomercy-libass and resolved against this repo's releases
+        // is the second origin that repo exists to remove. A literal version on
+        // top of that only means the test has to be edited every time a payload
+        // is rebuilt, and a test edited on every bump stops being read.
         val libass = assertNotNull(NativeArchives.of(NativeRuntimeKind.LIB_ASS, HostPlatform.WINDOWS_X64))
         assertEquals(
             "https://github.com/NoMercy-Entertainment/nomercy-libass/releases/download/" +
-                "v0.17.5/libass-0.17.5-windows-x64.tar.gz",
+                "v${libass.version}/libass-${libass.version}-windows-x64.tar.gz",
             libass.url,
         )
 
