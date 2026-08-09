@@ -72,8 +72,8 @@
     {
       "kind": "LIB_ASS",
       "platform": "WINDOWS_X64",
-      "version": "0.17.5",
-      "sha256": "0c37b2efd00ce150a7c4990c00aea8e43c7caf556b49334770119279c7c67417",
+      "version": "0.17.5-1",
+      "sha256": "3eb9e2d14efbcce698b3b9f770cd04e514b3ace44a9c289185bf4a6bb7c81045",
       "marker": "libass-9.dll",
       "bundle": true
     },

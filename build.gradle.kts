@@ -345,7 +345,17 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // are moved into the resource tree the loader reads from. Only the
             // fetched one arrives at its destination directly.
             if (payload.kind == "LIB_MPV") {
-                JavaFile(projectRoot, "build/payloads/${payload.fileName}").copyTo(destination, overwrite = true)
+                // Checked here, with the script's output in hand.
+                //
+                // `copyTo` on a missing source raises "the source file doesn't
+                // exist" and nothing else — and because the script exited 0 its
+                // output was discarded, so a macOS run reported a missing file
+                // and not one word about why it was missing.
+                val built = JavaFile(projectRoot, "build/payloads/${payload.fileName}")
+                check(built.isFile) {
+                    "the build script reported success and produced no ${payload.fileName}:\n$output"
+                }
+                built.copyTo(destination, overwrite = true)
             }
 
             // A FETCHED payload must match the digest we pinned — that is the

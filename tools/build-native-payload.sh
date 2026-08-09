@@ -325,9 +325,19 @@ if [ "$packed" = "no" ]; then
   rm -f "$out"
   # Sorted, owner-stripped and with gzip's own timestamp suppressed, so the
   # same upstream produces the same bytes and therefore the same digest.
+  echo "── tar: $(tar_bin)"
   "$(tar_bin)" --sort=name --owner=0 --group=0 --numeric-owner \
       --mtime="$STAMP_DATE" -C "$stage" -cf - . | gzip -n -9 > "$out"
 fi
+
+# Exiting 0 with no archive is the worst answer this script can give.
+#
+# It happened: the caller copied build/payloads/<name> into the resource tree,
+# got "the source file doesn't exist", and the script's own output was never
+# printed because the script had not failed. Whatever went wrong upstream of
+# here, the sentence naming it belongs in THIS script's output, where the caller
+# already knows to look.
+[ -f "$out" ] || { echo "the build produced no archive at $out"; exit 3; }
 
 echo
 echo "payload:  $out"
