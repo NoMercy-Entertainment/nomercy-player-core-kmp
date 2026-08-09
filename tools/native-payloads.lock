@@ -64,6 +64,14 @@ libmpv.android-arm.kind=android-container
 libmpv.android-arm.source=tools/libmpv-android.dockerfile
 libmpv.android-arm.sha256=
 
+# Its own version, because the fallback is the Windows one.
+#
+# Without this line the script fell back to libmpv.version and packed
+# libmpv-2026.06.10-macos-arm64.tar.gz while the catalogue -- which is what the
+# loader fetches and what the bundling task copies -- names 0.41.0. The build
+# succeeded, the file was written, and the caller found nothing at the name it
+# asked for. PayloadVersionsAgreeTest is the check that was missing.
+libmpv.macos-arm64.version=0.41.0
 libmpv.macos-arm64.kind=brew
 libmpv.macos-arm64.source=homebrew/core/mpv
 libmpv.macos-arm64.sha256=
