@@ -183,14 +183,27 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
     // installed and no daemon behind it would pass a file check and then fail
     // the build thirty seconds later, which is the shape of failure this is here
     // to stop reporting as a broken commit.
-    // Through providers.exec, not ProcessBuilder: the configuration cache
-    // refuses an external process started at configuration time outright, and
-    // the refusal is a build failure rather than a warning.
-    val dockerIsPresent: Boolean = try {
-        providers.exec {
-            commandLine("docker", "info")
+    // Docker is asked what it serves, which is the only thing that decides this.
+    //
+    // Two rules were written before this one and both inferred it. The first
+    // listed the host/payload pairings that had already failed, so a macOS
+    // runner tried to fetch a WINDOWS mpv package. The second said "anything
+    // that is not Windows can run a Linux container", and GitHub's macOS
+    // runners have no Docker at all -- and a Windows desktop with Docker in
+    // Linux mode, measured here, runs them perfectly well. Neither the host
+    // family nor the presence of the binary answers the question; `OSType` is
+    // the question, spelled out.
+    //
+    // Through providers.exec rather than ProcessBuilder: the configuration
+    // cache refuses an external process started at configuration time outright,
+    // and the refusal is a build failure rather than a warning.
+    val dockerServesLinux: Boolean = try {
+        val probe = providers.exec {
+            commandLine("docker", "info", "--format", "{{.OSType}}")
             isIgnoreExitValue = true
-        }.result.get().exitValue == 0
+        }
+        probe.result.get().exitValue == 0 &&
+            probe.standardOutput.asText.get().trim() == "linux"
     } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") missing: RuntimeException) {
         false
     }
@@ -280,19 +293,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             val hostFamily: String = hostPlatform.substringBefore('_')
             val linuxFamily: Boolean = family == "LINUX" || family == "ANDROID"
 
-            // ASKED, not inferred from the host family.
-            //
-            // Inferring it said "anything that is not Windows can run a Linux
-            // container", and GitHub's macOS runners have no Docker at all — so
-            // the job got past the Windows payload and died on the Linux one
-            // with "docker is required to build the linux payload". The same
-            // shape of mistake as the list this replaced, one level up.
-            //
-            // Windows is still excluded on top of the probe: Docker there runs
-            // WINDOWS containers and answers "no matching manifest for
-            // windows/amd64", which arrives as a payload that could not be
-            // obtained rather than as an unsupported host.
-            val canRunLinuxContainer: Boolean = hostFamily != "WINDOWS" && dockerIsPresent
+            val canRunLinuxContainer: Boolean = dockerServesLinux
 
             val unbuildableHere: String? = when {
                 payload.kind != "LIB_MPV" -> null
