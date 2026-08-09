@@ -176,6 +176,25 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
         candidates.firstOrNull { path -> JavaFile(path).isFile } ?: "bash"
     }
 
+    // Whether this machine has a Docker that answers, which is what the Linux
+    // payload is actually built by.
+    //
+    // `docker info` rather than the binary on PATH: a macOS runner with the CLI
+    // installed and no daemon behind it would pass a file check and then fail
+    // the build thirty seconds later, which is the shape of failure this is here
+    // to stop reporting as a broken commit.
+    // Through providers.exec, not ProcessBuilder: the configuration cache
+    // refuses an external process started at configuration time outright, and
+    // the refusal is a build failure rather than a warning.
+    val dockerIsPresent: Boolean = try {
+        providers.exec {
+            commandLine("docker", "info")
+            isIgnoreExitValue = true
+        }.result.get().exitValue == 0
+    } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") missing: RuntimeException) {
+        false
+    }
+
     val hostPlatform: String = run {
         val os: String = System.getProperty("os.name").lowercase()
         when {
@@ -261,10 +280,19 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             val hostFamily: String = hostPlatform.substringBefore('_')
             val linuxFamily: Boolean = family == "LINUX" || family == "ANDROID"
 
-            // Docker on a Windows host runs Windows containers and answers "no
-            // matching manifest for windows/amd64", which arrives as a payload
-            // that could not be obtained rather than as an unsupported host.
-            val canRunLinuxContainer: Boolean = hostFamily != "WINDOWS"
+            // ASKED, not inferred from the host family.
+            //
+            // Inferring it said "anything that is not Windows can run a Linux
+            // container", and GitHub's macOS runners have no Docker at all — so
+            // the job got past the Windows payload and died on the Linux one
+            // with "docker is required to build the linux payload". The same
+            // shape of mistake as the list this replaced, one level up.
+            //
+            // Windows is still excluded on top of the probe: Docker there runs
+            // WINDOWS containers and answers "no matching manifest for
+            // windows/amd64", which arrives as a payload that could not be
+            // obtained rather than as an unsupported host.
+            val canRunLinuxContainer: Boolean = hostFamily != "WINDOWS" && dockerIsPresent
 
             val unbuildableHere: String? = when {
                 payload.kind != "LIB_MPV" -> null
