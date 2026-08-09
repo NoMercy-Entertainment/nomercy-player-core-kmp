@@ -238,14 +238,21 @@ stamp_tree() {
 }
 
 write_notice() {
+  # Resolved before the heredoc, not inside it. bash 3.2 -- which is still what
+  # /bin/bash is on macOS, and so what the Mac runner uses -- cannot parse a
+  # `case` inside a command substitution inside a heredoc, and reports it as a
+  # syntax error on the heredoc's first line rather than on the case.
+  local built_by
+  case "$kind" in
+    7z) built_by="the mpv-winbuild-cmake project and published at $source_url" ;;
+    brew) built_by="Homebrew from $source_url" ;;
+    android-container) built_by="mpv-android's buildscripts, in a container, from $source_url" ;;
+    *) built_by="$source_url" ;;
+  esac
+
     cat > "$stage/NOTICE-NoMercy.txt" <<EOF
 This directory contains an unmodified redistribution of libmpv, version
-$version, built by $(case "$kind" in
-  7z) echo "the mpv-winbuild-cmake project and published at $source_url" ;;
-  brew) echo "Homebrew from $source_url" ;;
-  android-container) echo "mpv-android's buildscripts, in a container, from $source_url" ;;
-  *) echo "$source_url" ;;
-esac)
+$version, built by $built_by
 
 mpv is licensed under the GNU General Public License, version 2 or later; parts
 of it are LGPL. This build is GPL. Sources for mpv are at
