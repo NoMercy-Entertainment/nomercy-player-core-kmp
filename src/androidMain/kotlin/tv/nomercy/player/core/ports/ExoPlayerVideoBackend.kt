@@ -381,6 +381,22 @@ public class ExoPlayerVideoBackend(
         // which is precisely the case CapTo has already ruled out.
         engine.renderers.requestSdrToneMap = !displayIsHdr && canToneMapHdrToSdr
         applyTunneling(url)
+        // What the caller asked to be sent, sent.
+        //
+        // `LoadOptions.headers` is part of the backend contract and the mpv
+        // backend has always honoured it; this one dropped it, so a signed
+        // library played on the desktop and failed here with
+        // ERROR_CODE_IO_BAD_HTTP_STATUS -- a 401 arriving as "unknown error"
+        // over a black picture. Photographed on a phone against a real server.
+        //
+        // Through the same provider a host uses, because the interceptor
+        // beneath already applies it to every manifest and segment request and
+        // a second path would be a second thing to keep in step. A host that
+        // set its own provider keeps it when a load carries no headers.
+        if (opts.headers.isNotEmpty()) {
+            val carried: Map<String, String> = opts.headers
+            authHeaders.provider = { carried }
+        }
         player.setMediaItem(MediaItem.fromUri(url))
         // prepare, not play: starting is a separate decision above, and an
         // engine that started on its own would ignore a refused beforePlay.
