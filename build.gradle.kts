@@ -291,15 +291,24 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // running this is the machine whose desktop has to play.
             val family: String = payload.platform.substringBefore('_')
             val hostFamily: String = hostPlatform.substringBefore('_')
-            val linuxFamily: Boolean = family == "LINUX" || family == "ANDROID"
 
             val canRunLinuxContainer: Boolean = dockerServesLinux
 
+            // A host builds its OWN family and nothing else.
+            //
+            // ANDROID used to ride along with LINUX because both are assembled
+            // in a Linux container. That is true and it is not a reason: the
+            // Android payload is a cross-compile that takes tens of minutes on a
+            // cold cache, and nothing in another repo's CI needs it — video's
+            // Linux job wants libass, and it was failing on
+            // "building nomercy/libmpv-android:arm64" instead. An artifact that
+            // long-running belongs to a release, not to every consumer build
+            // that happens to resolve this project.
             val unbuildableHere: String? = when {
                 payload.kind != "LIB_MPV" -> null
-                family == hostFamily -> null
-                linuxFamily && canRunLinuxContainer -> null
-                else -> "a $family payload is not assembled on a $hostFamily host"
+                family != hostFamily -> "a $family payload is not assembled on a $hostFamily host"
+                family == "LINUX" && !canRunLinuxContainer -> "the linux payload is assembled in a container"
+                else -> null
             }
 
             if (unbuildableHere != null) {
