@@ -55,6 +55,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public final fun getPauseCount ()I
 	public final fun getPlayCount ()I
 	public final fun getRatesSet ()Ljava/util/List;
+	public final fun getReleaseCount ()I
 	public final fun getSeekedTo ()Ljava/util/List;
 	public final fun getStateValue ()Ltv/nomercy/player/core/ports/BackendState;
 	public final fun getStopCount ()I
@@ -68,6 +69,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
+	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setBufferedValue (D)V
 	public final fun setCurrentTimeValue (D)V
@@ -181,6 +183,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public final fun getLevels ()Ljava/util/List;
 	public final fun getPauseCount ()I
 	public final fun getPlayCount ()I
+	public final fun getReleaseCount ()I
 	public final fun getSeekedTo ()Ljava/util/List;
 	public final fun getSubtitleTracks ()Ljava/util/List;
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
@@ -195,6 +198,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
+	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setAudio (Ljava/util/List;)V
 	public final fun setLevels (Ljava/util/List;)V

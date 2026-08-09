@@ -18,6 +18,8 @@ import tv.nomercy.player.core.natives.libmpv.LibMpv
 import tv.nomercy.player.core.natives.libmpv.MPV_RENDER_API_TYPE_SW
 import tv.nomercy.player.core.natives.libmpv.MpvRenderParams
 import tv.nomercy.player.core.natives.libmpv.MpvRenderParamType
+import tv.nomercy.player.core.natives.libmpv.MpvEndFileReason
+import tv.nomercy.player.core.natives.libmpv.MpvEventPump
 import tv.nomercy.player.core.natives.libmpv.MpvHandle
 import tv.nomercy.player.core.natives.libmpv.property
 
@@ -29,13 +31,17 @@ import tv.nomercy.player.core.natives.libmpv.property
  * an HLS master to play. `edition` takes an assignment, so the quality menu
  * finally selects something instead of building a list nothing could act on.
  *
- * State is POLLED rather than pushed. mpv has an event queue reached through
- * `mpv_wait_event`, which returns a struct and needs a thread parked inside the
- * native call; a poll of six properties on a scheduled executor produces the
- * same canonical event spine, is the same shape as the Android and Apple
- * backends' own timer, and cannot wedge on a native call that never returns.
- * The cost is a bounded lateness — one poll interval — on `pause` and `ended`,
- * which are also the two the player above re-derives from its own state.
+ * State is POLLED rather than pushed. A poll of six properties on a scheduled
+ * executor produces the same canonical event spine, is the same shape as the
+ * Android and Apple backends' own timer, and cannot wedge. The cost is a bounded
+ * lateness — one poll interval — on `pause` and `ended`, which are also the two
+ * the player above re-derives from its own state.
+ *
+ * Failure is PUSHED, and has to be. A stream that cannot be opened leaves every
+ * property at the value it had before the load, so a poll reads a broken stream
+ * and a slow one identically and the player above spins on both — which is what
+ * an unreachable host actually looked like on screen. mpv states the reason once,
+ * in `END_FILE`, so [MpvEventPump] reads that queue and nothing else from it.
  */
 @Suppress("TooManyFunctions")
 public class MpvVideoBackend internal constructor(
@@ -74,8 +80,25 @@ public class MpvVideoBackend internal constructor(
     private var announcedMetadata: Boolean = false
     private var released: Boolean = false
 
+    // The one thing the poll cannot see. Every property a failed open leaves
+    // behind is the value it had before the load — duration zero, eof-reached
+    // false, no picture — so a stream that is broken and a stream that is slow
+    // are the same reading, and the player above spins on both. mpv says which
+    // through END_FILE and nowhere else.
+    private val events = MpvEventPump(mpv, handle, ::announceEndFile)
+
     init {
         poller.scheduleAtFixedRate(::poll, POLL_MS, POLL_MS, TimeUnit.MILLISECONDS)
+        events.start()
+    }
+
+    // An open that failed, told apart from the credits rolling. Only ERROR is an
+    // error: STOP is this backend's own `stop()`, QUIT is shutdown, and REDIRECT
+    // is mpv resolving a playlist — reporting any of those would put a failure
+    // on screen every time an item changed.
+    private fun announceEndFile(reason: Int, error: Int) {
+        if (released || reason != MpvEndFileReason.ERROR) return
+        bus.emit(BackendEvents.STREAM_ERROR, mpv.mpv_error_string(error))
     }
 
     // ---- loading -----------------------------------------------------------
@@ -333,7 +356,7 @@ public class MpvVideoBackend internal constructor(
      * `mpv_terminate_destroy` is a use-after-free in native code, which on this
      * platform is a process death with a stack naming none of this.
      */
-    public fun release() {
+    override fun release() {
         if (released) return
         released = true
         renderer.shutdown()
@@ -341,6 +364,7 @@ public class MpvVideoBackend internal constructor(
         renderContext?.let(mpv::mpv_render_context_free)
         renderContext = null
         renderParams = null
+        events.stop()
         poller.shutdown()
         poller.awaitTermination(POLL_MS * SHUTDOWN_POLLS, TimeUnit.MILLISECONDS)
         mpv.mpv_terminate_destroy(handle)

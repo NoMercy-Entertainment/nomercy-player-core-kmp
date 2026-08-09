@@ -131,6 +131,30 @@ public interface LibMpv : Library {
 
     public fun mpv_render_context_free(context: Pointer)
 
+    // ---- the event queue ---------------------------------------------------
+    //
+    // State is polled, and stays polled. This is here for the one thing a poll
+    // cannot produce: a stream that fails to open leaves every property at the
+    // value it had before the load, so "broken" and "still loading" read
+    // identically and the player above spins forever. mpv says which, once,
+    // through END_FILE, and nowhere else.
+
+    /**
+     * The next event, or an event of [MpvEventId.NONE] when [timeoutSeconds]
+     * elapsed first.
+     *
+     * Never null in practice; mpv returns a pointer to storage it owns and
+     * reuses, so the result must be read before the next call and never kept.
+     * A finite timeout is what makes this safe to park a thread in — the call
+     * returns on its own, and [mpv_wakeup] cuts it short at shutdown.
+     *
+     * Must be called from ONE thread only. mpv's queue is not multi-consumer.
+     */
+    public fun mpv_wait_event(handle: MpvHandle, timeoutSeconds: Double): MpvEvent.ByReference?
+
+    /** Returns [mpv_wait_event] immediately, which is how the pump is stopped. */
+    public fun mpv_wakeup(handle: MpvHandle)
+
     public companion object {
         /**
          * The soname differs per platform and none of them is "mpv".

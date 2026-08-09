@@ -108,4 +108,13 @@ public open class FakeVideoBackend : VideoBackend {
     override fun qualityLevels(): List<QualityLevel> = levels
     override fun quality(): QualityLevel? = chosenQuality
     override fun quality(level: QualityLevel?) { chosenQuality = level }
+
+    // Counted, because the defect this exists to catch is a seam that creates an
+    // engine and never frees it — which is silent by construction, since what an
+    // engine holds is native and the garbage collector cannot see it.
+    public var releaseCount: Int = 0
+        private set
+
+    override fun release() { releaseCount += 1 }
+
 }

@@ -3559,6 +3559,8 @@ public abstract interface class tv/nomercy/player/core/natives/libmpv/LibMpv : c
 	public abstract fun mpv_set_option_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
 	public abstract fun mpv_set_property_string (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;Ljava/lang/String;)I
 	public abstract fun mpv_terminate_destroy (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)V
+	public abstract fun mpv_wait_event (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;D)Ltv/nomercy/player/core/natives/libmpv/MpvEvent$ByReference;
+	public abstract fun mpv_wakeup (Ltv/nomercy/player/core/natives/libmpv/MpvHandle;)V
 }
 
 public final class tv/nomercy/player/core/natives/libmpv/LibMpv$Companion {
@@ -3568,6 +3570,65 @@ public final class tv/nomercy/player/core/natives/libmpv/LibMpv$Companion {
 
 public final class tv/nomercy/player/core/natives/libmpv/LibMpvBindingKt {
 	public static final fun property (Ltv/nomercy/player/core/natives/libmpv/LibMpv;Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public class tv/nomercy/player/core/natives/libmpv/MpvEndFile : com/sun/jna/Structure {
+	public field error I
+	public field playlistEntryId J
+	public field playlistInsertId J
+	public field playlistInsertNumEntries I
+	public field reason I
+	public fun <init> ()V
+	public fun <init> (Lcom/sun/jna/Pointer;)V
+	public synthetic fun <init> (Lcom/sun/jna/Pointer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvEndFile$ByReference : tv/nomercy/player/core/natives/libmpv/MpvEndFile {
+	public fun <init> ()V
+	public fun <init> (Lcom/sun/jna/Pointer;)V
+	public synthetic fun <init> (Lcom/sun/jna/Pointer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvEndFileReason {
+	public static final field EOF I
+	public static final field ERROR I
+	public static final field INSTANCE Ltv/nomercy/player/core/natives/libmpv/MpvEndFileReason;
+	public static final field QUIT I
+	public static final field REDIRECT I
+	public static final field STOP I
+}
+
+public class tv/nomercy/player/core/natives/libmpv/MpvEvent : com/sun/jna/Structure {
+	public field data Lcom/sun/jna/Pointer;
+	public field error I
+	public field eventId I
+	public field replyUserdata J
+	public fun <init> ()V
+	public fun <init> (Lcom/sun/jna/Pointer;)V
+	public synthetic fun <init> (Lcom/sun/jna/Pointer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvEvent$ByReference : tv/nomercy/player/core/natives/libmpv/MpvEvent {
+	public fun <init> ()V
+	public fun <init> (Lcom/sun/jna/Pointer;)V
+	public synthetic fun <init> (Lcom/sun/jna/Pointer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvEventId {
+	public static final field END_FILE I
+	public static final field FILE_LOADED I
+	public static final field INSTANCE Ltv/nomercy/player/core/natives/libmpv/MpvEventId;
+	public static final field NONE I
+	public static final field SHUTDOWN I
+	public static final field START_FILE I
+}
+
+public final class tv/nomercy/player/core/natives/libmpv/MpvEventPump {
+	public static final field JOIN_MS J
+	public static final field TIMEOUT_SECONDS D
+	public fun <init> (Ltv/nomercy/player/core/natives/libmpv/LibMpv;Ltv/nomercy/player/core/natives/libmpv/MpvHandle;Lkotlin/jvm/functions/Function2;)V
+	public final fun start ()V
+	public final fun stop ()V
 }
 
 public final class tv/nomercy/player/core/natives/libmpv/MpvFormat {
@@ -7037,6 +7098,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun playbackRate ()D
 	public abstract fun playbackRate (D)V
+	public abstract fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public abstract fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public abstract fun stop ()V
@@ -7144,7 +7206,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
 	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun release ()V
+	public fun release ()V
 	public fun secondaryGain ()F
 	public fun secondaryGain (F)V
 	public fun seekableRanges ()Ljava/util/List;
@@ -7199,7 +7261,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
-	public final fun release ()V
+	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun stop ()V

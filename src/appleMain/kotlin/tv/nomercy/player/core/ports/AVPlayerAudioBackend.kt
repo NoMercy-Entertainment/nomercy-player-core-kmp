@@ -134,7 +134,7 @@ public class AVPlayerAudioBackend : AudioBackend {
 
     // Both engines. Without it a caller can dispose the standby and stop the
     // current one and still leave two AVPlayers holding their items.
-    public fun release() {
+    override fun release() {
         standby?.release()
         standby = null
         current.release()

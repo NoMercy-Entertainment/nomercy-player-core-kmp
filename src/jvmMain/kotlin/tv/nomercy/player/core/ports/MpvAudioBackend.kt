@@ -137,7 +137,7 @@ public class MpvAudioBackend : AudioBackend {
     // still leaves a live mpv handle and its poll thread behind, which in one
     // process is a slow leak and in a test run is the previous test's audio
     // deciding the next one's result.
-    public fun release() {
+    override fun release() {
         standby?.release()
         standby = null
         current.release()

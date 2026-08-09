@@ -74,6 +74,14 @@ public open class FakeMediaBackend : MediaBackend {
 
     override fun stop() { stopCount += 1 }
 
+    // Counted, because the defect this exists to catch is a seam that creates an
+    // engine and never frees it — which is silent by construction, since what an
+    // engine holds is native and the garbage collector cannot see it.
+    public var releaseCount: Int = 0
+        private set
+
+    override fun release() { releaseCount += 1 }
+
     override fun currentTime(): Double = currentTimeValue
 
     override fun currentTime(seconds: Double) {

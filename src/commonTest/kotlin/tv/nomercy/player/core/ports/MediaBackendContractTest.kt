@@ -55,6 +55,11 @@ private open class FakeAudioBackend : AudioBackend {
         position = 0.0
     }
 
+    override fun release() {
+        stop()
+        listeners.clear()
+    }
+
     override fun currentTime(): Double = position
 
     override fun currentTime(seconds: Double) {

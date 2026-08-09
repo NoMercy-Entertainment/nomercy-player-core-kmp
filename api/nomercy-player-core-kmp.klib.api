@@ -1467,6 +1467,7 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     abstract fun pause() // tv.nomercy.player.core.ports/MediaBackend.pause|pause(){}[0]
     abstract fun playbackRate(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.playbackRate|playbackRate(){}[0]
     abstract fun playbackRate(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.playbackRate|playbackRate(kotlin.Double){}[0]
+    abstract fun release() // tv.nomercy.player.core.ports/MediaBackend.release|release(){}[0]
     abstract fun state(): tv.nomercy.player.core.ports/BackendState // tv.nomercy.player.core.ports/MediaBackend.state|state(){}[0]
     abstract fun stop() // tv.nomercy.player.core.ports/MediaBackend.stop|stop(){}[0]
     abstract fun unmute() // tv.nomercy.player.core.ports/MediaBackend.unmute|unmute(){}[0]

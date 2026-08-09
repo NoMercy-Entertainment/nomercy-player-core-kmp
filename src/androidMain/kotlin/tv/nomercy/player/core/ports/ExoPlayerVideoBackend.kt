@@ -670,7 +670,7 @@ public class ExoPlayerVideoBackend(
     // Not optional: an ExoPlayer that is dropped without this keeps its codec
     // and its audio focus, and the next one starts against a device that still
     // thinks something is playing.
-    public fun release(): Unit = fireAndForget {
+    override fun release(): Unit = fireAndForget {
         stopTicking()
         player.release()
     }

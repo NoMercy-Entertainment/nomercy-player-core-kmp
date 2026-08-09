@@ -675,7 +675,24 @@ tasks.withType<Test>().configureEach {
     // test JVM does not inherit the shell's -D flags, so a property set on the
     // command line reached nothing and the gates skipped themselves while
     // reporting green.
-    for (name in listOf("jna.library.path", "nomercy.mpv.fixture", "nomercy.mpv.master", "nomercy.mpv.fixtures", "nomercy.mpv.openMs")) {
+    // Every `nomercy.` property, by prefix rather than by name. The list this
+    // replaces had to be edited every time a gate learned a new switch, and the
+    // failure mode of forgetting was not an error — it was the gate skipping
+    // itself and the build staying green, which is the one shape that never
+    // gets investigated.
+    val forwarded: Map<String, String> =
+        providers.gradlePropertiesPrefixedBy("nomercy.").get() +
+            System.getProperties()
+                .stringPropertyNames()
+                .filter { name -> name.startsWith("nomercy.") }
+                .associateWith { name -> System.getProperty(name) }
+
+    forwarded.forEach { (name, value) -> systemProperty(name, value) }
+
+    // Not `nomercy.`-prefixed, and the one every native gate needs: it is JNA's
+    // own name for where to find the library, so it cannot be renamed into the
+    // scheme above.
+    for (name in listOf("jna.library.path")) {
         providers.gradleProperty(name).orNull?.let { value -> systemProperty(name, value) }
         System.getProperty(name)?.let { value -> systemProperty(name, value) }
     }

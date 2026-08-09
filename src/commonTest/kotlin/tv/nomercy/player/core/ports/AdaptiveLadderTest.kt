@@ -142,6 +142,8 @@ class AdaptiveLadderDriverTest {
         override suspend fun play(): Unit = error("not this test's business")
         override fun pause(): Unit = error("not this test's business")
         override fun stop(): Unit = error("not this test's business")
+
+        override fun release(): Unit = Unit
         override fun currentTime(): Double = 0.0
         override fun currentTime(seconds: Double): Unit = error("not this test's business")
         override fun duration(): Double = 0.0

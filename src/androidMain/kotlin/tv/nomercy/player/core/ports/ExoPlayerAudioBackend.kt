@@ -89,6 +89,16 @@ public class ExoPlayerAudioBackend(
 
     override fun stop(): Unit = current.stop()
 
+    // Both engines, not just the one playing. This backend keeps a retired
+    // engine as the standby for the next crossfade, so releasing only `current`
+    // would leave a whole ExoPlayer — and the codec it holds — behind every
+    // time a player is torn down.
+    override fun release() {
+        current.release()
+        standby?.release()
+        standby = null
+    }
+
     override fun currentTime(): Double = current.currentTime()
 
     override fun currentTime(seconds: Double): Unit = current.currentTime(seconds)

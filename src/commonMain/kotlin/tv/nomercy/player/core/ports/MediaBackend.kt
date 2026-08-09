@@ -94,6 +94,22 @@ public interface MediaBackend {
 
     public fun on(event: String, fn: (Any?) -> Unit)
     public fun off(event: String, fn: (Any?) -> Unit)
+
+    /**
+     * Gives back everything the engine holds. The instance is finished afterwards.
+     *
+     * Every backend already had this and no interface named it, which meant an
+     * engine taken from the registry could be created through the seam and not
+     * freed through it — the caller held a `VideoBackend` and the method was on
+     * the concrete class. What an engine holds is a decoder's frame pool, its
+     * demuxer buffers and a native handle, none of which the garbage collector
+     * can see, so the cost of not calling it does not show up as pressure. It
+     * shows up as a process that grows by a few hundred megabytes per film.
+     *
+     * [stop] is not this. Stopping ends playback and leaves the engine ready for
+     * the next item, which is what an item change wants; this ends the engine.
+     */
+    public fun release()
 }
 
 // The event names every backend emits, whatever engine is underneath.

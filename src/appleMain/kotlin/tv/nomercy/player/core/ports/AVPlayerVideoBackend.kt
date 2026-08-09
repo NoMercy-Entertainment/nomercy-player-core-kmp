@@ -272,7 +272,7 @@ public class AVPlayerVideoBackend : VideoBackend {
 
     override fun off(event: String, fn: (Any?) -> Unit): Unit = bus.off(event, fn)
 
-    public fun release() {
+    override fun release() {
         timeObserver?.let { player.removeTimeObserver(it) }
         timeObserver = null
         legible.detach()
