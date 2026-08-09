@@ -160,6 +160,22 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
     val outputDirectory: Provider<Directory> = layout.buildDirectory.dir("generated/natives/resources")
     val bundled: List<NativePayload> = nativePayloads.filter { payload -> payload.bundle }
     val projectRoot: JavaFile = layout.projectDirectory.asFile
+    // Which bash, said explicitly, because on Windows `bash` is not the one we
+    // mean. System32ash.exe is the WSL launcher, it comes first on PATH, and
+    // on a runner with no distribution installed it answers "Windows Subsystem
+    // for Linux has no installed distributions" — which arrives as a payload
+    // that could not be obtained and reads like a missing release.
+    //
+    // Git ships one and every Windows host that can clone this repo has it.
+    val bashExecutable: String = run {
+        val candidates: List<String> = listOfNotNull(
+            System.getenv("NOMERCY_BASH"),
+            "C:/Program Files/Git/bin/bash.exe",
+            "C:/Program Files (x86)/Git/bin/bash.exe",
+        )
+        candidates.firstOrNull { path -> JavaFile(path).isFile } ?: "bash"
+    }
+
     val hostPlatform: String = run {
         val os: String = System.getProperty("os.name").lowercase()
         when {
@@ -229,7 +245,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             }
 
             val command: List<String> = if (payload.kind == "LIB_MPV") {
-                listOf("bash", "tools/build-native-payload.sh", "libmpv", payload.platformId, "build/payloads")
+                listOf(bashExecutable, "tools/build-native-payload.sh", "libmpv", payload.platformId, "build/payloads")
             } else {
                 listOf(
                     "gh", "release", "download", payload.tag,
