@@ -68,23 +68,32 @@ internal class AVLegibleCues(
     // One output rather than one per item, because it carries the delegate and
     // the queue: a fresh output per item would need both re-bound, and a delegate
     // bound twice announces every cue twice.
+    // The removal is UNCONDITIONAL, and that is the fix rather than an
+    // oversight.
+    //
+    // Asking `output in previous.outputs` first reads as the careful thing and
+    // is the bug: `outputs` hands back a freshly wrapped Kotlin reference per
+    // call, so the membership test can answer false while the output is very
+    // much still attached. The remove is then skipped, the add on the next item
+    // throws `Cannot attach an output that is already attached`, and an
+    // NSException on Kotlin/Native takes the process down rather than surfacing
+    // as an error — which is how the iOS testbed died on launch, after the
+    // media-selection deadlock above it was fixed and it got this far.
+    //
+    // `removeOutput:` on an item that does not carry it is a documented no-op,
+    // so there is nothing to protect against and nothing to ask.
     fun attach(item: AVPlayerItem) {
         if (attachedTo === item) return
 
-        attachedTo?.let { previous: AVPlayerItem ->
-            if (output in previous.outputs) previous.removeOutput(output)
-        }
+        attachedTo?.removeOutput(output)
         attachedTo = item
-
-        if (output !in item.outputs) item.addOutput(output)
+        item.addOutput(output)
     }
 
     // On the way out, so a released backend does not leave an output on an item
     // the next one wants to use.
     fun detach() {
-        attachedTo?.let { item: AVPlayerItem ->
-            if (output in item.outputs) item.removeOutput(output)
-        }
+        attachedTo?.removeOutput(output)
         attachedTo = null
     }
 

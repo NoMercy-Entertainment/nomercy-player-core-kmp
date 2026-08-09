@@ -78,9 +78,22 @@ private const val TIME_OBSERVER_HZ = 4.0
 private const val NANOS_PER_SECOND = 1_000_000_000
 private const val MILLIS_PER_SECOND = 1000.0
 private const val PLAYABLE_KEY = "playable"
+
+// The key behind every media selection group, and the reason iOS aborted on
+// launch.
+//
+// `mediaSelectionGroupForMediaCharacteristic:` is a synchronous getter over an
+// ASYNCHRONOUS property: asked before the key is loaded, AVFoundation loads it
+// then and there and blocks the calling thread inside an NSCondition until the
+// network answers. The caller here is `audioTracks()`, reached from a StateFlow
+// collector on the main thread, so the main thread parked in
+// `_ensureAllDependenciesOfKeyAreLoaded:` and the watchdog killed the process --
+// SIGABRT, abort trap 6, on every single launch of the iOS testbed.
+private const val SELECTION_KEY = "availableMediaCharacteristicsWithMediaSelectionOptions"
+
 // duration and tracks as well: without them the item reports an indefinite
 // duration and a scrubber has nothing to draw.
-private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks")
+private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks", SELECTION_KEY)
 
 // The Apple engine, over AVFoundation.
 //
@@ -407,8 +420,20 @@ public class AVPlayerVideoBackend : VideoBackend {
 
     private val legible = AVLegibleCues(::announceCues)
 
-    private fun groupFor(characteristic: String): AVMediaSelectionGroup? =
-        currentAsset()?.mediaSelectionGroupForMediaCharacteristic(characteristic)
+    // Only once the key is loaded, and never waited for.
+    //
+    // The getter is synchronous over an asynchronous property, so asking early
+    // does not return null — it BLOCKS the calling thread inside AVFoundation
+    // until the value arrives. On the main thread that is a watchdog kill.
+    // Loading is requested with the rest of the asset's keys, so this answers
+    // empty for the moment between the item arriving and the key landing, and
+    // the state flow above re-reads when it does.
+    private fun groupFor(characteristic: String): AVMediaSelectionGroup? {
+        val asset: AVAsset = currentAsset() ?: return null
+        if (asset.statusOfValueForKey(SELECTION_KEY, null) != AVKeyValueStatusLoaded) return null
+
+        return asset.mediaSelectionGroupForMediaCharacteristic(characteristic)
+    }
 
     // Kept from the load rather than read back off the item. The interop does
     // not surface AVPlayerItem's asset, and the backend already had it —
