@@ -581,6 +581,16 @@ public class MpvVideoBackend internal constructor(
             "load-scripts" to NO,
             "idle" to YES,
             "keep-open" to YES,
+
+            // A host that never answers must not be an endless spinner.
+            //
+            // With no deadline, an unreachable server leaves mpv holding a
+            // connection that never opens: video-params stays 0x0, the playhead
+            // never moves, and nothing is ever reported — which reads as a
+            // player that cannot play the file rather than a server that is
+            // down. Ten seconds is long enough for a slow LAN mount and short
+            // enough that somebody watching learns something.
+            "network-timeout" to "10",
         )
     }
 }
