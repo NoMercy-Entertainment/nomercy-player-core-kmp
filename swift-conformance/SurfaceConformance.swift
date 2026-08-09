@@ -147,7 +147,12 @@ enum SurfaceConformance {
             // the ObjC header, so every new PlayerConfig field is a new REQUIRED
             // argument here. This file exists to break loudly when that happens.
             hdrOnSdr: HdrOnSdrFallback.play,
-            mutationGuards: MutationGuards.Default.shared
+            // MutationGuardsDefault, not MutationGuards.Default. Kotlin/Native
+            // restores nesting in Swift for a nested class of a CLASS — which
+            // is why ErrorCode.Companion reads that way above — but a sealed
+            // interface becomes a protocol, and a protocol has no members to
+            // nest under, so its cases flatten to the parent's name plus theirs.
+            mutationGuards: MutationGuardsDefault.shared
         ))
         try await player.play(opts: ActionOptions(source: nil, silent: false, autoplay: false))
 
