@@ -48,7 +48,7 @@ public open class EqualizerPlugin(
 
     public companion object Manifest : PluginManifest {
         override val id: String = "equalizer"
-        override val version: String = "1.0.0"
+        override val version: String = "2.0.0"
     }
 
     override val manifest: PluginManifest get() = Manifest
