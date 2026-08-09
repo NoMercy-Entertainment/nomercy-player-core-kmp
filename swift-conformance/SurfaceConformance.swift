@@ -164,15 +164,16 @@ enum SurfaceConformance {
     // The quality ladder a quality menu draws. Descriptor-keyed, so a menu can
     // name a rung without holding an index that goes stale.
     static func quality() {
-        // width is last and nullable — a manifest writes RESOLUTION=1920x1080 and
-        // a rung that carried only the height reached the menu unable to name
-        // itself anything but "1080p" beside a browser saying 1920x1080.
+        // width is last, and nullable because a manifest need not declare one.
+        // Nil rather than a number: Kotlin's `Int?` crosses as a BOXED NMPCInt,
+        // so `width: 1920` does not compile — which is itself the kind of thing
+        // this file is here to have found once rather than in a consumer.
         let hd = QualityDescriptor(
             height: 1080,
             bitrate: 6_000_000,
             dynamicRange: DynamicRange.sdr,
             codec: "avc1",
-            width: 1920
+            width: nil
         )
 
         precondition(hd.label() == "1080p")
