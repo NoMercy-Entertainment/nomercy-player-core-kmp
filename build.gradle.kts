@@ -176,6 +176,23 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
         candidates.firstOrNull { path -> JavaFile(path).isFile } ?: "bash"
     }
 
+    // The same problem one tool along: a launchd-started CI runner inherits no
+    // login shell, so Homebrew's directories are not on its PATH and `gh` --
+    // which is how a fetched payload is downloaded from a private release --
+    // fails as "Cannot run program gh ... No such file or directory". The
+    // workflow already calls brew by absolute path and the payload script
+    // already looks for gtar this way; this is the third tool in the same
+    // situation and the last one that assumed PATH.
+    val ghExecutable: String = run {
+        val candidates: List<String> = listOfNotNull(
+            System.getenv("NOMERCY_GH"),
+            "/opt/homebrew/bin/gh",
+            "/usr/local/bin/gh",
+            "/usr/bin/gh",
+        )
+        candidates.firstOrNull { path -> JavaFile(path).isFile } ?: "gh"
+    }
+
     // Whether this machine has a Docker that answers, which is what the Linux
     // payload is actually built by.
     //
@@ -323,7 +340,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
                 listOf(bashExecutable, "tools/build-native-payload.sh", "libmpv", payload.platformId, "build/payloads")
             } else {
                 listOf(
-                    "gh", "release", "download", payload.tag,
+                    ghExecutable, "release", "download", payload.tag,
                     "--repo", "NoMercy-Entertainment/${payload.repository}",
                     "--pattern", payload.fileName,
                     "--output", destination.absolutePath,
