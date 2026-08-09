@@ -105,6 +105,9 @@ enum SurfaceConformance {
             logger: SilentLogger.shared,
             storage: InMemoryStorage(),
             translator: nil,
+            // Kotlin defaults do not cross into the ObjC header, so a new
+            // constructor parameter is a new REQUIRED argument here.
+            onMissingTranslation: nil,
             announcer: nil,
             castSender: nil,
             platform: UnconfiguredPlatform.shared,
@@ -143,7 +146,8 @@ enum SurfaceConformance {
             // Kotlin's default (`= HdrOnSdrFallback.Play`) does not survive into
             // the ObjC header, so every new PlayerConfig field is a new REQUIRED
             // argument here. This file exists to break loudly when that happens.
-            hdrOnSdr: HdrOnSdrFallback.play
+            hdrOnSdr: HdrOnSdrFallback.play,
+            mutationGuards: MutationGuards.Default.shared
         ))
         try await player.play(opts: ActionOptions(source: nil, silent: false, autoplay: false))
 
@@ -160,7 +164,16 @@ enum SurfaceConformance {
     // The quality ladder a quality menu draws. Descriptor-keyed, so a menu can
     // name a rung without holding an index that goes stale.
     static func quality() {
-        let hd = QualityDescriptor(height: 1080, bitrate: 6_000_000, dynamicRange: DynamicRange.sdr, codec: "avc1")
+        // width is last and nullable — a manifest writes RESOLUTION=1920x1080 and
+        // a rung that carried only the height reached the menu unable to name
+        // itself anything but "1080p" beside a browser saying 1920x1080.
+        let hd = QualityDescriptor(
+            height: 1080,
+            bitrate: 6_000_000,
+            dynamicRange: DynamicRange.sdr,
+            codec: "avc1",
+            width: 1920
+        )
 
         precondition(hd.label() == "1080p")
         precondition(hd.height == 1080)
