@@ -37,6 +37,40 @@ lock="$here/tools/native-payloads.lock"
 readonly STAMP_EPOCH=1700000000
 readonly STAMP_DATE="@$STAMP_EPOCH"
 
+# The same instant in the one spelling both touches accept.
+#
+# `touch -d @<epoch>` is GNU only: BSD touch on macOS answered "out of range or
+# illegal time specification" and took the whole payload down after it had
+# already built. `-t CCYYMMDDhhmm.SS` is understood by both, and TZ=UTC0 in
+# front of it is what keeps a runner in Amsterdam and one in UTC writing the
+# same second. 1700000000 is 2023-11-14T22:13:20Z.
+readonly STAMP_TOUCH=202311142213.20
+
+# GNU tar and GNU coreutils, wherever this host keeps them.
+#
+# `--sort=name --owner=0 --mtime` and `sha256sum` do not exist on macOS; tar
+# there is bsdtar and the digest tool is `shasum`. Reproducibility is the entire
+# promise of this script, so the GNU tar is REQUIRED rather than approximated --
+# Homebrew installs it as gtar, and the CI job that builds a macOS payload
+# installs gnu-tar for exactly this reason.
+# Homebrew's own directories are searched by name, because a launchd-started CI
+# runner does not inherit a login shell's PATH -- the same reason the workflow
+# calls brew by absolute path.
+tar_bin() {
+  local candidate
+  for candidate in gtar /opt/homebrew/bin/gtar /usr/local/bin/gtar; do
+    if command -v "$candidate" >/dev/null 2>&1; then echo "$candidate"; return; fi
+  done
+  echo tar
+}
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum "$1" | cut -d' ' -f1
+  else
+    shasum -a 256 "$1" | cut -d' ' -f1
+  fi
+}
+
 pin() {
   local key="$1"
   sed -n "s/^${key//./\\.}=//p" "$lock" | head -1
@@ -71,7 +105,7 @@ fetch_verified() {
     mv "$into.part" "$into"
   fi
   local actual
-  actual="$(sha256sum "$into" | cut -d' ' -f1)"
+  actual="$(sha256_of "$into")"
   if [ -n "$expected" ] && [ "$actual" != "$expected" ]; then
     echo "digest mismatch for $url"
     echo "  expected $expected"
@@ -234,7 +268,7 @@ build_android_mpv() {
 # extractor restores them.
 stamp_tree() {
   echo "── freezing timestamps"
-  find "$stage" -exec touch -h -d "$STAMP_DATE" {} +
+  find "$stage" -exec env TZ=UTC0 touch -h -t "$STAMP_TOUCH" {} +
 }
 
 write_notice() {
@@ -264,7 +298,7 @@ linked into any NoMercy binary, so it can be replaced: put a directory
 containing your own build on the payload override described in the NoMercy
 player documentation and the player will load yours instead of this one.
 EOF
-  touch -d "$STAMP_DATE" "$stage/NOTICE-NoMercy.txt"
+  TZ=UTC0 touch -t "$STAMP_TOUCH" "$stage/NOTICE-NoMercy.txt"
 
 }
 
@@ -291,14 +325,14 @@ if [ "$packed" = "no" ]; then
   rm -f "$out"
   # Sorted, owner-stripped and with gzip's own timestamp suppressed, so the
   # same upstream produces the same bytes and therefore the same digest.
-  tar --sort=name --owner=0 --group=0 --numeric-owner \
+  "$(tar_bin)" --sort=name --owner=0 --group=0 --numeric-owner \
       --mtime="$STAMP_DATE" -C "$stage" -cf - . | gzip -n -9 > "$out"
 fi
 
 echo
 echo "payload:  $out"
 echo "size:     $(du -h "$out" | cut -f1)"
-echo "sha256:   $(sha256sum "$out" | cut -d' ' -f1)"
+echo "sha256:   $(sha256_of "$out")"
 echo
 echo "Paste that digest into NativeArchives.kt and publish the archive as the"
 echo "release asset it names."
