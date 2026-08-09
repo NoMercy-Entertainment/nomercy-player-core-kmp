@@ -95,6 +95,10 @@ private const val SELECTION_KEY = "availableMediaCharacteristicsWithMediaSelecti
 // duration and a scrubber has nothing to draw.
 private val LOADED_KEYS = listOf(PLAYABLE_KEY, "duration", "tracks", SELECTION_KEY)
 
+// Spelled out rather than imported. The constant is declared in AVAsset.h and
+// Kotlin/Native does not surface it, so the string is the binding.
+private const val HTTP_HEADER_FIELDS_KEY = "AVURLAssetHTTPHeaderFieldsKey"
+
 // The Apple engine, over AVFoundation.
 //
 // AVPlayer is the only decoder on iOS and tvOS that gets hardware decode,
@@ -184,7 +188,22 @@ public class AVPlayerVideoBackend : VideoBackend {
         // time observer, which only fires once time is moving and so can never
         // report that time may start; and the asset being playable, which is
         // true before its item is ready.
-        val asset: AVURLAsset? = NSURL.URLWithString(url)?.let { AVURLAsset(uRL = it, options = null) }
+        // The headers the caller asked for, on every request the asset makes.
+        //
+        // `AVURLAssetHTTPHeaderFieldsKey` is how AVFoundation is told, and it
+        // covers the child playlists and segments as well as the manifest —
+        // which is the whole point, because an HLS engine resolves those
+        // relative to the manifest and relative resolution drops a query
+        // string. Passing null here is what left the Apple half unable to play
+        // a signed library at all, the same gap the Android backend had.
+        //
+        // Undocumented-but-public rather than private API: the key is declared
+        // in AVAsset.h and has been the supported answer since iOS 8.
+        val options: Map<Any?, *>? = opts.headers
+            .takeIf { headers -> headers.isNotEmpty() }
+            ?.let { headers -> mapOf<Any?, Any?>(HTTP_HEADER_FIELDS_KEY to headers) }
+
+        val asset: AVURLAsset? = NSURL.URLWithString(url)?.let { AVURLAsset(uRL = it, options = options) }
         if (asset == null) {
             bus.emit(CanonicalBackendEvent.ERROR)
             return
