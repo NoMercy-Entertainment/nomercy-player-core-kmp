@@ -161,7 +161,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
     val bundled: List<NativePayload> = nativePayloads.filter { payload -> payload.bundle }
     val projectRoot: JavaFile = layout.projectDirectory.asFile
     // Which bash, said explicitly, because on Windows `bash` is not the one we
-    // mean. System32ash.exe is the WSL launcher, it comes first on PATH, and
+    // mean. System32/bash.exe is the WSL launcher, it comes first on PATH, and
     // on a runner with no distribution installed it answers "Windows Subsystem
     // for Linux has no installed distributions" — which arrives as a payload
     // that could not be obtained and reads like a missing release.
@@ -236,10 +236,30 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // install_name_tool are the tools that read and rewrite a Mach-O
             // dependency list, and neither exists anywhere else. Its own runner
             // produces it.
-            if (payload.kind == "LIB_MPV" && payload.platform.startsWith("MACOS") && hostPlatform != payload.platform) {
+            //
+            // The Linux and Android payloads are assembled in a Linux
+            // container, so a Windows host cannot make them either: Docker
+            // there runs Windows containers and answers "no matching manifest
+            // for windows/amd64", which arrives as a payload that could not be
+            // obtained. Each runner makes what it can and the host's own is
+            // always among them, which is what matters — the machine running
+            // this is the machine whose desktop has to play.
+            val needsMacOs: Boolean = payload.platform.startsWith("MACOS")
+            val needsLinuxContainer: Boolean =
+                payload.platform.startsWith("LINUX") || payload.platform.startsWith("ANDROID")
+            val unbuildableHere: String? = when {
+                payload.kind != "LIB_MPV" -> null
+                needsMacOs && hostPlatform != "MACOS_ARM64" ->
+                    "a Mach-O closure needs macOS"
+                needsLinuxContainer && hostPlatform == "WINDOWS_X64" ->
+                    "a Linux container cannot be run from a Windows-container host"
+                else -> null
+            }
+
+            if (unbuildableHere != null) {
                 logger.lifecycle(
                     "bundleNativePayloads: skipping ${payload.fileName} — " +
-                        "a Mach-O closure needs macOS and this host is $hostPlatform.",
+                        "$unbuildableHere and this host is $hostPlatform.",
                 )
                 continue
             }
