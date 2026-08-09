@@ -244,16 +244,33 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
             // obtained. Each runner makes what it can and the host's own is
             // always among them, which is what matters — the machine running
             // this is the machine whose desktop has to play.
-            val needsMacOs: Boolean = payload.platform.startsWith("MACOS")
-            val needsLinuxContainer: Boolean =
-                payload.platform.startsWith("LINUX") || payload.platform.startsWith("ANDROID")
+            // A host builds its OWN payload, and the Linux family when it can
+            // run a Linux container.
+            //
+            // Stated as one rule rather than as a list of the cases that have
+            // failed so far, because the list was the bug. It named macOS
+            // payloads off macOS and Linux payloads on Windows, and every other
+            // pairing fell through to "buildable" — so a macOS runner tried to
+            // fetch the WINDOWS mpv development package and the job died on a
+            // download for a platform it was never going to assemble.
+            //
+            // Each runner produces what it can and the host's own is always
+            // among them, which is the property that matters: the machine
+            // running this is the machine whose desktop has to play.
+            val family: String = payload.platform.substringBefore('_')
+            val hostFamily: String = hostPlatform.substringBefore('_')
+            val linuxFamily: Boolean = family == "LINUX" || family == "ANDROID"
+
+            // Docker on a Windows host runs Windows containers and answers "no
+            // matching manifest for windows/amd64", which arrives as a payload
+            // that could not be obtained rather than as an unsupported host.
+            val canRunLinuxContainer: Boolean = hostFamily != "WINDOWS"
+
             val unbuildableHere: String? = when {
                 payload.kind != "LIB_MPV" -> null
-                needsMacOs && hostPlatform != "MACOS_ARM64" ->
-                    "a Mach-O closure needs macOS"
-                needsLinuxContainer && hostPlatform == "WINDOWS_X64" ->
-                    "a Linux container cannot be run from a Windows-container host"
-                else -> null
+                family == hostFamily -> null
+                linuxFamily && canRunLinuxContainer -> null
+                else -> "a $family payload is not assembled on a $hostFamily host"
             }
 
             if (unbuildableHere != null) {
