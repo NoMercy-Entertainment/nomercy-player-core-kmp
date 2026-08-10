@@ -21,6 +21,7 @@ import tv.nomercy.player.core.ports.FocusLossKind
 import tv.nomercy.player.core.ports.fakes.FakeAudioFocusPort
 import tv.nomercy.player.testing.FakeMediaBackend
 import tv.nomercy.player.testing.TestItem
+import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -37,6 +38,13 @@ import kotlin.test.assertTrue
 // viewer's. A pair of plain recording lambdas would not exercise that round
 // trip at all.
 class AudioFocusPluginTest {
+
+    // ProcessPlaybackOwner is a process-wide singleton, so a claim left
+    // standing from one test is the next test's stale second player.
+    @AfterTest
+    fun resetProcessOwner() {
+        ProcessPlaybackOwner.resetForTest()
+    }
 
     // Runs what is launched into it straight away — audioFocusPlugin's pause
     // and resume launch rather than await, on purpose, so this is what lets a
@@ -139,5 +147,20 @@ class AudioFocusPluginTest {
         wiring.player.emit(CoreEvents.Stop, PlaySource())
 
         assertTrue(wiring.port.abandoned, "a deliberate stop left the focus request open")
+    }
+
+    @Test
+    fun aSecondPlayerStartingPausesTheFirstThroughTheSameProcessOwnerFocusAlone() = runTest {
+        // The scenario P21.13/P21.14 exist for: video and music are separate
+        // hosts, each with its own AudioFocusPlugin and its own OS-level
+        // focus grant, so the OS never tells either about the other.
+        // ProcessPlaybackOwner is the one thing both share.
+        val video: Wiring = wire()
+        val music: Wiring = wire()
+
+        video.player.emit(CoreEvents.Play, PlaySource())
+        music.player.emit(CoreEvents.Play, PlaySource())
+
+        assertEquals(1, video.pauseCount.size, "the second player starting never paused the first")
     }
 }

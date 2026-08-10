@@ -63,6 +63,13 @@ public open class AudioFocusPlugin(
         port = opened
 
         on(CoreEvents.Play) { source: PlaySource ->
+            // Claimed on every play, self-initiated resumes included: a grant
+            // that hands this player the speaker back makes it the process's
+            // active sound-maker again, and something else may have started
+            // in the meantime. See ProcessPlaybackOwner for why claiming is
+            // safe to repeat rather than only being the user branch's job.
+            ProcessPlaybackOwner.claim(pause)
+
             if (source.source == ActionSource.AUDIO_FOCUS) return@on
             arbiter.onUserResumed()
             opened.request(::onFocusChange)
@@ -73,16 +80,21 @@ public open class AudioFocusPlugin(
             arbiter.onUserPaused()
         }
 
-        // A deliberate stop releases focus outright rather than waiting for a
-        // loss that may never come — nothing else is about to ask for it if
-        // this app is the only thing that was using the speaker.
-        on(CoreEvents.Stop) { opened.abandon() }
+        // A deliberate stop releases both focus and process ownership outright
+        // rather than waiting for a loss that may never come — nothing else is
+        // about to ask for either if this app is the only thing that was using
+        // the speaker.
+        on(CoreEvents.Stop) {
+            opened.abandon()
+            ProcessPlaybackOwner.release(pause)
+        }
         on(CoreEvents.Ended) { opened.abandon() }
     }
 
     override fun dispose() {
         port?.abandon()
         port = null
+        ProcessPlaybackOwner.release(pause)
     }
 
     // Called by whichever platform component detected a headphone or
