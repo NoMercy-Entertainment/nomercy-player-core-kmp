@@ -85,6 +85,15 @@ public open class AudioFocusPlugin(
         port = null
     }
 
+    // Called by whichever platform component detected a headphone or
+    // Bluetooth disconnect — Android's ACTION_AUDIO_BECOMING_NOISY broadcast,
+    // for the one platform that has one. Not routed through [AudioFocusPort]:
+    // becoming-noisy is a route change, not a grant or a loss, and the two
+    // ports would have nothing in common beyond both ending in a pause.
+    public fun handleBecomingNoisy() {
+        apply(arbiter.onBecomingNoisy())
+    }
+
     private fun onFocusChange(change: FocusChange) {
         val action: FocusAction = when (change) {
             is FocusChange.Lost -> arbiter.onFocusLost(change.kind).also {
