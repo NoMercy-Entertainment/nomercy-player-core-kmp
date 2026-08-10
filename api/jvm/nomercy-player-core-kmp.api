@@ -4861,6 +4861,14 @@ public final class tv/nomercy/player/core/plugins/audio/BeatReading {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/plugins/audio/EqualizerEventKeys {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/EqualizerEventKeys;
+	public final fun getBandChanged ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getBandChangedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPresetChanged ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getPresetChangedOnPlayer ()Ltv/nomercy/player/core/events/EventKey;
+}
+
 public abstract interface class tv/nomercy/player/core/plugins/audio/EqualizerEvents {
 }
 

@@ -8927,6 +8927,17 @@ final object tv.nomercy.player.core.plugins.audio/AudioGraphEvents { // tv.nomer
         final fun <get-UnsupportedOnPlayer>(): tv.nomercy.player.core.events/EventKey<kotlin/String> // tv.nomercy.player.core.plugins.audio/AudioGraphEvents.UnsupportedOnPlayer.<get-UnsupportedOnPlayer>|<get-UnsupportedOnPlayer>(){}[0]
 }
 
+final object tv.nomercy.player.core.plugins.audio/EqualizerEventKeys { // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys|null[0]
+    final val BandChanged // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.BandChanged|{}BandChanged[0]
+        final fun <get-BandChanged>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.audio/EqualizerEvents.BandChanged> // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.BandChanged.<get-BandChanged>|<get-BandChanged>(){}[0]
+    final val BandChangedOnPlayer // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.BandChangedOnPlayer|{}BandChangedOnPlayer[0]
+        final fun <get-BandChangedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.audio/EqualizerEvents.BandChanged> // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.BandChangedOnPlayer.<get-BandChangedOnPlayer>|<get-BandChangedOnPlayer>(){}[0]
+    final val PresetChanged // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.PresetChanged|{}PresetChanged[0]
+        final fun <get-PresetChanged>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.audio/EqualizerEvents.PresetChanged> // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.PresetChanged.<get-PresetChanged>|<get-PresetChanged>(){}[0]
+    final val PresetChangedOnPlayer // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.PresetChangedOnPlayer|{}PresetChangedOnPlayer[0]
+        final fun <get-PresetChangedOnPlayer>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.plugins.audio/EqualizerEvents.PresetChanged> // tv.nomercy.player.core.plugins.audio/EqualizerEventKeys.PresetChangedOnPlayer.<get-PresetChangedOnPlayer>|<get-PresetChangedOnPlayer>(){}[0]
+}
+
 final object tv.nomercy.player.core.plugins.audio/MixerEvents { // tv.nomercy.player.core.plugins.audio/MixerEvents|null[0]
     final val GainChanged // tv.nomercy.player.core.plugins.audio/MixerEvents.GainChanged|{}GainChanged[0]
         final fun <get-GainChanged>(): tv.nomercy.player.core.events/EventKey<kotlin/Double> // tv.nomercy.player.core.plugins.audio/MixerEvents.GainChanged.<get-GainChanged>|<get-GainChanged>(){}[0]

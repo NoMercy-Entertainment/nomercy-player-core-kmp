@@ -218,7 +218,20 @@ public abstract class Plugin<O : Any> {
     // goes out verbatim, so re-emitting your own registry key is not
     // double-prefixed.
     protected fun <T> emit(key: EventKey<T>, data: T) {
-        wired.host.emit(EventKey(scopedName(key.name)), data)
+        // Silent before registration, rather than fatal.
+        //
+        // A plugin's setters are callable on a plugin nobody has registered --
+        // the library's own equaliser tests construct one and drag a band --
+        // and an announcement with no host to hear it is not an error, it is
+        // an announcement to nobody. Throwing turns "this plugin now reports
+        // its changes" into "this plugin now crashes when used alone", which
+        // is what adding the equaliser's band:changed did to four green tests.
+        //
+        // Reads, options and storage still throw through `wired`: asking a
+        // detached plugin for its host's state is a question with no honest
+        // answer, and that is a different thing from telling nobody.
+        val host: Wiring<O> = wiring ?: return
+        host.host.emit(EventKey(scopedName(key.name)), data)
     }
 
     // The same cancellable seam core uses for its own before* events: a

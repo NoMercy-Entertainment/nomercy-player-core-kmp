@@ -15,7 +15,9 @@ import tv.nomercy.player.core.dsp.EqPresets
 import tv.nomercy.player.core.dsp.EqSliderTarget
 import tv.nomercy.player.core.dsp.EqSliderValues
 import tv.nomercy.player.core.dsp.SliderRange
+import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.plugin.Plugin
+import tv.nomercy.player.core.plugin.pluginEventKey
 import tv.nomercy.player.core.plugin.PluginManifest
 import tv.nomercy.player.core.plugin.PluginOptionField
 import tv.nomercy.player.core.ports.AudioDspGraph
@@ -137,6 +139,7 @@ public open class EqualizerPlugin(
         chosenPreset = EqPresets.CUSTOM.name
         graph?.bandGain(frequencyHz, gainDb)
         persist()
+        emit(EqualizerEventKeys.BandChanged, EqualizerEvents.BandChanged(current[index]))
     }
 
     public open fun preGain(): Double = pre
@@ -185,6 +188,7 @@ public open class EqualizerPlugin(
         chosenPreset = preset.name
         graph?.setEqBands(preset.bands)
         persist()
+        emit(EqualizerEventKeys.PresetChanged, EqualizerEvents.PresetChanged(preset.name))
     }
 
     public open fun reset() {
@@ -317,6 +321,36 @@ public open class EqualizerPlugin(
             )
         }
     }
+}
+
+// What the plugin publishes, and what a consumer subscribes to on the player.
+//
+// Both halves, because a plugin's emit is namespaced on the way out and a
+// listener built from the wrong one never fires -- the same pairing
+// AudioGraphEvents declares next door.
+//
+// The sealed EqualizerEvents payloads have been declared since the port began
+// with ZERO references anywhere in the library -- no key, no emit, no listener.
+// A payload type nothing sends is a contract nobody can hold. These are the
+// keys it was missing.
+//
+// The events existed in the reference and not here. The web's EqualizerPanel is
+// built on `band:changed` and `preset:changed`; without them a native panel can
+// only see the changes it made itself, so a preset applied from a remote, a
+// restored session or another view leaves every slider showing the old curve.
+public object EqualizerEventKeys {
+
+    /** A band's gain moved. Carries the band as it now stands. */
+    public val BandChanged: EventKey<EqualizerEvents.BandChanged> = EventKey("band:changed")
+
+    /** A preset was applied. Null name after a reset, as the payload declares. */
+    public val PresetChanged: EventKey<EqualizerEvents.PresetChanged> = EventKey("preset:changed")
+
+    public val BandChangedOnPlayer: EventKey<EqualizerEvents.BandChanged> =
+        pluginEventKey(EqualizerPlugin.Manifest, "band:changed")
+
+    public val PresetChangedOnPlayer: EventKey<EqualizerEvents.PresetChanged> =
+        pluginEventKey(EqualizerPlugin.Manifest, "preset:changed")
 }
 
 // The reference's clamp, to the hundredth of a thousandth: a Q of zero is a
