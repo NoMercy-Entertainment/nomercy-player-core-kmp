@@ -15,6 +15,17 @@ package tv.nomercy.player.core.media
 // [startTime] is where it begins. There is no end: a chapter ends where the next
 // one starts, and carrying both invites the two to disagree. The last one runs
 // to the end of the item, which only the player knows.
+//
+// SECONDS, matching player.time()/ChapterTrack's own comparisons throughout this
+// file. P20.0's mandatory gate, verified against real scan data rather than
+// guessed: the server's wire `IChapter.start_time`/`end_time` are MILLISECONDS —
+// `ParseVttTimestampMs` in nomercy-media-server's
+// NoMercy.MediaProcessing/Files/FileManager.Hashing.cs is what writes
+// `Metadata.Chapters`, and it is what the name says. Web's normalize-item.ts
+// already divides by 1000 for the same reason. A host mapping a server payload
+// into this type must do the same conversion; nothing in this library does it
+// for them, because a Chapter can be constructed by a host that never touched
+// this server's wire shape at all.
 public data class Chapter(
     val startTime: Double,
     val title: String,
