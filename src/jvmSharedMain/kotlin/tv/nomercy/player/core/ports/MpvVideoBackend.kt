@@ -178,6 +178,21 @@ public class MpvVideoBackend internal constructor(
     }
 
     /**
+     * Replaces mpv's whole `af` (audio filter) chain.
+     *
+     * The seam [MpvDspGraph] drives: mpv exposes no raw-PCM tap comparable to
+     * libVLC's `amem` callback in its public client API, so the shared
+     * [tv.nomercy.player.core.ports.PcmEqualiser] this project's EQ math
+     * otherwise runs through cannot be wired in here. `af=lavfi=[...]` is the
+     * substitute — FFmpeg's own `equalizer` filter implements the identical
+     * RBJ-cookbook peaking transfer function [tv.nomercy.player.core.dsp.BiquadPeaking]
+     * does, so a band list translates to it without a second set of numbers.
+     */
+    public fun setAudioFilter(af: String) {
+        mpv.mpv_set_property_string(handle, "af", af)
+    }
+
+    /**
      * What mpv measures the stream at, in bits per second.
      *
      * `cache-speed` is bytes per second over the last second of reading, and it
