@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.binary.compatibility.validator)
     alias(libs.plugins.maven.publish)
+    jacoco
 }
 
 val libraryVersion: String = providers.gradleProperty("VERSION_NAME").get()
@@ -509,6 +510,16 @@ kotlin {
         }
     }
 
+    // The cast-web receiver's target. No libmpv/Media3 here — a browser
+    // sandbox has no native codec access, so the eventual backend is
+    // MediaSource + <video>, the same decode boundary nomercy-video-player's
+    // existing JS library already uses. This target carries the state
+    // machine / ABR / event contract only; the browser owns decode.
+    wasmJs {
+        browser()
+        binaries.executable()
+    }
+
     // One xcframework for both Apple platforms, matching how nomercy-app-kmp's
     // `shared` module already ships to the Tuist project.
     val playerCoreXcf: XCFrameworkConfig = XCFramework("NoMercyPlayerCore")
@@ -698,6 +709,77 @@ tasks.register<Test>("parityConformance") {
     testLogging {
         events("failed")
         showStandardStreams = false
+    }
+}
+
+// P30.9 — the coverage half of the parity CI gate.
+//
+// kotlinx-kover was tried first and rejected: 0.9.1 crashes at configuration
+// time against this repo's AGP 9 `com.android.kotlin.multiplatform.library`
+// plugin — its KMP/Android variant locator requires the classic `android`
+// extension `com.android.library` registers, which the newer KMP library
+// plugin does not (`KoverCriticalException: Kover requires extension with
+// name 'android'`). JaCoco needs no such variant location — it instruments
+// whatever classpath a JVM test task already ran on — so it is applied
+// directly to `jvmTest`, the same task `parityConformance` above borrows its
+// classpath from. Scoped there for the same reason: jvmTest is where the
+// vendored contract/scenario suite runs, so it answers "does the behavioural
+// suite actually exercise this port" — an Android/Apple report would measure
+// a different, mostly-untested-by-design surface (platform actuals covered
+// by their own device/instrumented suites, not by this floor).
+jacoco {
+    toolVersion = "0.8.13"
+}
+
+tasks.named<Test>("jvmTest") {
+    // The jvm-agent hook JaCoco's own plugin config normally wires
+    // automatically for a plain `java`/`kotlin-jvm` project. This project has
+    // neither, so it is wired by hand onto the one JVM test task the gate
+    // measures against.
+    extensions.configure(JacocoTaskExtension::class) {
+        isEnabled = true
+    }
+}
+
+tasks.register<JacocoReport>("jacocoJvmTestReport") {
+    group = "verification"
+    description = "Line coverage over jvmTest — the same classpath parityConformance runs on."
+    dependsOn("jvmTest")
+
+    val jvmTestTask: Test = tasks.named<Test>("jvmTest").get()
+    executionData.setFrom(jvmTestTask.extensions.getByType(JacocoTaskExtension::class).destinationFile)
+    sourceDirectories.setFrom(files("src/commonMain/kotlin", "src/jvmMain/kotlin"))
+    classDirectories.setFrom(
+        files(layout.buildDirectory.dir("classes/kotlin/jvm/main")).asFileTree.matching {
+            // Generated/testing-only surface — measuring it tells us nothing
+            // about whether the port's own behaviour is covered.
+            exclude("tv/nomercy/player/core/testing/**", "tv/nomercy/player/core/BuildInfo*")
+        },
+    )
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.register<JacocoCoverageVerification>("jacocoJvmTestVerify") {
+    group = "verification"
+    description = "Fails if jvmTest line coverage over the port's own source drops under the floor."
+    dependsOn("jacocoJvmTestReport")
+
+    val reportTask: JacocoReport = tasks.named<JacocoReport>("jacocoJvmTestReport").get()
+    executionData.setFrom(reportTask.executionData)
+    sourceDirectories.setFrom(reportTask.sourceDirectories)
+    classDirectories.setFrom(reportTask.classDirectories)
+
+    violationRules {
+        rule {
+            limit {
+                counter = "LINE"
+                minimum = "0.60".toBigDecimal()
+            }
+        }
     }
 }
 
