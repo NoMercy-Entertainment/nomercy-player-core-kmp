@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.ports
 
 import android.content.Context
+import android.content.Intent
 import android.net.wifi.WifiManager
 import android.os.PowerManager
 import androidx.media3.common.util.UnstableApi
@@ -31,6 +32,14 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
 
     private val session: MediaSession =
         MediaSession.Builder(appContext, bridge).setId(SESSION_ID).build()
+
+    init {
+        // Published before the service is asked to start, not after — a
+        // service whose first `onGetSession` call raced this init's own
+        // assignment would answer null to the very query it started for.
+        PlaybackForegroundSession.publish(session)
+        startPlaybackService()
+    }
 
     // Held while playing and released the moment it stops.
     //
@@ -71,7 +80,25 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
 
     override fun release() {
         holdLocks(false)
+        // Publish before releasing the Media3 object, so the service's own
+        // reconcile sees the `null` transition and removeSession()s a
+        // session that still answers, rather than one already torn down
+        // underneath it.
+        if (PlaybackForegroundSession.session.value === session) {
+            PlaybackForegroundSession.publish(null)
+        }
         session.release()
+    }
+
+    // `startForegroundService`, not `startService` — a background-started
+    // service is killed within seconds unless it promotes itself to
+    // foreground almost immediately, which is exactly what
+    // [NoMercyPlaybackService.reconcile] does the moment it sees this
+    // session over `addSession`. This project's minSdk (29) is already past
+    // the API 26 floor `startForegroundService` needs, so there is no older
+    // path to fall back to.
+    private fun startPlaybackService() {
+        appContext.startForegroundService(Intent(appContext, NoMercyPlaybackService::class.java))
     }
 
     private fun holdLocks(hold: Boolean) {

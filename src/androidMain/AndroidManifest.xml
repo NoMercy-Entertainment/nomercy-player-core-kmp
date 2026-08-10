@@ -24,5 +24,22 @@
                 android:name="tv.nomercy.player.core.ports.PlayerCoreInitializer"
                 android:value="androidx.startup" />
         </provider>
+
+        <!-- What keeps the process alive with the screen off (P21.20).
+             android:exported="false": only this app's own MediaController
+             and the framework's MediaSessionManager (the lock screen, the
+             notification, Android Auto) ever bind to it, never another
+             app's process directly. The intent-filter action is the
+             standard framework contract androidx.media3.session.MediaSessionService
+             consumers all declare — it is what makes the system able to
+             find this Service by capability rather than by name. -->
+        <service
+            android:name="tv.nomercy.player.core.ports.NoMercyPlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>
