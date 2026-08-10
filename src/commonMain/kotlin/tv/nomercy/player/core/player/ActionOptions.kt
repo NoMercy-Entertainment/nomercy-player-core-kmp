@@ -32,4 +32,10 @@ public object ActionSource {
     // the reference's pause-when-hidden and offline policies. The web spells it
     // exactly this way, so a listener filtering on it works on both.
     public const val PLATFORM: String = "platform"
+
+    // AudioFocusPlugin's own pause and resume, tagged so its own CoreEvents.Pause
+    // and CoreEvents.Play never read back as the viewer's — the distinction
+    // "never resume a player the user paused" is built on. Native-only: the
+    // reference has no audio-focus concept for this to answer to.
+    public const val AUDIO_FOCUS: String = "audio-focus"
 }
