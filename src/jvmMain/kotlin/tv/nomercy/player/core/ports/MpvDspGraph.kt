@@ -13,28 +13,43 @@ import tv.nomercy.player.core.dsp.EqBands
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 
-// The desktop's [AudioDspGraph] — EQ only, and that is a limit of mpv, not a
-// choice made here.
+// The desktop's [AudioDspGraph] — EQ over mpv's own `af` chain, spectrum over
+// an OS-level loopback tap, because the two gaps mpv's client API leaves
+// needed two different substitutes rather than one.
 //
-// mpv's public client API exposes no raw-PCM tap: nothing plays the role
-// libVLC's `amem` callback played for the plan this port was originally
-// written against, and without one the shared
-// [tv.nomercy.player.core.ports.PcmEqualiser] this project's biquad math
-// otherwise runs through cannot see a sample. EQ moves to mpv's own `af`
-// filter chain instead (see [MpvAudioFilterChain] for why that is a
-// coordinate change and not a second implementation of the curve).
+// mpv exposes no raw-PCM tap: nothing plays the role libVLC's `amem`
+// callback played for the plan this port was originally written against,
+// and without one the shared [PcmEqualiser] this project's biquad math
+// otherwise runs through cannot see a sample from mpv directly. EQ moves to
+// mpv's own `af` filter chain instead (see [MpvAudioFilterChain] for why
+// that is a coordinate change and not a second implementation of the
+// curve).
 //
-// Spectrum/visualization has no equivalent substitute — mpv's `af` graph can
-// shape audio, but nothing in the public client API hands this process the
-// samples a [tv.nomercy.player.core.plugins.audio.VisualizationFrame] needs.
-// [installFrameTap] is therefore a real no-op, not a stub awaiting wiring:
-// closing that gap needs either a custom native mpv filter or a second,
-// parallel raw-decode path, neither of which this class can grow into.
-public class MpvDspGraph(private val backend: MpvVideoBackend) : AudioDspGraph {
+// Spectrum has a substitute mpv itself cannot offer but the operating
+// system can: [AudioLoopbackCapture] taps the OS's own mixed audio output —
+// already carrying the `af` chain's EQ, since that runs before the mix — and
+// hands the samples to a second [PcmEqualiser] running with its own shaping
+// bypassed ([PcmEqualiser.eqEnabled] false), so it contributes nothing but
+// the FFT accumulation every other platform's graph already shares. Built
+// and wired, unverified against a real device — see [AudioLoopbackCapture]'s
+// own doc for what that means and why it was accepted anyway.
+public class MpvDspGraph(
+    private val backend: MpvVideoBackend,
+    private val sampleRate: Int = DEFAULT_SAMPLE_RATE,
+    private val channels: Int = DEFAULT_CHANNELS,
+    private val capture: AudioLoopbackCapture = defaultAudioLoopbackCapture(),
+) : AudioDspGraph {
 
     private var bands: List<EqBand> = EqBands.DEFAULT
     private var preGain: Double = 1.0
     private var enabled: Boolean = true
+
+    // Spectrum-only: `eqEnabled(false)` below means every sample this
+    // accumulates passes through unfiltered, so it never applies the biquad
+    // curve a second time on top of what mpv's `af` chain already baked into
+    // the captured signal.
+    private val spectrum: PcmEqualiser = PcmEqualiser(sampleRate, channels).also { it.eqEnabled(false) }
+    private var capturing: Boolean = false
 
     override fun setEqBands(bands: List<EqBand>) {
         this.bands = bands
@@ -58,16 +73,36 @@ public class MpvDspGraph(private val backend: MpvVideoBackend) : AudioDspGraph {
         apply()
     }
 
-    // No sample access on this backend — see the class doc. Returns a
-    // subscription that does nothing when disposed, the same contract a real
-    // tap gives a caller that never receives a frame.
-    override fun installFrameTap(onFrame: (VisualizationFrame) -> Unit): Subscription = Subscription {}
+    override fun fftSize(): Int = spectrum.fftSize()
+
+    override fun installFrameTap(onFrame: (VisualizationFrame) -> Unit): Subscription {
+        if (!capturing) {
+            capturing = capture.start(sampleRate, channels) { samples, frames -> spectrum.process(samples, frames) }
+        }
+        val inner = spectrum.installFrameTap(onFrame)
+        return Subscription {
+            inner.dispose()
+            removeFrameTap()
+        }
+    }
 
     override fun removeFrameTap() {
-        // Nothing was ever installed.
+        spectrum.removeFrameTap()
+        if (capturing) {
+            capture.stop()
+            capturing = false
+        }
     }
 
     private fun apply() {
         backend.setAudioFilter(MpvAudioFilterChain.build(bands, preGain, enabled))
+    }
+
+    private companion object {
+        // CD-quality stereo — mpv's own default output shape when nothing
+        // requests otherwise, and the shape [AudioLoopbackCapture]'s three
+        // implementations were written against.
+        const val DEFAULT_SAMPLE_RATE: Int = 44_100
+        const val DEFAULT_CHANNELS: Int = 2
     }
 }

@@ -608,6 +608,7 @@ kotlin {
             resources.srcDir(desktopNativePayloads)
             dependencies {
                 implementation(libs.jna)
+                implementation(libs.jna.platform)
             }
         }
         getByName("androidHostTest").dependencies {
