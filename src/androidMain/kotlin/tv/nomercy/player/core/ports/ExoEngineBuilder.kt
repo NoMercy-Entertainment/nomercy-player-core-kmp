@@ -134,15 +134,26 @@ internal fun buildEngine(
         // between a gapless transition and an OOM.
         .setUseLazyPreparation(true)
         .setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
-        // handleAudioFocus, so something else starting to play takes the sound
-        // rather than both being audible at once. A media library that ignored
-        // focus would talk over every notification.
+        // handleAudioFocus is FALSE. P21's AudioFocusArbiter/AudioFocusPlugin
+        // is what decides pause/duck/resume now, over the shared
+        // AudioFocusPort (AudioManagerFocusPort on Android) — the same
+        // arbitration every platform uses, including the cross-player
+        // ProcessPlaybackOwner rule ExoPlayer's own internal handling has no
+        // way to know about (a video and a music player each requesting
+        // focus independently, with neither aware the other exists). Media3
+        // requesting focus itself would double-request behind the plugin's
+        // back and could win a race the plugin's "never resume a user
+        // pause" guarantee depends on. A consumer that has not yet added
+        // AudioFocusPlugin gets no focus handling at all until it does —
+        // true only for a KMP-adopting consumer; nomercy-app-kmp has not
+        // adopted this engine on Android yet (P32.5), so nothing shipping
+        // today is affected by this flip.
         .setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(C.USAGE_MEDIA)
                 .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
                 .build(),
-            true,
+            false,
         )
         .build()
 
