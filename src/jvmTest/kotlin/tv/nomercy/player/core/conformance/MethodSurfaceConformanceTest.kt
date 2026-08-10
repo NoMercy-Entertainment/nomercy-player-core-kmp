@@ -185,6 +185,15 @@ class MethodSurfaceConformanceTest {
             // has to be reachable some other way, and this is it. The plugin
             // method it serves IS on the contract; only this seam is ours.
             "preloadNow",
+            // The reference reaches AirPlay through transferTo(AIRPLAY) — one
+            // seam for both casting and system-level output routing, because a
+            // DOM element you can call requestAirplay-adjacent APIs on already
+            // holds the destination. AirPlayHandoff's own note explains why
+            // that seam is wrong here: an AirPlay route has no item or position
+            // to hand over and must not pause first, where a CastSender
+            // transfer must. Two behaviours that must not share a guard get
+            // two methods instead.
+            "transferToExternal",
         )
     }
 }

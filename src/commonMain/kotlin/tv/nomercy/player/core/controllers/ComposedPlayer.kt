@@ -42,6 +42,9 @@ import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.AudioTrackPayload
 import tv.nomercy.player.core.events.SubtitlePayload
 import tv.nomercy.player.core.events.AudioTrackStatePayload
+import tv.nomercy.player.core.cast.AirPlayHandoff
+import tv.nomercy.player.core.cast.HandoffResult
+import tv.nomercy.player.core.ports.UnsupportedExternalPlayback
 import tv.nomercy.player.core.events.BeforeTransferPayload
 import tv.nomercy.player.core.events.CastTarget
 import tv.nomercy.player.core.events.TransferPreventedPayload
@@ -666,6 +669,15 @@ public open class ComposedPlayer(
         castState(if (accepted) CastState.CONNECTED else CastState.AVAILABLE)
         return accepted
     }
+
+    // Ask the platform to show its AirPlay-style route picker.
+    //
+    // Deliberately not routed through transferTo/CastSender: the engine keeps
+    // decoding throughout and there is no item or position to hand over, only a
+    // request that the OS move the output it is already producing. See
+    // AirPlayHandoff's own note for why the two must not share a seam.
+    public open fun transferToExternal(): HandoffResult =
+        AirPlayHandoff(context.backend?.externalPlayback() ?: UnsupportedExternalPlayback).transfer()
 
     private suspend fun reclaimFrom(sender: CastSender): Boolean {
         val remotePosition: Double? = sender.reclaim()

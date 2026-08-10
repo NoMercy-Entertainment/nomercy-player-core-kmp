@@ -309,7 +309,21 @@ public class AVPlayerVideoBackend : VideoBackend {
         timeObserver = null
         legible.detach()
         player.replaceCurrentItemWithPlayerItem(null)
+        externalPlayback.dispose()
     }
+
+    // Built once, over the same AVPlayer this backend already owns — AirPlay is
+    // the OS routing that player's own output, not a second engine. Lazy so a
+    // backend that is released before anything ever asked for a route never
+    // pays for the observer the real implementation installs.
+    //
+    // Per-target rather than a straight construction: the real route sender is
+    // iOS-only (tvOS has no AVRoutePickerView — AirPlay there lives in Control
+    // Center, outside any app's reach), and this class is compiled once for
+    // every Apple target from the shared appleMain source set.
+    private val externalPlayback: ExternalPlayback by lazy { makeExternalPlayback(player) }
+
+    override fun externalPlayback(): ExternalPlayback = externalPlayback
 
     // AVFoundation does not publish an HLS variant list. The public API gives
     // the rendition currently being played and a ceiling to cap adaptation with,

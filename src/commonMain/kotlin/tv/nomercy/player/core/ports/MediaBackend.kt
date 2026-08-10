@@ -110,6 +110,16 @@ public interface MediaBackend {
      * the next item, which is what an item change wants; this ends the engine.
      */
     public fun release()
+
+    // Somewhere else the operating system can send this engine's output, if this
+    // engine has such a route at all.
+    //
+    // Null by default, and that is an honest answer rather than a gap: most
+    // engines have no route sender, and a consumer asking one for AirPlay should
+    // be told there is none rather than handed a port that accepts a picker
+    // request and shows nothing. Only the engine that owns the native player
+    // instance the platform can route can answer this — AVPlayer on Apple today.
+    public fun externalPlayback(): ExternalPlayback? = null
 }
 
 // The event names every backend emits, whatever engine is underneath.
