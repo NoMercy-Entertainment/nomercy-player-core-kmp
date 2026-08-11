@@ -13,10 +13,47 @@ pluginManagement {
 }
 
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    // PREFER, not FAIL. The Kotlin/Wasm Gradle plugin adds the Binaryen
+    // distribution as a PROJECT repository at task-config time (to run
+    // wasm-opt on the wasmJs production build), which FAIL_ON_PROJECT_REPOS
+    // rejects outright as "added by unknown code" — confirmed live in CI the
+    // day this repo's wasmJs target landed. PREFER_SETTINGS still means only
+    // repositories explicitly declared here are ever consulted; it just stops
+    // rejecting a project-added repo that duplicates one already declared
+    // below, which is exactly this plugin's own case. Same fix
+    // nomercy-app-kmp's settings.gradle.kts already carries for the same
+    // plugin behaviour (Node/Yarn/Binaryen), applied here for the same reason.
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
+
+        // Node, downloaded by the Kotlin/Wasm plugin to run wasmJsBrowserTest
+        // (Karma needs a Node toolchain). Same class of project-repo addition
+        // as Binaryen below.
+        ivy("https://nodejs.org/dist") {
+            name = "Node Distributions"
+            patternLayout { artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("org.nodejs", "node") }
+        }
+
+        // Yarn, downloaded by the same plugin and for the same reason.
+        ivy("https://github.com/yarnpkg/yarn/releases/download") {
+            name = "Yarn Distributions"
+            patternLayout { artifact("v[revision]/[artifact](-v[revision]).[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.yarnpkg", "yarn") }
+        }
+
+        // Binaryen, downloaded by the Kotlin/Wasm plugin to run wasm-opt on a
+        // wasmJs production build. See the repositoriesMode comment above.
+        ivy("https://github.com/WebAssembly/binaryen/releases/download") {
+            name = "Binaryen Distributions"
+            patternLayout { artifact("version_[revision]/binaryen-version_[revision]-[classifier].[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.github.webassembly", "binaryen") }
+        }
     }
 }
 
