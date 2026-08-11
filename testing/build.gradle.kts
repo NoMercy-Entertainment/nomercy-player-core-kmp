@@ -43,6 +43,13 @@ kotlin {
         }
     }
 
+    // Matches the engine's own wasmJs target — a wasmJs consumer (cast-web,
+    // via nomercy-video-player-kmp's wasmJsTest) needs these fakes on that
+    // target too, or its test classpath cannot resolve this artifact at all.
+    wasmJs {
+        browser()
+    }
+
     // The same Apple targets the engine has, assembled into their own
     // framework. A fake that existed everywhere except the platform whose
     // conformance is hardest to run would leave that platform writing its own
