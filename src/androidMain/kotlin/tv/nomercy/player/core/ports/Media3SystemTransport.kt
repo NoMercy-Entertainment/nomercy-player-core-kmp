@@ -55,7 +55,9 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // whatever was attached before addSession()ing the new one) avoids
         // the phantom "stopped" state entirely.
         PlaybackForegroundSession.session.value?.release()
-        MediaSession.Builder(appContext, bridge).setId(SESSION_ID).build()
+        MediaSession.Builder(appContext, bridge)
+            .setId(SESSION_ID)
+            .build()
     }
 
     // Guards [release] against running twice: the pre-emptive release above
@@ -100,6 +102,15 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
 
     override fun setNowPlaying(nowPlaying: NowPlaying) {
         bridge.setNowPlaying(nowPlaying)
+    }
+
+    // Metadata only — no lock, no service, no session-publish state touched.
+    // MediaSessionPlugin calls this for a transient or genuinely-empty cursor
+    // (see its own comment), which happens on the way to almost every real
+    // item too — anything here that reached into service lifecycle turned an
+    // ordinary track change into a stop/republish cycle.
+    override fun clearNowPlaying() {
+        bridge.blank()
     }
 
     override fun setPlaybackState(

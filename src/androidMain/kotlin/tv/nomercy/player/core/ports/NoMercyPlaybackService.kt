@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.ports
 
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,21 @@ public class NoMercyPlaybackService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
+        // The consuming app's own icon and channel name, not this library's —
+        // see MediaNotificationBranding's own comment. Media3's own default
+        // provider (stock icon, generic channel name) is what a consumer
+        // that supplies nothing keeps getting. Read through
+        // PlatformEnvironment, same seam the Android Context itself is
+        // installed and read through — not a second static holder.
+        PlatformEnvironment.mediaNotificationBranding?.let { branding ->
+            setMediaNotificationProvider(
+                DefaultMediaNotificationProvider.Builder(this)
+                    .setChannelId(branding.channelId)
+                    .setChannelName(branding.channelNameResId)
+                    .build()
+                    .also { it.setSmallIcon(branding.smallIconResId) },
+            )
+        }
         val job = Job()
         scopeJob = job
         val scope = CoroutineScope(Dispatchers.Main.immediate + job)

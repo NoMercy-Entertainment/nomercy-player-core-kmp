@@ -139,9 +139,19 @@ public open class MediaSessionPlugin(
     private fun announce(item: PlaylistItem?) {
         val opened: SystemTransport = transport ?: return
         if (item == null) {
-            // The cursor past the end of an exhausted queue. Nothing is playing
-            // and the lock screen should say so rather than keep the last item.
-            opened.clear()
+            // The cursor past the end of an exhausted queue — OR the transient
+            // null a queue REPLACE passes through on its way to the real item
+            // (confirmed live: every playTrack() call fires this on its way to
+            // announcing the real item, not only on genuine exhaustion). Using
+            // the heavier clear() here — which now also unpublishes the
+            // session and resets the foreground-promotion flag, see its own
+            // comment — turned every ordinary track change into a spurious
+            // stop/republish cycle and reintroduced
+            // ForegroundServiceDidNotStartInTimeException on a real device,
+            // 2026-08-12. clearNowPlaying() only blanks the displayed
+            // metadata, which is all a transient (or genuinely empty) cursor
+            // needs — the session itself stays exactly as it was.
+            opened.clearNowPlaying()
             return
         }
 
