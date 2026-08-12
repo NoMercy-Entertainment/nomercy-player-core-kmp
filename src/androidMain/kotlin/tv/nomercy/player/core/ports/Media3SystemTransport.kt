@@ -127,6 +127,15 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // grace window down to "right as Media3 has a reason to promote",
         // rather than starting the clock back when the item was merely
         // selected and possibly still buffering.
+        // Bridge updated BEFORE the service is asked to promote — Media3's own
+        // notification manager reads the player's current isPlaying off this
+        // bridge the moment addSession() binds, and a stale "not playing"
+        // read here is a promotion that never happens: it does not always get
+        // a second chance from the later invalidateState(), and Android's 10s
+        // grace window on startForegroundService() does not wait for one.
+        // ForegroundServiceDidNotStartInTimeException, confirmed live, real
+        // device, 2026-08-12, on an otherwise ordinary first play.
+        bridge.setPlayback(state, positionMs)
         if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested) {
             servicePromotionRequested = true
             // clear() (a real stop, not a pause) unpublishes this session so
@@ -139,7 +148,6 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
             }
             startPlaybackService()
         }
-        bridge.setPlayback(state, positionMs)
         holdLocks(state == TransportPlaybackState.PLAYING)
     }
 
