@@ -67,7 +67,21 @@ public open class MediaSessionPlugin(
         on(CoreEvents.Pause) { push(TransportPlaybackState.PAUSED) }
         on(CoreEvents.Time) { update ->
             positionMs = toMillis(update.time)
-            durationMs = toMillis(update.duration)
+            val newDurationMs = toMillis(update.duration)
+            // A one-time correction, not a per-tick push — the item's
+            // duration is usually still unknown at announce() (Item fires
+            // before the engine has read it), so every notification built
+            // that way carries durationMs=0 forever and Media3 draws no
+            // seek bar for it at all, confirmed live, real device,
+            // 2026-08-12. Re-announcing on every tick would be the
+            // per-second rebuild this file's own top comment already warns
+            // against; only the unknown-to-known transition needs one.
+            if (durationMs == 0L && newDurationMs > 0L) {
+                durationMs = newDurationMs
+                item()?.let { announce(it) }
+            } else {
+                durationMs = newDurationMs
+            }
         }
         on(CoreEvents.Seek) { position ->
             positionMs = toMillis(position.time)
