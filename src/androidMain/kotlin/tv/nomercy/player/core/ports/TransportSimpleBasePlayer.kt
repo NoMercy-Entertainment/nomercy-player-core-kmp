@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.ports
 
 import android.os.Looper
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -35,6 +36,7 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     private var playing: Boolean = false
     private var positionMs: Long = 0
     private var durationMs: Long = 0
+    private var isLive: Boolean = false
     private var metadata: MediaMetadata = MediaMetadata.EMPTY
 
     // Read by Media3SystemTransport before it asks Android to promote the
@@ -71,6 +73,7 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
             .setArtworkUri(nowPlaying.artworkUrl?.let(android.net.Uri::parse))
             .build()
         durationMs = nowPlaying.durationMs
+        isLive = nowPlaying.isLive
         hasItem = true
         invalidateState()
     }
@@ -87,6 +90,7 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         playing = false
         positionMs = 0
         durationMs = 0
+        isLive = false
         invalidateState()
     }
 
@@ -109,7 +113,14 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
                     MediaItemData.Builder(ITEM_ID)
                         .setMediaItem(MediaItem.Builder().setMediaId(ITEM_ID).build())
                         .setMediaMetadata(metadata)
-                        .setDurationUs(durationMs * MICROS_PER_MILLI)
+                        // TIME_UNSET when live OR not-yet-known — both are
+                        // "no seek bar", the difference is app-UI-facing
+                        // (NowPlaying.isLive), not Media3's. A literal 0 here
+                        // drew a real, frozen zero-length bar instead of
+                        // Media3's own no-duration treatment.
+                        .setDurationUs(
+                            if (isLive || durationMs <= 0L) C.TIME_UNSET else durationMs * MICROS_PER_MILLI,
+                        )
                         .build(),
                 ),
             )

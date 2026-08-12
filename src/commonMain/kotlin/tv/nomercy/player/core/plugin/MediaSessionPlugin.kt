@@ -57,6 +57,12 @@ public open class MediaSessionPlugin(
 
     private var durationMs: Long = 0
 
+    // Whether a real CoreEvents.Time update has arrived for the CURRENT item.
+    // Reset alongside durationMs on every announce(); flipped true the moment
+    // one lands, live or not — that flip is what tells "live" apart from
+    // "not measured yet" below.
+    private var durationKnown: Boolean = false
+
     override fun use() {
         val opened: SystemTransport = openTransport()
         transport = opened
@@ -76,7 +82,9 @@ public open class MediaSessionPlugin(
             // 2026-08-12. Re-announcing on every tick would be the
             // per-second rebuild this file's own top comment already warns
             // against; only the unknown-to-known transition needs one.
-            if (durationMs == 0L && newDurationMs > 0L) {
+            val wasKnown = durationKnown
+            durationKnown = true
+            if ((durationMs == 0L && newDurationMs > 0L) || !wasKnown) {
                 durationMs = newDurationMs
                 item()?.let { announce(it) }
             } else {
@@ -122,6 +130,9 @@ public open class MediaSessionPlugin(
     protected open fun nowPlayingFor(item: PlaylistItem): NowPlaying = NowPlaying(
         title = item.title ?: item.url.substringAfterLast('/'),
         durationMs = durationMs,
+        // Live only once a real update has confirmed there is no duration —
+        // never on the transient durationMs==0 every item starts at.
+        isLive = durationKnown && durationMs <= 0L,
     )
 
     // The lego-brick custom buttons for this item — favorite, or whatever
@@ -181,6 +192,16 @@ public open class MediaSessionPlugin(
         }
 
         positionMs = 0
+        // Reset alongside position — a track change carries over the PREVIOUS
+        // track's durationMs otherwise, since only the Time handler ever wrote
+        // it, and that handler only re-announces on the 0-to-known transition
+        // (see its own comment). Without this reset that transition never
+        // happens again after the first track: switching songs (or to a radio
+        // station with a different length) left the notification/mini-player
+        // showing the old track's stale duration and a progress bar computed
+        // against it — confirmed live, real device, 2026-08-12.
+        durationMs = 0
+        durationKnown = false
         val playing: NowPlaying = nowPlayingFor(item)
         announced = playing
         opened.setNowPlaying(playing)

@@ -89,6 +89,12 @@ public data class NowPlaying(
     val album: String? = null,
     val artworkUrl: String? = null,
     val durationMs: Long = 0,
+    // True only once the engine has actually reported a time update for this
+    // item AND that update carries no duration — a genuine live stream, not
+    // just a track whose duration hasn't arrived yet. durationMs==0 is worn
+    // by both states; conflating them marked every freshly-announced track
+    // "LIVE" for the instant before its real duration landed.
+    val isLive: Boolean = false,
 )
 
 // The three states a system transport can show. Deliberately not the player's
