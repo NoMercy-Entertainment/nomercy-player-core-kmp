@@ -118,6 +118,14 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // selected and possibly still buffering.
         if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested) {
             servicePromotionRequested = true
+            // clear() (a real stop, not a pause) unpublishes this session so
+            // the service demotes out of foreground — see its own comment.
+            // Republish here so the NEXT play after a stop has a session for
+            // the service's onGetSession to answer, exactly like the initial
+            // publish in init.
+            if (PlaybackForegroundSession.session.value !== session) {
+                PlaybackForegroundSession.publish(session)
+            }
             startPlaybackService()
         }
         bridge.setPlayback(state, positionMs)
@@ -128,9 +136,22 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         bridge.setActions(actions)
     }
 
+    // A real stop, not a pause — the viewer closed the player rather than
+    // merely paused it. Blanking the bridge alone left the foreground
+    // service (and its notification) pinned showing whatever it last had,
+    // because nothing here ever told NoMercyPlaybackService.reconcile() that
+    // playback had genuinely ended (confirmed live: stop left a stale
+    // notification behind, real device, 2026-08-12). Unpublishing does that
+    // — reconcile() sees null and calls stopSelf(), which removes the
+    // notification. servicePromotionRequested resets so the NEXT real play
+    // re-promotes to foreground instead of silently no-op'ing forever.
     override fun clear() {
         bridge.blank()
         holdLocks(false)
+        if (PlaybackForegroundSession.session.value === session) {
+            PlaybackForegroundSession.publish(null)
+        }
+        servicePromotionRequested = false
     }
 
     override fun release() {
