@@ -30,16 +30,58 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
 
     private val bridge = TransportSimpleBasePlayer()
 
-    private val session: MediaSession =
+    private val session: MediaSession = run {
+        // The fixed [SESSION_ID] means Media3 throws "Session ID must be
+        // unique" if a prior instance's own release() (app-side dispose() is
+        // suspend, fired from a Compose DisposableEffect) has not completed
+        // before this constructor runs — confirmed live: navigating back to a
+        // watch screen and re-entering it crashed with exactly this exception
+        // (real TV, 2026-08-11), because the old holder's async dispose lost
+        // the race against the new holder's synchronous construction. Release
+        // whatever is still published under this session's identity first, so
+        // construction is idempotent regardless of which side wins the race.
+        //
+        // NOT routed through `publish(null)` first: that interim null reaches
+        // NoMercyPlaybackService.reconcile() (a StateFlow collector on
+        // Dispatchers.Main.immediate) before this constructor's own `init`
+        // block publishes the real replacement, and reconcile() treats a null
+        // session as "playback stopped" and calls stopSelf() — which then
+        // raced the next line's startForegroundService(), producing a NEW
+        // crash (ForegroundServiceDidNotStartInTimeException, confirmed live
+        // switching from video to music on a real TV, 2026-08-11) in place of
+        // the one this was fixing. Releasing the stale MediaSession directly
+        // and letting the real publish() below carry the old→new transition
+        // through reconcile() in one pass (it already removeSession()s
+        // whatever was attached before addSession()ing the new one) avoids
+        // the phantom "stopped" state entirely.
+        PlaybackForegroundSession.session.value?.release()
         MediaSession.Builder(appContext, bridge).setId(SESSION_ID).build()
+    }
+
+    // Guards [release] against running twice: the pre-emptive release above
+    // takes the OLD instance's own Media3 [MediaSession] out from under it,
+    // and Media3 throws if `.release()` runs on an already-released session
+    // when that old instance's own (suspend, slower) dispose() catches up.
+    private var released = false
 
     init {
         // Published before the service is asked to start, not after — a
         // service whose first `onGetSession` call raced this init's own
         // assignment would answer null to the very query it started for.
+        //
+        // Starting the service itself does NOT happen here anymore — see
+        // [setPlaybackState]'s own comment for why: this construction runs
+        // the instant a plugin registers, which the app now does the moment
+        // an item is merely SELECTED into the queue, well before its media
+        // has loaded. `startForegroundService()` here started Android's
+        // ~10s foreground-promotion clock at that same too-early moment,
+        // and a slow load (network buffering) routinely outran it —
+        // ForegroundServiceDidNotStartInTimeException, confirmed live, real
+        // TV, 2026-08-12 (a track took ~35s to start decoding).
         PlaybackForegroundSession.publish(session)
-        startPlaybackService()
     }
+
+    private var servicePromotionRequested = false
 
     // Held while playing and released the moment it stops.
     //
@@ -65,6 +107,19 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         positionMs: Long,
         playbackRate: Double,
     ) {
+        // First real PLAYING push, not construction — this is the moment the
+        // engine has actually been kicked (TransportController.play() emits
+        // CoreEvents.Play, MediaSessionPlugin pushes PLAYING, right before
+        // ctx.backend?.play() runs), so playWhenReady is about to go true on
+        // the bridge within the same event turn. Starting the OS service
+        // here instead of at construction collapses Android's foreground
+        // grace window down to "right as Media3 has a reason to promote",
+        // rather than starting the clock back when the item was merely
+        // selected and possibly still buffering.
+        if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested) {
+            servicePromotionRequested = true
+            startPlaybackService()
+        }
         bridge.setPlayback(state, positionMs)
         holdLocks(state == TransportPlaybackState.PLAYING)
     }
@@ -79,6 +134,8 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     }
 
     override fun release() {
+        if (released) return
+        released = true
         holdLocks(false)
         // Publish before releasing the Media3 object, so the service's own
         // reconcile sees the `null` transition and removeSession()s a
