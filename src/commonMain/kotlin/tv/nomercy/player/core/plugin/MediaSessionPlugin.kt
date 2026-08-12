@@ -74,24 +74,46 @@ public open class MediaSessionPlugin(
         on(CoreEvents.Time) { update ->
             positionMs = toMillis(update.time)
             val newDurationMs = toMillis(update.duration)
-            // A one-time correction, not a per-tick push — the item's
+            // Only pushed when the duration actually moves — the item's
             // duration is usually still unknown at announce() (Item fires
             // before the engine has read it), so every notification built
-            // that way carries durationMs=0 forever and Media3 draws no
-            // seek bar for it at all, confirmed live, real device,
-            // 2026-08-12. Re-announcing on every tick would be the
-            // per-second rebuild this file's own top comment already warns
-            // against; only the unknown-to-known transition needs one.
-            val wasKnown = durationKnown
+            // that way carried durationMs=0 forever and Media3 drew no seek
+            // bar for it at all, confirmed live, real device, 2026-08-12.
+            //
+            // Routed through pushNowPlaying(), NOT announce() — announce()
+            // resets positionMs to 0 and durationKnown to false, which called
+            // from here (every tick, once durationKnown flips back to false
+            // by its own reset) snapped the reported position back to zero
+            // every second and produced exactly the flicker this file's top
+            // comment already warns against — confirmed live, real device,
+            // 2026-08-12 (the seek bar vanished within a few seconds of
+            // playback starting).
+            val changed = durationMs != newDurationMs
+            val firstTickForItem = !durationKnown
             durationKnown = true
-            if ((durationMs == 0L && newDurationMs > 0L) || !wasKnown) {
-                durationMs = newDurationMs
-                item()?.let { announce(it) }
-            } else {
-                durationMs = newDurationMs
+            durationMs = newDurationMs
+            if (firstTickForItem || changed) {
+                item()?.let { pushNowPlaying(it) }
             }
         }
         on(CoreEvents.Seek) { position ->
+            positionMs = toMillis(position.time)
+            push(lastState)
+        }
+        // Seek fires early (before the backend has actually moved), Seeked
+        // fires once the move is done — and a real seek on this engine can
+        // report a transient PLATFORM Pause/Play pair around the backend
+        // catching up (BackendBridge.announcePause/announcePlay react to the
+        // engine's own isPlaying callback, which several backends flip false
+        // then true while they resettle after a seek). Each of those pushes
+        // lastState correctly at the time, but the widget was left showing
+        // whichever one landed last — paused, if the resettle's Play callback
+        // arrived before this plugin's own Seeked handler existed to correct
+        // it. Re-pushing here, once the seek is fully settled, is the correct
+        // final word — confirmed live, real device, 2026-08-12 (seeking while
+        // playing left the notification's button showing paused although
+        // audio kept playing).
+        on(CoreEvents.Seeked) { position ->
             positionMs = toMillis(position.time)
             push(lastState)
         }
@@ -202,10 +224,19 @@ public open class MediaSessionPlugin(
         // against it — confirmed live, real device, 2026-08-12.
         durationMs = 0
         durationKnown = false
+        pushNowPlaying(item)
+        opened.setCustomButtons(customButtonsFor(item))
+    }
+
+    // The metadata half of announce(), without the item-change resets —
+    // positionMs and durationKnown carry over. This is what the Time
+    // handler's duration correction calls: it is fixing up the CURRENT
+    // item's metadata, not starting a new one, so it must not touch either.
+    private fun pushNowPlaying(item: PlaylistItem) {
+        val opened: SystemTransport = transport ?: return
         val playing: NowPlaying = nowPlayingFor(item)
         announced = playing
         opened.setNowPlaying(playing)
-        opened.setCustomButtons(customButtonsFor(item))
     }
 
     private fun push(state: TransportPlaybackState) {
