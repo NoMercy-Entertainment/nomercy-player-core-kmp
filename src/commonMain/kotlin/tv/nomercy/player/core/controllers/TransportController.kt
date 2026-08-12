@@ -76,14 +76,26 @@ public class TransportController(
         ctx.backend?.pause()
     }
 
+    // A viewer ending the session, not the item merely finishing (that is
+    // Ended, which advances to the next queued item rather than tearing
+    // anything down — see MediaSessionPlugin's own comment on the two).
+    // Empties the queue and zeroes the clock the same way the reference's
+    // own stop() always did: a stop that leaves the queue loaded and the
+    // scrubber sitting at the last position it played is a pause wearing a
+    // stop's name, confirmed live, real device, 2026-08-12 (the transport,
+    // the notification and the play/pause icon all correctly recognised
+    // STOPPED — only the queue and the elapsed time were left behind).
     public suspend fun stop(opts: ActionOptions = ActionOptions()) {
         ctx.assertReady()
         if (!allowed(CoreEvents.BeforeStop, opts, CoreEvents.StopPrevented)) return
 
         ctx.playState = PlayState.STOPPED
         ctx.transitionPhase(PlayerPhase.STOPPED)
-        ctx.emit(CoreEvents.Stop, PlaySource(opts.source))
+        ctx.internalCurrentTime = 0.0
         ctx.backend?.stop()
+        queue.queueClear()
+        queue.backlogClear()
+        ctx.emit(CoreEvents.Stop, PlaySource(opts.source))
     }
 
     public suspend fun togglePlayback(opts: ActionOptions = ActionOptions()) {

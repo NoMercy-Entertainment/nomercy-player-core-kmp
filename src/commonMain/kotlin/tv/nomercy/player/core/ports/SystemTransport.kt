@@ -50,6 +50,21 @@ public interface SystemTransport {
     // register its commands at startup registers the ones it was given here.
     public fun setActionHandlers(actions: TransportActions)
 
+    /**
+     * The lego-brick custom buttons drawn beside the standard transport
+     * controls.
+     *
+     * Defaulted to nothing so an existing implementation keeps compiling —
+     * the same reasoning as [clearNowPlaying]: a platform that cannot draw
+     * these is no worse off than before, and one that can — Media3's
+     * `CommandButton` custom layout today, CarPlay's own custom set later —
+     * overrides it. Called with the app's whole current set every time it
+     * changes, including a state-only change on one button (an existing id
+     * with a flipped isActive) — same replace-the-whole-list contract as
+     * [setActionHandlers].
+     */
+    public fun setCustomButtons(buttons: List<CustomTransportButton>): Unit = Unit
+
     // Nothing is playing any more. Distinct from release: the transport is still
     // alive and will be used again, so a platform that tears down its session
     // here would have to build another one on the next item.

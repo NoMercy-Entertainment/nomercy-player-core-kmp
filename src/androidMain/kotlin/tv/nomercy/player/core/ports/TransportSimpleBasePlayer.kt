@@ -36,7 +36,16 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     private var positionMs: Long = 0
     private var durationMs: Long = 0
     private var metadata: MediaMetadata = MediaMetadata.EMPTY
-    private var hasItem: Boolean = false
+
+    // Read by Media3SystemTransport before it asks Android to promote the
+    // service — a PLAYING push that arrives with nothing loaded (a toggle
+    // fired after a real stop, before the queue was reloaded) reports
+    // STATE_IDLE below regardless of [playing], and Media3 will not promote
+    // an IDLE session to foreground. Requesting anyway is a promotion
+    // guaranteed to time out — ForegroundServiceDidNotStartInTimeException,
+    // confirmed live, real device, 2026-08-12.
+    var hasItem: Boolean = false
+        private set
 
     // Recomputed when the handlers change rather than per getState, because
     // getState runs on every invalidation and the answer only moves when the

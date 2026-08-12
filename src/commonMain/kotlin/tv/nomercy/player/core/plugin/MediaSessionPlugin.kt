@@ -10,6 +10,7 @@ package tv.nomercy.player.core.plugin
 
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.ports.CustomTransportButton
 import tv.nomercy.player.core.ports.NowPlaying
 import tv.nomercy.player.core.ports.SystemTransport
 import tv.nomercy.player.core.ports.TransportActions
@@ -109,6 +110,16 @@ public open class MediaSessionPlugin(
         durationMs = durationMs,
     )
 
+    // The lego-brick custom buttons for this item — favorite, or whatever
+    // else a consumer wants beside the standard transport controls. Empty by
+    // default: this library has no concept of what any of them mean, the
+    // same reasoning as [nowPlayingFor]'s own comment. A subclass overrides
+    // this rather than calling SystemTransport.setCustomButtons directly, so
+    // the buttons stay in step with the item they were built for — announce
+    // pushes both together, and a consumer cannot push one without the
+    // other going stale.
+    protected open fun customButtonsFor(item: PlaylistItem): List<CustomTransportButton> = emptyList()
+
     private var lastState: TransportPlaybackState = TransportPlaybackState.STOPPED
 
     /**
@@ -159,6 +170,7 @@ public open class MediaSessionPlugin(
         val playing: NowPlaying = nowPlayingFor(item)
         announced = playing
         opened.setNowPlaying(playing)
+        opened.setCustomButtons(customButtonsFor(item))
     }
 
     private fun push(state: TransportPlaybackState) {

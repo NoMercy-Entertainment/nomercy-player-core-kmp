@@ -11,9 +11,17 @@ package tv.nomercy.player.core.ports
 import android.content.Context
 import android.content.Intent
 import android.net.wifi.WifiManager
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PowerManager
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 
 // The Android lock screen, notification and car display — all of them one
 // session.
@@ -57,7 +65,42 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         PlaybackForegroundSession.session.value?.release()
         MediaSession.Builder(appContext, bridge)
             .setId(SESSION_ID)
+            .setCallback(TransportSessionCallback())
             .build()
+    }
+
+    // id -> what to run when the system reports that command pressed.
+    // Rebuilt in full on every setCustomButtons call, same replace-the-whole-
+    // map shape as TransportSimpleBasePlayer.setActions.
+    private val customButtonHandlers = mutableMapOf<String, () -> Unit>()
+
+    // The other half of the custom layout — the system reporting which of
+    // those command ids was pressed, and the one place that needs to know
+    // which app-level buttons exist at all so it can advertise them to a
+    // connecting controller.
+    private inner class TransportSessionCallback : MediaSession.Callback {
+
+        override fun onConnect(
+            controllerSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+        ): MediaSession.ConnectionResult {
+            val available = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+            customButtonHandlers.keys.forEach { id -> available.add(SessionCommand(id, Bundle.EMPTY)) }
+            return MediaSession.ConnectionResult.accept(
+                available.build(),
+                MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS,
+            )
+        }
+
+        override fun onCustomCommand(
+            controllerSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            customCommand: SessionCommand,
+            args: Bundle,
+        ): ListenableFuture<SessionResult> {
+            customButtonHandlers[customCommand.customAction]?.invoke()
+            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
     }
 
     // Guards [release] against running twice: the pre-emptive release above
@@ -84,6 +127,12 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     }
 
     private var servicePromotionRequested = false
+
+    // The main-thread handle a real stop's unpublish/stopSelf is debounced
+    // through — see [clear]'s own comment for why a stop needs a grace
+    // window at all before it is allowed to actually tear anything down.
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var pendingStop: Runnable? = null
 
     // Held while playing and released the moment it stops.
     //
@@ -136,7 +185,24 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // ForegroundServiceDidNotStartInTimeException, confirmed live, real
         // device, 2026-08-12, on an otherwise ordinary first play.
         bridge.setPlayback(state, positionMs)
-        if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested) {
+        if (state == TransportPlaybackState.PLAYING) {
+            // A play arriving while a just-issued stop is still in its grace
+            // window (see [clear]) is the same track resuming, not a new
+            // session to promote — cancel the pending teardown rather than
+            // let it run out from under this play.
+            pendingStop?.let { mainHandler.removeCallbacks(it) }
+            pendingStop = null
+        }
+        // Requires an actual loaded item, not just the PLAYING label — a
+        // toggle fired after a real stop and before the queue is reloaded
+        // reports STATE_IDLE on the bridge regardless of this flag, and
+        // Media3 will not promote an IDLE session to foreground: the
+        // request times out and Android kills the app for it, confirmed
+        // live, real device, 2026-08-12 (MusicPlayerFacade.togglePlayback
+        // after a stop, no item ever reloaded). Falling through here still
+        // leaves playWhenReady=true on the bridge for when a real item does
+        // load; it only withholds the doomed promotion attempt.
+        if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested && bridge.hasItem) {
             servicePromotionRequested = true
             // clear() (a real stop, not a pause) unpublishes this session so
             // the service demotes out of foreground — see its own comment.
@@ -155,6 +221,28 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         bridge.setActions(actions)
     }
 
+    // Builds Media3's own CommandButton layout from whatever generic buttons
+    // the app supplied — this library never asks what any of them mean.
+    // iconKey resolution goes through PlatformEnvironment the same way
+    // MediaNotificationBranding's icon does; a key with nothing installed to
+    // resolve it draws CommandButton's own undefined icon rather than one
+    // this library invented.
+    override fun setCustomButtons(buttons: List<CustomTransportButton>) {
+        customButtonHandlers.clear()
+        val resolver = PlatformEnvironment.customTransportButtonIconResolver
+
+        val layout = buttons.map { button ->
+            customButtonHandlers[button.id] = button.onPress
+            CommandButton.Builder(CommandButton.ICON_UNDEFINED)
+                .setDisplayName(button.label)
+                .setSessionCommand(SessionCommand(button.id, Bundle.EMPTY))
+                .setCustomIconResId(resolver?.resolve(button.iconKey) ?: 0)
+                .setEnabled(true)
+                .build()
+        }
+        session.setCustomLayout(layout)
+    }
+
     // A real stop, not a pause — the viewer closed the player rather than
     // merely paused it. Blanking the bridge alone left the foreground
     // service (and its notification) pinned showing whatever it last had,
@@ -162,20 +250,40 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     // playback had genuinely ended (confirmed live: stop left a stale
     // notification behind, real device, 2026-08-12). Unpublishing does that
     // — reconcile() sees null and calls stopSelf(), which removes the
-    // notification. servicePromotionRequested resets so the NEXT real play
-    // re-promotes to foreground instead of silently no-op'ing forever.
+    // notification.
+    //
+    // The unpublish itself is debounced rather than immediate: a stop
+    // followed within a beat by a fresh play — confirmed live, real device,
+    // 2026-08-12, a stop/play/stop burst inside ~1.1s while backgrounding
+    // the app — otherwise tears the service down before Media3 has had a
+    // chance to call startForeground() on the session that stop's own
+    // republish just handed it, throwing
+    // ForegroundServiceDidNotStartInTimeException regardless of how briefly
+    // the service actually lived. [setPlaybackState]'s PLAYING branch
+    // cancels this if a play lands first, so a genuine resume never sees
+    // the notification blink off and back on.
     override fun clear() {
         bridge.blank()
+        customButtonHandlers.clear()
+        session.setCustomLayout(emptyList())
         holdLocks(false)
-        if (PlaybackForegroundSession.session.value === session) {
-            PlaybackForegroundSession.publish(null)
+        pendingStop?.let { mainHandler.removeCallbacks(it) }
+        val stop = Runnable {
+            if (PlaybackForegroundSession.session.value === session) {
+                PlaybackForegroundSession.publish(null)
+            }
+            servicePromotionRequested = false
+            pendingStop = null
         }
-        servicePromotionRequested = false
+        pendingStop = stop
+        mainHandler.postDelayed(stop, STOP_DEBOUNCE_MS)
     }
 
     override fun release() {
         if (released) return
         released = true
+        pendingStop?.let { mainHandler.removeCallbacks(it) }
+        pendingStop = null
         holdLocks(false)
         // Publish before releasing the Media3 object, so the service's own
         // reconcile sees the `null` transition and removeSession()s a
@@ -221,5 +329,10 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // torn down without release() running — a lock held forever is a phone
         // that does not sleep.
         const val WAKE_TIMEOUT_MS = 4L * 60L * 60L * 1_000L
+
+        // Long enough to swallow a same-track pause/resume or focus-loss
+        // blip, short enough that a genuine stop still clears the
+        // notification promptly — see [clear]'s own comment.
+        const val STOP_DEBOUNCE_MS = 800L
     }
 }
