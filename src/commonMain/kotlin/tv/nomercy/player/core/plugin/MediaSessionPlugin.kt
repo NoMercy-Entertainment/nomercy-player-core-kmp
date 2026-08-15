@@ -105,14 +105,26 @@ public open class MediaSessionPlugin(
         // report a transient PLATFORM Pause/Play pair around the backend
         // catching up (BackendBridge.announcePause/announcePlay react to the
         // engine's own isPlaying callback, which several backends flip false
-        // then true while they resettle after a seek). Each of those pushes
-        // lastState correctly at the time, but the widget was left showing
-        // whichever one landed last — paused, if the resettle's Play callback
-        // arrived before this plugin's own Seeked handler existed to correct
-        // it. Re-pushing here, once the seek is fully settled, is the correct
-        // final word — confirmed live, real device, 2026-08-12 (seeking while
-        // playing left the notification's button showing paused although
-        // audio kept playing).
+        // then true while they resettle after a seek).
+        //
+        // NOT "once the seek is fully settled" — traced on real hardware
+        // (SeekedOrderingTraceTest, a Samsung phone and a Nokia Streaming
+        // Box, 2026-08-15): Seeked fires roughly 11ms BEFORE the engine's
+        // real BACKEND_SETTLE blip lands, not after. This push(lastState) is
+        // an early, likely-stale answer, same as the one on CoreEvents.Seek
+        // above it. The widget still ends up correct because
+        // CoreEvents.Play/Pause's own handlers just above are unconditional
+        // (unlike AudioFocusPlugin's, they do not filter BACKEND_SETTLE) —
+        // the real settle event that lands ~11ms later re-fires one of them
+        // and overwrites lastState with the engine's actual state. That
+        // later, unconditional push is the correct final word; this one
+        // is not, and never was.
+        //
+        // Kept anyway: positionMs updates immediately here rather than
+        // waiting ~11ms for the settle blip, which is the part of the
+        // original 2026-08-12 fix (notification stuck on a stale position
+        // and, transiently, a stale play/pause icon) that this handler
+        // actually earns its place for.
         on(CoreEvents.Seeked) { position ->
             positionMs = toMillis(position.time)
             push(lastState)
