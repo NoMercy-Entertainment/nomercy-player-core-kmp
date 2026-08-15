@@ -715,10 +715,20 @@ public class ExoPlayerVideoBackend(
     // The synchronous half of the contract against a main-thread-only engine.
     // Launching rather than blocking, because blocking the caller to satisfy
     // Media3's threading rule would deadlock a caller already on main.
+    //
+    // Guarded: two independently-launched fireAndForget calls have no FIFO
+    // guarantee under real dispatcher contention, so a call queued right
+    // before this backend's own release() (also fireAndForget) can run
+    // after it — a seek or pause reaching a player Media3 has already torn
+    // down. That throws IllegalStateException, which is otherwise uncaught
+    // on this scope and takes down the whole process for a screen that was
+    // already closing.
     private fun fireAndForget(block: () -> Unit) {
         main.launch {
-            block()
-            refreshCache()
+            runCatching {
+                block()
+                refreshCache()
+            }.onFailure { e -> Log.w("nm-video-backend", "fireAndForget after teardown: ${e.message}") }
         }
     }
 }
