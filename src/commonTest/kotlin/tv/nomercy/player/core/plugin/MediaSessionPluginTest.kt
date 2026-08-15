@@ -174,12 +174,20 @@ class MediaSessionPluginTest {
 
     @Test
     fun anExhaustedQueueClearsRatherThanKeepingTheLastItemUp() = runTest {
+        // ffd3e62 deliberately rerouted announce(null) to clearNowPlaying()
+        // rather than the heavier clear() — the latter also unpublishes the
+        // session, which turned every ordinary track change's transient null
+        // (see announce()'s own comment) into a spurious stop/republish cycle
+        // and reintroduced ForegroundServiceDidNotStartInTimeException on a
+        // real device. clearNowPlaying() still blanks the displayed metadata,
+        // which is all a genuinely exhausted queue needs.
         val wiring: Wiring = wire()
         wiring.player.emit(CoreEvents.Item, ItemChange(item = DemoItem(), index = 0))
 
         wiring.player.emit(CoreEvents.Item, ItemChange(item = null, index = 1))
 
-        assertTrue(wiring.transport.cleared, "the last item stayed on the lock screen")
+        assertTrue(wiring.transport.nowPlayingCleared, "the last item stayed on the lock screen")
+        assertFalse(wiring.transport.cleared, "exhaustion should not unpublish the session")
     }
 
     @Test

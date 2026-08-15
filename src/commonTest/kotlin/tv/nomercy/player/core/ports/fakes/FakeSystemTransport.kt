@@ -35,6 +35,13 @@ class FakeSystemTransport : SystemTransport {
     var cleared: Boolean = false
         private set
 
+    // The metadata-only clear, distinct from [cleared]: clearNowPlaying()
+    // blanks what is displayed without unpublishing the session, which is
+    // what MediaSessionPlugin.announce(null) uses for an exhausted queue
+    // since ffd3e62 — the heavier clear() is reserved for a deliberate stop.
+    var nowPlayingCleared: Boolean = false
+        private set
+
     var released: Boolean = false
         private set
 
@@ -69,6 +76,11 @@ class FakeSystemTransport : SystemTransport {
     override fun clear() {
         cleared = true
         pushes += "clear"
+    }
+
+    override fun clearNowPlaying() {
+        nowPlayingCleared = true
+        pushes += "clearNowPlaying"
     }
 
     override fun release() {
