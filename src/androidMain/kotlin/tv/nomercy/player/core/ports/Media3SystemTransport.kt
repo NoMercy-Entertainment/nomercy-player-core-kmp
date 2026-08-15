@@ -62,12 +62,7 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // through reconcile() in one pass (it already removeSession()s
         // whatever was attached before addSession()ing the new one) avoids
         // the phantom "stopped" state entirely.
-        // Guarded: whatever raced this constructor to publish first may have
-        // already released this same object through the same pre-emptive
-        // call, on the same "whichever side wins the race" reasoning this
-        // comment already describes — Media3's MediaSession.release() is not
-        // confirmed idempotent, and the sibling guard on the last line of
-        // [release] exists for exactly this uncertainty.
+        // Guarded: release() is not confirmed idempotent under this race.
         runCatching { PlaybackForegroundSession.session.value?.release() }
         MediaSession.Builder(appContext, bridge)
             .setId(SESSION_ID)
@@ -298,20 +293,9 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         if (PlaybackForegroundSession.session.value === session) {
             PlaybackForegroundSession.publish(null)
         }
-        // Guarded rather than gated on the identity check above: that check
-        // only tells us whether to touch the published pointer, and a
-        // `session.value !== session` reading is also what a perfectly
-        // ordinary clear()-then-release() leaves behind — gating the release
-        // itself on it would skip a genuine teardown. The double-release this
-        // guards against is the OTHER cause of that same reading: the
-        // constructor's own pre-emptive release (this class's [init]) running
-        // on THIS exact object from a newer instance, ahead of this
-        // instance's own (suspend, slower) dispose() — the race [released]'s
-        // own doc names, which [released] cannot catch because that
-        // pre-emptive call runs on the old instance's raw session directly,
-        // never through the old instance's own release(). Not confirmed
-        // whether Media3 throws on a second release(); this is a no-op
-        // either way if it does not.
+        // Guarded: the constructor's own pre-emptive release (above) may already
+        // have released this exact object from a newer instance — not confirmed
+        // idempotent, so this is a no-op either way if Media3 already threw.
         runCatching { session.release() }
     }
 

@@ -17,21 +17,8 @@ private const val SAMPLE_RATE = 44_100
 private const val SECONDS = 3
 private const val SETTLE_MS = 250L
 
-// F20, driven for real: a call queued right after release() lands on an
-// already-released ExoPlayer, on a real device, through the actual
-// fireAndForget scope both routes share — not a mock that never throws.
-//
-// release() and pause() are both fireAndForget on the SAME main-thread
-// CoroutineScope. Called back-to-back from this instrumentation thread, both
-// land on that dispatcher's queue in that order — the exact "a seek issued
-// right as the player screen tears down" shape the finding describes, and
-// close enough to the FIFO case the class's own release() doc says is not
-// guaranteed under real contention. If ExoPlayer really does throw
-// IllegalStateException on a call to a released player (it does, confirmed
-// by Media3's own documented contract), this proves the guard this pass
-// added to fireAndForget actually catches it rather than crashing the
-// process — the thing ExoPlayerVideoBackendTest's own suite, which never
-// calls anything after release(), cannot see.
+// F20 on real hardware: calls queued right after release() land on an
+// already-released ExoPlayer, through the real fireAndForget scope.
 class ExoPlayerVideoBackendTeardownRaceTest {
 
     @Test
@@ -48,19 +35,10 @@ class ExoPlayerVideoBackendTeardownRaceTest {
             runBlocking { backend.load(media.toURI().toString(), LoadOptions()) }
             Thread.sleep(SETTLE_MS)
 
-            // release() first, then a burst of calls right behind it — the
-            // teardown itself, plus everything a screen tearing down at the
-            // same moment might still have in flight.
             backend.release()
             backend.pause()
             backend.currentTime(1.0)
             backend.playbackRate(1.5)
-
-            // The process still running long enough to reach this sleep (and
-            // an instrumentation runner still able to report a result
-            // afterward) is the actual proof — an uncaught
-            // IllegalStateException on any of the three calls above would
-            // have taken the whole process down before this line.
             Thread.sleep(SETTLE_MS)
         } finally {
             media.delete()

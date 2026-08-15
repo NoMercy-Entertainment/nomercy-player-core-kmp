@@ -40,13 +40,8 @@ import tv.nomercy.player.core.events.SubtitleCueChange
 private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
 
-// The same pattern the web trio's HLS_EXT_RE already carries: `.m3u8`
-// followed by a query string, a fragment anchor, or the end of the URL.
-// A plain endsWith(".m3u8") after stripping the query string misses
-// `master.m3u8#t=30` — real URLs carry a fragment anchor for a resume
-// position — which wrongly reported sourceIsHls=false and could enable
-// tunneling for genuine HLS-over-TS content, a real breakage mode
-// TunnelingRule documents.
+// Mirrors the web trio's HLS_EXT_RE: `.m3u8` then a query, fragment, or end of
+// URL — a plain endsWith miss on `master.m3u8#t=30` wrongly disabled tunneling.
 internal val HLS_EXT_RE = Regex("""\.m3u8(?:[?#]|$)""", RegexOption.IGNORE_CASE)
 
 // The Android engine, over Media3.
@@ -725,13 +720,9 @@ public class ExoPlayerVideoBackend(
     // Launching rather than blocking, because blocking the caller to satisfy
     // Media3's threading rule would deadlock a caller already on main.
     //
-    // Guarded: two independently-launched fireAndForget calls have no FIFO
-    // guarantee under real dispatcher contention, so a call queued right
-    // before this backend's own release() (also fireAndForget) can run
-    // after it — a seek or pause reaching a player Media3 has already torn
-    // down. That throws IllegalStateException, which is otherwise uncaught
-    // on this scope and takes down the whole process for a screen that was
-    // already closing.
+    // Guarded: a call queued right before release() (also fireAndForget) can
+    // run after it — a seek/pause reaching a torn-down player throws
+    // IllegalStateException, otherwise uncaught and fatal on this scope.
     private fun fireAndForget(block: () -> Unit) {
         main.launch {
             runCatching {

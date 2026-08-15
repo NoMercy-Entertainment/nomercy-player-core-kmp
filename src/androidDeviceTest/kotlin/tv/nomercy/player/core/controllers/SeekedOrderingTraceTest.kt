@@ -29,15 +29,8 @@ private const val SECONDS = 10
 private data class Clip(override val id: String, override val url: String, override val title: String? = null) :
     PlaylistItem
 
-// F19, traced for real: TransportController.seek() emits CoreEvents.Seeked
-// right after the fire-and-forget currentTime(resolved) call returns — not
-// after the engine's real async settle. BackendBridge.announcePlay/
-// announcePause react to the ENGINE's own isPlaying callback and tag it
-// ActionSource.BACKEND_SETTLE, which arrives off Media3's own event loop,
-// asynchronously, an unknown-until-measured interval later. This device
-// test records the actual wall-clock order of both on a real engine, real
-// device — the thing the finding said needed a trace before trusting
-// fc4790e's "once the seek is fully settled" assumption.
+// F19 on real hardware: records the real order of CoreEvents.Seeked vs the
+// BACKEND_SETTLE Play/Pause blip.
 class SeekedOrderingTraceTest {
 
     @Test
@@ -70,23 +63,17 @@ class SeekedOrderingTraceTest {
                 p.queue(listOf(Clip("a", media.toURI().toString())))
                 p.item("a", autoplay = true)
             }
-            // Real playback actually starting, not merely requested.
             Thread.sleep(1_000)
 
             events.clear()
             runBlocking { p.time(4.0) }
-            // Generous: the settle blip's own real arrival time is exactly
-            // the unknown this test exists to measure.
             Thread.sleep(1_500)
 
             val seekedAt: Long? = events.firstOrNull { it.first == "Seeked" }?.second
             val settleAt: Long? = events.firstOrNull { it.first.endsWith(":backend-settle") }?.second
 
-            // Not asserted against a specific order: the finding IS which
-            // order this actually runs in on real hardware, and forcing a
-            // pass either way would hide the answer rather than report it.
-            // Printed so this trace's actual result is on record in the
-            // instrumentation log for whoever reads this run.
+            // Not asserted against a specific order — reporting the real
+            // order was the point.
             println(
                 "F19 TRACE: Seeked@${seekedAt ?: "never"} settle@${settleAt ?: "never fired within 1500ms"} " +
                     "seekedBeforeSettle=${if (seekedAt != null && settleAt != null) seekedAt < settleAt else "n/a"} " +
