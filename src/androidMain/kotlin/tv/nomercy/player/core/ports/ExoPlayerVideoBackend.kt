@@ -40,6 +40,15 @@ import tv.nomercy.player.core.events.SubtitleCueChange
 private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
 
+// The same pattern the web trio's HLS_EXT_RE already carries: `.m3u8`
+// followed by a query string, a fragment anchor, or the end of the URL.
+// A plain endsWith(".m3u8") after stripping the query string misses
+// `master.m3u8#t=30` — real URLs carry a fragment anchor for a resume
+// position — which wrongly reported sourceIsHls=false and could enable
+// tunneling for genuine HLS-over-TS content, a real breakage mode
+// TunnelingRule documents.
+internal val HLS_EXT_RE = Regex("""\.m3u8(?:[?#]|$)""", RegexOption.IGNORE_CASE)
+
 // The Android engine, over Media3.
 //
 // Media3 is what every Android client already uses, and reimplementing its
@@ -339,7 +348,7 @@ public class ExoPlayerVideoBackend(
         val wanted: Boolean = !engine.renderers.requestSdrToneMap &&
             videoSurfaceAttached && TunnelingRule.shouldTunnel(
             isTv = isTvDevice,
-            sourceIsHls = url.substringBefore('?').endsWith(".m3u8", ignoreCase = true),
+            sourceIsHls = HLS_EXT_RE.containsMatchIn(url),
             refusedByAudioSink = tunnelingRefusedByAudioSink,
         )
         trackSelector.parameters = trackSelector.buildUponParameters()
