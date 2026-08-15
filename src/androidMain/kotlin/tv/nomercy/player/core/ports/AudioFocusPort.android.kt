@@ -43,6 +43,22 @@ public class AudioManagerFocusPort(context: Context) : AudioFocusPort {
     private var current: AudioFocusRequest? = null
 
     override fun request(onChange: (FocusChange) -> Unit): FocusRequestResult {
+        // Already holding a request — every resume (including the one after
+        // an ordinary seek, AudioFocusPlugin.Play calls this unconditionally)
+        // otherwise built and issued a BRAND NEW AudioFocusRequest while the
+        // previous one was still active. Android fires AUDIOFOCUS_LOSS on the
+        // OLD request's listener when a new one from the SAME app supersedes
+        // it — and that listener is this port's own onFocusChange, the same
+        // function regardless of which request triggered it — so every
+        // resume paused itself via a self-inflicted spurious loss a few tens
+        // of milliseconds later, then re-granted, then the arbiter resumed:
+        // a flap the viewer read as "seeking left it paused" or "focus keeps
+        // breaking." Confirmed live, real device, 2026-08-12 (trace showed
+        // Pause source=audio-focus firing ~40ms after every Play, on a
+        // device with no other app requesting anything). No-op re-grant is
+        // exactly what a caller that already holds focus wants.
+        if (current != null) return FocusRequestResult.GRANTED
+
         val attributes: AudioAttributes = AudioAttributes.Builder()
             .setUsage(AudioAttributes.USAGE_MEDIA)
             .setContentType(AudioAttributes.CONTENT_TYPE_MOVIE)
@@ -54,8 +70,15 @@ public class AudioManagerFocusPort(context: Context) : AudioFocusPort {
             .setOnAudioFocusChangeListener { change -> onChange(mapFocusChange(change)) }
             .build()
 
-        current = built
         val outcome: Int = manager.requestAudioFocus(built)
+        // Only remembered once actually granted. A DENIED request delivers no
+        // focus-change callback at all — nothing will ever call [abandon] for
+        // it — so recording it here the same as a grant would make the guard
+        // above believe this port holds focus forever after one denial (a
+        // call briefly taking exclusive focus, for one), short-circuiting
+        // every later [request] to a false GRANTED without ever asking the
+        // OS again for the rest of the session.
+        if (outcome == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) current = built
         return if (outcome == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
             FocusRequestResult.GRANTED
         } else {

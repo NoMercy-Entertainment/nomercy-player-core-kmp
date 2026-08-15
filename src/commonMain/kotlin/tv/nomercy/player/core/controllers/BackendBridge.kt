@@ -296,7 +296,7 @@ public class BackendBridge(
         if (ctx.playState == PlayState.PLAYING) return
 
         ctx.playState = PlayState.PLAYING
-        ctx.emit(CoreEvents.Play, PlaySource(ActionSource.PLATFORM))
+        ctx.emit(CoreEvents.Play, PlaySource(ActionSource.BACKEND_SETTLE))
     }
 
     // Only when it was going, and only when it is not just the item finishing.
@@ -310,7 +310,7 @@ public class BackendBridge(
         if (ctx.phase == PlayerPhase.ENDED) return
 
         ctx.playState = PlayState.PAUSED
-        ctx.emit(CoreEvents.Pause, PlaySource(ActionSource.PLATFORM))
+        ctx.emit(CoreEvents.Pause, PlaySource(ActionSource.BACKEND_SETTLE))
     }
 
     // The engine's own channel, spoken rather than merely declared. A consumer

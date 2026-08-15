@@ -70,13 +70,29 @@ public open class AudioFocusPlugin(
             // safe to repeat rather than only being the user branch's job.
             ProcessPlaybackOwner.claim(pause)
 
-            if (source.source == ActionSource.AUDIO_FOCUS) return@on
+            // BACKEND_SETTLE excluded alongside AUDIO_FOCUS — it is the
+            // backend's own transient Pause/Play blip while a seek settles,
+            // not a viewer decision. Reading it as user intent re-requested
+            // real Android audio focus on every seek and, when that
+            // request's own callback paused again (tagged AUDIO_FOCUS,
+            // which by design never auto-resumes), left the transport stuck
+            // paused after a seek that never stopped playing — confirmed
+            // live, real device, 2026-08-12.
+            //
+            // PLATFORM itself is NOT excluded here, deliberately: it also
+            // covers PolicyController's offline-pause (a real, non-transient
+            // pause a viewer would recognise as "paused"), and folding that
+            // into this branch left the arbiter's pausedByUser flag unset —
+            // the next unrelated focus blip (headset unplug, a call ending)
+            // then resumed playback with no network, silently overriding
+            // the offline policy. See BACKEND_SETTLE's own doc.
+            if (source.source == ActionSource.AUDIO_FOCUS || source.source == ActionSource.BACKEND_SETTLE) return@on
             arbiter.onUserResumed()
             opened.request(::onFocusChange)
         }
 
         on(CoreEvents.Pause) { source: PlaySource ->
-            if (source.source == ActionSource.AUDIO_FOCUS) return@on
+            if (source.source == ActionSource.AUDIO_FOCUS || source.source == ActionSource.BACKEND_SETTLE) return@on
             arbiter.onUserPaused()
         }
 
