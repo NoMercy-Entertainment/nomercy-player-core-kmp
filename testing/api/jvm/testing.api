@@ -44,6 +44,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
 	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeMediaBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
 	public final fun getBufferedValue ()D
@@ -176,6 +177,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
 	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeVideoBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
 	public final fun getAudio ()Ljava/util/List;
