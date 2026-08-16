@@ -81,7 +81,15 @@ public class NoMercyPlaybackService : MediaSessionService() {
     // rather than lingering as an empty session with a stale "Nothing
     // playing" notification nobody asked to keep seeing.
     private fun reconcile(session: MediaSession?) {
-        attached?.let { if (it !== session) removeSession(it) }
+        // Guarded: removeSession() throws "session not found" if the old
+        // session was already torn down by some other path (its own
+        // release(), a prior reconcile that raced this one) — confirmed
+        // live, real device, 2026-08-15. Left unguarded this was fatal on
+        // Dispatchers.Main.immediate with no CoroutineExceptionHandler,
+        // which also permanently killed this StateFlow collector — every
+        // later publish() went unreconciled, producing the next crash
+        // downstream ("Session ID must be unique") on the next transition.
+        attached?.let { old -> if (old !== session) runCatching { removeSession(old) } }
         attached = session
         if (session != null) {
             addSession(session)

@@ -34,38 +34,38 @@ private external fun jsScreenHeight(): Double
 
 private fun supported(mime: String): Boolean = jsIsTypeSupported(mime.toJsString())
 
-public actual fun platformClientCapabilities(): ClientCapabilities {
+public actual fun platformDecodeProfile(): DeviceDecodeProfile {
     val videoCodecs = buildList {
-        if (supported("""video/mp4; codecs="avc1.640028"""")) add(ClientCodec.H264)
-        if (supported("""video/mp4; codecs="hvc1.1.6.L93.B0"""")) add(ClientCodec.H265)
-        if (supported("""video/mp4; codecs="av01.0.05M.08"""")) add(ClientCodec.AV1)
+        if (supported("""video/mp4; codecs="avc1.640028"""")) add(DecodeCodec.H264)
+        if (supported("""video/mp4; codecs="hvc1.1.6.L93.B0"""")) add(DecodeCodec.H265)
+        if (supported("""video/mp4; codecs="av01.0.05M.08"""")) add(DecodeCodec.AV1)
     }
     val audioCodecs = buildList {
-        if (supported("""audio/mp4; codecs="mp4a.40.2"""")) add(ClientCodec.AAC)
-        if (supported("""audio/mp4; codecs="ec-3"""")) add(ClientCodec.EAC3)
-        if (supported("""audio/mp4; codecs="ac-3"""")) add(ClientCodec.AC3)
-        if (supported("""audio/mp4; codecs="flac"""")) add(ClientCodec.FLAC)
-        if (supported("""audio/webm; codecs="opus"""")) add(ClientCodec.OPUS)
-        if (supported("""audio/mpeg""")) add(ClientCodec.MP3)
+        if (supported("""audio/mp4; codecs="mp4a.40.2"""")) add(DecodeCodec.AAC)
+        if (supported("""audio/mp4; codecs="ec-3"""")) add(DecodeCodec.EAC3)
+        if (supported("""audio/mp4; codecs="ac-3"""")) add(DecodeCodec.AC3)
+        if (supported("""audio/mp4; codecs="flac"""")) add(DecodeCodec.FLAC)
+        if (supported("""audio/webm; codecs="opus"""")) add(DecodeCodec.OPUS)
+        if (supported("""audio/mpeg""")) add(DecodeCodec.MP3)
     }
     // No MediaSource probe for these: HLS/DASH are manifest formats MSE
     // consumes segment-by-segment (there is no "video/vnd.apple.mpegurl" MIME
     // MSE itself accepts), so declaring them tracks what nomercy-video-player's
     // existing JS library already ships against, the same browser engine.
-    val containers = listOf(ClientContainer.HLS, ClientContainer.MP4, ClientContainer.DASH)
+    val containers = listOf(DecodeContainer.HLS, DecodeContainer.MP4, DecodeContainer.DASH)
 
-    return ClientCapabilities(
+    return DeviceDecodeProfile(
         videoCodecs = videoCodecs,
         audioCodecs = audioCodecs,
         containers = containers,
-        maxWidth = runCatching { ClientResolution.clamp(jsScreenWidth().toInt()) }.getOrNull(),
-        maxHeight = runCatching { ClientResolution.clamp(jsScreenHeight().toInt()) }.getOrNull(),
+        maxWidth = runCatching { DecodeResolution.clamp(jsScreenWidth().toInt()) }.getOrNull(),
+        maxHeight = runCatching { DecodeResolution.clamp(jsScreenHeight().toInt()) }.getOrNull(),
         // Not probed. No browser API answers whether the attached TV panel
         // itself does HDR — same "say no rather than guess" call every other
         // actual of this port makes for the same reason.
         supportsHdr = false,
         supports10Bit = supported("""video/mp4; codecs="hvc1.2.4.L93.B0""""),
-        maxAudioChannels = STEREO,
-        maxBitrateKbps = NO_CAP,
+        maxAudioChannels = DeviceDecodeProfile.STEREO,
+        maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
     )
 }

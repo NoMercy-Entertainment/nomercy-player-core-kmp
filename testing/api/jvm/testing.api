@@ -93,6 +93,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;)Ltv/nomercy/player/core/player/Player;
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun dispose ()V
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
@@ -125,6 +126,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;)Ltv/nomercy/player/core/player/Player;
 	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
 	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public fun time ()D
 	public fun time (D)V

@@ -31,7 +31,7 @@ import tv.nomercy.player.core.ports.engines.MpvVideoEngineProvider
  * The web probe is the shape this follows, because the server reads one
  * contract and two clients disagreeing about it is two answers to one question.
  */
-public actual fun platformClientCapabilities(): ClientCapabilities {
+public actual fun platformDecodeProfile(): DeviceDecodeProfile {
     val decoders: List<MediaCodecInfo> = MediaCodecList(MediaCodecList.REGULAR_CODECS)
         .codecInfos
         .filterNot(MediaCodecInfo::isEncoder)
@@ -80,42 +80,42 @@ public actual fun platformClientCapabilities(): ClientCapabilities {
         .resources
         .displayMetrics
 
-    return ClientCapabilities(
+    return DeviceDecodeProfile(
         videoCodecs = video,
         audioCodecs = audio,
         // Media3 plays HLS, DASH and progressive MP4 out of the box, and libmpv
         // plays all of them; neither is conditional on the device.
-        containers = listOf(ClientContainer.HLS, ClientContainer.MP4, ClientContainer.DASH),
-        maxWidth = ClientResolution.clamp(maxOf(metrics.widthPixels, metrics.heightPixels)),
-        maxHeight = ClientResolution.clamp(minOf(metrics.widthPixels, metrics.heightPixels)),
+        containers = listOf(DecodeContainer.HLS, DecodeContainer.MP4, DecodeContainer.DASH),
+        maxWidth = DecodeResolution.clamp(maxOf(metrics.widthPixels, metrics.heightPixels)),
+        maxHeight = DecodeResolution.clamp(minOf(metrics.widthPixels, metrics.heightPixels)),
         supportsHdr = supports(MediaFormat.MIMETYPE_VIDEO_HEVC, HEVCProfileMain10),
         supports10Bit = tenBit,
         // Stereo unless something proves otherwise. The count that matters is
         // the OUTPUT route's — HDMI, Bluetooth, the speaker — and it changes
         // while the app runs, so a number taken once at start-up is wrong more
         // often than right. The bedroom television is exactly this case.
-        maxAudioChannels = STEREO,
+        maxAudioChannels = DeviceDecodeProfile.STEREO,
         // No client-imposed cap, for the reason web gives: the server hard-
         // transcodes above this, and a guess forces transcoding of compatible
         // files over a LAN.
-        maxBitrateKbps = NO_CAP,
+        maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
     )
 }
 
 private val VIDEO_MIME_TYPES: List<Pair<String, String>> = listOf(
     // H264 first, as web does it: the server transcodes to the client's first
     // listed codec, and that is the one every downstream target also opens.
-    MediaFormat.MIMETYPE_VIDEO_AVC to ClientCodec.H264,
-    MediaFormat.MIMETYPE_VIDEO_HEVC to ClientCodec.H265,
-    MediaFormat.MIMETYPE_VIDEO_AV1 to ClientCodec.AV1,
+    MediaFormat.MIMETYPE_VIDEO_AVC to DecodeCodec.H264,
+    MediaFormat.MIMETYPE_VIDEO_HEVC to DecodeCodec.H265,
+    MediaFormat.MIMETYPE_VIDEO_AV1 to DecodeCodec.AV1,
 )
 
 // Which wire codec each 10-bit profile belongs to, so the flag can be answered
 // per codec even though the server's field is not.
 private val TEN_BIT_PROFILES: List<Pair<String, String>> = listOf(
-    MediaFormat.MIMETYPE_VIDEO_HEVC to ClientCodec.H265,
-    MediaFormat.MIMETYPE_VIDEO_AVC to ClientCodec.H264,
-    MediaFormat.MIMETYPE_VIDEO_AV1 to ClientCodec.AV1,
+    MediaFormat.MIMETYPE_VIDEO_HEVC to DecodeCodec.H265,
+    MediaFormat.MIMETYPE_VIDEO_AVC to DecodeCodec.H264,
+    MediaFormat.MIMETYPE_VIDEO_AV1 to DecodeCodec.AV1,
 )
 
 private val TEN_BIT_PROFILE_OF: Map<String, Int> = mapOf(
@@ -128,10 +128,10 @@ private val TEN_BIT_PROFILE_OF: Map<String, Int> = mapOf(
 // ifs — the run was one line repeated with two words changed, which is where a
 // copied line keeps the previous line's constant.
 private val AUDIO_MIME_TYPES: List<Pair<String, String>> = listOf(
-    MediaFormat.MIMETYPE_AUDIO_AAC to ClientCodec.AAC,
-    MediaFormat.MIMETYPE_AUDIO_EAC3 to ClientCodec.EAC3,
-    MediaFormat.MIMETYPE_AUDIO_AC3 to ClientCodec.AC3,
-    MediaFormat.MIMETYPE_AUDIO_FLAC to ClientCodec.FLAC,
-    MediaFormat.MIMETYPE_AUDIO_OPUS to ClientCodec.OPUS,
-    MediaFormat.MIMETYPE_AUDIO_MPEG to ClientCodec.MP3,
+    MediaFormat.MIMETYPE_AUDIO_AAC to DecodeCodec.AAC,
+    MediaFormat.MIMETYPE_AUDIO_EAC3 to DecodeCodec.EAC3,
+    MediaFormat.MIMETYPE_AUDIO_AC3 to DecodeCodec.AC3,
+    MediaFormat.MIMETYPE_AUDIO_FLAC to DecodeCodec.FLAC,
+    MediaFormat.MIMETYPE_AUDIO_OPUS to DecodeCodec.OPUS,
+    MediaFormat.MIMETYPE_AUDIO_MPEG to DecodeCodec.MP3,
 )

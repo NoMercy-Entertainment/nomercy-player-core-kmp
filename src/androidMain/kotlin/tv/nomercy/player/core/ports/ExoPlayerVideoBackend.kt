@@ -144,6 +144,10 @@ public class ExoPlayerVideoBackend(
     // not change while the same cable is plugged into the same receiver.
     private var tunnelingRefusedByAudioSink: Boolean = false
 
+    // Once per player. A tracks change fires on every rung switch and a
+    // viewer does not need the same refusal repeated for the whole film.
+    private var reportedUnsupported: Boolean = false
+
     // Whether a video output surface exists yet, and therefore whether
     // tunneling may be asked for at all.
     //
@@ -259,6 +263,28 @@ public class ExoPlayerVideoBackend(
                         "viewport=${trackSelector.parameters.viewportWidth}x" +
                         "${trackSelector.parameters.viewportHeight}",
                 )
+                reportUnsupportedVideo(tracks)
+            }
+
+            // A stream this device cannot decode is SILENT in Media3: the
+            // renderer is dropped, the audio plays on, and nothing is thrown.
+            // Measured on an SM-A137F against an HEVC Main10 rung — four
+            // `NoSupport [codec.profileLevel, hvc1.2.4.L120.B0]` lines in
+            // logcat, no ExoPlaybackException, and a black picture the viewer
+            // has no explanation for.
+            private fun reportUnsupportedVideo(tracks: Tracks) {
+                val video: List<Tracks.Group> = tracks.groups.filter { it.type == C.TRACK_TYPE_VIDEO }
+                if (video.isEmpty()) return
+                // Every rung refused, not merely the one that was picked: a
+                // manifest with a playable alternative is an ABR decision, and
+                // reporting that would cry wolf on every adaptive stream.
+                val anyPlayable: Boolean = video.any { group ->
+                    (0 until group.length).any { index -> group.isTrackSupported(index) }
+                }
+                if (anyPlayable || reportedUnsupported) return
+
+                reportedUnsupported = true
+                bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.CODEC_UNSUPPORTED)
             }
 
             override fun onPlaybackStateChanged(state: Int) {
@@ -401,11 +427,15 @@ public class ExoPlayerVideoBackend(
             val carried: Map<String, String> = opts.headers
             authHeaders.provider = { carried }
         }
-        player.setMediaItem(MediaItem.fromUri(url))
+        // The position goes ON the item, not after prepare(). Seeking
+        // afterwards works only because a finished file has every segment: the
+        // engine loads from zero, then jumps. A live transcode has exactly the
+        // part the encoder has written, so a resumed episode fetched segment 0
+        // from a session that starts minutes later and waited on it forever.
+        player.setMediaItem(MediaItem.fromUri(url), opts.startPositionMs.coerceAtLeast(0L))
         // prepare, not play: starting is a separate decision above, and an
         // engine that started on its own would ignore a refused beforePlay.
         player.prepare()
-        if (opts.startPositionMs > 0L) player.seekTo(opts.startPositionMs)
     }
 
     override suspend fun play(): Unit = onMain {
@@ -665,14 +695,21 @@ public class ExoPlayerVideoBackend(
         refreshCache()
     }
 
-    // By id, because that is what the track the caller was handed carries. An
-    // index would be this engine's numbering, which is exactly what the rest of
-    // the library refuses to pass around.
+    // By id, because that is what the track the caller was handed carries — the
+    // caller never sees this engine's numbering. The id itself IS that
+    // numbering now (ExoTrackMapper's positional "audio:n"/"text:n"), because
+    // matching against the raw Format.id below it used to resolve to was
+    // wrong: HLS renditions routinely share one non-null Format.id across every
+    // language variant, so firstOrNull matched the wrong track and every row in
+    // the picker compared equal to "selected" (confirmed live, real TV,
+    // 2026-08-15). Parsed back out here rather than passed as a second
+    // parameter, so ExoTrackMapper stays the only place that owns the format.
     private fun selectByTypeOnMain(type: Int, id: String) {
+        val flatIndex: Int = id.substringAfterLast(':').toIntOrNull() ?: return
         val located: Pair<Tracks.Group, Int> = player.currentTracks.groups
             .filter { it.type == type }
             .flatMap { group -> (0 until group.length).map { group to it } }
-            .firstOrNull { (group, track) -> group.getTrackFormat(track).id == id }
+            .getOrNull(flatIndex)
             ?: return
 
         player.trackSelectionParameters = player.trackSelectionParameters

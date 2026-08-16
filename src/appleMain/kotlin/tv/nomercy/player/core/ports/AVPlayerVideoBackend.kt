@@ -209,12 +209,13 @@ public class AVPlayerVideoBackend : VideoBackend {
             return
         }
 
+        // Held, not seeked to here. The asset is still loading, the player has
+        // no item yet, and a seek issued against that is dropped silently — so
+        // a resumed item began at zero, and a live transcode asked for media
+        // its encoder was never told to write. Applied in onAssetLoaded, the
+        // one moment the item is both present and ready.
+        pendingStartMs = opts.startPositionMs.coerceAtLeast(0L)
         asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) { onAssetLoaded(asset) }
-        if (opts.startPositionMs > 0L) {
-            player.seekToTime(
-                CMTimeMakeWithSeconds(opts.startPositionMs / MILLIS_PER_SECOND, NANOS_PER_SECOND),
-            )
-        }
         refreshCache()
     }
 
@@ -496,6 +497,9 @@ public class AVPlayerVideoBackend : VideoBackend {
 
     @Volatile private var loadedAsset: AVAsset? = null
 
+    /** Where the pending load should begin, applied once its item is in the player. */
+    @Volatile private var pendingStartMs: Long = 0L
+
     private fun onAssetLoaded(asset: AVURLAsset) {
         val loaded: Boolean = asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded
         if (!loaded || !asset.playable) {
@@ -508,6 +512,10 @@ public class AVPlayerVideoBackend : VideoBackend {
         // opens on dialogue is not missed while the output is being attached.
         legible.attach(item)
         player.replaceCurrentItemWithPlayerItem(item)
+        if (pendingStartMs > 0L) {
+            player.seekToTime(CMTimeMakeWithSeconds(pendingStartMs / MILLIS_PER_SECOND, NANOS_PER_SECOND))
+            pendingStartMs = 0L
+        }
         refreshCache()
         announceReadyOnce()
     }

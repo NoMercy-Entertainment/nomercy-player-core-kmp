@@ -122,7 +122,7 @@ internal fun buildEngine(
             DefaultMediaSourceFactory(
                 dataSourceFactory(context, auth, onVariants),
                 DefaultExtractorsFactory(),
-            ),
+            ).setLoadErrorHandlingPolicy(PendingSegmentRetryPolicy()),
         )
         .setLoadControl(loadControlFor(budget))
         // Hold a network wakelock while playing. Without it a TV that dims its
@@ -234,6 +234,13 @@ private fun dataSourceFactory(
     onVariants: (List<QualityDescriptor>) -> Unit,
 ): DataSource.Factory {
     val client = OkHttpClient.Builder()
+        // A live-transcoded segment does not exist until the encoder writes
+        // it, and the server holds the request open until it does. OkHttp's
+        // 10s default gave up first: measured on an SM-A137F playing a
+        // transcoded episode, which died on SocketTimeoutException about a
+        // minute in while the encoder was still working.
+        .readTimeout(SEGMENT_READ_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
+        .callTimeout(SEGMENT_CALL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
         // Auth first, so the repair below sees the response that the
         // authenticated request actually returned rather than a 401 body.
         .addInterceptor(auth.asInterceptor())
@@ -283,3 +290,8 @@ private fun loadControlFor(budget: BufferConfig): DefaultLoadControl {
 // Media3's own default. Named because the number appearing bare next to a
 // budget measured in megabytes reads as if the two were related.
 private const val ALLOCATION_CHUNK_BYTES = 64 * 1024
+
+// Long enough for an encoder to produce a segment, short enough that a dead
+// server still fails rather than hanging the player forever.
+private const val SEGMENT_READ_TIMEOUT_S = 60L
+private const val SEGMENT_CALL_TIMEOUT_S = 120L

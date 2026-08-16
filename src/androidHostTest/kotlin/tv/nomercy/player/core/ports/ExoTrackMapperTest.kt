@@ -85,4 +85,56 @@ class ExoTrackMapperTest {
     fun anUnknownSubtitleTypeDefaultsToTheOneEveryPlayerHandles() {
         assertEquals("vtt", ExoTrackMapper.subtitleFormatOf(null))
     }
+
+    @Test
+    fun aBlankLabelFallsBackToLanguageRatherThanShowingAnEmptyRow() {
+        // Format.label is often "" (not null) on HLS variants — NAME="" is
+        // a valid attribute — so a null-only fallback leaves the menu row
+        // blank instead of catching it.
+        assertEquals("eng", ExoTrackMapper.resolveLabel("", "eng"))
+        assertEquals("eng", ExoTrackMapper.resolveLabel(null, "eng"))
+        assertEquals("Commentary", ExoTrackMapper.resolveLabel("Commentary", "eng"))
+    }
+
+    @Test
+    fun aBlankLabelAndLanguageFallsBackToUnknown() {
+        assertEquals("und", ExoTrackMapper.resolveLabel("", ""))
+        assertEquals("und", ExoTrackMapper.resolveLabel(null, null))
+    }
+
+    @Test
+    fun aBareKindTokenIsDetectedAsThatKind() {
+        // The server names an HLS SUBTITLES group after its bare variant —
+        // NAME="full", NAME="sdh" — which arrives here as the whole label.
+        assertEquals("Full", subtitleKindOf("full"))
+        assertEquals("SDH", subtitleKindOf("sdh"))
+        assertEquals("Signs", subtitleKindOf("sign"))
+        assertEquals("Signs", subtitleKindOf("signs"))
+        assertEquals("Forced", subtitleKindOf("forced"))
+        assertEquals("Alt", subtitleKindOf("alt"))
+    }
+
+    @Test
+    fun aLanguageNameInsideTheLabelDoesNotFalsePositiveAsAKind() {
+        // "Maltese" contains "alt" as a substring, not a token.
+        assertEquals(null, subtitleKindOf("Maltese"))
+        assertEquals(null, subtitleKindOf("English"))
+    }
+
+    @Test
+    fun aSubtitleLabelCombinesTheLanguageWithTheDetectedKind() {
+        // The actual defect: six same-kind tracks in different languages all
+        // showed the bare word "full" with nothing to tell them apart.
+        // displayLanguage() reads the runtime's own locale, not a fixed one
+        // (the whole point of it over the old hardcoded map), so the expected
+        // language name is derived the same way rather than hardcoded English.
+        assertEquals("${displayLanguage("en")} (Full)", resolveSubtitleLabel("full", "en"))
+        assertEquals("${displayLanguage("nl")} (SDH)", resolveSubtitleLabel("sdh", "nl"))
+    }
+
+    @Test
+    fun aSubtitleLabelWithNoDetectableKindFallsBackLikeAnyOtherTrack() {
+        assertEquals("Commentary", resolveSubtitleLabel("Commentary", "en"))
+        assertEquals("eng", resolveSubtitleLabel(null, "eng"))
+    }
 }

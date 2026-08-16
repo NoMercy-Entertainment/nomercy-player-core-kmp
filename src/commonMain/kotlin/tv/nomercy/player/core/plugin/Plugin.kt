@@ -22,6 +22,7 @@ import tv.nomercy.player.core.events.PluginDisabledPayload
 import tv.nomercy.player.core.events.PluginEnabledPayload
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.ports.AudioTrack
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
@@ -30,6 +31,7 @@ import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.RealtimeState
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.SubtitleTrack
 
 // What a plugin author writes against.
 //
@@ -328,6 +330,12 @@ public abstract class Plugin<O : Any> {
     // The item that is already playing when this plugin is installed. Null when
     // nothing is, or when the host has no queue at all — see PluginHost.item.
     protected fun item(): PlaylistItem? = wired.host.item()
+
+    // The currently-selected audio/subtitle track — see PluginHost.audioTrack
+    // and PluginHost.subtitle for why these exist alongside item().
+    protected fun audioTrack(): AudioTrack? = wired.host.audioTrack()
+
+    protected fun selectedSubtitle(): SubtitleTrack? = wired.host.subtitle()
 
     // Closes itself when the plugin goes away, unless it is already closing.
     protected fun websocket(url: String, opts: RealtimeFactoryOptions = RealtimeFactoryOptions()): RealtimeChannel {

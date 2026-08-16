@@ -64,10 +64,36 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // the phantom "stopped" state entirely.
         // Guarded: release() is not confirmed idempotent under this race.
         runCatching { PlaybackForegroundSession.session.value?.release() }
-        MediaSession.Builder(appContext, bridge)
+        buildSession()
+    }
+
+    // The release above is not always enough on its own: it frees whatever
+    // THIS process currently tracks as the active session, but a session from
+    // an even earlier, already-abandoned construction (one that threw before
+    // ever reaching publish()) can still hold the id in Media3's own registry
+    // — confirmed live, real device, 2026-08-16 (the same "Session ID must be
+    // unique" exception recurring through this exact constructor). One retry
+    // after a short yield is a standard mitigation for a registry race like
+    // this, not a guaranteed fix for whatever left the orphan behind.
+    // The id stays fixed: music stopped keeping playback alive when it varied
+    // per instance (reported live, 2026-08-16), because the foreground service
+    // binds to the session it was promoted with. The duplicate-id crash this
+    // was trying to solve is an orphan-release problem, not a naming one.
+    private fun buildSession(): MediaSession {
+        // The orphan, not the name. A session that was constructed and then
+        // thrown away before publish() still holds SESSION_ID in Media3's
+        // registry, and PlaybackForegroundSession only knows about published
+        // ones — so releasing that was never enough. Every session this process
+        // builds is tracked here and released before the next one, which is what
+        // actually frees the id.
+        lastBuilt?.let { orphan -> runCatching { orphan.release() } }
+        lastBuilt = null
+
+        return MediaSession.Builder(appContext, bridge)
             .setId(SESSION_ID)
             .setCallback(TransportSessionCallback())
             .build()
+            .also { built -> lastBuilt = built }
     }
 
     // id -> what to run when the system reports that command pressed.
@@ -99,6 +125,10 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
             customCommand: SessionCommand,
             args: Bundle,
         ): ListenableFuture<SessionResult> {
+            android.util.Log.d(
+                "NMTransport",
+                "customCommand=${customCommand.customAction} known=${customButtonHandlers.keys}",
+            )
             customButtonHandlers[customCommand.customAction]?.invoke()
             return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
         }
@@ -242,6 +272,29 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
                 .build()
         }
         session.setCustomLayout(layout)
+
+        // The notification's controller connects when the session is built, before
+        // any button exists, so onConnect granted it none of these commands and
+        // every press was rejected — the button drew and did nothing. Re-grant on
+        // every change, for the controllers already attached.
+        val granted = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+        customButtonHandlers.keys.forEach { id -> granted.add(SessionCommand(id, Bundle.EMPTY)) }
+        val commands = granted.build()
+        // The notification's own controller is NOT in connectedControllers —
+        // Media3 keeps it separate, and it is the one the notification button
+        // dispatches through, so granting only the ordinary controllers left the
+        // press rejected exactly as before.
+        val controllers = session.connectedControllers +
+            listOfNotNull(session.mediaNotificationControllerInfo)
+        controllers.forEach { controller ->
+            runCatching {
+                session.setAvailableCommands(
+                    controller,
+                    commands,
+                    MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS,
+                )
+            }
+        }
     }
 
     // A real stop, not a pause — the viewer closed the player rather than
@@ -325,6 +378,11 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
 
     private companion object {
         const val SESSION_ID = "nomercy-player"
+
+        // Process-wide: the id is process-wide too.
+        @Volatile
+        private var lastBuilt: MediaSession? = null
+
         const val WAKE_TAG = "nomercy:playback"
         const val WIFI_TAG = "nomercy:streaming"
 

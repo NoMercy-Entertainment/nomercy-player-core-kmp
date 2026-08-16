@@ -30,7 +30,7 @@ class ClientCapabilitiesDeviceTest {
     private fun capabilities(): ClientCapabilities {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         PlatformEnvironment.install(PlatformContext(context.applicationContext))
-        return platformClientCapabilities().also { probed ->
+        return platformDeviceDecodeProfile().also { probed ->
             // Logged, because a passing assertion says the relationship holds and
             // says nothing about what this device actually answered — and what it
             // answered is the thing anybody debugging a transcode decision needs.
@@ -44,9 +44,9 @@ class ClientCapabilitiesDeviceTest {
     fun theDeviceDeclaresTheCodecsItActuallyHas() {
         val declared: ClientCapabilities = capabilities()
 
-        assertTrue(ClientCodec.H264 in declared.videoCodecs, "no H264: ${declared.videoCodecs}")
+        assertTrue(DecodeCodec.H264 in declared.videoCodecs, "no H264: ${declared.videoCodecs}")
         assertTrue(declared.audioCodecs.isNotEmpty(), "no audio codecs at all")
-        assertTrue(declared.containers.contains(ClientContainer.HLS), declared.containers.toString())
+        assertTrue(declared.containers.contains(DecodeContainer.HLS), declared.containers.toString())
     }
 
     /**
@@ -85,7 +85,7 @@ class ClientCapabilitiesDeviceTest {
         val declared: ClientCapabilities = capabilities()
 
         assertTrue(
-            declared.maxWidth in setOf(ClientResolution.HD, ClientResolution.FHD, ClientResolution.UHD),
+            declared.maxWidth in setOf(DecodeResolution.HD, DecodeResolution.FHD, DecodeResolution.UHD),
             "max_width=${declared.maxWidth}",
         )
         assertEquals(0, declared.maxBitrateKbps, "a client-imposed bitrate cap was invented")
@@ -107,15 +107,15 @@ class ClientCapabilitiesDeviceTest {
 
     private companion object {
         val TEN_BIT_PROFILES: Map<String, Pair<String, Int>> = mapOf(
-            ClientCodec.H265 to (
+            DecodeCodec.H265 to (
                 android.media.MediaFormat.MIMETYPE_VIDEO_HEVC to
                     android.media.MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10
                 ),
-            ClientCodec.H264 to (
+            DecodeCodec.H264 to (
                 android.media.MediaFormat.MIMETYPE_VIDEO_AVC to
                     android.media.MediaCodecInfo.CodecProfileLevel.AVCProfileHigh10
                 ),
-            ClientCodec.AV1 to (
+            DecodeCodec.AV1 to (
                 android.media.MediaFormat.MIMETYPE_VIDEO_AV1 to
                     android.media.MediaCodecInfo.CodecProfileLevel.AV1ProfileMain10
                 ),

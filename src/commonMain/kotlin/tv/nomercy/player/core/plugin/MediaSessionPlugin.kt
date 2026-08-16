@@ -185,6 +185,14 @@ public open class MediaSessionPlugin(
         transport?.clearNowPlaying()
     }
 
+    /** Rebuilds the custom buttons for what is playing, for a consumer whose own
+     *  button state changed without the item changing. */
+    protected fun refreshCustomButtons() {
+        val opened: SystemTransport = transport ?: return
+        val current: PlaylistItem = item() ?: return
+        opened.setCustomButtons(customButtonsFor(current))
+    }
+
     private var announced: NowPlaying? = null
 
     private fun announce(item: PlaylistItem?) {

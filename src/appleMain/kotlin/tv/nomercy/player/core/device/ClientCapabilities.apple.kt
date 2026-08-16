@@ -18,14 +18,14 @@ import platform.AVFoundation.AVURLAsset
  * play. Saying otherwise would have the server send a stream nothing here can
  * open — the same mistake as declaring 10-bit on an Android phone.
  */
-public actual fun platformClientCapabilities(): ClientCapabilities {
+public actual fun platformDecodeProfile(): DeviceDecodeProfile {
     fun plays(mimeType: String): Boolean = AVURLAsset.isPlayableExtendedMIMEType(mimeType)
 
-    return ClientCapabilities(
+    return DeviceDecodeProfile(
         videoCodecs = VIDEO_PROBES.filter { (probe, _) -> plays(probe) }.map { (_, codec) -> codec },
         audioCodecs = AUDIO_PROBES.filter { (probe, _) -> plays(probe) }.map { (_, codec) -> codec },
         // HLS is the one Apple guarantees; the rest go through the same player.
-        containers = listOf(ClientContainer.HLS, ClientContainer.MP4),
+        containers = listOf(DecodeContainer.HLS, DecodeContainer.MP4),
         // Left unset rather than guessed. On an Apple TV the answer is the
         // television's, and it changes with whatever it is plugged into today.
         maxWidth = null,
@@ -34,8 +34,8 @@ public actual fun platformClientCapabilities(): ClientCapabilities {
         // A decoder trait, probed as one: Apple silicon opens Main 10 and High
         // 10 where older chips do not, and HDR only implies it.
         supports10Bit = TEN_BIT_PROBES.any(::plays),
-        maxAudioChannels = STEREO,
-        maxBitrateKbps = NO_CAP,
+        maxAudioChannels = DeviceDecodeProfile.STEREO,
+        maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
     )
 }
 
@@ -52,16 +52,16 @@ private val TEN_BIT_PROBES: List<String> = listOf(
 )
 
 private val VIDEO_PROBES: List<Pair<String, String>> = listOf(
-    """video/mp4; codecs="avc1.42E01E"""" to ClientCodec.H264,
-    """video/mp4; codecs="hvc1.1.6.L150.B0"""" to ClientCodec.H265,
-    """video/mp4; codecs="av01.0.05M.08"""" to ClientCodec.AV1,
+    """video/mp4; codecs="avc1.42E01E"""" to DecodeCodec.H264,
+    """video/mp4; codecs="hvc1.1.6.L150.B0"""" to DecodeCodec.H265,
+    """video/mp4; codecs="av01.0.05M.08"""" to DecodeCodec.AV1,
 )
 
 private val AUDIO_PROBES: List<Pair<String, String>> = listOf(
-    """audio/mp4; codecs="mp4a.40.2"""" to ClientCodec.AAC,
-    """audio/mp4; codecs="ec-3"""" to ClientCodec.EAC3,
-    """audio/mp4; codecs="ac-3"""" to ClientCodec.AC3,
-    """audio/mp4; codecs="fLaC"""" to ClientCodec.FLAC,
-    """audio/mp4; codecs="Opus"""" to ClientCodec.OPUS,
-    """audio/mpeg""" to ClientCodec.MP3,
+    """audio/mp4; codecs="mp4a.40.2"""" to DecodeCodec.AAC,
+    """audio/mp4; codecs="ec-3"""" to DecodeCodec.EAC3,
+    """audio/mp4; codecs="ac-3"""" to DecodeCodec.AC3,
+    """audio/mp4; codecs="fLaC"""" to DecodeCodec.FLAC,
+    """audio/mp4; codecs="Opus"""" to DecodeCodec.OPUS,
+    """audio/mpeg""" to DecodeCodec.MP3,
 )

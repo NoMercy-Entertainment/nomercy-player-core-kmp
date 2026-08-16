@@ -14,6 +14,7 @@ import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.ports.AudioTrack
 import tv.nomercy.player.core.ports.CueParser
 import tv.nomercy.player.core.ports.FetchOptions
 import tv.nomercy.player.core.ports.FetchResponse
@@ -21,6 +22,7 @@ import tv.nomercy.player.core.ports.Logger
 import tv.nomercy.player.core.ports.RealtimeChannel
 import tv.nomercy.player.core.ports.RealtimeFactoryOptions
 import tv.nomercy.player.core.ports.Storage
+import tv.nomercy.player.core.ports.SubtitleTrack
 
 // The slice of the player a plugin can reach, and nothing else.
 //
@@ -89,4 +91,9 @@ public interface PluginHost {
     // is playing" — the two are indistinguishable to a plugin and it should
     // treat both the same way.
     public fun item(): PlaylistItem? = null
+
+    // The currently-selected audio/subtitle track. Same default-null pattern
+    // as item() — only a real host (ComposedPlayer) knows the actual selection.
+    public fun audioTrack(): AudioTrack? = null
+    public fun subtitle(): SubtitleTrack? = null
 }

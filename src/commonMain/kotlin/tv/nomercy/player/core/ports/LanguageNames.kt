@@ -36,3 +36,42 @@ public expect fun displayLanguage(tag: String): String
 // here rather than beside any one engine's mapper.
 public fun labelsNeedQualifier(languages: List<String>): Boolean =
     languages.size != languages.toSet().size
+
+// A subtitle rendition's label, when the source only gave a bare variant word.
+//
+// The media server (and HLS SUBTITLES groups it generates) names a track's
+// VARIANT — "full", "sdh", "sign", "forced", "alt" — not a human label, on both
+// the sidecar wire response AND the embedded-track path a native engine reads
+// off the manifest. Left alone, six same-kind tracks in six different
+// languages all render the identical bare word, with nothing to tell them
+// apart (confirmed live, real TV, 2026-08-15). Shared here rather than
+// duplicated per engine, because both paths hand this exact ambiguity to
+// exactly the same fix.
+public fun resolveSubtitleLabel(label: String?, language: String?): String {
+    val kind: String? = subtitleKindOf(label)
+    if (kind != null) {
+        val langName: String? = language?.takeIf { it.isNotBlank() }?.let(::displayLanguage)
+        return if (langName != null) "$langName ($kind)" else kind
+    }
+    return label?.takeIf { it.isNotBlank() }
+        ?: language?.takeIf { it.isNotBlank() }
+        ?: UNKNOWN_SUBTITLE_LANGUAGE
+}
+
+// Whole tokens, not substrings — "Maltese" contains "alt", and a title named
+// "Sign of Four" would otherwise claim the signs variant.
+public fun subtitleKindOf(label: String?): String? {
+    val tokens: Set<String> = label.orEmpty().lowercase()
+        .split('.', ' ', '_', '-', '/', '(', ')', '[', ']')
+        .filterTo(mutableSetOf()) { it.isNotBlank() }
+    return when {
+        "sdh" in tokens -> "SDH"
+        "sign" in tokens || "signs" in tokens -> "Signs"
+        "full" in tokens -> "Full"
+        "forced" in tokens -> "Forced"
+        "alt" in tokens -> "Alt"
+        else -> null
+    }
+}
+
+private const val UNKNOWN_SUBTITLE_LANGUAGE = "und"

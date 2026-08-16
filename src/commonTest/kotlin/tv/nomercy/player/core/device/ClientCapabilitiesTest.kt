@@ -21,10 +21,10 @@ import kotlin.test.assertTrue
 // is a warm CPU on somebody's server.
 class ClientCapabilitiesTest {
 
-    private val capabilities = ClientCapabilities(
-        videoCodecs = listOf(ClientCodec.H264, ClientCodec.H265),
-        audioCodecs = listOf(ClientCodec.AAC),
-        containers = listOf(ClientContainer.HLS),
+    private val capabilities = DeviceDecodeProfile(
+        videoCodecs = listOf(DecodeCodec.H264, DecodeCodec.H265),
+        audioCodecs = listOf(DecodeCodec.AAC),
+        containers = listOf(DecodeContainer.HLS),
         maxWidth = 3840,
         maxHeight = 2160,
         supportsHdr = true,
@@ -68,7 +68,7 @@ class ClientCapabilitiesTest {
     // forces live transcoding of compatible files over a LAN.
     @Test
     fun anUnprobedClientImposesNoBitrateCapAndClaimsNothing() {
-        val blank = ClientCapabilities()
+        val blank = DeviceDecodeProfile()
 
         assertEquals(0, blank.maxBitrateKbps)
         assertEquals(2, blank.maxAudioChannels)
@@ -81,10 +81,10 @@ class ClientCapabilitiesTest {
     // through two clients has to get one decision.
     @Test
     fun resolutionsClampToTheSameThreeWebClampsTo() {
-        assertEquals(ClientResolution.UHD, ClientResolution.clamp(5120))
-        assertEquals(ClientResolution.UHD, ClientResolution.clamp(3840))
-        assertEquals(ClientResolution.FHD, ClientResolution.clamp(2560))
-        assertEquals(ClientResolution.FHD, ClientResolution.clamp(1920))
-        assertEquals(ClientResolution.HD, ClientResolution.clamp(1366))
+        assertEquals(DecodeResolution.UHD, DecodeResolution.clamp(5120))
+        assertEquals(DecodeResolution.UHD, DecodeResolution.clamp(3840))
+        assertEquals(DecodeResolution.FHD, DecodeResolution.clamp(2560))
+        assertEquals(DecodeResolution.FHD, DecodeResolution.clamp(1920))
+        assertEquals(DecodeResolution.HD, DecodeResolution.clamp(1366))
     }
 }
