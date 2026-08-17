@@ -269,7 +269,7 @@ public open class MediaSessionPlugin(
      */
     protected fun publishMirroredState(isPlaying: Boolean, positionMs: Long) {
         transport?.setPlaybackState(
-            if (isPlaying) TransportPlaybackState.Playing else TransportPlaybackState.Paused,
+            if (isPlaying) TransportPlaybackState.PLAYING else TransportPlaybackState.PAUSED,
             positionMs,
             if (isPlaying) 1.0 else 0.0,
         )
