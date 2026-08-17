@@ -92,14 +92,21 @@ public class NoMercyPlaybackService : MediaSessionService() {
         attached?.let { old -> if (old !== session) runCatching { removeSession(old) } }
         attached = session
         if (session != null) {
-            addSession(session)
+            // Guarded for the same reason the removal is: a session id that is
+            // already registered answers with a throw, and this runs on a
+            // collector whose death silently strands every later transition.
+            runCatching { addSession(session) }
         } else {
             stopSelf()
         }
     }
 
     override fun onDestroy() {
-        attached?.let { removeSession(it) }
+        // Same guard as reconcile's, for the same reason: removeSession throws
+        // "session not found" when the session was already torn down by another
+        // path, and a throw here is fatal — the phone restarted on a play press
+        // (measured 2026-08-17, IllegalArgumentException from this class).
+        attached?.let { runCatching { removeSession(it) } }
         attached = null
         scopeJob?.cancel()
         scopeJob = null
