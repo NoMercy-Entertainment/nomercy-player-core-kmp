@@ -360,7 +360,21 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     // the API 26 floor `startForegroundService` needs, so there is no older
     // path to fall back to.
     private fun startPlaybackService() {
-        appContext.startForegroundService(Intent(appContext, NoMercyPlaybackService::class.java))
+        // A backgrounded process is not allowed to start one, and the platform
+        // answers with ForegroundServiceStartNotAllowedException — which is
+        // fatal, not ignorable. A device MIRRORING a session playing elsewhere
+        // publishes state while sitting on a home screen with nothing of its own
+        // playing, and every such publish killed the app: a television crashed
+        // and relaunched on every frame it mirrored (measured 2026-08-17).
+        //
+        // Swallowed rather than pre-checked: the allowance depends on state only
+        // the platform knows, and the service exists to keep OUR OWN audio
+        // alive. A process that is not allowed to start it has no audio to keep.
+        runCatching {
+            appContext.startForegroundService(Intent(appContext, NoMercyPlaybackService::class.java))
+        }.onFailure { failure ->
+            android.util.Log.w("Media3SystemTransport", "playback service not started: ${failure.message}")
+        }
     }
 
     private fun holdLocks(hold: Boolean) {
