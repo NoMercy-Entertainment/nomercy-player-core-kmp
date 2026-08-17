@@ -7873,6 +7873,8 @@ open class tv.nomercy.player.core.plugin/MediaSessionPlugin : tv.nomercy.player.
 
     final fun clearMetadata() // tv.nomercy.player.core.plugin/MediaSessionPlugin.clearMetadata|clearMetadata(){}[0]
     final fun metadata(): tv.nomercy.player.core.ports/NowPlaying? // tv.nomercy.player.core.plugin/MediaSessionPlugin.metadata|metadata(){}[0]
+    final fun publishMirroredItem(tv.nomercy.player.core.media/PlaylistItem) // tv.nomercy.player.core.plugin/MediaSessionPlugin.publishMirroredItem|publishMirroredItem(tv.nomercy.player.core.media.PlaylistItem){}[0]
+    final fun publishMirroredState(kotlin/Boolean, kotlin/Long) // tv.nomercy.player.core.plugin/MediaSessionPlugin.publishMirroredState|publishMirroredState(kotlin.Boolean;kotlin.Long){}[0]
     final fun refreshCustomButtons() // tv.nomercy.player.core.plugin/MediaSessionPlugin.refreshCustomButtons|refreshCustomButtons(){}[0]
     open fun customButtonsFor(tv.nomercy.player.core.media/PlaylistItem): kotlin.collections/List<tv.nomercy.player.core.ports/CustomTransportButton> // tv.nomercy.player.core.plugin/MediaSessionPlugin.customButtonsFor|customButtonsFor(tv.nomercy.player.core.media.PlaylistItem){}[0]
     open fun dispose() // tv.nomercy.player.core.plugin/MediaSessionPlugin.dispose|dispose(){}[0]

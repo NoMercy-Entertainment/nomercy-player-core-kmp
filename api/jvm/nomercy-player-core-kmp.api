@@ -4362,6 +4362,8 @@ public class tv/nomercy/player/core/plugin/MediaSessionPlugin : tv/nomercy/playe
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
 	public final fun metadata ()Ltv/nomercy/player/core/ports/NowPlaying;
 	protected fun nowPlayingFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/ports/NowPlaying;
+	protected final fun publishMirroredItem (Ltv/nomercy/player/core/media/PlaylistItem;)V
+	protected final fun publishMirroredState (ZJ)V
 	protected final fun refreshCustomButtons ()V
 	public fun use ()V
 	protected fun volumeIsRemote ()Z

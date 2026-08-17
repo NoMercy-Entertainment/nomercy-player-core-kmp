@@ -164,7 +164,6 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     // play — a press that lands on the wrong one is silently dropped.
     private fun stepDeviceVolume(direction: Int): ListenableFuture<*> {
         remoteVolume = (remoteVolume + direction).coerceIn(0, REMOTE_VOLUME_MAX)
-        android.util.Log.d("NMTransport", "device volume step $direction -> $remoteVolume")
         actions.onVolumeStep?.invoke(direction)
         return Futures.immediateVoidFuture()
     }
