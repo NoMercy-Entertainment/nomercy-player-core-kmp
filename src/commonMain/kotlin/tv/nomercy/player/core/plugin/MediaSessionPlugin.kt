@@ -267,6 +267,19 @@ public open class MediaSessionPlugin(
      * which sends the press to the local speaker instead. A consumer that knows
      * playback is live somewhere else says so here.
      */
+    /**
+     * Publish the item a mirroring device is showing.
+     *
+     * Registering this plugin is not enough on its own: it builds its metadata
+     * from the engine's item, and a device mirroring a session elsewhere has
+     * none — so nothing was ever published and the platform had no session for
+     * the app at all (measured: "Media button session is null"). A session that
+     * does not exist cannot be handed a volume key.
+     */
+    protected fun publishMirroredItem(item: PlaylistItem) {
+        transport?.setNowPlaying(nowPlayingFor(item))
+    }
+
     protected fun publishMirroredState(isPlaying: Boolean, positionMs: Long) {
         transport?.setPlaybackState(
             if (isPlaying) TransportPlaybackState.PLAYING else TransportPlaybackState.PAUSED,
