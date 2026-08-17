@@ -106,10 +106,11 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
                 // platform against this device's own stream, and the player is
                 // never asked. Only a REMOTE device is routed to the player,
                 // which is the whole point of taking the press.
-                if (actions.onVolumeStep != null) {
+                if (actions.onVolumeStep != null && actions.isVolumeRemote?.invoke() == true) {
                     state.setDeviceInfo(
                         DeviceInfo.Builder(DeviceInfo.PLAYBACK_TYPE_REMOTE)
                             .setMaxVolume(REMOTE_VOLUME_MAX)
+                            .setMinVolume(0)
                             .build(),
                     )
                     state.setDeviceVolume(remoteVolume)

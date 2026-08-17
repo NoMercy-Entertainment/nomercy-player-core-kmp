@@ -134,6 +134,11 @@ public data class TransportActions(
     // reaches an Activity — the platform hands a volume key to the media
     // session, not to the foreground window.
     val onVolumeStep: ((Int) -> Unit)? = null,
+    // Asked on every state build, because the answer changes while the app
+    // runs: the press belongs elsewhere only while this device is not the one
+    // playing. Declaring it always meant the device that IS playing had its own
+    // speaker driven by the session too.
+    val isVolumeRemote: (() -> Boolean)? = null,
 )
 
 // How far a skip button goes when the system has no opinion of its own.

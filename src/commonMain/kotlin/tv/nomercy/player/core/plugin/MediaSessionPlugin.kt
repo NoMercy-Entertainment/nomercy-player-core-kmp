@@ -255,6 +255,9 @@ public open class MediaSessionPlugin(
      */
     protected open fun volumeStepHandler(): ((Int) -> Unit)? = null
 
+    /** True while the press belongs to another device — see [TransportActions.isVolumeRemote]. */
+    protected open fun volumeIsRemote(): Boolean = false
+
     private fun handlers(): TransportActions = TransportActions(
         onPlay = commands::play,
         onPause = commands::pause,
@@ -271,6 +274,7 @@ public open class MediaSessionPlugin(
         onSkipBackward = commands::skipBackward,
         onSkipForward = commands::skipForward,
         onVolumeStep = volumeStepHandler(),
+        isVolumeRemote = { volumeIsRemote() },
     )
 }
 
