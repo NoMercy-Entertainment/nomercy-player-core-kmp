@@ -10,6 +10,7 @@ package tv.nomercy.player.core.ports
 
 import android.os.Looper
 import androidx.media3.common.C
+import androidx.media3.common.DeviceInfo
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -100,6 +101,20 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
             .setPlayWhenReady(playing, Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
             .setPlaybackState(if (hasItem) Player.STATE_READY else Player.STATE_IDLE)
             .setContentPositionMs(positionMs)
+            .also { state ->
+                // A session whose volume is LOCAL has its keys handled by the
+                // platform against this device's own stream, and the player is
+                // never asked. Only a REMOTE device is routed to the player,
+                // which is the whole point of taking the press.
+                if (actions.onVolumeStep != null) {
+                    state.setDeviceInfo(
+                        DeviceInfo.Builder(DeviceInfo.PLAYBACK_TYPE_REMOTE)
+                            .setMaxVolume(REMOTE_VOLUME_MAX)
+                            .build(),
+                    )
+                    state.setDeviceVolume(remoteVolume)
+                }
+            }
             // The interval the buttons are labelled with, so what a viewer is
             // offered is what the player moves by. Media3's own defaults are
             // five back and fifteen forward, which would draw two different
@@ -139,12 +154,18 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         return Futures.immediateVoidFuture()
     }
 
+    // Media3 requires a level to draw; the real one lives wherever the press is
+    // being sent, so this only has to move in the direction that was pressed.
+    private var remoteVolume: Int = REMOTE_VOLUME_MAX / 2
+
     override fun handleIncreaseDeviceVolume(flags: Int): ListenableFuture<*> {
+        remoteVolume = (remoteVolume + 1).coerceAtMost(REMOTE_VOLUME_MAX)
         actions.onVolumeStep?.invoke(1)
         return Futures.immediateVoidFuture()
     }
 
     override fun handleDecreaseDeviceVolume(flags: Int): ListenableFuture<*> {
+        remoteVolume = (remoteVolume - 1).coerceAtLeast(0)
         actions.onVolumeStep?.invoke(-1)
         return Futures.immediateVoidFuture()
     }
@@ -205,6 +226,8 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         const val ITEM_ID = "nomercy-current"
 
         const val MICROS_PER_MILLI = 1_000L
+
+        const val REMOTE_VOLUME_MAX = 20
 
         val ALWAYS: IntArray = intArrayOf(
             Player.COMMAND_PLAY_PAUSE,
