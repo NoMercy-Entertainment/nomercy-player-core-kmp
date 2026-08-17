@@ -4364,6 +4364,7 @@ public class tv/nomercy/player/core/plugin/MediaSessionPlugin : tv/nomercy/playe
 	protected fun nowPlayingFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/ports/NowPlaying;
 	protected final fun refreshCustomButtons ()V
 	public fun use ()V
+	protected fun volumeStepHandler ()Lkotlin/jvm/functions/Function1;
 }
 
 public final class tv/nomercy/player/core/plugin/MediaSessionPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
@@ -8347,8 +8348,8 @@ public final class tv/nomercy/player/core/ports/Translator$DefaultImpls {
 
 public final class tv/nomercy/player/core/ports/TransportActions {
 	public fun <init> ()V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lkotlin/jvm/functions/Function0;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lkotlin/jvm/functions/Function0;
@@ -8357,8 +8358,9 @@ public final class tv/nomercy/player/core/ports/TransportActions {
 	public final fun component6 ()Lkotlin/jvm/functions/Function1;
 	public final fun component7 ()Lkotlin/jvm/functions/Function1;
 	public final fun component8 ()Lkotlin/jvm/functions/Function1;
-	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/ports/TransportActions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
+	public final fun component9 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/ports/TransportActions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOnNext ()Lkotlin/jvm/functions/Function0;
 	public final fun getOnPause ()Lkotlin/jvm/functions/Function0;
@@ -8368,6 +8370,7 @@ public final class tv/nomercy/player/core/ports/TransportActions {
 	public final fun getOnSkipBackward ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnSkipForward ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStop ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnVolumeStep ()Lkotlin/jvm/functions/Function1;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

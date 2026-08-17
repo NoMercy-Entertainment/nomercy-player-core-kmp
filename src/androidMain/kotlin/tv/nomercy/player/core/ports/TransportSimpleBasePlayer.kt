@@ -139,6 +139,16 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         return Futures.immediateVoidFuture()
     }
 
+    override fun handleIncreaseDeviceVolume(flags: Int): ListenableFuture<*> {
+        actions.onVolumeStep?.invoke(1)
+        return Futures.immediateVoidFuture()
+    }
+
+    override fun handleDecreaseDeviceVolume(flags: Int): ListenableFuture<*> {
+        actions.onVolumeStep?.invoke(-1)
+        return Futures.immediateVoidFuture()
+    }
+
     override fun handleSeek(
         mediaItemIndex: Int,
         positionMs: Long,
@@ -178,6 +188,13 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         ALWAYS.forEach { command -> builder.add(command) }
         if (actions.onSkipBackward != null) builder.add(Player.COMMAND_SEEK_BACK)
         if (actions.onSkipForward != null) builder.add(Player.COMMAND_SEEK_FORWARD)
+        // Declared only when someone wants the presses. Media3 hands a volume
+        // key to the player only if the player says it takes one; otherwise the
+        // platform moves this device's own stream and the press never leaves.
+        if (actions.onVolumeStep != null) {
+            builder.add(Player.COMMAND_ADJUST_DEVICE_VOLUME_WITH_FLAGS)
+            builder.add(Player.COMMAND_GET_DEVICE_VOLUME)
+        }
         return builder.build()
     }
 

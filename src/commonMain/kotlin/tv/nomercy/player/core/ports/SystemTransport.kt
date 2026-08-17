@@ -127,6 +127,13 @@ public data class TransportActions(
     // registered. The offset is the one the system asked for, in milliseconds.
     val onSkipBackward: ((Long) -> Unit)? = null,
     val onSkipForward: ((Long) -> Unit)? = null,
+    // The hardware volume rocker. Wired only by a consumer that has somewhere
+    // else to send it: with no handler the system keeps its default, which is
+    // this device's own output stream. A phone controlling playback happening
+    // in another room needs the press to leave the phone, and the press never
+    // reaches an Activity — the platform hands a volume key to the media
+    // session, not to the foreground window.
+    val onVolumeStep: ((Int) -> Unit)? = null,
 )
 
 // How far a skip button goes when the system has no opinion of its own.

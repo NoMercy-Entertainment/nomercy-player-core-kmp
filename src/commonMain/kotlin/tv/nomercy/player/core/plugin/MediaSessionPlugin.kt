@@ -248,6 +248,13 @@ public open class MediaSessionPlugin(
     // What the system may ask for. Seek and the two transport verbs always;
     // queue movement only if the player has a queue, because a control with no
     // handler is hidden rather than drawn doing nothing.
+    /**
+     * A hardware volume press, in notches, or null to leave the platform's own
+     * default alone. Overridden by a consumer whose device may be controlling
+     * playback somewhere else — see [TransportActions.onVolumeStep].
+     */
+    protected open fun volumeStepHandler(): ((Int) -> Unit)? = null
+
     private fun handlers(): TransportActions = TransportActions(
         onPlay = commands::play,
         onPause = commands::pause,
@@ -263,6 +270,7 @@ public open class MediaSessionPlugin(
         // seekbackward and seekforward handlers call optional player methods.
         onSkipBackward = commands::skipBackward,
         onSkipForward = commands::skipForward,
+        onVolumeStep = volumeStepHandler(),
     )
 }
 
