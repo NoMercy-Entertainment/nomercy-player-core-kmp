@@ -159,16 +159,23 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     // being sent, so this only has to move in the direction that was pressed.
     private var remoteVolume: Int = REMOTE_VOLUME_MAX / 2
 
-    override fun handleIncreaseDeviceVolume(flags: Int): ListenableFuture<*> {
-        remoteVolume = (remoteVolume + 1).coerceAtMost(REMOTE_VOLUME_MAX)
-        actions.onVolumeStep?.invoke(1)
+    // Both the flags and the no-arg variants: which one Media3 dispatches to
+    // depends on the caller, and overriding one leaves the other's default in
+    // play — a press that lands on the wrong one is silently dropped.
+    private fun stepDeviceVolume(direction: Int): ListenableFuture<*> {
+        remoteVolume = (remoteVolume + direction).coerceIn(0, REMOTE_VOLUME_MAX)
+        android.util.Log.d("NMTransport", "device volume step $direction -> $remoteVolume")
+        actions.onVolumeStep?.invoke(direction)
         return Futures.immediateVoidFuture()
     }
 
-    override fun handleDecreaseDeviceVolume(flags: Int): ListenableFuture<*> {
-        remoteVolume = (remoteVolume - 1).coerceAtLeast(0)
-        actions.onVolumeStep?.invoke(-1)
-        return Futures.immediateVoidFuture()
+    override fun handleIncreaseDeviceVolume(flags: Int): ListenableFuture<*> = stepDeviceVolume(1)
+
+    override fun handleDecreaseDeviceVolume(flags: Int): ListenableFuture<*> = stepDeviceVolume(-1)
+
+    override fun handleSetDeviceVolume(deviceVolume: Int, flags: Int): ListenableFuture<*> {
+        val direction: Int = if (deviceVolume > remoteVolume) 1 else -1
+        return stepDeviceVolume(direction)
     }
 
     override fun handleSeek(
@@ -215,6 +222,8 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         // platform moves this device's own stream and the press never leaves.
         if (actions.onVolumeStep != null) {
             builder.add(Player.COMMAND_ADJUST_DEVICE_VOLUME_WITH_FLAGS)
+            builder.add(Player.COMMAND_ADJUST_DEVICE_VOLUME)
+            builder.add(Player.COMMAND_SET_DEVICE_VOLUME_WITH_FLAGS)
             builder.add(Player.COMMAND_GET_DEVICE_VOLUME)
         }
         return builder.build()

@@ -258,6 +258,23 @@ public open class MediaSessionPlugin(
     /** True while the press belongs to another device — see [TransportActions.isVolumeRemote]. */
     protected open fun volumeIsRemote(): Boolean = false
 
+    /**
+     * Publish a state this player's own engine cannot report.
+     *
+     * A device mirroring a session happening elsewhere has an idle engine, so
+     * every event this plugin listens to says paused — and a paused session is
+     * skipped when the platform decides who receives a hardware volume key,
+     * which sends the press to the local speaker instead. A consumer that knows
+     * playback is live somewhere else says so here.
+     */
+    protected fun publishMirroredState(isPlaying: Boolean, positionMs: Long) {
+        transport?.setPlaybackState(
+            if (isPlaying) TransportPlaybackState.Playing else TransportPlaybackState.Paused,
+            positionMs,
+            if (isPlaying) 1.0 else 0.0,
+        )
+    }
+
     private fun handlers(): TransportActions = TransportActions(
         onPlay = commands::play,
         onPause = commands::pause,
