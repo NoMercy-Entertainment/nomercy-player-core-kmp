@@ -42,6 +42,13 @@ public data class EqualizerOptions(
      * rather than clamp in every control.
      */
     val sliderValues: EqSliderValues = EqBands.DEFAULT_SLIDER_VALUES,
+    /**
+     * Time constant, in seconds, for the exponential ramp a band or the
+     * pre-gain applies toward its target on a drag. Null takes the web's own
+     * default of 0.05s. A preset, a reset or a restore snaps instantly —
+     * this only smooths the value a listener is actively moving.
+     */
+    val smoothingTimeConstantSeconds: Double? = null,
 )
 
 // One key holds the whole equaliser: bands, headroom, the chosen preset and any

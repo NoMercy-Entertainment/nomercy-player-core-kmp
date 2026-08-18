@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.plugins.audio
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import tv.nomercy.player.core.dsp.EqBand
 import tv.nomercy.player.core.dsp.EqBands
 import tv.nomercy.player.core.dsp.EqPreset
@@ -116,8 +118,7 @@ public open class EqualizerPlugin(
                     current = restored.bands
                     chosenPreset = restored.preset
                     pre = restored.preGain
-                    graph?.setEqBands(current)
-                    graph?.preGain(pre)
+                    snapAll(current, pre)
                 }
             }
         }
@@ -137,7 +138,7 @@ public open class EqualizerPlugin(
         // called a moment ago. A UI still showing "Rock" after the viewer has
         // edited it is claiming something untrue about what they are hearing.
         chosenPreset = EqPresets.CUSTOM.name
-        graph?.bandGain(frequencyHz, gainDb)
+        rampBand(frequencyHz, gainDb)
         persist()
         emit(EqualizerEventKeys.BandChanged, EqualizerEvents.BandChanged(current[index]))
     }
@@ -146,7 +147,7 @@ public open class EqualizerPlugin(
 
     public open fun preGain(sliderValue: Double) {
         pre = EqBands.preGainLinear(sliderValue)
-        graph?.preGain(pre)
+        rampPreGain(pre)
         persist()
     }
 
@@ -186,7 +187,7 @@ public open class EqualizerPlugin(
 
         current = preset.bands
         chosenPreset = preset.name
-        graph?.setEqBands(preset.bands)
+        snapAll(current, pre)
         persist()
         emit(EqualizerEventKeys.PresetChanged, EqualizerEvents.PresetChanged(preset.name))
     }
@@ -195,8 +196,7 @@ public open class EqualizerPlugin(
         current = EqBands.DEFAULT
         chosenPreset = EqPresets.CUSTOM.name
         pre = 1.0
-        graph?.setEqBands(EqBands.DEFAULT)
-        graph?.preGain(pre)
+        snapAll(current, pre)
         persist()
     }
 
@@ -291,8 +291,7 @@ public open class EqualizerPlugin(
         chosenPreset = restored.preset
         pre = restored.preGain
         store.replaceAll(restored.customPresets)
-        graph?.setEqBands(current)
-        graph?.preGain(pre)
+        snapAll(current, pre)
     }
 
     private fun snapshot(): EqualizerState = EqualizerState(
@@ -321,7 +320,92 @@ public open class EqualizerPlugin(
             )
         }
     }
+
+    // A drag ramps; a preset, a reset or a restore is a deliberate switch and
+    // snaps, the same distinction the web's own applyAllToNodes() (direct
+    // `.value =`) draws against rampParam(). Cancels whatever was mid-ramp so a
+    // stale tick does not fight the value this just set.
+    private fun snapAll(bands: List<EqBand>, preGainLinear: Double) {
+        preGainRampJob?.cancel()
+        appliedPreGain = preGainLinear
+        graph?.preGain(preGainLinear)
+
+        bandRampJobs.values.forEach { it.cancel() }
+        bandRampJobs.clear()
+        for (band in bands) appliedBandGains[band.frequency] = band.gainDb
+        graph?.setEqBands(bands)
+    }
+
+    private fun rampPreGain(target: Double) {
+        preGainRampJob?.cancel()
+
+        val tau: Double? = opts.smoothingTimeConstantSeconds
+        if (tau == null || tau <= 0.0) {
+            appliedPreGain = target
+            graph?.preGain(target)
+            return
+        }
+
+        val alpha: Double = rampAlpha(tau)
+        preGainRampJob = this.launch {
+            while (kotlin.math.abs(target - appliedPreGain) > RAMP_EPSILON) {
+                appliedPreGain += (target - appliedPreGain) * alpha
+                graph?.preGain(appliedPreGain)
+                delay(RAMP_TICK_MS.toLong())
+            }
+            appliedPreGain = target
+            graph?.preGain(target)
+        }
+    }
+
+    // The web's own curve, reproduced over [AudioDspGraph.bandGain] the same
+    // way MixerPlugin reproduces it over preGain — see that file for why a
+    // ticked coroutine and not a platform ramp primitive.
+    private fun rampBand(frequencyHz: Int, targetGainDb: Double) {
+        bandRampJobs[frequencyHz]?.cancel()
+
+        val tau: Double? = opts.smoothingTimeConstantSeconds
+        val start: Double = appliedBandGains[frequencyHz] ?: targetGainDb
+        if (tau == null || tau <= 0.0) {
+            appliedBandGains[frequencyHz] = targetGainDb
+            graph?.bandGain(frequencyHz, targetGainDb)
+            return
+        }
+
+        val alpha: Double = rampAlpha(tau)
+        bandRampJobs[frequencyHz] = this.launch {
+            var value: Double = start
+            while (kotlin.math.abs(targetGainDb - value) > RAMP_EPSILON) {
+                value += (targetGainDb - value) * alpha
+                appliedBandGains[frequencyHz] = value
+                graph?.bandGain(frequencyHz, value)
+                delay(RAMP_TICK_MS.toLong())
+            }
+            appliedBandGains[frequencyHz] = targetGainDb
+            graph?.bandGain(frequencyHz, targetGainDb)
+        }
+    }
+
+    private fun rampAlpha(tau: Double): Double {
+        val stepSeconds: Double = RAMP_TICK_MS / MILLIS_PER_SECOND
+        return 1.0 - kotlin.math.exp(-stepSeconds / tau)
+    }
+
+    private var appliedPreGain: Double = 1.0
+    private var preGainRampJob: Job? = null
+    private val appliedBandGains: MutableMap<Int, Double> = mutableMapOf()
+    private val bandRampJobs: MutableMap<Int, Job> = mutableMapOf()
 }
+
+// A 60 Hz ramp, matching the rate a browser's own audio param automation is
+// perceived at — the same tick MixerPlugin's ramp uses.
+private const val RAMP_TICK_MS: Double = 1000.0 / 60.0
+
+private const val MILLIS_PER_SECOND: Double = 1000.0
+
+// Below this the difference is inaudible and the ramp is just spending ticks
+// approaching a value it will never exactly reach.
+private const val RAMP_EPSILON: Double = 0.0005
 
 // What the plugin publishes, and what a consumer subscribes to on the player.
 //

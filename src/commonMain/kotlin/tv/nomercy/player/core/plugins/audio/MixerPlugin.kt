@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.plugins.audio
 
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.plugin.Plugin
@@ -31,6 +33,14 @@ public data class MixerOptions(
      * hosts that want it.
      */
     val persistKey: String? = null,
+    /**
+     * Time constant, in seconds, for the exponential ramp `gain()` and
+     * `muted()` apply toward their target. Null (the default) applies
+     * instantly, matching a mixer with no smoothing configured. The web's
+     * `AudioParam.setTargetAtTime` curve, reproduced over [AudioDspGraph.preGain]
+     * rather than requiring a ramp primitive from every backend.
+     */
+    val smoothingTimeConstantSeconds: Double? = null,
 )
 
 /**
@@ -216,12 +226,72 @@ public open class MixerPlugin(
     /** Where a platform with a panner does the work. */
     protected open fun applyPan(value: Double) {}
 
+    // The currently APPLIED linear gain, which lags the target while a ramp is
+    // in flight. Separate from currentGainDb, which is the listener's chosen
+    // dB and is reported the instant they set it — a redraw should not wait
+    // for the ramp to finish, only the signal should.
+    private var appliedLinearGain: Double = 1.0
+
+    private var rampJob: Job? = null
+
     private fun applyGain() {
-        graph.preGain(if (isMutedNow) 0.0 else dbToLinear(currentGainDb))
+        val target: Double = if (isMutedNow) 0.0 else dbToLinear(currentGainDb)
+
+        // Setup and restore jump straight to the value: a ramp exists to make
+        // a listener's own adjustment smooth, not to fade in whatever the
+        // constructor or a persisted blob left the mixer at.
+        if (applying) {
+            rampJob?.cancel()
+            appliedLinearGain = target
+            graph.preGain(target)
+            return
+        }
+
+        rampToward(target)
+    }
+
+    // The web's own curve: `AudioParam.setTargetAtTime`, an exponential
+    // approach with time constant [MixerOptions.smoothingTimeConstantSeconds].
+    // Ticked here rather than left to a platform ramp primitive because
+    // [AudioDspGraph.preGain] is the one call every backend already answers;
+    // reproducing the same curve over it is the port, not a new port surface.
+    private fun rampToward(target: Double) {
+        rampJob?.cancel()
+
+        val tau: Double? = opts.smoothingTimeConstantSeconds
+        if (tau == null || tau <= 0.0) {
+            appliedLinearGain = target
+            graph.preGain(target)
+            return
+        }
+
+        val stepSeconds: Double = RAMP_TICK_MS / MILLIS_PER_SECOND
+        val alpha: Double = 1.0 - kotlin.math.exp(-stepSeconds / tau)
+
+        rampJob = this.launch {
+            while (kotlin.math.abs(target - appliedLinearGain) > RAMP_EPSILON) {
+                appliedLinearGain += (target - appliedLinearGain) * alpha
+                graph.preGain(appliedLinearGain)
+                delay(RAMP_TICK_MS.toLong())
+            }
+            appliedLinearGain = target
+            graph.preGain(target)
+        }
     }
 
     private fun dbToLinear(db: Double): Double = TEN.pow(db / DB_PER_DECADE)
 }
+
+// A 60 Hz ramp, matching the rate a browser's own audio param automation is
+// perceived at.
+private const val RAMP_TICK_MS: Double = 1000.0 / 60.0
+
+private const val MILLIS_PER_SECOND: Double = 1000.0
+
+// Below this the difference is inaudible and the ramp is just spending ticks
+// approaching a value it will never exactly reach — exponential decay has no
+// true zero, so without a floor the coroutine would run forever.
+private const val RAMP_EPSILON: Double = 0.0005
 
 // What the plugin publishes, and what a consumer subscribes to on the player.
 //

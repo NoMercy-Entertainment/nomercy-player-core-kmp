@@ -5925,7 +5925,7 @@ final class tv.nomercy.player.core.plugins.audio/BeatReading { // tv.nomercy.pla
 }
 
 final class tv.nomercy.player.core.plugins.audio/EqualizerOptions { // tv.nomercy.player.core.plugins.audio/EqualizerOptions|null[0]
-    constructor <init>(kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.dsp/EqSliderValues = ...) // tv.nomercy.player.core.plugins.audio/EqualizerOptions.<init>|<init>(kotlin.String?;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.dsp.EqSliderValues){}[0]
+    constructor <init>(kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.dsp/EqSliderValues = ..., kotlin/Double? = ...) // tv.nomercy.player.core.plugins.audio/EqualizerOptions.<init>|<init>(kotlin.String?;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.dsp.EqSliderValues;kotlin.Double?){}[0]
 
     final val autoLoad // tv.nomercy.player.core.plugins.audio/EqualizerOptions.autoLoad|{}autoLoad[0]
         final fun <get-autoLoad>(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerOptions.autoLoad.<get-autoLoad>|<get-autoLoad>(){}[0]
@@ -5935,19 +5935,22 @@ final class tv.nomercy.player.core.plugins.audio/EqualizerOptions { // tv.nomerc
         final fun <get-persistKey>(): kotlin/String? // tv.nomercy.player.core.plugins.audio/EqualizerOptions.persistKey.<get-persistKey>|<get-persistKey>(){}[0]
     final val sliderValues // tv.nomercy.player.core.plugins.audio/EqualizerOptions.sliderValues|{}sliderValues[0]
         final fun <get-sliderValues>(): tv.nomercy.player.core.dsp/EqSliderValues // tv.nomercy.player.core.plugins.audio/EqualizerOptions.sliderValues.<get-sliderValues>|<get-sliderValues>(){}[0]
+    final val smoothingTimeConstantSeconds // tv.nomercy.player.core.plugins.audio/EqualizerOptions.smoothingTimeConstantSeconds|{}smoothingTimeConstantSeconds[0]
+        final fun <get-smoothingTimeConstantSeconds>(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/EqualizerOptions.smoothingTimeConstantSeconds.<get-smoothingTimeConstantSeconds>|<get-smoothingTimeConstantSeconds>(){}[0]
 
     final fun component1(): kotlin/String? // tv.nomercy.player.core.plugins.audio/EqualizerOptions.component1|component1(){}[0]
     final fun component2(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerOptions.component2|component2(){}[0]
     final fun component3(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerOptions.component3|component3(){}[0]
     final fun component4(): tv.nomercy.player.core.dsp/EqSliderValues // tv.nomercy.player.core.plugins.audio/EqualizerOptions.component4|component4(){}[0]
-    final fun copy(kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.dsp/EqSliderValues = ...): tv.nomercy.player.core.plugins.audio/EqualizerOptions // tv.nomercy.player.core.plugins.audio/EqualizerOptions.copy|copy(kotlin.String?;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.dsp.EqSliderValues){}[0]
+    final fun component5(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/EqualizerOptions.component5|component5(){}[0]
+    final fun copy(kotlin/String? = ..., kotlin/Boolean = ..., kotlin/Boolean = ..., tv.nomercy.player.core.dsp/EqSliderValues = ..., kotlin/Double? = ...): tv.nomercy.player.core.plugins.audio/EqualizerOptions // tv.nomercy.player.core.plugins.audio/EqualizerOptions.copy|copy(kotlin.String?;kotlin.Boolean;kotlin.Boolean;tv.nomercy.player.core.dsp.EqSliderValues;kotlin.Double?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/EqualizerOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/EqualizerOptions.toString|toString(){}[0]
 }
 
 final class tv.nomercy.player.core.plugins.audio/MixerOptions { // tv.nomercy.player.core.plugins.audio/MixerOptions|null[0]
-    constructor <init>(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/String? = ...) // tv.nomercy.player.core.plugins.audio/MixerOptions.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.String?){}[0]
+    constructor <init>(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/String? = ..., kotlin/Double? = ...) // tv.nomercy.player.core.plugins.audio/MixerOptions.<init>|<init>(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.String?;kotlin.Double?){}[0]
 
     final val gainDb // tv.nomercy.player.core.plugins.audio/MixerOptions.gainDb|{}gainDb[0]
         final fun <get-gainDb>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerOptions.gainDb.<get-gainDb>|<get-gainDb>(){}[0]
@@ -5957,12 +5960,15 @@ final class tv.nomercy.player.core.plugins.audio/MixerOptions { // tv.nomercy.pl
         final fun <get-pan>(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerOptions.pan.<get-pan>|<get-pan>(){}[0]
     final val persistKey // tv.nomercy.player.core.plugins.audio/MixerOptions.persistKey|{}persistKey[0]
         final fun <get-persistKey>(): kotlin/String? // tv.nomercy.player.core.plugins.audio/MixerOptions.persistKey.<get-persistKey>|<get-persistKey>(){}[0]
+    final val smoothingTimeConstantSeconds // tv.nomercy.player.core.plugins.audio/MixerOptions.smoothingTimeConstantSeconds|{}smoothingTimeConstantSeconds[0]
+        final fun <get-smoothingTimeConstantSeconds>(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/MixerOptions.smoothingTimeConstantSeconds.<get-smoothingTimeConstantSeconds>|<get-smoothingTimeConstantSeconds>(){}[0]
 
     final fun component1(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerOptions.component1|component1(){}[0]
     final fun component2(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerOptions.component2|component2(){}[0]
     final fun component3(): kotlin/Double // tv.nomercy.player.core.plugins.audio/MixerOptions.component3|component3(){}[0]
     final fun component4(): kotlin/String? // tv.nomercy.player.core.plugins.audio/MixerOptions.component4|component4(){}[0]
-    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/String? = ...): tv.nomercy.player.core.plugins.audio/MixerOptions // tv.nomercy.player.core.plugins.audio/MixerOptions.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.String?){}[0]
+    final fun component5(): kotlin/Double? // tv.nomercy.player.core.plugins.audio/MixerOptions.component5|component5(){}[0]
+    final fun copy(kotlin/Double = ..., kotlin/Double = ..., kotlin/Double = ..., kotlin/String? = ..., kotlin/Double? = ...): tv.nomercy.player.core.plugins.audio/MixerOptions // tv.nomercy.player.core.plugins.audio/MixerOptions.copy|copy(kotlin.Double;kotlin.Double;kotlin.Double;kotlin.String?;kotlin.Double?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/MixerOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/MixerOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/MixerOptions.toString|toString(){}[0]
