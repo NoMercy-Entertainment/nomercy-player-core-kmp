@@ -351,17 +351,6 @@ public class ExoPlayerVideoBackend(
                 when (state) {
                     Player.STATE_BUFFERING -> bus.emit(CanonicalBackendEvent.WAITING)
                     Player.STATE_READY -> {
-                        // Bytes are flowing again — retire any in-flight
-                        // reconnect and hand the full backoff ladder back.
-                        if (networkRetryAttempt != 0) {
-                            Log.i(
-                                "nm-video-backend",
-                                "Playback recovered after $networkRetryAttempt reconnect attempt(s)",
-                            )
-                        }
-                        resetOutageLadder()
-                        positionBeforeNetworkLoss = 0L
-
                         if (!announcedCanPlay) {
                             announcedCanPlay = true
                             bus.emit(CanonicalBackendEvent.LOADED_METADATA)
@@ -397,6 +386,24 @@ public class ExoPlayerVideoBackend(
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 refreshCache()
                 if (isPlaying) {
+                    // Bytes are flowing again — retire any in-flight reconnect and
+                    // hand the full backoff ladder back.
+                    //
+                    // On PLAYING, not on STATE_READY. A re-prepare against a dead
+                    // server reaches READY off the buffer it already holds, which
+                    // zeroed the counter between every rung: the ladder announced
+                    // 10/10, reset to 1/10, and looped forever. The viewer sat on
+                    // "Buffering..." with no offline screen and no error, because
+                    // the give-up budget could never actually be spent.
+                    if (networkRetryAttempt != 0) {
+                        Log.i(
+                            "nm-video-backend",
+                            "Playback recovered after $networkRetryAttempt reconnect attempt(s)",
+                        )
+                    }
+                    resetOutageLadder()
+                    positionBeforeNetworkLoss = 0L
+
                     bus.emit(CanonicalBackendEvent.PLAYING)
                     startTicking()
                 } else {
