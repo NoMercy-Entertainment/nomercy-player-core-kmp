@@ -9,6 +9,8 @@
 package tv.nomercy.player.core.ports
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -29,6 +31,9 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -143,6 +148,49 @@ public class ExoPlayerVideoBackend(
     // gives a viewer the same failure on every item, and the sink's answer does
     // not change while the same cable is plugged into the same receiver.
     private var tunnelingRefusedByAudioSink: Boolean = false
+
+    // Riding out a server that went away mid-playback — a host restart, a LAN
+    // drop, a Wi-Fi roam. Media3 reports these as fatal source errors, but
+    // nothing about the media is broken: the bytes are back the moment the
+    // server is. See the transient branch in onPlayerError.
+    private var networkRetryAttempt: Int = 0
+    private var networkRecoveryJob: Job? = null
+    private var positionBeforeNetworkLoss: Long = 0L
+    // Set once the ladder is spent, so a device that regains connectivity later
+    // still rebuilds the session instead of leaving the viewer on a dead error.
+    private var awaitingNetworkReturn: Boolean = false
+    // Whether this outage started at the connection level, which is what tells
+    // a restarting server's 404 apart from a video that is genuinely gone.
+    private var sawConnectionFailure: Boolean = false
+
+    private val connectivityManager: ConnectivityManager? =
+        context.getSystemService(ConnectivityManager::class.java)
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+
+    private val recovering = MutableStateFlow(false)
+
+    /**
+     * True while the reconnect ladder is riding out a source the server stopped
+     * serving.
+     *
+     * The engine is the first thing in an app to learn the origin is gone: it
+     * asks for bytes constantly, while a realtime socket behind the same tunnel
+     * can stay up long after the server behind it died. A host watches this to
+     * probe reachability on the engine's evidence rather than waiting for a
+     * socket that may never drop — which is why a server restart could leave a
+     * TV on a dead player and never raise the server-offline screen.
+     */
+    public val isRecoveringFromOutage: StateFlow<Boolean> = recovering.asStateFlow()
+
+    /**
+     * Whether this session means to play, as opposed to having been paused.
+     *
+     * Survives buffering, so it separates "the bytes stopped" from "the viewer
+     * paused before any of this" — which is what a host needs to decide whether
+     * an outage screen owes playback back when it leaves.
+     */
+    public val isPlaybackIntended: Boolean
+        get() = runCatching { player.playWhenReady }.getOrDefault(false)
 
     // Once per player. A tracks change fires on every rung switch and a
     // viewer does not need the same refusal repeated for the whole film.
@@ -292,6 +340,17 @@ public class ExoPlayerVideoBackend(
                 when (state) {
                     Player.STATE_BUFFERING -> bus.emit(CanonicalBackendEvent.WAITING)
                     Player.STATE_READY -> {
+                        // Bytes are flowing again — retire any in-flight
+                        // reconnect and hand the full backoff ladder back.
+                        if (networkRetryAttempt != 0) {
+                            Log.i(
+                                "nm-video-backend",
+                                "Playback recovered after $networkRetryAttempt reconnect attempt(s)",
+                            )
+                        }
+                        resetOutageLadder()
+                        positionBeforeNetworkLoss = 0L
+
                         if (!announcedCanPlay) {
                             announcedCanPlay = true
                             bus.emit(CanonicalBackendEvent.LOADED_METADATA)
@@ -337,6 +396,7 @@ public class ExoPlayerVideoBackend(
 
             override fun onPlayerError(error: PlaybackException) {
                 if (recoverFromTunnelingRefusal(error)) return
+                if (rideOutSourceOutage(error)) return
                 bus.emit(CanonicalBackendEvent.ERROR, error.errorCodeName)
             }
 
@@ -396,10 +456,165 @@ public class ExoPlayerVideoBackend(
         return true
     }
 
+    /**
+     * A server that went away is an outage to ride out, not a dead file.
+     *
+     * Tearing the session down with an error overlay is what made a brief
+     * server blip read to a viewer as a corrupt film. Re-prepare from the
+     * position that was lost, on a backoff, and hold the UI in its waiting
+     * state so it reads as reconnecting rather than dead. Only once the ladder
+     * is spent does the failure become real and the error surface.
+     *
+     * Returns whether it handled the error, so the caller does not also report
+     * one the viewer is about to stop seeing.
+     */
+    private fun rideOutSourceOutage(error: PlaybackException): Boolean {
+        if (error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
+            error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
+        ) {
+            sawConnectionFailure = true
+        }
+
+        if (!SourceOutage.isTransient(error.errorCode)) return false
+
+        val limit: Int = SourceOutage.retryLimitFor(
+            error.errorCode,
+            SourceOutage.httpStatusOf(error),
+            sawConnectionFailure,
+        )
+        val attempt: Int = networkRetryAttempt
+        if (attempt >= limit) {
+            // The ladder is spent. The session stays revivable rather than
+            // dead: the error surfaces so the viewer sees what happened, and
+            // the connectivity callback rebuilds playback if this device gets a
+            // network back later.
+            awaitingNetworkReturn = true
+            ensureNetworkCallback()
+            recovering.value = false
+            return false
+        }
+
+        // Captured on the FIRST failure only. Every later prepare() has already
+        // reset the timeline, so reading it again would resume from zero.
+        if (attempt == 0) {
+            positionBeforeNetworkLoss = runCatching { player.currentPosition }.getOrDefault(0L)
+        }
+
+        // An outage on THIS device's side is not evidence that the server is
+        // gone, so it must not spend the give-up budget — a two-minute Wi-Fi
+        // drop would burn the whole ladder without a single attempt ever having
+        // a route to try. Hold at the slowest rung and let the connectivity
+        // callback take over the moment a network is back.
+        val deviceOffline: Boolean = !hasNetwork()
+        if (!deviceOffline) networkRetryAttempt = attempt + 1
+        ensureNetworkCallback()
+
+        Log.w(
+            "nm-video-backend",
+            "Transient source error (${error.errorCodeName}) — reconnect attempt " +
+                "${attempt + 1}/$limit in ${SourceOutage.BACKOFF_MS[attempt]}ms " +
+                "from ${positionBeforeNetworkLoss}ms" +
+                if (deviceOffline) " (device offline, budget held)" else "",
+        )
+        recovering.value = true
+        bus.emit(CanonicalBackendEvent.WAITING)
+        reconnect(SourceOutage.BACKOFF_MS[attempt])
+        return true
+    }
+
+    private fun reconnect(delayMs: Long) {
+        networkRecoveryJob?.cancel()
+        networkRecoveryJob = main.launch {
+            if (delayMs > 0) delay(delayMs)
+            runCatching {
+                // playWhenReady survives a source error but is cleared by
+                // pause(), so reading it HERE rather than at failure time is
+                // what lets an intervening pause — the viewer's, or an outage
+                // screen's — suppress the auto-resume instead of being
+                // overridden by it.
+                val shouldResume: Boolean = player.playWhenReady
+                player.prepare()
+                if (positionBeforeNetworkLoss > 0) player.seekTo(positionBeforeNetworkLoss)
+                if (shouldResume) player.play()
+            }.onFailure { e ->
+                Log.e("nm-video-backend", "Reconnect attempt failed: ${e.message}", e)
+            }
+        }
+    }
+
+    /**
+     * Whether the device itself is on a network right now. Deliberately "is
+     * there a default network", not "is the internet validated": a NoMercy
+     * server is usually a box on the same LAN, and a Wi-Fi network with no
+     * internet route still reaches it.
+     */
+    private fun hasNetwork(): Boolean {
+        val manager: ConnectivityManager = connectivityManager ?: return true
+        return runCatching { manager.activeNetwork != null }.getOrDefault(true)
+    }
+
+    /**
+     * Watches for the device coming back online so an outage longer than the
+     * backoff ladder still ends in playback rather than a dead error. Without
+     * it, a Wi-Fi drop that outlasts the ladder leaves the session
+     * unrecoverable until the viewer backs out and picks the episode again.
+     */
+    private fun ensureNetworkCallback() {
+        if (networkCallback != null) return
+        val manager: ConnectivityManager = connectivityManager ?: return
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                main.launch {
+                    if (networkRetryAttempt == 0 && !awaitingNetworkReturn) return@launch
+
+                    Log.i("nm-video-backend", "Connectivity returned — reconnecting now")
+                    // A fresh outage deserves the whole ladder: the attempts
+                    // spent waiting for the network to come back say nothing
+                    // about whether the server answers now.
+                    resetOutageLadder()
+                    reconnect(0L)
+                }
+            }
+        }
+
+        runCatching {
+            manager.registerDefaultNetworkCallback(callback)
+            networkCallback = callback
+        }.onFailure { e ->
+            Log.w("nm-video-backend", "Could not register network callback: ${e.message}")
+        }
+    }
+
+    private fun releaseNetworkCallback() {
+        val manager: ConnectivityManager = connectivityManager ?: return
+        networkCallback?.let { callback ->
+            runCatching { manager.unregisterNetworkCallback(callback) }
+                .onFailure { e ->
+                    Log.w("nm-video-backend", "Could not unregister network callback: ${e.message}")
+                }
+        }
+        networkCallback = null
+    }
+
+    /** Hands the full backoff budget back, so a later unrelated drop does not inherit a spent one. */
+    private fun resetOutageLadder() {
+        networkRecoveryJob?.cancel()
+        networkRecoveryJob = null
+        networkRetryAttempt = 0
+        awaitingNetworkReturn = false
+        sawConnectionFailure = false
+        recovering.value = false
+    }
+
     override suspend fun load(url: String, opts: LoadOptions): Unit = onMain {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
         refusedAsUnplayable = false
+        // A new source is a new session: the rungs the previous one spent say
+        // nothing about whether this one can be fetched.
+        resetOutageLadder()
+        positionBeforeNetworkLoss = 0L
         // The previous item's last line, taken off the picture before the next
         // one's first frame arrives. The web backend does this in unload() for
         // the same reason.
@@ -440,6 +655,18 @@ public class ExoPlayerVideoBackend(
 
     override suspend fun play(): Unit = onMain {
         bus.emit(CanonicalBackendEvent.PLAY)
+        // An idle player ignores play(): a source that died after the ladder ran
+        // out leaves the engine in STATE_IDLE with no timeline to resume, so the
+        // press did nothing at all and the player read as dead. The media item
+        // is still there, so re-preparing resumes at the second it was lost
+        // rather than rebuilding from the last position anything was told about.
+        if (awaitingNetworkReturn && player.playbackState == Player.STATE_IDLE) {
+            Log.w("nm-video-backend", "play() after a spent reconnect ladder — re-preparing the source")
+            resetOutageLadder()
+            player.playWhenReady = true
+            reconnect(0L)
+            return@onMain
+        }
         player.play()
     }
 
@@ -447,6 +674,11 @@ public class ExoPlayerVideoBackend(
 
     override fun stop(): Unit = fireAndForget {
         stopTicking()
+        // A pending reconnect would otherwise fire its prepare()/play() after
+        // this stop and quietly resurrect playback — under the outage screen,
+        // in the very case that asked us to stop.
+        resetOutageLadder()
+        positionBeforeNetworkLoss = 0L
         player.stop()
     }
 
@@ -729,6 +961,8 @@ public class ExoPlayerVideoBackend(
     // thinks something is playing.
     override fun release(): Unit = fireAndForget {
         stopTicking()
+        resetOutageLadder()
+        releaseNetworkCallback()
         player.release()
     }
 
