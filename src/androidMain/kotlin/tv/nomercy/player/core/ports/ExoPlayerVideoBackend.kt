@@ -540,7 +540,15 @@ public class ExoPlayerVideoBackend(
                 val shouldResume: Boolean = player.playWhenReady
                 player.prepare()
                 if (positionBeforeNetworkLoss > 0) player.seekTo(positionBeforeNetworkLoss)
-                if (shouldResume) player.play()
+                if (shouldResume) {
+                    // Through the bus, not just the engine. A media session is
+                    // published from CanonicalBackendEvent.PLAY; resuming with a
+                    // bare player.play() left the lock screen and every Connect
+                    // consumer frozen on PAUSED at the second the outage began,
+                    // while the film played on.
+                    bus.emit(CanonicalBackendEvent.PLAY)
+                    player.play()
+                }
             }.onFailure { e ->
                 Log.e("nm-video-backend", "Reconnect attempt failed: ${e.message}", e)
             }
