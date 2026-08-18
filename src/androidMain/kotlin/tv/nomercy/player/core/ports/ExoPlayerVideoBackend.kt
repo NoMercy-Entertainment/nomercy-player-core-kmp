@@ -316,6 +316,12 @@ public class ExoPlayerVideoBackend(
                         "viewport=${trackSelector.parameters.viewportWidth}x" +
                         "${trackSelector.parameters.viewportHeight}",
                 )
+                // The tracks the menus read. Nothing else refreshed them on this
+                // event, so the audio and subtitle lists held whatever the last
+                // state change happened to see — for a file that plays straight
+                // through with no rebuffer, that is nothing at all, and both
+                // menus stay empty for the whole title.
+                refreshCache()
                 reportUnsupportedVideo(tracks)
             }
 
