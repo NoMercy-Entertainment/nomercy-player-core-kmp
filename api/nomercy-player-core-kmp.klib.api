@@ -6052,6 +6052,19 @@ final class tv.nomercy.player.core.plugins.audio/VisualizationOptions { // tv.no
     final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VisualizationOptions.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions { // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions|null[0]
+    constructor <init>(kotlin/String? = ...) // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.<init>|<init>(kotlin.String?){}[0]
+
+    final val persistKey // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.persistKey|{}persistKey[0]
+        final fun <get-persistKey>(): kotlin/String? // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.persistKey.<get-persistKey>|<get-persistKey>(){}[0]
+
+    final fun component1(): kotlin/String? // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.component1|component1(){}[0]
+    final fun copy(kotlin/String? = ...): tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.copy|copy(kotlin.String?){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.plugins.canvas/CanvasFrame { // tv.nomercy.player.core.plugins.canvas/CanvasFrame|null[0]
     constructor <init>(kotlin/Double, kotlin/Double) // tv.nomercy.player.core.plugins.canvas/CanvasFrame.<init>|<init>(kotlin.Double;kotlin.Double){}[0]
 
@@ -8046,6 +8059,24 @@ open class tv.nomercy.player.core.plugins.audio/SpectrumPlugin : tv.nomercy.play
             final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
         final val version // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.version|{}version[0]
             final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/SpectrumPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
+    }
+}
+
+open class tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin : tv.nomercy.player.core.plugin/Plugin<tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions> { // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin|null[0]
+    constructor <init>(tv.nomercy.player.core.plugin/VolumeCommands, tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions = ...) // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.<init>|<init>(tv.nomercy.player.core.plugin.VolumeCommands;tv.nomercy.player.core.plugins.audio.VolumeMemoryOptions){}[0]
+
+    open val manifest // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.manifest|{}manifest[0]
+        open fun <get-manifest>(): tv.nomercy.player.core.plugin/PluginManifest // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.manifest.<get-manifest>|<get-manifest>(){}[0]
+    open val options // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.options|{}options[0]
+        open fun <get-options>(): tv.nomercy.player.core.plugins.audio/VolumeMemoryOptions // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.options.<get-options>|<get-options>(){}[0]
+
+    open fun use() // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.use|use(){}[0]
+
+    final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.Manifest|null[0]
+        final val id // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.Manifest.id|{}id[0]
+            final fun <get-id>(): kotlin/String // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.Manifest.id.<get-id>|<get-id>(){}[0]
+        final val version // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.Manifest.version|{}version[0]
+            final fun <get-version>(): kotlin/String // tv.nomercy.player.core.plugins.audio/VolumeMemoryPlugin.Manifest.version.<get-version>|<get-version>(){}[0]
     }
 }
 

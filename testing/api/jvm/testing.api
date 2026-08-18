@@ -1,3 +1,21 @@
+public class tv/nomercy/player/testing/FakeAudioBackend : tv/nomercy/player/testing/FakeMediaBackend, tv/nomercy/player/core/ports/AudioBackend {
+	public fun <init> ()V
+	public fun audioGraph ()Ltv/nomercy/player/core/ports/AudioDspGraph;
+	public fun crossfade (JLtv/nomercy/player/core/ports/CrossfadeCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun disposeSecondary ()V
+	public final fun getCrossfadeSupported ()Z
+	public final fun getCrossfades ()Ljava/util/List;
+	public final fun getSecondaryDisposals ()I
+	public final fun getSecondaryLoads ()Ljava/util/List;
+	public final fun getSecondaryPrimes ()Ljava/util/List;
+	public fun loadSecondary (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun secondaryGain ()F
+	public fun secondaryGain (F)V
+	public final fun setCrossfadeSupported (Z)V
+	public fun supportsCrossfade ()Z
+}
+
 public final class tv/nomercy/player/testing/FakeFetchCall {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;)V
 	public final fun component1 ()Ljava/lang/String;

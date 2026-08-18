@@ -182,6 +182,32 @@ final class tv.nomercy.player.testing/TestItem : tv.nomercy.player.core.media/Pl
     final fun toString(): kotlin/String // tv.nomercy.player.testing/TestItem.toString|toString(){}[0]
 }
 
+open class tv.nomercy.player.testing/FakeAudioBackend : tv.nomercy.player.core.ports/AudioBackend, tv.nomercy.player.testing/FakeMediaBackend { // tv.nomercy.player.testing/FakeAudioBackend|null[0]
+    constructor <init>() // tv.nomercy.player.testing/FakeAudioBackend.<init>|<init>(){}[0]
+
+    final val crossfades // tv.nomercy.player.testing/FakeAudioBackend.crossfades|{}crossfades[0]
+        final fun <get-crossfades>(): kotlin.collections/MutableList<kotlin/Pair<kotlin/Long, tv.nomercy.player.core.ports/CrossfadeCurve>> // tv.nomercy.player.testing/FakeAudioBackend.crossfades.<get-crossfades>|<get-crossfades>(){}[0]
+    final val secondaryLoads // tv.nomercy.player.testing/FakeAudioBackend.secondaryLoads|{}secondaryLoads[0]
+        final fun <get-secondaryLoads>(): kotlin.collections/MutableList<kotlin/String> // tv.nomercy.player.testing/FakeAudioBackend.secondaryLoads.<get-secondaryLoads>|<get-secondaryLoads>(){}[0]
+    final val secondaryPrimes // tv.nomercy.player.testing/FakeAudioBackend.secondaryPrimes|{}secondaryPrimes[0]
+        final fun <get-secondaryPrimes>(): kotlin.collections/MutableList<kotlin/Long> // tv.nomercy.player.testing/FakeAudioBackend.secondaryPrimes.<get-secondaryPrimes>|<get-secondaryPrimes>(){}[0]
+
+    final var crossfadeSupported // tv.nomercy.player.testing/FakeAudioBackend.crossfadeSupported|{}crossfadeSupported[0]
+        final fun <get-crossfadeSupported>(): kotlin/Boolean // tv.nomercy.player.testing/FakeAudioBackend.crossfadeSupported.<get-crossfadeSupported>|<get-crossfadeSupported>(){}[0]
+        final fun <set-crossfadeSupported>(kotlin/Boolean) // tv.nomercy.player.testing/FakeAudioBackend.crossfadeSupported.<set-crossfadeSupported>|<set-crossfadeSupported>(kotlin.Boolean){}[0]
+    final var secondaryDisposals // tv.nomercy.player.testing/FakeAudioBackend.secondaryDisposals|{}secondaryDisposals[0]
+        final fun <get-secondaryDisposals>(): kotlin/Int // tv.nomercy.player.testing/FakeAudioBackend.secondaryDisposals.<get-secondaryDisposals>|<get-secondaryDisposals>(){}[0]
+
+    open fun audioGraph(): tv.nomercy.player.core.ports/AudioDspGraph? // tv.nomercy.player.testing/FakeAudioBackend.audioGraph|audioGraph(){}[0]
+    open fun disposeSecondary() // tv.nomercy.player.testing/FakeAudioBackend.disposeSecondary|disposeSecondary(){}[0]
+    open fun secondaryGain(): kotlin/Float // tv.nomercy.player.testing/FakeAudioBackend.secondaryGain|secondaryGain(){}[0]
+    open fun secondaryGain(kotlin/Float) // tv.nomercy.player.testing/FakeAudioBackend.secondaryGain|secondaryGain(kotlin.Float){}[0]
+    open fun supportsCrossfade(): kotlin/Boolean // tv.nomercy.player.testing/FakeAudioBackend.supportsCrossfade|supportsCrossfade(){}[0]
+    open suspend fun crossfade(kotlin/Long, tv.nomercy.player.core.ports/CrossfadeCurve) // tv.nomercy.player.testing/FakeAudioBackend.crossfade|crossfade(kotlin.Long;tv.nomercy.player.core.ports.CrossfadeCurve){}[0]
+    open suspend fun loadSecondary(kotlin/String) // tv.nomercy.player.testing/FakeAudioBackend.loadSecondary|loadSecondary(kotlin.String){}[0]
+    open suspend fun primeSecondary(kotlin/Long) // tv.nomercy.player.testing/FakeAudioBackend.primeSecondary|primeSecondary(kotlin.Long){}[0]
+}
+
 open class tv.nomercy.player.testing/FakeMediaBackend : tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.testing/FakeMediaBackend|null[0]
     constructor <init>() // tv.nomercy.player.testing/FakeMediaBackend.<init>|<init>(){}[0]
 

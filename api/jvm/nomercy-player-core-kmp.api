@@ -5345,6 +5345,40 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationTick : java
 	public static fun values ()[Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
 }
 
+public final class tv/nomercy/player/core/plugins/audio/VolumeMemoryOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPersistKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class tv/nomercy/player/core/plugins/audio/VolumeMemoryPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/VolumeMemoryPlugin$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/plugin/VolumeCommands;Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/VolumeCommands;Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public synthetic fun getOptions ()Ljava/lang/Object;
+	public fun getOptions ()Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VolumeMemoryPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
 public class tv/nomercy/player/core/plugins/audio/WaveformVisualization : tv/nomercy/player/core/plugins/audio/VisualizationPlugin {
 	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/WaveformVisualization$Manifest;
 	public fun <init> (Ltv/nomercy/player/core/plugins/audio/SpectrumPlugin;I)V
