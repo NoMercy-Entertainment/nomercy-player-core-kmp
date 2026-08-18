@@ -166,6 +166,11 @@ public class ExoPlayerVideoBackend(
     private val connectivityManager: ConnectivityManager? =
         context.getSystemService(ConnectivityManager::class.java)
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    // registerDefaultNetworkCallback delivers onAvailable for the network that
+    // is ALREADY up, immediately. Proven on a Nokia box: the ladder announced
+    // rung 1 and 37ms later "connectivity returned" reset it to rung 1 again.
+    // A route that never went away is not a route coming back.
+    private var ignoreFirstOnAvailable: Boolean = false
 
     private val recovering = MutableStateFlow(false)
 
@@ -563,9 +568,14 @@ public class ExoPlayerVideoBackend(
         if (networkCallback != null) return
         val manager: ConnectivityManager = connectivityManager ?: return
 
+        ignoreFirstOnAvailable = hasNetwork()
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 main.launch {
+                    if (ignoreFirstOnAvailable) {
+                        ignoreFirstOnAvailable = false
+                        return@launch
+                    }
                     if (networkRetryAttempt == 0 && !awaitingNetworkReturn) return@launch
 
                     Log.i("nm-video-backend", "Connectivity returned — reconnecting now")
