@@ -57,6 +57,64 @@ jobs:
             build/test-results/
           retention-days: 7
 
+  # The two libraries that consume this one, compiled against this commit.
+  #
+  # Core is the only repo in the trio that can break the other two, and it was
+  # the only one with nothing watching. Video and music each compile against a
+  # core checkout in their own CI, so a core push that removes or renames
+  # something was caught whenever a consumer next pushed -- which is to say,
+  # not by the push that caused it.
+  #
+  # That is not hypothetical. The app's Android release build failed on
+  # 2026-08-08 compiling video-player against a core master that did not yet
+  # carry KeyHandlerScope, DEFAULT_COOLDOWN_MS, NO_ACTIVE_ITEM or
+  # PluginOptionField. Video's master was hours ahead of core's, every repo was
+  # individually green, and the break surfaced days later in a third repo's
+  # release.
+  #
+  # The consumers are taken at master because that is the ref the app's release
+  # workflow clones. Green here means the app can resolve this core.
+  downstream:
+    runs-on: [self-hosted, Linux, X64, beast-unit]
+    steps:
+      # The monorepo layout, because that is what both consumers'
+      # settings.gradle.kts looks for: each substitutes the coordinate with a
+      # sibling checkout at ../nomercy-player-core-kmp when one is there.
+      - uses: actions/checkout@v4
+        with:
+          path: packages-native/nomercy-player-core-kmp
+
+      - uses: actions/checkout@v4
+        with:
+          repository: NoMercy-Entertainment/nomercy-video-player-kmp
+          path: packages-native/nomercy-video-player-kmp
+
+      - uses: actions/checkout@v4
+        with:
+          repository: NoMercy-Entertainment/nomercy-music-player-kmp
+          path: packages-native/nomercy-music-player-kmp
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # assemble, not build: this job answers "can a consumer still compile
+      # against this core", and their own suites are their own CI's job. Every
+      # target the runner can build, because androidMain code that reaches for a
+      # symbol commonMain never touched is exactly what the app trips over.
+      - name: Video player compiles against this core
+        working-directory: packages-native/nomercy-video-player-kmp
+        run: ./gradlew assemble --console=plain
+
+      - name: Music player compiles against this core
+        working-directory: packages-native/nomercy-music-player-kmp
+        run: ./gradlew assemble --console=plain
+
   # The half that legally requires Apple hardware: executing Kotlin/Native tests
   # on a simulator, and linking the xcframework the Swift side consumes. SKIE
   # only runs during framework linking, so this job is the first place its output
