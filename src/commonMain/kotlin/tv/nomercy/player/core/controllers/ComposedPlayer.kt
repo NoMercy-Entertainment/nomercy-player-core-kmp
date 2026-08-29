@@ -1157,7 +1157,10 @@ public open class ComposedPlayer(
 
     public open fun backlogClear(): Unit = queue.backlogClear()
 
-    public open suspend fun item(id: String, autoplay: Boolean = false): Unit = queue.item(id, autoplay)
+    // Autoplay defaults ON: picking an item is a decision to watch it, and
+    // every caller that meant otherwise says so. The old default left a queue
+    // pick, an episode dialog and a remote all loading onto a still frame.
+    public open suspend fun item(id: String, autoplay: Boolean = true): Unit = queue.item(id, autoplay)
 
     public open suspend fun playItem(id: String): Unit = queue.playItem(id)
 
