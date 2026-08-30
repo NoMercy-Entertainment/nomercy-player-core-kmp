@@ -199,20 +199,48 @@ public class BackendBridge(
     // spinner is expected; after playback started the buffer ran dry, and that
     // is worth saying out loud rather than showing the same spinner and hoping.
     private fun attachBufferState(backend: MediaBackend) {
+        // Both gated on the player actually running.
+        //
+        // A paused player is not waiting for data, it is waiting for the viewer.
+        // Media3 announces WAITING for a seek it services while paused and then
+        // never reaches CAN_PLAY, because it is never going to start — so the
+        // stall announced on the way in had nothing to clear it, and the chrome
+        // went on saying "buffering" over a still frame for as long as the
+        // viewer left it there. Seeking around while paused is the ordinary way
+        // to hit that, and it made the state read as a lie.
         listen(backend, CanonicalBackendEvent.WAITING) {
-            ctx.bufferState = if (announcedFirstFrame) BufferState.STALLED else BufferState.LOADING
-            ctx.emit(CoreEvents.BackendWaiting, Unit)
+            if (ctx.phase != PlayerPhase.PAUSED) {
+                ctx.bufferState =
+                    if (announcedFirstFrame) BufferState.STALLED else BufferState.LOADING
+                ctx.emit(CoreEvents.BackendWaiting, Unit)
+            }
         }
 
         listen(backend, CanonicalBackendEvent.STALLED) {
-            ctx.bufferState = BufferState.STALLED
-            ctx.emit(CoreEvents.BackendStalled, BackendStalledPayload(ctx.backend?.currentTime() ?: 0.0))
+            if (ctx.phase != PlayerPhase.PAUSED) {
+                ctx.bufferState = BufferState.STALLED
+                ctx.emit(
+                    CoreEvents.BackendStalled,
+                    BackendStalledPayload(ctx.backend?.currentTime() ?: 0.0),
+                )
+            }
         }
 
         // Announced, like every other handler here. Setting the field alone
         // left the clear invisible: nothing recomputes the snapshot for a value
         // nobody emits, so a player that finished buffering while paused went on
         // reporting LOADING until some unrelated event moved the state.
+        // A paused player is not waiting for data, it is waiting for the viewer.
+        //
+        // Media3 announces WAITING for a seek it services while paused and then
+        // never reaches CAN_PLAY, because it is never going to start — so the
+        // stall announced on the way in had nothing to clear it, and the chrome
+        // went on saying "buffering" over a still frame for as long as the
+        // viewer left it there. Pausing settles it.
+        listen(backend, CanonicalBackendEvent.PAUSE) {
+            ctx.bufferState = BufferState.IDLE
+        }
+
         listen(backend, CanonicalBackendEvent.CAN_PLAY) {
             ctx.bufferState = BufferState.IDLE
             // The stream is healthy, so the retries it took to get here are spent
