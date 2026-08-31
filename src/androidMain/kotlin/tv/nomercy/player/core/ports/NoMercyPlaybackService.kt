@@ -72,6 +72,37 @@ public class NoMercyPlaybackService : MediaSessionService() {
             .launchIn(scope)
     }
 
+    // The promotion that never came.
+    //
+    // `startForegroundService` starts a clock: the platform kills the process
+    // with ForegroundServiceDidNotStartInTimeException unless something calls
+    // `startForeground` within a few seconds. The base class does that for us,
+    // but ONLY once a registered session reports that it is playing — and a
+    // session that never starts (a play that failed, a source that never
+    // opened, a session published and released inside the window) leaves the
+    // clock running with nothing to answer it. The phone crashed mid-episode,
+    // reported 2026-08-31.
+    //
+    // So the service ends itself before the platform does. Stopping in time is
+    // as good an answer to the clock as promoting is, and a service with no
+    // playing session has nothing to keep alive.
+    override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
+        mainHandler.removeCallbacks(stopIfNeverPromoted)
+        mainHandler.postDelayed(stopIfNeverPromoted, PROMOTION_GRACE_MS)
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private val mainHandler: android.os.Handler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    private val stopIfNeverPromoted: Runnable = Runnable {
+        // playWhenReady rather than isPlaying: a stream still opening has not
+        // started yet and is exactly the case worth waiting for.
+        val wanted: Boolean = runCatching {
+            attached?.player?.let { it.isPlaying || it.playWhenReady } == true
+        }.getOrDefault(false)
+        if (!wanted) stopSelf()
+    }
+
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = attached
 
     // A `null` published session — playback stopped and
@@ -97,8 +128,16 @@ public class NoMercyPlaybackService : MediaSessionService() {
             // collector whose death silently strands every later transition.
             runCatching { addSession(session) }
         } else {
+            mainHandler.removeCallbacks(stopIfNeverPromoted)
             stopSelf()
         }
+    }
+
+    private companion object {
+        // Under the platform's own window, which is five seconds on the devices
+        // this runs on. Long enough for a real play to promote, short enough
+        // that a play which never happens ends quietly instead of fatally.
+        const val PROMOTION_GRACE_MS: Long = 4_000L
     }
 
     override fun onDestroy() {
@@ -106,6 +145,7 @@ public class NoMercyPlaybackService : MediaSessionService() {
         // "session not found" when the session was already torn down by another
         // path, and a throw here is fatal — the phone restarted on a play press
         // (measured 2026-08-17, IllegalArgumentException from this class).
+        mainHandler.removeCallbacks(stopIfNeverPromoted)
         attached?.let { runCatching { removeSession(it) } }
         attached = null
         scopeJob?.cancel()
