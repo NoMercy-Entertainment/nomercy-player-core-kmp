@@ -14,6 +14,7 @@ import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import tv.nomercy.player.testing.FakeMediaBackend
 import tv.nomercy.player.testing.TestItem
 
@@ -48,10 +49,19 @@ class ProgressAndBufferStateTest {
 
         val snapshot: TimeState = player.timeData()
 
-        assertEquals(
-            TimeState(time = 25.0, duration = 100.0, buffered = 40.0, remaining = 75.0, percentage = 25.0),
-            snapshot,
+        // The position advances between engine ticks now — the renderer owns the
+        // clock — so the one field that keeps moving is compared with a
+        // tolerance and the three derived from it are checked against IT, which
+        // is the thing this test is actually about: a chrome reading a snapshot
+        // rather than computing the same three numbers itself.
+        assertTrue(
+            snapshot.time >= 25.0 && snapshot.time < 25.5,
+            "the snapshot did not carry the position it was ticked to: ${snapshot.time}",
         )
+        assertEquals(100.0, snapshot.duration)
+        assertEquals(40.0, snapshot.buffered)
+        assertEquals(snapshot.duration - snapshot.time, snapshot.remaining)
+        assertEquals(snapshot.time / snapshot.duration * 100.0, snapshot.percentage)
     }
 
     @Test
@@ -170,6 +180,29 @@ class ProgressAndBufferStateTest {
         backend.fire(CanonicalBackendEvent.STALLED)
 
         assertEquals(BufferState.STALLED, player.bufferState())
+    }
+
+    // A player sitting still is not waiting for data, whether it was paused or
+    // never started.
+    //
+    // The guard read the PHASE, which is only PAUSED once something has paused
+    // — a player parked at the start has never been there. So the engine's own
+    // buffering, which happens whether or not anybody asked for playback, was
+    // reported as a stall, and a stall on a still picture clears on a position
+    // that advances: nothing was advancing, so it stayed for ever.
+    @Test
+    fun anEngineFillingItsBufferOnAPlayerNobodyStartedIsNotAStall() = runTest {
+        val backend = FakeMediaBackend()
+        val player = ComposedPlayer(backend = backend)
+        player.queue(listOf(TestItem("a")))
+        player.setup()
+        // Loaded and parked at the top, which is where a pre-screen leaves it:
+        // nobody has pressed play, so nothing has ever been PAUSED either.
+        backend.fire(CanonicalBackendEvent.CAN_PLAY)
+
+        backend.fire(CanonicalBackendEvent.WAITING)
+
+        assertEquals(BufferState.IDLE, player.bufferState())
     }
 
     @Test

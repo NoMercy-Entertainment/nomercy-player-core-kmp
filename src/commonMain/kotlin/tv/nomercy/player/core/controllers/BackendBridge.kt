@@ -102,6 +102,7 @@ public class BackendBridge(
             ctx.bufferState = BufferState.LOADING
             // A new item has its own first frame.
             announcedFirstFrame = false
+            announcedCanPlay = false
             // Nothing comes out while a source loads, so a state still saying
             // playing is a state that is lying. A toggle bound to it spent the
             // viewer's first press pausing a silent player.
@@ -198,18 +199,36 @@ public class BackendBridge(
     // when it arrives. Before the first frame the source is still loading and a
     // spinner is expected; after playback started the buffer ran dry, and that
     // is worth saying out loud rather than showing the same spinner and hoping.
+    // PLAYING is set the moment play() is called, not when the first frame
+    // lands, so the spinner still covers the wait after a viewer presses play.
+    private fun playbackWanted(): Boolean =
+        ctx.playState == PlayState.PLAYING && ctx.phase != PlayerPhase.PAUSED
+
+    // Whether this source has ever said it holds enough to play. Until it has,
+    // a wait IS the source loading and the spinner belongs on screen whoever
+    // asked; after it has, a wait on a player nobody is running is the engine
+    // topping up behind a still picture, and saying so is a lie that never
+    // clears — nothing advances to take it back.
+    private var announcedCanPlay: Boolean = false
+
     private fun attachBufferState(backend: MediaBackend) {
         // Both gated on the player actually running.
         //
-        // A paused player is not waiting for data, it is waiting for the viewer.
-        // Media3 announces WAITING for a seek it services while paused and then
-        // never reaches CAN_PLAY, because it is never going to start — so the
-        // stall announced on the way in had nothing to clear it, and the chrome
-        // went on saying "buffering" over a still frame for as long as the
-        // viewer left it there. Seeking around while paused is the ordinary way
-        // to hit that, and it made the state read as a lie.
+        // A player sitting still is not waiting for data, it is waiting for the
+        // viewer. Media3 announces WAITING for a seek it services while stopped
+        // and then never reaches CAN_PLAY, because it is never going to start —
+        // so the stall announced on the way in had nothing to clear it, and the
+        // chrome went on saying "buffering" over a still frame for as long as
+        // the viewer left it there.
+        //
+        // Whether playback was ASKED for, not which phase it is in: a player
+        // parked at the top has never been PAUSED, so a phase test let the
+        // engine's own start-up buffering through as a stall on a picture that
+        // was never moving — reported from the living room as a paused player at
+        // the start showing the buffering state.
         listen(backend, CanonicalBackendEvent.WAITING) {
-            if (ctx.phase != PlayerPhase.PAUSED) {
+            val worthSaying: Boolean = playbackWanted() || !announcedCanPlay
+            if (worthSaying) {
                 ctx.bufferState =
                     if (announcedFirstFrame) BufferState.STALLED else BufferState.LOADING
                 ctx.emit(CoreEvents.BackendWaiting, Unit)
@@ -242,6 +261,7 @@ public class BackendBridge(
         }
 
         listen(backend, CanonicalBackendEvent.CAN_PLAY) {
+            announcedCanPlay = true
             ctx.bufferState = BufferState.IDLE
             // The stream is healthy, so the retries it took to get here are spent
             // budget rather than a running total. A film watched through three bad
