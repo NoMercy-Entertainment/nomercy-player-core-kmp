@@ -794,7 +794,11 @@ public class ExoPlayerVideoBackend(
         cachedSubtitleTrack = ExoTrackMapper.selectedSubtitleTrack(tracks)
         cachedState = when (player.playbackState) {
             Player.STATE_READY -> if (player.isPlaying) BackendState.PLAYING else BackendState.PAUSED
-            Player.STATE_BUFFERING -> BackendState.LOADING
+            // Media3 buffers whether or not anybody asked it to play, and a
+            // player told to stay put is not loading — it is stopped, holding
+            // whatever it holds. Reporting LOADING there is what a media
+            // element never does, and the reference reads this answer directly.
+            Player.STATE_BUFFERING -> if (player.playWhenReady) BackendState.LOADING else BackendState.PAUSED
             Player.STATE_ENDED -> BackendState.READY
             else -> BackendState.IDLE
         }
