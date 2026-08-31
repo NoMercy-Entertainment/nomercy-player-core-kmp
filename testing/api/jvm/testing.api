@@ -202,6 +202,8 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeVideoBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
 	public final fun getAudio ()Ljava/util/List;
 	public fun getCanToneMapHdrToSdr ()Z
+	public final fun getChosenAudio ()Ltv/nomercy/player/core/ports/AudioTrack;
+	public final fun getChosenSubtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public final fun getLevels ()Ljava/util/List;
 	public final fun getPauseCount ()I
 	public final fun getPlayCount ()I
@@ -223,6 +225,8 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setAudio (Ljava/util/List;)V
+	public final fun setChosenAudio (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public final fun setChosenSubtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public final fun setLevels (Ljava/util/List;)V
 	public final fun setSubtitleTracks (Ljava/util/List;)V
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
