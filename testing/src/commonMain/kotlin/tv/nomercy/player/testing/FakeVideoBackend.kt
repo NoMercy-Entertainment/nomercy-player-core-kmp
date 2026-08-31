@@ -34,8 +34,12 @@ public open class FakeVideoBackend : VideoBackend {
         private set
 
     private var position: Double = 0.0
-    private var chosenSubtitle: SubtitleTrack? = null
-    private var chosenAudio: AudioTrack? = null
+    // Writable, so a test can model the ENGINE settling on a file's own default.
+    // That selection does not go through the player's setter and announces no
+    // event, which is the distinction a preferences plugin depends on: what it
+    // saves is a viewer's choice, and the engine's default is not one.
+    public var chosenSubtitle: SubtitleTrack? = null
+    public var chosenAudio: AudioTrack? = null
     private var chosenQuality: QualityLevel? = null
     private var level: Float = 1.0f
     private var rate: Double = 1.0
