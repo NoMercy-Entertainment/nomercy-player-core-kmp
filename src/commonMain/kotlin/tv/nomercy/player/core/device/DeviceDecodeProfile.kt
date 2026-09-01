@@ -20,6 +20,12 @@ package tv.nomercy.player.core.device
  * backend's contract inside a library any consumer is meant to use — the web
  * keeps the equivalent (`browserCaps.ts`) in its APP for that reason. A
  * consumer maps this into whatever its own server asks for.
+ *
+ * Per-codec rather than a flat allow-list plus one global boolean: a device
+ * that decodes HEVC Main10 but not AVC High10 has no way to say so under a
+ * single `supports10Bit` flag, and the same failure mode applies to HDR
+ * format, profile/level, resolution+fps ceiling, max bitrate, and audio
+ * passthrough vs decode-only.
  */
 public data class DeviceDecodeProfile(
     /**
@@ -27,26 +33,12 @@ public data class DeviceDecodeProfile(
      * that asks a server to transcode wants the most reliably decodable target
      * named first, which on every platform so far is H.264.
      */
-    val videoCodecs: List<String> = emptyList(),
-    val audioCodecs: List<String> = emptyList(),
+    val video: List<VideoCodecCapability> = emptyList(),
+    val audio: List<AudioCodecCapability> = emptyList(),
     val containers: List<String> = emptyList(),
-    val maxWidth: Int? = null,
-    val maxHeight: Int? = null,
 
-    /** A DISPLAY trait. */
+    /** DISPLAY trait, not decoder — kept as-is. */
     val supportsHdr: Boolean = false,
-
-    /**
-     * A DECODER trait, and deliberately not the same question as HDR.
-     *
-     * SDR 10-bit HEVC is routine, and a capable decoder opens it with no HDR
-     * display anywhere near it. This is also the field that decides whether a
-     * Hi10P file reaches an Android phone as-is, and no Android device has
-     * answered yes to it in hardware.
-     */
-    val supports10Bit: Boolean = false,
-
-    val maxAudioChannels: Int = STEREO,
 
     /** Zero means no client-imposed cap, and zero is nearly always right. */
     val maxBitrateKbps: Int = NO_CAP,
@@ -55,6 +47,39 @@ public data class DeviceDecodeProfile(
         public const val STEREO: Int = 2
         public const val NO_CAP: Int = 0
     }
+}
+
+/**
+ * One codec's decode ceiling, exhaustive rather than additive-flag: a profile
+ * absent from [profiles] means this device does not open it, not "unlisted so
+ * far" — an AVC entry with no `high10`/`main10` profile is 8-bit-only H.264 on
+ * this device, exactly the bug case a flat allow-list could not express.
+ */
+public data class VideoCodecCapability(
+    val codec: String,                       // DecodeCodec.H264 / H265 / AV1 / VP9
+    val profiles: List<String> = emptyList(), // e.g. "high10", "main10", "main"
+    val maxBitDepth: Int = 8,                 // 8 / 10 / 12
+    val maxWidth: Int,
+    val maxHeight: Int,
+    val maxFramerate: Int = 60,
+    val hdrFormats: List<String> = emptyList(), // HdrFormat.HDR10 / HDR10_PLUS / DOLBY_VISION / HLG
+    val maxBitrateKbps: Int = DeviceDecodeProfile.NO_CAP,
+)
+
+/** One codec's audio decode/passthrough answer — a device can have both, either, or neither. */
+public data class AudioCodecCapability(
+    val codec: String,                 // DecodeCodec.AAC / AC3 / EAC3 / DTS / TRUEHD / FLAC / OPUS / MP3
+    val maxChannels: Int = DeviceDecodeProfile.STEREO,
+    val passthrough: Boolean = false,  // bitstream to an external receiver, no decode
+    val decode: Boolean = true,        // device can decode+downmix itself
+)
+
+/** The HDR format names this library reports, lowercase and vendor-neutral. */
+public object HdrFormat {
+    public const val HDR10: String = "hdr10"
+    public const val HDR10_PLUS: String = "hdr10plus"
+    public const val DOLBY_VISION: String = "dolbyvision"
+    public const val HLG: String = "hlg"
 }
 
 /** The codec names this library reports, lowercase and vendor-neutral. */
@@ -67,6 +92,8 @@ public object DecodeCodec {
     public const val AAC: String = "aac"
     public const val EAC3: String = "eac3"
     public const val AC3: String = "ac3"
+    public const val DTS: String = "dts"
+    public const val TRUEHD: String = "truehd"
     public const val FLAC: String = "flac"
     public const val OPUS: String = "opus"
     public const val MP3: String = "mp3"
@@ -77,6 +104,8 @@ public object DecodeContainer {
     public const val MP4: String = "mp4"
     public const val WEBM: String = "webm"
     public const val DASH: String = "dash"
+    public const val TS: String = "ts"
+    public const val MKV: String = "mkv"
 }
 
 /**

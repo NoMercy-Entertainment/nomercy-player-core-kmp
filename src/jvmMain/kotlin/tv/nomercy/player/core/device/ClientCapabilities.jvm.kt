@@ -26,36 +26,71 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
         GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.displayMode
     }.getOrNull()
 
+    val maxWidth: Int = bounds?.let { mode -> DecodeResolution.clamp(maxOf(mode.width, mode.height)) } ?: DecodeResolution.UHD
+    val maxHeight: Int = bounds?.let { mode -> DecodeResolution.clamp(minOf(mode.width, mode.height)) } ?: DecodeResolution.UHD
+
+    // libmpv tone-maps whatever it opens rather than gating on it, so every
+    // format and profile this list names is a ceiling ffmpeg clears, not a
+    // hardware answer the way the Android/Apple actuals give one.
+    val allHdrFormats: List<String> = listOf(HdrFormat.HDR10, HdrFormat.HDR10_PLUS, HdrFormat.DOLBY_VISION, HdrFormat.HLG)
+
+    fun video(codec: String, profiles: List<String>): VideoCodecCapability = VideoCodecCapability(
+        codec = codec,
+        profiles = profiles,
+        maxBitDepth = MAX_BIT_DEPTH,
+        maxWidth = maxWidth,
+        maxHeight = maxHeight,
+        maxFramerate = MAX_FRAMERATE,
+        hdrFormats = allHdrFormats,
+        maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
+    )
+
+    fun audio(codec: String): AudioCodecCapability = AudioCodecCapability(
+        codec = codec,
+        maxChannels = MAX_SURROUND_CHANNELS,
+        passthrough = false,
+        decode = true,
+    )
+
     return DeviceDecodeProfile(
         // H264 first, as web does it, because the server transcodes to the
         // first listed codec and that is the one every downstream device and
         // cast target also opens.
-        videoCodecs = listOf(DecodeCodec.H264, DecodeCodec.H265, DecodeCodec.AV1),
-        audioCodecs = listOf(
-            DecodeCodec.AAC,
-            DecodeCodec.EAC3,
-            DecodeCodec.AC3,
-            DecodeCodec.FLAC,
-            DecodeCodec.OPUS,
-            DecodeCodec.MP3,
+        video = listOf(
+            video(DecodeCodec.H264, listOf("baseline", "main", "high", "high10")),
+            video(DecodeCodec.H265, listOf("main", "main10")),
+            video(DecodeCodec.AV1, listOf("main", "main10")),
+            video(DecodeCodec.VP9, listOf("profile0", "profile2")),
+        ),
+        audio = listOf(
+            audio(DecodeCodec.AAC),
+            audio(DecodeCodec.EAC3),
+            audio(DecodeCodec.AC3),
+            audio(DecodeCodec.DTS),
+            audio(DecodeCodec.TRUEHD),
+            audio(DecodeCodec.FLAC),
+            audio(DecodeCodec.OPUS),
+            audio(DecodeCodec.MP3),
         ),
         containers = listOf(
             DecodeContainer.HLS,
             DecodeContainer.MP4,
             DecodeContainer.WEBM,
             DecodeContainer.DASH,
+            DecodeContainer.MKV,
+            DecodeContainer.TS,
         ),
-        maxWidth = bounds?.let { mode -> DecodeResolution.clamp(maxOf(mode.width, mode.height)) },
-        maxHeight = bounds?.let { mode -> DecodeResolution.clamp(minOf(mode.width, mode.height)) },
         // Not probed. A desktop's HDR output depends on the panel, the cable
         // and the compositor, and none of the three answers through a JVM API —
         // so this says no rather than guessing, and an SDR picture one rung
-        // lower is the cost of being wrong that way.
+        // lower is the cost of being wrong that way. Per-codec [hdrFormats]
+        // above stays a decode ceiling regardless: libmpv tone-maps HDR to
+        // whatever the display actually is.
         supportsHdr = false,
-        // ffmpeg decodes 10-bit everything, which is the whole reason the
-        // desktop plays the files a phone cannot.
-        supports10Bit = true,
-        maxAudioChannels = DeviceDecodeProfile.STEREO,
         maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
     )
 }
+
+private const val MAX_BIT_DEPTH: Int = 12
+private const val MAX_FRAMERATE: Int = 120
+private const val MAX_SURROUND_CHANNELS: Int = 8
