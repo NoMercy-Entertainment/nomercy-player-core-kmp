@@ -407,7 +407,15 @@ public class ExoPlayerVideoBackend(
                     bus.emit(CanonicalBackendEvent.PLAYING)
                     startTicking()
                 } else {
-                    bus.emit(CanonicalBackendEvent.PAUSE)
+                    // Media3 also reports not-playing while STATE_BUFFERING with
+                    // playWhenReady still true — a stall, not a pause. The comment
+                    // above already draws this distinction for the true branch;
+                    // the false branch was announcing PAUSE unconditionally,
+                    // which told every listener (chrome visibility included) that
+                    // the viewer had paused whenever the network merely stalled.
+                    if (!exoPlayer.playWhenReady) {
+                        bus.emit(CanonicalBackendEvent.PAUSE)
+                    }
                     stopTicking()
                 }
             }
@@ -639,6 +647,15 @@ public class ExoPlayerVideoBackend(
     }
 
     override suspend fun load(url: String, opts: LoadOptions): Unit = onMain {
+        // Silence the outgoing item the instant a switch is decided, not once
+        // the incoming one is ready. TransportController.advanceTo() moves the
+        // queue cursor and fires the chrome's loading state before this runs
+        // (see its own comment on that ordering) — with playWhenReady left
+        // alone here, the OLD item's audio/video kept rendering under that
+        // spinner for as long as the new source took to buffer, seconds on an
+        // HLS episode change. The subsequent play(opts) call re-arms it once
+        // the new item is actually ready.
+        player.playWhenReady = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
         refusedAsUnplayable = false
