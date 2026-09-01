@@ -268,6 +268,11 @@ public class BackendBridge(
             // patches would otherwise die at the third having survived the first
             // two, which is the failure mode that looks least like a bug.
             recovery.progressed()
+            // Announced, like every other handler here: nothing recomputed the
+            // chrome's own feedback overlay for a bufferState flip nobody emitted,
+            // so a pre-screen preview that finished loading while paused (never
+            // Playing, never a Time tick) kept "Buffering" up over a ready picture.
+            ctx.emit(CoreEvents.Ready, Unit)
         }
     }
 

@@ -49,12 +49,23 @@ public fun labelsNeedQualifier(languages: List<String>): Boolean =
 // exactly the same fix.
 public fun resolveSubtitleLabel(label: String?, language: String?): String {
     val kind: String? = subtitleKindOf(label)
+
+    // Resolved once, used by both tiers below: a track with no kind word is
+    // exactly as entitled to a real language name as one with "full" in its
+    // label. Excludes the tag itself — "und" IS a real ISO-639-2 code, but
+    // showing it verbatim in a menu answers nothing a viewer can act on, so
+    // it is treated the same as no language at all rather than round-tripped
+    // through displayLanguage (which mostly just echoes an unrecognised tag
+    // back unchanged, per its own doc — including this one).
+    val langName: String? = language
+        ?.takeIf { it.isNotBlank() && !it.equals(UNKNOWN_SUBTITLE_LANGUAGE, ignoreCase = true) }
+        ?.let(::displayLanguage)
+
     if (kind != null) {
-        val langName: String? = language?.takeIf { it.isNotBlank() }?.let(::displayLanguage)
         return if (langName != null) "$langName ($kind)" else kind
     }
     return label?.takeIf { it.isNotBlank() }
-        ?: language?.takeIf { it.isNotBlank() }
+        ?: langName
         ?: UNKNOWN_SUBTITLE_LANGUAGE
 }
 
