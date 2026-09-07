@@ -15,13 +15,27 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
+import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.CommandButton
+import androidx.media3.session.LibraryResult
+import androidx.media3.session.MediaLibraryService.LibraryParams
+import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionResult
+import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.SettableFuture
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import tv.nomercy.player.core.plugin.BrowseNode
+import tv.nomercy.player.core.plugin.BrowseTreeProvider
 
 // The Android lock screen, notification and car display — all of them one
 // session.
@@ -32,13 +46,18 @@ import com.google.common.util.concurrent.ListenableFuture
 // on which registered last. A session built by the library and released with the
 // player cannot have that argument with itself.
 @UnstableApi
-internal class Media3SystemTransport(context: Context) : SystemTransport {
+internal class Media3SystemTransport(
+    context: Context,
+    // Injected rather than reached for, so a test can resolve a browse answer
+    // on its own scheduler instead of waiting on a real thread pool.
+    browseDispatcher: CoroutineDispatcher = Dispatchers.Default,
+) : SystemTransport {
 
     private val appContext: Context = context.applicationContext
 
     private val bridge = TransportSimpleBasePlayer()
 
-    private val session: MediaSession = run {
+    private val session: MediaLibrarySession = run {
         // The fixed [SESSION_ID] means Media3 throws "Session ID must be
         // unique" if a prior instance's own release() (app-side dispose() is
         // suspend, fired from a Compose DisposableEffect) has not completed
@@ -79,7 +98,7 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     // per instance (reported live, 2026-08-16), because the foreground service
     // binds to the session it was promoted with. The duplicate-id crash this
     // was trying to solve is an orphan-release problem, not a naming one.
-    private fun buildSession(): MediaSession {
+    private fun buildSession(): MediaLibrarySession {
         // The orphan, not the name. A session that was constructed and then
         // thrown away before publish() still holds SESSION_ID in Media3's
         // registry, and PlaybackForegroundSession only knows about published
@@ -89,11 +108,35 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         lastBuilt?.let { orphan -> runCatching { orphan.release() } }
         lastBuilt = null
 
-        return MediaSession.Builder(appContext, bridge)
+        // A MediaLibrarySession rather than a plain MediaSession, because a
+        // Bluetooth head unit finds a player by enumerating BROWSABLE ones —
+        // a session with no browse side is controllable once something else
+        // starts it and invisible to the car's own player list, which is why
+        // NoMercy never appeared beside Spotify on a head unit and its cover
+        // art never loaded. MediaLibrarySession is a MediaSession, so nothing
+        // that already held one notices.
+        return MediaLibrarySession.Builder(appContext, bridge, TransportSessionCallback())
             .setId(SESSION_ID)
-            .setCallback(TransportSessionCallback())
             .build()
             .also { built -> lastBuilt = built }
+    }
+
+    // Browse answers are suspend and a car asks on a binder thread it expects
+    // back immediately, so every one of them is resolved off this scope and
+    // handed over as a future. Off the main thread by default: a tree backed by
+    // the network would otherwise resolve on the thread drawing the UI.
+    private val browseScope = CoroutineScope(browseDispatcher + SupervisorJob())
+
+    private fun <T : Any> answer(block: suspend () -> LibraryResult<T>): ListenableFuture<LibraryResult<T>> {
+        val pending: SettableFuture<LibraryResult<T>> = SettableFuture.create()
+        browseScope.launch {
+            // A tree that throws is a catalogue that failed to load, not a
+            // reason to leave the car waiting on a future nobody completes.
+            val answered: LibraryResult<T> = runCatching { block() }
+                .getOrElse { LibraryResult.ofError(LibraryResult.RESULT_ERROR_UNKNOWN) }
+            pending.set(answered)
+        }
+        return pending
     }
 
     // id -> what to run when the system reports that command pressed.
@@ -105,7 +148,7 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     // those command ids was pressed, and the one place that needs to know
     // which app-level buttons exist at all so it can advertise them to a
     // connecting controller.
-    private inner class TransportSessionCallback : MediaSession.Callback {
+    private inner class TransportSessionCallback : MediaLibrarySession.Callback {
 
         override fun onConnect(
             controllerSession: MediaSession,
@@ -131,6 +174,31 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
             )
             customButtonHandlers[customCommand.customAction]?.invoke()
             return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+        }
+
+        // The three questions a car, a watch or an assistant asks. Answered
+        // from whatever tree the app installed; an app that installed none
+        // answers a root with nothing under it, which is a true statement
+        // about a player nobody gave a catalogue to.
+        override fun onGetLibraryRoot(
+            librarySession: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            params: LibraryParams?,
+        ): ListenableFuture<LibraryResult<MediaItem>> = answer {
+            LibraryResult.ofItem(PlatformEnvironment.browseTree.root().toMediaItem(), params)
+        }
+
+        override fun onGetChildren(
+            librarySession: MediaLibrarySession,
+            browser: MediaSession.ControllerInfo,
+            parentId: String,
+            page: Int,
+            pageSize: Int,
+            params: LibraryParams?,
+        ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> = answer {
+            val tree: BrowseTreeProvider = PlatformEnvironment.browseTree
+            val all: List<BrowseNode> = tree.children(parentId)
+            LibraryResult.ofItemList(all.browsePage(page, pageSize).map { it.toMediaItem() }, params)
         }
     }
 
@@ -165,6 +233,9 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var pendingStop: Runnable? = null
 
+    // The same handle for the metadata-only blank — see [clearNowPlaying].
+    private var pendingBlank: Runnable? = null
+
     // Held while playing and released the moment it stops.
     //
     // Without the wake lock the processor sleeps with the screen and audio
@@ -181,6 +252,10 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
             ?.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, WIFI_TAG)
 
     override fun setNowPlaying(nowPlaying: NowPlaying) {
+        // The replacement arrived, so the blank the transient cursor asked for
+        // never has to happen — see [clearNowPlaying].
+        pendingBlank?.let { mainHandler.removeCallbacks(it) }
+        pendingBlank = null
         bridge.setNowPlaying(nowPlaying)
     }
 
@@ -189,8 +264,23 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     // (see its own comment), which happens on the way to almost every real
     // item too — anything here that reached into service lifecycle turned an
     // ordinary track change into a stop/republish cycle.
+    //
+    // Debounced, because MediaSessionPlugin.announce(null) fires on the way to
+    // EVERY real item, not only on a genuinely exhausted queue (its own comment
+    // says so). Blanking immediately means the head unit is told "nothing is
+    // playing" between every two tracks — a phone notification survives that as
+    // a flicker, a car display goes empty and a Bluetooth head unit redraws the
+    // whole page. Holding the last item for a beat lets the replacement land
+    // first; a clear that really was final still blanks, a beat later, and a
+    // real stop does not come through here at all (see [clear]).
     override fun clearNowPlaying() {
-        bridge.blank()
+        pendingBlank?.let { mainHandler.removeCallbacks(it) }
+        val blank = Runnable {
+            bridge.blank()
+            pendingBlank = null
+        }
+        pendingBlank = blank
+        mainHandler.postDelayed(blank, BLANK_DEBOUNCE_MS)
     }
 
     override fun setPlaybackState(
@@ -317,6 +407,10 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
     // cancels this if a play lands first, so a genuine resume never sees
     // the notification blink off and back on.
     override fun clear() {
+        // A real stop blanks now rather than in a beat: the debounce exists for
+        // the transient cursor between two tracks, and this is not that.
+        pendingBlank?.let { mainHandler.removeCallbacks(it) }
+        pendingBlank = null
         bridge.blank()
         customButtonHandlers.clear()
         session.setCustomLayout(emptyList())
@@ -338,6 +432,9 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         released = true
         pendingStop?.let { mainHandler.removeCallbacks(it) }
         pendingStop = null
+        pendingBlank?.let { mainHandler.removeCallbacks(it) }
+        pendingBlank = null
+        browseScope.cancel()
         holdLocks(false)
         // Publish before releasing the Media3 object, so the service's own
         // reconcile sees the `null` transition and removeSession()s a
@@ -395,7 +492,7 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
 
         // Process-wide: the id is process-wide too.
         @Volatile
-        private var lastBuilt: MediaSession? = null
+        private var lastBuilt: MediaLibrarySession? = null
 
         const val WAKE_TAG = "nomercy:playback"
         const val WIFI_TAG = "nomercy:streaming"
@@ -410,5 +507,12 @@ internal class Media3SystemTransport(context: Context) : SystemTransport {
         // blip, short enough that a genuine stop still clears the
         // notification promptly — see [clear]'s own comment.
         const val STOP_DEBOUNCE_MS = 800L
+
+        // Wider than the stop debounce on purpose: the gap this covers is a
+        // queue REPLACE resolving its next item, which can wait on the network,
+        // and the cost of guessing too long is a stale title for a beat while
+        // the cost of guessing too short is the empty car display this exists
+        // to stop.
+        const val BLANK_DEBOUNCE_MS = 3_000L
     }
 }

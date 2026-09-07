@@ -10,8 +10,9 @@ package tv.nomercy.player.core.ports
 
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.DefaultMediaNotificationProvider
+import androidx.media3.session.MediaLibraryService
+import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -23,18 +24,23 @@ import kotlinx.coroutines.flow.onEach
 
 // What keeps the process alive with the screen off (P21.20).
 //
-// [Media3SystemTransport] builds its `MediaSession` on its own, from
+// [Media3SystemTransport] builds its `MediaLibrarySession` on its own, from
 // whatever `Context` the app handed the library — never from a running
 // `Service`, because the library has no `Service` to build one from until a
-// player actually exists. That is the wrong order for `MediaSessionService`,
+// player actually exists. That is the wrong order for `MediaLibraryService`,
 // which wants to own the session it manages a notification for. This bridges
 // the two ownership models instead of forcing one onto the other:
 // [PlaybackForegroundSession] is where the transport PUBLISHES the session it
 // already built, and this service is the framework-visible thing that reads
-// what was published and does the two jobs `MediaSessionService` exists for
+// what was published and does the two jobs `MediaLibraryService` exists for
 // — answer the system's `onGetSession` query, and register the session with
 // its own base class's notification manager so the base class can promote
 // itself to foreground the moment something plays.
+//
+// A `MediaLibraryService` rather than a plain `MediaSessionService` because
+// this is also the thing a Bluetooth head unit enumerates when it lists the
+// players it can browse. That enumeration is what makes a car show NoMercy at
+// all, and on Android 13+ it is also what makes the car fetch cover art.
 //
 // Registered in this library's own `AndroidManifest.xml` (merged into the
 // consumer's) rather than left for an app to declare, the same way the
@@ -42,10 +48,10 @@ import kotlinx.coroutines.flow.onEach
 // player gets the whole subsystem, not a checklist of things it also has to
 // wire by hand.
 @UnstableApi
-public class NoMercyPlaybackService : MediaSessionService() {
+public class NoMercyPlaybackService : MediaLibraryService() {
 
     private var scopeJob: Job? = null
-    private var attached: MediaSession? = null
+    private var attached: MediaLibrarySession? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -103,15 +109,15 @@ public class NoMercyPlaybackService : MediaSessionService() {
         if (!wanted) stopSelf()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = attached
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = attached
 
     // A `null` published session — playback stopped and
-    // [Media3SystemTransport.release] ran — is `MediaSessionService`'s own
+    // [Media3SystemTransport.release] ran — is `MediaLibraryService`'s own
     // documented signal to stop itself; `stopSelf()` is what lets the
     // foreground promotion (and the notification with it) actually end
     // rather than lingering as an empty session with a stale "Nothing
     // playing" notification nobody asked to keep seeing.
-    private fun reconcile(session: MediaSession?) {
+    private fun reconcile(session: MediaLibrarySession?) {
         // Guarded: removeSession() throws "session not found" if the old
         // session was already torn down by some other path (its own
         // release(), a prior reconcile that raced this one) — confirmed
@@ -163,10 +169,10 @@ public class NoMercyPlaybackService : MediaSessionService() {
 // [Media3SystemTransport] triggers, immediately after) and needs the current
 // value the moment it does.
 public object PlaybackForegroundSession {
-    private val mutable = MutableStateFlow<MediaSession?>(null)
-    public val session: StateFlow<MediaSession?> = mutable.asStateFlow()
+    private val mutable = MutableStateFlow<MediaLibrarySession?>(null)
+    public val session: StateFlow<MediaLibrarySession?> = mutable.asStateFlow()
 
-    public fun publish(session: MediaSession?) {
+    public fun publish(session: MediaLibrarySession?) {
         mutable.value = session
     }
 }
