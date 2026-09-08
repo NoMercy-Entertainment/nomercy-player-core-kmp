@@ -39,11 +39,20 @@ public open class PlayerTransportCommands(
     private val scope: CoroutineScope,
 ) : TransportCommands {
 
-    // Marked as remote rather than as a user action, because from the player's
-    // point of view that is what it is: something outside this process asked.
-    // A listener that treats "the viewer pressed pause" and "the car pressed
-    // pause" identically can, and one that needs to tell them apart now can.
-    private val options = ActionOptions(source = ActionSource.REMOTE)
+    // PLUGIN, not REMOTE: MusicConnectPlugin's own isEcho() reads source ==
+    // REMOTE as "the Connect layer just re-applied a server frame, don't loop
+    // it back out" (see ConnectProtocol.kt's isEcho and MusicConnectPlugin's
+    // own `remote` field). Tagging a lock-screen/notification/car button press
+    // REMOTE made every one of them look like that echo: guard() returned
+    // before reaching the server, so a passive device's press never told the
+    // server anything, AND never blocked the local (idle, nothing loaded)
+    // engine from trying to act on its own — confirmed live, real phone,
+    // 2026-09-09: pressing pause on the notification while mirroring another
+    // device's session did nothing to the real session at all. PLUGIN is
+    // guard()'s other non-echo tag (see MusicConnectPlugin's own
+    // `ownInitiative`) and reaches the server exactly the way a real button
+    // press should.
+    private val options = ActionOptions(source = ActionSource.PLUGIN)
 
     override fun play() {
         scope.launch { player.play(options) }
