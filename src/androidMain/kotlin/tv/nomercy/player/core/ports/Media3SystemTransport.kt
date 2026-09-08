@@ -17,6 +17,10 @@ import android.os.Looper
 import android.os.PowerManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DataSourceBitmapLoader
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.session.CommandButton
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService.LibraryParams
@@ -27,6 +31,8 @@ import androidx.media3.session.SessionResult
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.ListeningExecutorService
+import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import tv.nomercy.player.core.plugin.BrowseNode
 import tv.nomercy.player.core.plugin.BrowseTreeProvider
 
@@ -56,6 +63,13 @@ internal class Media3SystemTransport(
     private val appContext: Context = context.applicationContext
 
     private val bridge = TransportSimpleBasePlayer()
+
+    // One thread, shared by every artwork fetch this session makes. Declared
+    // before [session] on purpose: its initializer calls buildSession(),
+    // which reads this — declared after session it is still null there
+    // (confirmed live: NPE out of DataSourceBitmapLoader.loadBitmap).
+    private val artworkLoaderExecutor: ListeningExecutorService =
+        MoreExecutors.listeningDecorator(java.util.concurrent.Executors.newSingleThreadExecutor())
 
     private val session: MediaLibrarySession = run {
         // The fixed [SESSION_ID] means Media3 throws "Session ID must be
@@ -112,13 +126,43 @@ internal class Media3SystemTransport(
         // Bluetooth head unit finds a player by enumerating BROWSABLE ones —
         // a session with no browse side is controllable once something else
         // starts it and invisible to the car's own player list, which is why
-        // NoMercy never appeared beside Spotify on a head unit and its cover
-        // art never loaded. MediaLibrarySession is a MediaSession, so nothing
-        // that already held one notices.
+        // NoMercy never appeared beside Spotify on a head unit. MediaLibrarySession
+        // is a MediaSession, so nothing that already held one notices.
         return MediaLibrarySession.Builder(appContext, bridge, TransportSessionCallback())
             .setId(SESSION_ID)
+            .setBitmapLoader(DataSourceBitmapLoader(artworkLoaderExecutor, artworkDataSourceFactory()))
             .build()
             .also { built -> lastBuilt = built }
+    }
+
+    // Media3's own default BitmapLoader fetches artworkUri with a bare
+    // HttpDataSource — no Authorization header — so a car, a Bluetooth head
+    // unit or the lock screen got the title and the transport controls but
+    // never the cover: the request reached a server that gates every image
+    // the same way it gates everything else, and was refused (see
+    // ArtworkAuthHeaders' own comment). The engine's own AuthHeaders is not
+    // reachable here — it belongs to one playback backend, built later than
+    // this session and released with it — so this reads the seam the app
+    // installs once at startup, the same shape [mediaNotificationBranding]
+    // already uses for the same forced-static-seam reason.
+    private fun artworkDataSourceFactory(): DataSource.Factory {
+        val headers: () -> Map<String, String> = { PlatformEnvironment.artworkAuthHeaders?.invoke().orEmpty() }
+        val client = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val request = chain.request()
+                val extra = headers()
+                if (extra.isEmpty()) {
+                    chain.proceed(request)
+                } else {
+                    val builder = request.newBuilder()
+                    for ((name, value) in extra) {
+                        if (request.header(name) == null) builder.header(name, value)
+                    }
+                    chain.proceed(builder.build())
+                }
+            }
+            .build()
+        return DefaultDataSource.Factory(appContext, OkHttpDataSource.Factory(client))
     }
 
     // Browse answers are suspend and a car asks on a binder thread it expects
