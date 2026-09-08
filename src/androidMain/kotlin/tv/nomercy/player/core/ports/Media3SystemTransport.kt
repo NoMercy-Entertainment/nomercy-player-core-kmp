@@ -244,6 +244,22 @@ internal class Media3SystemTransport(
             val all: List<BrowseNode> = tree.children(parentId)
             LibraryResult.ofItemList(all.browsePage(page, pageSize).map { it.toMediaItem() }, params)
         }
+
+        // A car tapped something. Nothing is added to the bridge — it is a
+        // transport surface with no queue of its own, and handing it items it
+        // cannot open would replace what is playing with silence. The empty
+        // list is the honest answer to "what did you add"; the app plays the
+        // selection through the same path its own screens use, and the
+        // resulting metadata arrives back here as setNowPlaying.
+        override fun onAddMediaItems(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            mediaItems: List<MediaItem>,
+        ): ListenableFuture<List<MediaItem>> {
+            val chosen: String? = mediaItems.firstOrNull()?.mediaId
+            if (chosen != null) PlatformEnvironment.browseSelection?.invoke(chosen)
+            return Futures.immediateFuture(emptyList())
+        }
     }
 
     // Guards [release] against running twice: the pre-emptive release above
@@ -368,7 +384,6 @@ internal class Media3SystemTransport(
         // leaves playWhenReady=true on the bridge for when a real item does
         // load; it only withholds the doomed promotion attempt.
         if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested && bridge.hasItem) {
-            servicePromotionRequested = true
             // clear() (a real stop, not a pause) unpublishes this session so
             // the service demotes out of foreground — see its own comment.
             // Republish here so the NEXT play after a stop has a session for
@@ -377,7 +392,11 @@ internal class Media3SystemTransport(
             if (PlaybackForegroundSession.session.value !== session) {
                 PlaybackForegroundSession.publish(session)
             }
-            startPlaybackService()
+            // Latched only on success — a rejected start (e.g. this device was
+            // backgrounded, mirroring another device's session) must retry on
+            // the next genuine PLAYING transition rather than give up for
+            // this instance's whole lifetime.
+            servicePromotionRequested = startPlaybackService()
         }
         holdLocks(state == TransportPlaybackState.PLAYING)
     }
@@ -504,7 +523,7 @@ internal class Media3SystemTransport(
     // session over `addSession`. This project's minSdk (29) is already past
     // the API 26 floor `startForegroundService` needs, so there is no older
     // path to fall back to.
-    private fun startPlaybackService() {
+    private fun startPlaybackService(): Boolean {
         // A backgrounded process is not allowed to start one, and the platform
         // answers with ForegroundServiceStartNotAllowedException — which is
         // fatal, not ignorable. A device MIRRORING a session playing elsewhere
@@ -515,11 +534,19 @@ internal class Media3SystemTransport(
         // Swallowed rather than pre-checked: the allowance depends on state only
         // the platform knows, and the service exists to keep OUR OWN audio
         // alive. A process that is not allowed to start it has no audio to keep.
-        runCatching {
-            appContext.startForegroundService(Intent(appContext, NoMercyPlaybackService::class.java))
-        }.onFailure { failure ->
-            android.util.Log.w("Media3SystemTransport", "playback service not started: ${failure.message}")
-        }
+        //
+        // Returns whether the start was actually accepted — the caller must not
+        // latch a one-shot "already tried" flag on a swallowed failure, or a
+        // rejection while merely mirroring a passive session permanently
+        // forfeits the notification for the rest of this instance's life, even
+        // once the app is later foregrounded and the same start would succeed.
+        return runCatching {
+                appContext.startForegroundService(Intent(appContext, NoMercyPlaybackService::class.java))
+            }
+            .onFailure { failure ->
+                android.util.Log.w("Media3SystemTransport", "playback service not started: ${failure.message}")
+            }
+            .isSuccess
     }
 
     private fun holdLocks(hold: Boolean) {
