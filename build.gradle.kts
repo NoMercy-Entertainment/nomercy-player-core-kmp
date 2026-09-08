@@ -619,6 +619,7 @@ kotlin {
         getByName("androidDeviceTest").dependencies {
             implementation(libs.androidx.test.runner)
             implementation(libs.androidx.test.core)
+            implementation(libs.androidx.test.ext.junit)
         }
         commonTest.dependencies {
             // The shipped fakes, used by the library's own suite.

@@ -192,6 +192,39 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun aRejectedForegroundServiceStartRetriesOnTheNextPlayingTransition() {
+        // The bug: startPlaybackService() swallows a real OS rejection
+        // (ForegroundServiceStartNotAllowedException — normal for a device
+        // backgrounded and only mirroring another device's session) by
+        // design, but the caller used to latch servicePromotionRequested
+        // shut on the FIRST attempt regardless of whether it succeeded. One
+        // rejection while backgrounded then permanently killed the
+        // notification for this instance's whole life. Not reproducible via
+        // a real OS rejection here — instrumentation itself is normally
+        // foreground-exempt — so the platform call is faked instead: reject
+        // once, then confirm the very next PLAYING transition tries again.
+        var attempts = 0
+        var transport: SystemTransport? = null
+
+        onMainThread {
+            transport = Media3SystemTransport(
+                context(),
+                requestForegroundService = { _, _ ->
+                    attempts++
+                    if (attempts == 1) error("simulated ForegroundServiceStartNotAllowedException")
+                },
+            )
+            transport?.setNowPlaying(NowPlaying(title = "x", durationMs = 1_000))
+            transport?.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
+            transport?.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
+        }
+
+        assertEquals(2, attempts, "a rejected start was not retried on the next PLAYING transition")
+
+        onMainThread { transport?.release() }
+    }
+
+    @Test
     fun clearingLeavesNothingForTheLockScreenToShow() {
         var title: CharSequence? = "still here"
 

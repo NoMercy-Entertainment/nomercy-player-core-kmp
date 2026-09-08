@@ -58,6 +58,14 @@ internal class Media3SystemTransport(
     // Injected rather than reached for, so a test can resolve a browse answer
     // on its own scheduler instead of waiting on a real thread pool.
     browseDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    // Injected so a test can simulate the real OS rejecting a foreground-
+    // service start (ForegroundServiceStartNotAllowedException) without
+    // needing this process to genuinely be in a background-restricted
+    // state — not reliably forceable from an instrumented test, since
+    // instrumentation itself usually carries a foreground/recent-interaction
+    // exemption. Defaults to the real call this class always made.
+    private val requestForegroundService: (Context, Intent) -> Unit =
+        { ctx, intent -> ctx.startForegroundService(intent) },
 ) : SystemTransport {
 
     private val appContext: Context = context.applicationContext
@@ -541,7 +549,7 @@ internal class Media3SystemTransport(
         // forfeits the notification for the rest of this instance's life, even
         // once the app is later foregrounded and the same start would succeed.
         return runCatching {
-                appContext.startForegroundService(Intent(appContext, NoMercyPlaybackService::class.java))
+                requestForegroundService(appContext, Intent(appContext, NoMercyPlaybackService::class.java))
             }
             .onFailure { failure ->
                 android.util.Log.w("Media3SystemTransport", "playback service not started: ${failure.message}")
