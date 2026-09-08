@@ -135,6 +135,9 @@ class ExoTrackMapperTest {
     @Test
     fun aSubtitleLabelWithNoDetectableKindFallsBackLikeAnyOtherTrack() {
         assertEquals("Commentary", resolveSubtitleLabel("Commentary", "en"))
-        assertEquals("eng", resolveSubtitleLabel(null, "eng"))
+        // No label to fall back on, so the language name itself — the same
+        // runtime-locale lookup as aSubtitleLabelCombinesTheLanguageWithTheDetectedKind,
+        // not the bare tag (Stoney: "we transform the eng to english ourselves").
+        assertEquals(displayLanguage("eng"), resolveSubtitleLabel(null, "eng"))
     }
 }
