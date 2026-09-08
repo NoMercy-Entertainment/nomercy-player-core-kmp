@@ -98,6 +98,41 @@ class SystemTransportContractTest {
     }
 
     @Test
+    fun aDraggedVolumeReachesTheHandlerThatWasRegisteredRatherThanTheStepOne() {
+        // The absolute half of the volume conversation, distinct from a notch:
+        // onVolumeSet carries the whole position a viewer dragged to, and a
+        // platform with one wired should never fall back to guessing a
+        // direction from it.
+        val transport = FakeSystemTransport()
+        var stepped: Int? = null
+        var setTo: Int = -1
+
+        transport.setActionHandlers(
+            TransportActions(
+                onVolumeStep = { direction -> stepped = direction },
+                onVolumeSet = { percent -> setTo = percent },
+            ),
+        )
+        transport.simulateOsVolumeSet(72)
+
+        assertEquals(72, setTo)
+        assertEquals(null, stepped, "a drag fell through to the step handler as well")
+        assertTrue(transport.offeredActions().contains("volumeSet"))
+    }
+
+    @Test
+    fun theRealRemoteVolumePushedInReachesTheTransportIntact() {
+        // The inbound half — see SystemTransport.setDeviceVolume's own doc.
+        // What a real platform draws from this is a lock screen slider; what
+        // a test can check is that the exact percent crossed the seam.
+        val transport = FakeSystemTransport()
+
+        transport.setDeviceVolume(37)
+
+        assertEquals(37, transport.lastDeviceVolumePercent)
+    }
+
+    @Test
     fun clearingIsNotReleasing() {
         // Two different moments. Nothing is playing any more, against this
         // transport will never be used again — a platform that tore its session
@@ -122,6 +157,7 @@ class SystemTransportContractTest {
         transport.setNowPlaying(NowPlaying(title = "anything"))
         transport.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
         transport.setActionHandlers(TransportActions())
+        transport.setDeviceVolume(50)
         transport.clear()
         transport.release()
     }

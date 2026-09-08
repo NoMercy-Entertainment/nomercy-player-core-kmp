@@ -70,6 +70,21 @@ public interface SystemTransport {
     // here would have to build another one on the next item.
     public fun clear()
 
+    /**
+     * The remote device's REAL level, pushed in — the inbound half of the
+     * volume conversation. [TransportActions.onVolumeSet]/[TransportActions.onVolumeStep]
+     * carry a press or a drag OUT to wherever volume is actually enforced;
+     * this is what tells the platform's own slider the truth once that
+     * enforcement (a server round trip, another client's own change) is
+     * known, so the drawn position is never a locally-invented guess.
+     *
+     * Defaulted to nothing for the same reason as [clearNowPlaying]: a
+     * platform with no remote-volume slider concept of its own is no worse
+     * off than before, and Android's — the only one with anything to push
+     * this into today — overrides it.
+     */
+    public fun setDeviceVolume(percent: Int): Unit = Unit
+
     public fun release()
 }
 
@@ -134,6 +149,16 @@ public data class TransportActions(
     // reaches an Activity — the platform hands a volume key to the media
     // session, not to the foreground window.
     val onVolumeStep: ((Int) -> Unit)? = null,
+    // The other shape a system slider sends: not a notch, a POSITION — the
+    // whole percent the viewer dragged to. Android's SimpleBasePlayer bridge
+    // is handed both a direction and a target for the same gesture, and
+    // computing one back-and-forth notch from a drag across the whole bar is
+    // how a 20%-to-80% drag ended up moving the real device by one step
+    // (confirmed live, 2026-09-08: TransportSimpleBasePlayer.handleSetDeviceVolume
+    // discarded the target and kept only its sign). Null falls back to
+    // [onVolumeStep]'s own ±1 read of that sign — non-breaking for a caller
+    // that never wires this in.
+    val onVolumeSet: ((Int) -> Unit)? = null,
     // Asked on every state build, because the answer changes while the app
     // runs: the press belongs elsewhere only while this device is not the one
     // playing. Declaring it always meant the device that IS playing had its own

@@ -45,6 +45,11 @@ class FakeSystemTransport : SystemTransport {
     var released: Boolean = false
         private set
 
+    // What [MediaSessionPlugin.publishRemoteVolume] most recently pushed — the
+    // inbound half, standing in for whatever real slider a platform draws.
+    var lastDeviceVolumePercent: Int? = null
+        private set
+
     // Every push in order, because the interesting failures are about ordering
     // and frequency rather than about any single value. A notification rebuilt
     // once a second is a radio that never sleeps, and only a sequence shows it.
@@ -71,6 +76,11 @@ class FakeSystemTransport : SystemTransport {
     override fun setActionHandlers(actions: TransportActions) {
         this.actions = actions
         pushes += "actions"
+    }
+
+    override fun setDeviceVolume(percent: Int) {
+        lastDeviceVolumePercent = percent
+        pushes += "deviceVolume:$percent"
     }
 
     override fun clear() {
@@ -114,6 +124,13 @@ class FakeSystemTransport : SystemTransport {
         actions.onSkipBackward?.invoke(offsetMs)
     }
 
+    // The system slider dragged to an absolute position — see
+    // [TransportActions.onVolumeSet]'s own doc for how this differs from a
+    // notch.
+    fun simulateOsVolumeSet(percent: Int) {
+        actions.onVolumeSet?.invoke(percent)
+    }
+
     // What the system would draw. A platform hides a control it has no handler
     // for, so this is the difference between a lock screen with a next button
     // and one without.
@@ -126,5 +143,6 @@ class FakeSystemTransport : SystemTransport {
         "seekTo" to actions.onSeekTo,
         "skipBackward" to actions.onSkipBackward,
         "skipForward" to actions.onSkipForward,
+        "volumeSet" to actions.onVolumeSet,
     ).filterValues { handler -> handler != null }.keys
 }

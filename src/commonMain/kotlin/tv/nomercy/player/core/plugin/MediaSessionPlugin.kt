@@ -255,6 +255,12 @@ public open class MediaSessionPlugin(
      */
     protected open fun volumeStepHandler(): ((Int) -> Unit)? = null
 
+    /**
+     * A system slider dragged to an absolute percent, or null to leave only
+     * [volumeStepHandler]'s ±1 reading available — see [TransportActions.onVolumeSet].
+     */
+    protected open fun volumeSetHandler(): ((Int) -> Unit)? = null
+
     /** True while the press belongs to another device — see [TransportActions.isVolumeRemote]. */
     protected open fun volumeIsRemote(): Boolean = false
 
@@ -288,6 +294,21 @@ public open class MediaSessionPlugin(
         )
     }
 
+    /**
+     * The active device's REAL, server-reported volume, pushed down into
+     * whatever slider the platform draws for it.
+     *
+     * A consumer whose device may be controlling — or merely watching —
+     * playback happening elsewhere calls this every time that real level
+     * changes, including a change this device had no part in (another
+     * client's own press, the far end's own remote). Without a live push
+     * here the platform's slider only ever shows local interaction history:
+     * see [SystemTransport.setDeviceVolume]'s own doc for the bug this closes.
+     */
+    protected fun publishRemoteVolume(percent: Int) {
+        transport?.setDeviceVolume(percent)
+    }
+
     private fun handlers(): TransportActions = TransportActions(
         onPlay = commands::play,
         onPause = commands::pause,
@@ -304,6 +325,7 @@ public open class MediaSessionPlugin(
         onSkipBackward = commands::skipBackward,
         onSkipForward = commands::skipForward,
         onVolumeStep = volumeStepHandler(),
+        onVolumeSet = volumeSetHandler(),
         isVolumeRemote = { volumeIsRemote() },
     )
 }

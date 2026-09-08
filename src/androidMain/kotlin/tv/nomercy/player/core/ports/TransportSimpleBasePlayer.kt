@@ -85,6 +85,16 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         invalidateState()
     }
 
+    // The inbound half of the volume conversation — see
+    // [SystemTransport.setDeviceVolume]'s own doc. A percent that arrived
+    // from outside (a server frame, another client's own press) replaces
+    // whatever this bridge last showed, same explicit-setter-plus-invalidate
+    // shape as [setNowPlaying]/[setPlayback] above.
+    fun setRemoteVolume(percent: Int) {
+        remoteVolume = percent.coerceIn(0, REMOTE_VOLUME_MAX)
+        invalidateState()
+    }
+
     fun blank() {
         metadata = MediaMetadata.EMPTY
         hasItem = false
@@ -155,9 +165,11 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         return Futures.immediateVoidFuture()
     }
 
-    // Media3 requires a level to draw; the real one lives wherever the press is
-    // being sent, so this only has to move in the direction that was pressed.
-    private var remoteVolume: Int = REMOTE_VOLUME_MAX / 2
+    // Media3 requires a level to draw before anything real has arrived — the
+    // window between this bridge being built and [setRemoteVolume]'s first
+    // real push. Zero rather than a fake midpoint: a level this bridge has
+    // never been told is honestly unknown, not "half".
+    private var remoteVolume: Int = 0
 
     // Both the flags and the no-arg variants: which one Media3 dispatches to
     // depends on the caller, and overriding one leaves the other's default in
@@ -172,7 +184,18 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
 
     override fun handleDecreaseDeviceVolume(flags: Int): ListenableFuture<*> = stepDeviceVolume(-1)
 
+    // A drag, not a notch — deviceVolume is the WHOLE position the viewer
+    // dragged to, and [TransportActions.onVolumeSet] is the only handler that
+    // can act on that rather than just its sign. Falling back to a single
+    // step when nothing is wired for it keeps a caller with no absolute sink
+    // working exactly as before, one notch per drag regardless of distance.
     override fun handleSetDeviceVolume(deviceVolume: Int, flags: Int): ListenableFuture<*> {
+        val onSet = actions.onVolumeSet
+        if (onSet != null) {
+            remoteVolume = deviceVolume.coerceIn(0, REMOTE_VOLUME_MAX)
+            onSet.invoke(remoteVolume)
+            return Futures.immediateVoidFuture()
+        }
         val direction: Int = if (deviceVolume > remoteVolume) 1 else -1
         return stepDeviceVolume(direction)
     }
@@ -236,7 +259,14 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
 
         const val MICROS_PER_MILLI = 1_000L
 
-        const val REMOTE_VOLUME_MAX = 20
+        // 100, not a small integer range — Media3's DeviceInfo places no
+        // upper bound on it, and Connect's own wire volume (MusicHub's
+        // volume_percentage) is already a clean 0-100 percent. Matching it
+        // 1:1 means a value crossing this bridge never needs converting in
+        // either direction, which is what a lossy small-range max was doing
+        // before: a server-reported 37% had nowhere exact to land in a
+        // 0-20 scale.
+        const val REMOTE_VOLUME_MAX = 100
 
         val ALWAYS: IntArray = intArrayOf(
             Player.COMMAND_PLAY_PAUSE,

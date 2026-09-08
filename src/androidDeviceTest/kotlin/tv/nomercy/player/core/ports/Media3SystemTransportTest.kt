@@ -137,6 +137,61 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun aPushedRemoteVolumeReachesTheSessionsDeviceVolume() {
+        // The inbound half, on the real bridge: setRemoteVolume is what a
+        // live server frame (via MediaSessionPlugin.publishRemoteVolume) ends
+        // up calling, and Media3's own deviceVolume is what the system slider
+        // actually reads to draw itself.
+        var deviceVolume = -1
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(TransportActions(onVolumeStep = { }, isVolumeRemote = { true }))
+            bridge.setRemoteVolume(64)
+            deviceVolume = bridge.deviceVolume
+        }
+
+        assertEquals(64, deviceVolume, "a pushed remote volume did not reach the session")
+    }
+
+    @Test
+    fun aDraggedDeviceVolumeSendsTheExactTargetRatherThanANotch() {
+        // The bug this closes: a drag across the whole bar (20% to 80%) used
+        // to compute only a direction and move the real device by one ±1
+        // step. onVolumeSet, when wired, gets the whole target instead.
+        var sentPercent = -1
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(
+                TransportActions(
+                    onVolumeStep = { },
+                    onVolumeSet = { percent -> sentPercent = percent },
+                    isVolumeRemote = { true },
+                ),
+            )
+            bridge.setDeviceVolume(80, 0)
+        }
+
+        assertEquals(80, sentPercent, "a dragged volume was not sent as its own absolute target")
+    }
+
+    @Test
+    fun withNoAbsoluteHandlerADraggedVolumeStillFallsBackToOneStep() {
+        // Non-breaking for a caller that never wires onVolumeSet — the
+        // original ±1-per-command behaviour survives unchanged.
+        var steppedDirection: Int? = null
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(TransportActions(onVolumeStep = { direction -> steppedDirection = direction }))
+            bridge.setDeviceVolume(80, 0)
+        }
+
+        assertEquals(1, steppedDirection, "no onVolumeSet should still step by one notch")
+    }
+
+    @Test
     fun clearingLeavesNothingForTheLockScreenToShow() {
         var title: CharSequence? = "still here"
 

@@ -4364,9 +4364,11 @@ public class tv/nomercy/player/core/plugin/MediaSessionPlugin : tv/nomercy/playe
 	protected fun nowPlayingFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/ports/NowPlaying;
 	protected final fun publishMirroredItem (Ltv/nomercy/player/core/media/PlaylistItem;)V
 	protected final fun publishMirroredState (ZJ)V
+	protected final fun publishRemoteVolume (I)V
 	protected final fun refreshCustomButtons ()V
 	public fun use ()V
 	protected fun volumeIsRemote ()Z
+	protected fun volumeSetHandler ()Lkotlin/jvm/functions/Function1;
 	protected fun volumeStepHandler ()Lkotlin/jvm/functions/Function1;
 }
 
@@ -7580,6 +7582,7 @@ public class tv/nomercy/player/core/ports/NoSystemTransport : tv/nomercy/player/
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 }
@@ -8283,6 +8286,7 @@ public abstract interface class tv/nomercy/player/core/ports/SystemTransport {
 	public abstract fun release ()V
 	public abstract fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public abstract fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public abstract fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 }
@@ -8290,6 +8294,7 @@ public abstract interface class tv/nomercy/player/core/ports/SystemTransport {
 public final class tv/nomercy/player/core/ports/SystemTransport$DefaultImpls {
 	public static fun clearNowPlaying (Ltv/nomercy/player/core/ports/SystemTransport;)V
 	public static fun setCustomButtons (Ltv/nomercy/player/core/ports/SystemTransport;Ljava/util/List;)V
+	public static fun setDeviceVolume (Ltv/nomercy/player/core/ports/SystemTransport;I)V
 }
 
 public final class tv/nomercy/player/core/ports/SystemTransportKt {
@@ -8389,10 +8394,11 @@ public final class tv/nomercy/player/core/ports/Translator$DefaultImpls {
 
 public final class tv/nomercy/player/core/ports/TransportActions {
 	public fun <init> ()V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)V
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lkotlin/jvm/functions/Function0;
-	public final fun component10 ()Lkotlin/jvm/functions/Function0;
+	public final fun component10 ()Lkotlin/jvm/functions/Function1;
+	public final fun component11 ()Lkotlin/jvm/functions/Function0;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lkotlin/jvm/functions/Function0;
 	public final fun component4 ()Lkotlin/jvm/functions/Function0;
@@ -8401,8 +8407,8 @@ public final class tv/nomercy/player/core/ports/TransportActions {
 	public final fun component7 ()Lkotlin/jvm/functions/Function1;
 	public final fun component8 ()Lkotlin/jvm/functions/Function1;
 	public final fun component9 ()Lkotlin/jvm/functions/Function1;
-	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)Ltv/nomercy/player/core/ports/TransportActions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
+	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)Ltv/nomercy/player/core/ports/TransportActions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOnNext ()Lkotlin/jvm/functions/Function0;
 	public final fun getOnPause ()Lkotlin/jvm/functions/Function0;
@@ -8412,6 +8418,7 @@ public final class tv/nomercy/player/core/ports/TransportActions {
 	public final fun getOnSkipBackward ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnSkipForward ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStop ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnVolumeSet ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnVolumeStep ()Lkotlin/jvm/functions/Function1;
 	public fun hashCode ()I
 	public final fun isVolumeRemote ()Lkotlin/jvm/functions/Function0;
@@ -8542,6 +8549,7 @@ public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransport : tv
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 }
@@ -8619,6 +8627,7 @@ public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransport : t
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 }

@@ -256,6 +256,46 @@ class MediaSessionPluginTest {
     }
 
     @Test
+    fun publishingARemoteVolumePushesTheExactPercentToTheTransport() = runTest {
+        // A consumer subclass calls this every time the ACTIVE device's real,
+        // server-reported level changes — see publishRemoteVolume's own doc.
+        // Exposed here through a tiny subclass the same way AppMusicMediaSessionPlugin
+        // exposes onMirrorChanged over publishMirroredItem/publishMirroredState.
+        val transport = FakeSystemTransport()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+
+        val plugin = object : MediaSessionPlugin(RecordingTransportCommands(), openTransport = { transport }) {
+            fun publish(percent: Int) = publishRemoteVolume(percent)
+        }
+        player.addPlugin(plugin)
+
+        plugin.publish(64)
+
+        assertEquals(64, transport.lastDeviceVolumePercent)
+    }
+
+    @Test
+    fun aDraggedSystemVolumeReachesWhicheverHandlerASubclassWired() = runTest {
+        // handlers() wires onVolumeSet = volumeSetHandler() unconditionally —
+        // this proves the wire is live end to end rather than merely present
+        // on TransportActions.
+        val transport = FakeSystemTransport()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+        var received = -1
+
+        val plugin = object : MediaSessionPlugin(RecordingTransportCommands(), openTransport = { transport }) {
+            override fun volumeSetHandler(): (Int) -> Unit = { percent -> received = percent }
+        }
+        player.addPlugin(plugin)
+
+        transport.simulateOsVolumeSet(88)
+
+        assertEquals(88, received)
+    }
+
+    @Test
     fun theTransportIsReleasedWhenThePlayerGoesAway() = runTest {
         // A session that outlives its player is a notification a viewer can
         // press with nothing behind it, and on Android it is also a service that
