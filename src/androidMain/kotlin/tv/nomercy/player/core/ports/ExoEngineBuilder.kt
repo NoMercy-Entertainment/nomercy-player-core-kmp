@@ -122,7 +122,14 @@ internal fun buildEngine(
             DefaultMediaSourceFactory(
                 dataSourceFactory(context, auth, onVariants),
                 DefaultExtractorsFactory(),
-            ).setLoadErrorHandlingPolicy(PendingSegmentRetryPolicy()),
+            ).setLoadErrorHandlingPolicy(
+                // processor is only ever given to the audio engine (this
+                // function's own doc) — the one engine that never live-
+                // transcodes, so it never has a "not written yet" 404 to wait
+                // out. See PendingSegmentRetryPolicy's own doc for the bug
+                // this closes.
+                PendingSegmentRetryPolicy(allowPendingSegments = processor == null),
+            ),
         )
         .setLoadControl(loadControlFor(budget))
         // Hold a network wakelock while playing. Without it a TV that dims its
