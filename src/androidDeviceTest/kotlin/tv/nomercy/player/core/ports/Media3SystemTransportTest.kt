@@ -63,6 +63,26 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun theRoutingControllerIdReachesTheSessionsDeviceInfo() {
+        // The output-switcher chip reads DeviceInfo.routingControllerId to
+        // resolve a real device name — without it Android falls back to a
+        // generic "Other device" placeholder even on a genuinely remote
+        // session. DeviceInfo is only built while a remote volume handler is
+        // wired (see getState()'s own gate), so both are set here.
+        var routingControllerId: String? = null
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(TransportActions(onVolumeStep = {}, isVolumeRemote = { true }))
+            bridge.setNowPlaying(NowPlaying(title = "x"))
+            bridge.setRoutingControllerId("route-42")
+            routingControllerId = bridge.deviceInfo.routingControllerId
+        }
+
+        assertEquals("route-42", routingControllerId)
+    }
+
+    @Test
     fun playingIsWhatMedia3CallsReadyAndWanting() {
         // Media3 has no "playing": it has a ready state and a play-when-ready
         // flag, and a lock screen showing a pause button is reading both. A

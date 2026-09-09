@@ -95,6 +95,18 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
         invalidateState()
     }
 
+    // The real MediaRouter2 route this playback is now going through, handed
+    // down from Media3SystemTransport the moment a MediaRoute2ProviderService
+    // reports a selection — see [SystemTransport.setRoutingControllerId]'s own
+    // doc for why. Same explicit-setter-plus-invalidate shape as the volume
+    // and now-playing setters above.
+    private var routingControllerId: String? = null
+
+    fun setRoutingControllerId(routingControllerId: String?) {
+        this.routingControllerId = routingControllerId
+        invalidateState()
+    }
+
     fun blank() {
         metadata = MediaMetadata.EMPTY
         hasItem = false
@@ -121,6 +133,7 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
                         DeviceInfo.Builder(DeviceInfo.PLAYBACK_TYPE_REMOTE)
                             .setMaxVolume(REMOTE_VOLUME_MAX)
                             .setMinVolume(0)
+                            .setRoutingControllerId(routingControllerId)
                             .build(),
                     )
                     state.setDeviceVolume(remoteVolume)

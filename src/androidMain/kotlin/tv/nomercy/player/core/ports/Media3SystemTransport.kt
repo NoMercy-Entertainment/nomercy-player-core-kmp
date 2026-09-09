@@ -417,6 +417,10 @@ internal class Media3SystemTransport(
         bridge.setRemoteVolume(percent)
     }
 
+    override fun setRoutingControllerId(routingControllerId: String?) {
+        bridge.setRoutingControllerId(routingControllerId)
+    }
+
     // Builds Media3's own CommandButton layout from whatever generic buttons
     // the app supplied — this library never asks what any of them mean.
     // iconKey resolution goes through PlatformEnvironment the same way

@@ -85,6 +85,22 @@ public interface SystemTransport {
      */
     public fun setDeviceVolume(percent: Int): Unit = Unit
 
+    /**
+     * The id of the real system route this playback is now going through —
+     * Android's `MediaRouter2.RoutingController.id`, set the moment a
+     * platform-level route provider (a `MediaRoute2ProviderService`) hands
+     * one over on selection, and cleared (null) the moment that route ends.
+     *
+     * Defaulted to nothing for the same reason as [clearNowPlaying]: a
+     * platform with no such provider is no worse off than before. Android's
+     * `DeviceInfo.Builder.setRoutingControllerId` is the one consumer today —
+     * without it, the system's own output-switcher chip has nothing to
+     * resolve a real device name from and falls back to a generic
+     * placeholder ("Other device"), even though the session is genuinely
+     * `PLAYBACK_TYPE_REMOTE`.
+     */
+    public fun setRoutingControllerId(routingControllerId: String?): Unit = Unit
+
     public fun release()
 }
 
