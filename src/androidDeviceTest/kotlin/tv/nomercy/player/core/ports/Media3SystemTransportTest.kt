@@ -245,6 +245,39 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun aTransportSupersededByAnotherInstancesConstructorReportsItselfAsReleased() {
+        // The real bug, reproduced without a fake: a second Media3SystemTransport
+        // (what a video engine builds when it takes over the app's one shared
+        // session) pre-emptively releases whichever MediaLibrarySession the
+        // first one owns. That kills the FIRST instance's underlying session,
+        // but the first instance's own `released` boolean only ever flips from
+        // its own release() — the takeover has no reference back to that
+        // wrapper to flip it directly. isReleased has to notice some other
+        // way, or MediaSessionPlugin.liveTransport() keeps handing back a
+        // wrapper whose session is already gone and nothing ever gets rebuilt.
+        // Confirmed live, real device, 2026-09-09: exactly this sequence left
+        // a passively-mirroring phone's notification gone for 10+ minutes,
+        // through a genuine track change, and even a full app foreground.
+        var first: SystemTransport? = null
+        var second: SystemTransport? = null
+
+        onMainThread { first = Media3SystemTransport(context()) }
+        assertTrue(first?.isReleased == false, "a freshly built transport reported itself already released")
+
+        onMainThread { second = Media3SystemTransport(context()) }
+
+        assertTrue(
+            first?.isReleased == true,
+            "the superseded transport still reports itself live after a newer instance took over",
+        )
+
+        onMainThread {
+            second?.release()
+            first?.release()
+        }
+    }
+
+    @Test
     fun clearingLeavesNothingForTheLockScreenToShow() {
         var title: CharSequence? = "still here"
 

@@ -506,7 +506,21 @@ internal class Media3SystemTransport(
         mainHandler.postDelayed(stop, STOP_DEBOUNCE_MS)
     }
 
-    override val isReleased: Boolean get() = released
+    // released is only ever set by this instance's OWN release() below — the
+    // constructor's pre-emptive takeover a few lines up calls .release() on
+    // the raw MediaLibrarySession it reads out of PlaybackForegroundSession,
+    // which has no reference back to whichever Media3SystemTransport wrapper
+    // used to own it, so a takeover can never flip that wrapper's own
+    // `released` this way. Comparing session identity against the currently
+    // published one catches that case too: once a NEWER instance's own
+    // constructor has published a different session, this one is exactly as
+    // dead as if it had released itself, whether or not that ever happened.
+    // Confirmed live, real device, 2026-09-09: leaving a video screen while
+    // passively mirroring music left `released` false on the superseded
+    // instance forever, so liveTransport() kept handing it back and no new
+    // Media3SystemTransport — and no notification — was ever built again.
+    override val isReleased: Boolean
+        get() = released || PlaybackForegroundSession.session.value !== session
 
     override fun release() {
         if (released) return
