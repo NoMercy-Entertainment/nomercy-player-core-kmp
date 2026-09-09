@@ -391,7 +391,15 @@ internal class Media3SystemTransport(
         // after a stop, no item ever reloaded). Falling through here still
         // leaves playWhenReady=true on the bridge for when a real item does
         // load; it only withholds the doomed promotion attempt.
-        if (state == TransportPlaybackState.PLAYING && !servicePromotionRequested && bridge.hasItem) {
+        // A PLAYBACK_TYPE_REMOTE session (bridge.isVolumeRemoteNow) is, by
+        // every caller that sets it, never local playback — promoting the
+        // LOCAL foreground service for one starts a service guarding audio
+        // that was never playing on this device (confirmed: real-device
+        // volume-routing investigation, 2026-09-10).
+        val eligibleForLocalPromotion = bridge.hasItem && !bridge.isVolumeRemoteNow
+        val shouldPromoteForegroundService =
+            state == TransportPlaybackState.PLAYING && !servicePromotionRequested && eligibleForLocalPromotion
+        if (shouldPromoteForegroundService) {
             // clear() (a real stop, not a pause) unpublishes this session so
             // the service demotes out of foreground — see its own comment.
             // Republish here so the NEXT play after a stop has a session for

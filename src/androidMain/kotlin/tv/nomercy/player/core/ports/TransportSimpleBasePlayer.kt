@@ -50,6 +50,15 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     var hasItem: Boolean = false
         private set
 
+    // Read by Media3SystemTransport's own PLAYING-branch service-promotion
+    // check. True only for a session whose actions report
+    // PLAYBACK_TYPE_REMOTE (see [getState]'s DeviceInfo branch below) — by
+    // construction that is never genuine local playback (RemoteCastSystemSession
+    // hardcodes it true; AppMusicMediaSessionPlugin only turns it true while
+    // this device is a passive, engine-idle Connect mirror).
+    val isVolumeRemoteNow: Boolean
+        get() = actions.isVolumeRemote?.invoke() == true
+
     // Recomputed when the handlers change rather than per getState, because
     // getState runs on every invalidation and the answer only moves when the
     // plugin rewires. Which commands are in here is what the notification and
