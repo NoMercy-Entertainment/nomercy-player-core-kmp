@@ -69,8 +69,22 @@ public open class MediaSessionPlugin(
         opened.setActionHandlers(handlers())
 
         on(CoreEvents.Item) { change -> announce(change.item) }
-        on(CoreEvents.Play) { push(TransportPlaybackState.PLAYING) }
-        on(CoreEvents.Pause) { push(TransportPlaybackState.PAUSED) }
+        // Gated: a device passively mirroring another one's session keeps its
+        // OWN engine paused on purpose (see MusicConnectPlugin.applyPassiveFrame
+        // — it pauses the local engine every frame to guarantee it never
+        // becomes a second stream). That local pause/resume-around-idle still
+        // fires these same events, and left unguarded they raced
+        // publishMirroredItem/publishMirroredState — the consumer's own
+        // correct source of truth for what a passive device shows — for
+        // ownership of this transport's PlaybackState. Whichever of the two
+        // landed last won, several times a second, which is what turned a
+        // passively mirrored PLAYING session into a system notification that
+        // visibly flickered between playing and paused. Confirmed live, real
+        // Samsung device, 2026-09-09 (video-captured + Samsung's own SystemUI
+        // logs), root-caused via the exact 5s match between the flip period
+        // and the far side's own position-report cadence.
+        on(CoreEvents.Play) { if (!isPassivelyMirroring()) push(TransportPlaybackState.PLAYING) }
+        on(CoreEvents.Pause) { if (!isPassivelyMirroring()) push(TransportPlaybackState.PAUSED) }
         on(CoreEvents.Time) { update ->
             positionMs = toMillis(update.time)
             val newDurationMs = toMillis(update.duration)
@@ -286,6 +300,18 @@ public open class MediaSessionPlugin(
     protected open fun volumeIsRemote(): Boolean = false
 
     /**
+     * True while this device's own engine is being kept deliberately idle to
+     * mirror a session actually happening elsewhere — see [publishMirroredItem]/
+     * [publishMirroredState]'s own doc for why an idle engine still fires real
+     * Play/Pause events. While this is true, [use]'s own CoreEvents.Play/Pause
+     * listeners publish nothing, so a consumer's explicit mirrored publish is
+     * never raced by the local engine's own paused-on-purpose noise. False by
+     * default: only a consumer that has a concept of "mirroring" knows when it
+     * applies, the same reasoning [volumeIsRemote] already uses.
+     */
+    protected open fun isPassivelyMirroring(): Boolean = false
+
+    /**
      * Publish a state this player's own engine cannot report.
      *
      * A device mirroring a session happening elsewhere has an idle engine, so
@@ -302,9 +328,21 @@ public open class MediaSessionPlugin(
      * none — so nothing was ever published and the platform had no session for
      * the app at all (measured: "Media button session is null"). A session that
      * does not exist cannot be handed a volume key.
+     *
+     * [durationMs] overrides whatever [nowPlayingFor] would have read off this
+     * device's OWN engine — always 0 while mirroring, because a device that
+     * never loads anything never gets a real CoreEvents.Time tick to learn a
+     * duration from. Publishing that 0 drew a system notification with no seek
+     * bar at all, even though the far side's real duration was sitting right
+     * there in the frame this call is built from. Confirmed live, real Samsung
+     * device, 2026-09-09.
      */
-    protected fun publishMirroredItem(item: PlaylistItem) {
-        liveTransport()?.setNowPlaying(nowPlayingFor(item))
+    protected fun publishMirroredItem(item: PlaylistItem, durationMs: Long) {
+        val playing: NowPlaying = nowPlayingFor(item).copy(
+            durationMs = durationMs,
+            isLive = durationMs <= 0L,
+        )
+        liveTransport()?.setNowPlaying(playing)
     }
 
     protected fun publishMirroredState(isPlaying: Boolean, positionMs: Long) {

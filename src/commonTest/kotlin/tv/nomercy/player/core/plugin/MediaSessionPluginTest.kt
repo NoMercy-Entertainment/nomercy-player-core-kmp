@@ -335,6 +335,78 @@ class MediaSessionPluginTest {
     }
 
     @Test
+    fun whilePassivelyMirroringTheLocalEnginesOwnPlayAndPauseNeverReachTheTransport() = runTest {
+        // The real bug: a device mirroring another one's session pauses its OWN
+        // idle engine every frame to guarantee it never becomes a second stream
+        // (MusicConnectPlugin.applyPassiveFrame). That local pause fires the
+        // same CoreEvents.Pause a genuine local press does, and unguarded it
+        // raced publishMirroredState — the consumer's real source of truth
+        // while mirroring — for the transport's PlaybackState. Confirmed live,
+        // real Samsung device, 2026-09-09: a passively mirrored, genuinely
+        // PLAYING session visibly flickered paused/playing on the system
+        // notification, in lockstep with the far side's ~5s position-report
+        // cadence.
+        val transport = FakeSystemTransport()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+
+        val plugin = object : MediaSessionPlugin(RecordingTransportCommands(), openTransport = { transport }) {
+            override fun isPassivelyMirroring(): Boolean = true
+            fun publishMirror(item: PlaylistItem, isPlaying: Boolean, positionMs: Long, durationMs: Long) {
+                publishMirroredItem(item, durationMs)
+                publishMirroredState(isPlaying, positionMs)
+            }
+        }
+        player.addPlugin(plugin)
+
+        // What the consumer actually wants shown: the far side is playing.
+        plugin.publishMirror(DemoItem(), isPlaying = true, positionMs = 5_000, durationMs = 240_000)
+        assertEquals(TransportPlaybackState.PLAYING, transport.lastState)
+
+        // The local, idle engine being kept quiet on purpose — must not
+        // overwrite what publishMirror just said.
+        player.emit(CoreEvents.Pause, PlaySource())
+        assertEquals(
+            TransportPlaybackState.PLAYING,
+            transport.lastState,
+            "the locally-idle engine's own Pause overwrote the mirrored PLAYING state",
+        )
+
+        player.emit(CoreEvents.Play, PlaySource())
+        assertEquals(
+            TransportPlaybackState.PLAYING,
+            transport.lastState,
+            "the local engine's own Play reached the transport while mirroring",
+        )
+    }
+
+    @Test
+    fun publishMirroredItemCarriesTheFarSidesRealDurationNotTheLocalEnginesUnknown() = runTest {
+        // The other half of the same live bug: a mirroring device's own engine
+        // never loads anything, so CoreEvents.Time never fires and the base
+        // nowPlayingFor()'s durationMs field stays 0 forever. Before this fix,
+        // publishMirroredItem published that 0 regardless of what the far side
+        // (the frame this call is built from) actually reported — Media3 draws
+        // no seek bar at all for a 0/unknown duration. Confirmed live, real
+        // Samsung device, 2026-09-09: a passively mirrored, genuinely 4-minute
+        // track showed a flat, empty progress bar despite position advancing
+        // correctly underneath it.
+        val transport = FakeSystemTransport()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+
+        val plugin = object : MediaSessionPlugin(RecordingTransportCommands(), openTransport = { transport }) {
+            fun publishMirror(item: PlaylistItem, durationMs: Long) = publishMirroredItem(item, durationMs)
+        }
+        player.addPlugin(plugin)
+
+        plugin.publishMirror(DemoItem(), durationMs = 240_000)
+
+        assertEquals(240_000, transport.lastNowPlaying?.durationMs, "the far side's real duration never reached the transport")
+        assertFalse(transport.lastNowPlaying?.isLive ?: true, "a known duration was drawn as a live/unknown one")
+    }
+
+    @Test
     fun theTransportIsReleasedWhenThePlayerGoesAway() = runTest {
         // A session that outlives its player is a notification a viewer can
         // press with nothing behind it, and on Android it is also a service that
