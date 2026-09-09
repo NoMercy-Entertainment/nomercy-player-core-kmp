@@ -136,6 +136,27 @@ public open class MediaSessionPlugin(
         transport = null
     }
 
+    /**
+     * The transport to publish through — reopening one if the held reference
+     * has gone stale (see [SystemTransport.isReleased]'s own doc for why that
+     * happens even though this plugin never released it itself). Every
+     * outward push in this class reads through here rather than the raw
+     * [transport] field, so a plugin that outlives another engine's own
+     * transport takeover recovers on its own next update instead of pushing
+     * silently into a dead session forever.
+     *
+     * Null only before [use] has ever run, or after [dispose] — an
+     * uninstalled plugin has nothing to reopen.
+     */
+    private fun liveTransport(): SystemTransport? {
+        val current: SystemTransport = transport ?: return null
+        if (!current.isReleased) return current
+        val reopened: SystemTransport = openTransport()
+        transport = reopened
+        reopened.setActionHandlers(handlers())
+        return reopened
+    }
+
     // What the system shows for this item.
     //
     // Open, because a PlaylistItem carries an id, a url and a title and nothing
@@ -182,13 +203,13 @@ public open class MediaSessionPlugin(
      */
     public fun clearMetadata() {
         announced = null
-        transport?.clearNowPlaying()
+        liveTransport()?.clearNowPlaying()
     }
 
     /** Rebuilds the custom buttons for what is playing, for a consumer whose own
      *  button state changed without the item changing. */
     protected fun refreshCustomButtons() {
-        val opened: SystemTransport = transport ?: return
+        val opened: SystemTransport = liveTransport() ?: return
         val current: PlaylistItem = item() ?: return
         opened.setCustomButtons(customButtonsFor(current))
     }
@@ -196,7 +217,7 @@ public open class MediaSessionPlugin(
     private var announced: NowPlaying? = null
 
     private fun announce(item: PlaylistItem?) {
-        val opened: SystemTransport = transport ?: return
+        val opened: SystemTransport = liveTransport() ?: return
         if (item == null) {
             // The cursor past the end of an exhausted queue — OR the transient
             // null a queue REPLACE passes through on its way to the real item
@@ -234,7 +255,7 @@ public open class MediaSessionPlugin(
     // handler's duration correction calls: it is fixing up the CURRENT
     // item's metadata, not starting a new one, so it must not touch either.
     private fun pushNowPlaying(item: PlaylistItem) {
-        val opened: SystemTransport = transport ?: return
+        val opened: SystemTransport = liveTransport() ?: return
         val playing: NowPlaying = nowPlayingFor(item)
         announced = playing
         opened.setNowPlaying(playing)
@@ -242,7 +263,7 @@ public open class MediaSessionPlugin(
 
     private fun push(state: TransportPlaybackState) {
         lastState = state
-        transport?.setPlaybackState(state, positionMs, PLAYING_RATE)
+        liveTransport()?.setPlaybackState(state, positionMs, PLAYING_RATE)
     }
 
     // What the system may ask for. Seek and the two transport verbs always;
@@ -283,11 +304,11 @@ public open class MediaSessionPlugin(
      * does not exist cannot be handed a volume key.
      */
     protected fun publishMirroredItem(item: PlaylistItem) {
-        transport?.setNowPlaying(nowPlayingFor(item))
+        liveTransport()?.setNowPlaying(nowPlayingFor(item))
     }
 
     protected fun publishMirroredState(isPlaying: Boolean, positionMs: Long) {
-        transport?.setPlaybackState(
+        liveTransport()?.setPlaybackState(
             if (isPlaying) TransportPlaybackState.PLAYING else TransportPlaybackState.PAUSED,
             positionMs,
             if (isPlaying) 1.0 else 0.0,
@@ -306,7 +327,19 @@ public open class MediaSessionPlugin(
      * see [SystemTransport.setDeviceVolume]'s own doc for the bug this closes.
      */
     protected fun publishRemoteVolume(percent: Int) {
-        transport?.setDeviceVolume(percent)
+        liveTransport()?.setDeviceVolume(percent)
+    }
+
+    /**
+     * The real system route this session's playback is now going through —
+     * see [SystemTransport.setRoutingControllerId]'s own doc. A consumer with
+     * a platform route provider (Android's `MediaRoute2ProviderService`)
+     * calls this the moment a route is selected, and again with `null` the
+     * moment it's released, so the platform's own output-switcher chip has a
+     * real name to resolve instead of falling back to a placeholder.
+     */
+    protected fun publishRoutingControllerId(routingControllerId: String?) {
+        liveTransport()?.setRoutingControllerId(routingControllerId)
     }
 
     private fun handlers(): TransportActions = TransportActions(

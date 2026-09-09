@@ -101,6 +101,25 @@ public interface SystemTransport {
      */
     public fun setRoutingControllerId(routingControllerId: String?): Unit = Unit
 
+    /**
+     * Whether this instance's platform session has already been released —
+     * by its own [release] call, or because a newer transport instance took
+     * over as the app's one shared session (Android's own single-owner
+     * contract: building a new `Media3SystemTransport` releases whichever
+     * one published before it). A caller that kept this reference across
+     * such a takeover has a transport that silently accepts every call and
+     * shows nothing for it — [tv.nomercy.player.core.plugin.MediaSessionPlugin]
+     * reads this to know when to open a fresh one instead of pushing into a
+     * dead session. Confirmed live: leaving a video screen while a passive
+     * music mirror kept running left the notification permanently gone,
+     * because music's own transport had gone stale minutes earlier (when
+     * video's own transport took over) and nothing noticed.
+     *
+     * Defaulted to false for the same reason as [clearNowPlaying]: a
+     * platform with no such takeover concept is never stale.
+     */
+    public val isReleased: Boolean get() = false
+
     public fun release()
 }
 

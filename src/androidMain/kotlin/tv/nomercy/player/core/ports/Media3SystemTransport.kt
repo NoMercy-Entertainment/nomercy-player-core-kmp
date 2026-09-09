@@ -506,6 +506,8 @@ internal class Media3SystemTransport(
         mainHandler.postDelayed(stop, STOP_DEBOUNCE_MS)
     }
 
+    override val isReleased: Boolean get() = released
+
     override fun release() {
         if (released) return
         released = true

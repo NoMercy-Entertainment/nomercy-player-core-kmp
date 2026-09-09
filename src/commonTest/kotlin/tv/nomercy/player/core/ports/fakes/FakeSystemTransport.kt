@@ -45,6 +45,8 @@ class FakeSystemTransport : SystemTransport {
     var released: Boolean = false
         private set
 
+    override val isReleased: Boolean get() = released
+
     // What [MediaSessionPlugin.publishRemoteVolume] most recently pushed — the
     // inbound half, standing in for whatever real slider a platform draws.
     var lastDeviceVolumePercent: Int? = null

@@ -128,6 +128,45 @@ class MediaSessionPluginTest {
     }
 
     @Test
+    fun aTransportReleasedFromOutsideIsReopenedOnTheNextPush() = runTest {
+        // The real scenario: another engine's own transport construction
+        // released this plugin's transport out from under it (Android's
+        // single-owner Media3SystemTransport contract — see
+        // SystemTransport.isReleased's own doc). Confirmed live: leaving a
+        // video screen while a passive music mirror kept running left the
+        // notification permanently gone, because nothing noticed the held
+        // transport had gone stale minutes earlier.
+        val opened: MutableList<FakeSystemTransport> = mutableListOf()
+        val commands = RecordingTransportCommands()
+        val plugin = MediaSessionPlugin(
+            commands = commands,
+            openTransport = { FakeSystemTransport().also { opened += it } },
+        )
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+        player.addPlugin(plugin)
+
+        player.emit(CoreEvents.Item, ItemChange(item = DemoItem(), index = 0))
+        assertEquals(1, opened.size, "the plugin did not open its first transport on install")
+        val first: FakeSystemTransport = opened[0]
+        assertEquals("Blade Runner 2049", first.lastNowPlaying?.title)
+
+        // Simulate the takeover: something else released this exact
+        // instance, exactly what Media3SystemTransport.release() does when
+        // called from outside (its own pre-emptive release in a newer
+        // instance's constructor, or an explicit dispose elsewhere).
+        first.release()
+
+        player.emit(CoreEvents.Play, PlaySource())
+
+        assertEquals(2, opened.size, "a push after the takeover did not reopen a transport")
+        val second: FakeSystemTransport = opened[1]
+        assertTrue(second.pushes.contains("actions"), "the reopened transport was never wired with action handlers")
+        assertEquals(TransportPlaybackState.PLAYING, second.lastState, "the reopened transport did not receive the push")
+        assertEquals(null, first.lastState, "the stale transport was pushed into instead of the reopened one")
+    }
+
+    @Test
     fun aSeekDoesTalkToTheOperatingSystemBecauseItCannotBeInferred() = runTest {
         // The one thing a system extrapolating from position and rate cannot
         // work out. Without this the lock screen's scrubber walks on from where
