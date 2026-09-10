@@ -46,7 +46,9 @@ class MpvAudioFilterChainTest {
     fun multipleBandsChainInOrderSeparatedByCommas() {
         val bands = listOf(EqBand(60, 3.0, 1.0), EqBand(1000, -2.0, 0.7), EqBand(8000, 5.0, 1.4))
         assertEquals(
-            "lavfi=[equalizer=f=60:width_type=q:w=1:g=3,equalizer=f=1000:width_type=q:w=0.7:g=-2,equalizer=f=8000:width_type=q:w=1.4:g=5]",
+            "lavfi=[equalizer=f=60:width_type=q:w=1:g=3," +
+                "equalizer=f=1000:width_type=q:w=0.7:g=-2," +
+                "equalizer=f=8000:width_type=q:w=1.4:g=5]",
             MpvAudioFilterChain.build(bands, preGain = 1.0, enabled = true),
         )
     }

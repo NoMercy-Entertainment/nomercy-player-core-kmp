@@ -10,7 +10,9 @@
 // to spell the PulseAudio symbols exactly — pa_simple_new, not paSimpleNew.
 // Renaming them to satisfy Kotlin's convention would stop them resolving at
 // runtime.
-@file:Suppress("FunctionNaming")
+// pa_simple_new's nine arguments are PulseAudio's signature, not a shape this
+// binding chose, so LongParameterList is a property of the C API here.
+@file:Suppress("FunctionNaming", "LongParameterList")
 
 package tv.nomercy.player.core.ports
 

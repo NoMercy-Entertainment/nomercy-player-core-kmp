@@ -11,7 +11,10 @@
 // audioObjectGetPropertyData. Renaming them to satisfy Kotlin's convention
 // would not be a style change, it would stop the symbols resolving at runtime.
 // The same holds for the k-prefixed CoreAudio selector constants.
-@file:Suppress("FunctionNaming", "TopLevelPropertyNaming")
+// The arities are Apple's too: AudioObjectGetPropertyData takes six arguments
+// and the vtable invoke that reaches it takes the same, so LongParameterList
+// here is a property of the C API, not of this binding.
+@file:Suppress("FunctionNaming", "TopLevelPropertyNaming", "LongParameterList")
 
 package tv.nomercy.player.core.ports
 

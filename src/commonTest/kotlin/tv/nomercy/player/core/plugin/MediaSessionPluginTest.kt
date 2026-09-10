@@ -162,7 +162,11 @@ class MediaSessionPluginTest {
         assertEquals(2, opened.size, "a push after the takeover did not reopen a transport")
         val second: FakeSystemTransport = opened[1]
         assertTrue(second.pushes.contains("actions"), "the reopened transport was never wired with action handlers")
-        assertEquals(TransportPlaybackState.PLAYING, second.lastState, "the reopened transport did not receive the push")
+        assertEquals(
+            TransportPlaybackState.PLAYING,
+            second.lastState,
+            "the reopened transport did not receive the push",
+        )
         assertEquals(null, first.lastState, "the stale transport was pushed into instead of the reopened one")
     }
 
@@ -402,7 +406,11 @@ class MediaSessionPluginTest {
 
         plugin.publishMirror(DemoItem(), durationMs = 240_000)
 
-        assertEquals(240_000, transport.lastNowPlaying?.durationMs, "the far side's real duration never reached the transport")
+        assertEquals(
+            240_000,
+            transport.lastNowPlaying?.durationMs,
+            "the far side's real duration never reached the transport",
+        )
         assertFalse(transport.lastNowPlaying?.isLive ?: true, "a known duration was drawn as a live/unknown one")
     }
 

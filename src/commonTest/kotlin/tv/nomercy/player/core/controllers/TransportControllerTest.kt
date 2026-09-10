@@ -303,7 +303,7 @@ class TransportControllerTest {
     // without a user gesture is the everyday reason, and it is the case the
     // optimistic state before the call gets wrong.
     private class RefusingBackend : FakeMediaBackend() {
-        override suspend fun play(): Unit = throw IllegalStateException("autoplay refused")
+        override suspend fun play(): Unit = error("autoplay refused")
     }
 
     @Test

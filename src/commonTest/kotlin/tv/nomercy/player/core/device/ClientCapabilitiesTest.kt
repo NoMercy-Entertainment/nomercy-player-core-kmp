@@ -66,7 +66,10 @@ class ClientCapabilitiesTest {
     @Test
     fun dtsAbsentFromTheListMeansUnsupportedNotJustUnlisted() {
         assertFalse(samsungPhone.audio.any { it.codec == DecodeCodec.DTS }, "DTS must be absent, not merely unclaimed")
-        assertFalse(samsungPhone.audio.any { it.codec == DecodeCodec.TRUEHD }, "TrueHD must be absent, not merely unclaimed")
+        assertFalse(
+            samsungPhone.audio.any { it.codec == DecodeCodec.TRUEHD },
+            "TrueHD must be absent, not merely unclaimed",
+        )
     }
 
     @Test

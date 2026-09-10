@@ -207,7 +207,9 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     // documented position minus those three).
     private fun invoke(target: Unknown, vtableIndex: Int, vararg args: Any?): Int {
         val result = target.pointer.getPointer(0).getPointer((vtableIndex * Native.POINTER_SIZE).toLong())
-        @Suppress("UNCHECKED_CAST")
+        // A COM vtable slot is an untyped function pointer by construction —
+        // there is nothing to check the cast against until the call is made.
+        @Suppress("UNCHECKED_CAST", "NoUncheckedCast")
         return com.sun.jna.Function.getFunction(result).invokeInt(arrayOf(target.pointer, *args))
     }
 
