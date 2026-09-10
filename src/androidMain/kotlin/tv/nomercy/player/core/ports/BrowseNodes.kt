@@ -79,3 +79,20 @@ internal fun <T> List<T>.browsePage(page: Int, pageSize: Int): List<T> {
     val until: Long = minOf(from + pageSize.toLong(), size.toLong())
     return subList(from.toInt(), until.toInt())
 }
+
+// The other half of browsing: what happens when a car taps one of these.
+//
+// The player this library drives is a transport bridge, not a queue — the app
+// owns what plays and in what order, exactly as it does when the tap comes from
+// its own screens. So a browser's selection is handed back rather than acted on
+// here: the core knows an id was chosen, and only the app knows what that id
+// means.
+@Volatile
+private var installedBrowseSelection: ((String) -> Unit)? = null
+
+public fun PlatformEnvironment.installBrowseSelection(onChosen: (mediaId: String) -> Unit) {
+    installedBrowseSelection = onChosen
+}
+
+public val PlatformEnvironment.browseSelection: ((String) -> Unit)?
+    get() = installedBrowseSelection
