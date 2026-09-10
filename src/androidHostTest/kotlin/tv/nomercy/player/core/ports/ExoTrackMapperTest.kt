@@ -31,59 +31,59 @@ class ExoTrackMapperTest {
         // "hvc1.2.4.L153.B0" is what a manifest carries. Keeping the profile
         // makes one rung unmatchable across two manifests of the same film,
         // because the level digits change with the encode.
-        assertEquals("hvc1", ExoTrackMapper.codecFamily("hvc1.2.4.L153.B0", MimeTypes.VIDEO_H265))
-        assertEquals("avc1", ExoTrackMapper.codecFamily("avc1.640028", MimeTypes.VIDEO_H264))
-        assertEquals("av01", ExoTrackMapper.codecFamily("av01.0.08M.08", MimeTypes.VIDEO_AV1))
+        assertEquals("hvc1", ExoFormatMapper.codecFamily("hvc1.2.4.L153.B0", MimeTypes.VIDEO_H265))
+        assertEquals("avc1", ExoFormatMapper.codecFamily("avc1.640028", MimeTypes.VIDEO_H264))
+        assertEquals("av01", ExoFormatMapper.codecFamily("av01.0.08M.08", MimeTypes.VIDEO_AV1))
     }
 
     @Test
     fun aMissingCodecFallsBackToTheMimeType() {
         // Progressive MP4 carries no codecs attribute at all, and a rung
         // labelled with an empty codec matches nothing.
-        assertEquals("hvc1", ExoTrackMapper.codecFamily(null, MimeTypes.VIDEO_H265))
-        assertEquals("avc1", ExoTrackMapper.codecFamily("", MimeTypes.VIDEO_H264))
-        assertEquals("mp4a", ExoTrackMapper.codecFamily(null, MimeTypes.AUDIO_AAC))
-        assertEquals("ec-3", ExoTrackMapper.codecFamily(null, MimeTypes.AUDIO_E_AC3))
+        assertEquals("hvc1", ExoFormatMapper.codecFamily(null, MimeTypes.VIDEO_H265))
+        assertEquals("avc1", ExoFormatMapper.codecFamily("", MimeTypes.VIDEO_H264))
+        assertEquals("mp4a", ExoFormatMapper.codecFamily(null, MimeTypes.AUDIO_AAC))
+        assertEquals("ec-3", ExoFormatMapper.codecFamily(null, MimeTypes.AUDIO_E_AC3))
     }
 
     @Test
     fun anUnknownMimeTypeKeepsItsSubtypeRatherThanVanishing() {
         // A codec nobody mapped is still better identified by its subtype than
         // by a blank, which would collide with every other unknown.
-        assertEquals("x-vnd.on2.vp9", ExoTrackMapper.codecFamily(null, "video/x-vnd.on2.vp9"))
-        assertEquals("unknown", ExoTrackMapper.codecFamily(null, null))
+        assertEquals("x-vnd.on2.vp9", ExoFormatMapper.codecFamily(null, "video/x-vnd.on2.vp9"))
+        assertEquals("unknown", ExoFormatMapper.codecFamily(null, null))
     }
 
     @Test
     fun theRangeComesFromTheTransferFunction() {
         // HDR10 and SDR are both HEVC. Reading the codec to decide the range
         // gets it wrong on exactly the streams where the answer matters.
-        assertEquals(DynamicRange.HDR10, ExoTrackMapper.dynamicRange(C.COLOR_TRANSFER_ST2084))
-        assertEquals(DynamicRange.HDR10, ExoTrackMapper.dynamicRange(C.COLOR_TRANSFER_HLG))
-        assertEquals(DynamicRange.SDR, ExoTrackMapper.dynamicRange(C.COLOR_TRANSFER_SDR))
+        assertEquals(DynamicRange.HDR10, ExoFormatMapper.dynamicRange(C.COLOR_TRANSFER_ST2084))
+        assertEquals(DynamicRange.HDR10, ExoFormatMapper.dynamicRange(C.COLOR_TRANSFER_HLG))
+        assertEquals(DynamicRange.SDR, ExoFormatMapper.dynamicRange(C.COLOR_TRANSFER_SDR))
     }
 
     @Test
     fun anUnreportedRangeIsSdrRatherThanAGuess() {
         // Media3 leaves colorInfo null on plenty of streams. Treating unknown as
         // HDR would send a device down a decode path it cannot take.
-        assertEquals(DynamicRange.SDR, ExoTrackMapper.dynamicRange(null))
+        assertEquals(DynamicRange.SDR, ExoFormatMapper.dynamicRange(null))
     }
 
     @Test
     fun subtitleFormatsAreNamedByWhatTheyAre() {
         // The format decides which renderer draws it: an .ass through libass, a
         // .vtt through the built-in one. Getting it wrong shows nothing.
-        assertEquals("vtt", ExoTrackMapper.subtitleFormatOf(MimeTypes.TEXT_VTT))
-        assertEquals("srt", ExoTrackMapper.subtitleFormatOf(MimeTypes.APPLICATION_SUBRIP))
-        assertEquals("ass", ExoTrackMapper.subtitleFormatOf(MimeTypes.TEXT_SSA))
-        assertEquals("ttml", ExoTrackMapper.subtitleFormatOf(MimeTypes.APPLICATION_TTML))
-        assertEquals("pgs", ExoTrackMapper.subtitleFormatOf(MimeTypes.APPLICATION_PGS))
+        assertEquals("vtt", ExoFormatMapper.subtitleFormatOf(MimeTypes.TEXT_VTT))
+        assertEquals("srt", ExoFormatMapper.subtitleFormatOf(MimeTypes.APPLICATION_SUBRIP))
+        assertEquals("ass", ExoFormatMapper.subtitleFormatOf(MimeTypes.TEXT_SSA))
+        assertEquals("ttml", ExoFormatMapper.subtitleFormatOf(MimeTypes.APPLICATION_TTML))
+        assertEquals("pgs", ExoFormatMapper.subtitleFormatOf(MimeTypes.APPLICATION_PGS))
     }
 
     @Test
     fun anUnknownSubtitleTypeDefaultsToTheOneEveryPlayerHandles() {
-        assertEquals("vtt", ExoTrackMapper.subtitleFormatOf(null))
+        assertEquals("vtt", ExoFormatMapper.subtitleFormatOf(null))
     }
 
     @Test
@@ -91,15 +91,15 @@ class ExoTrackMapperTest {
         // Format.label is often "" (not null) on HLS variants — NAME="" is
         // a valid attribute — so a null-only fallback leaves the menu row
         // blank instead of catching it.
-        assertEquals("eng", ExoTrackMapper.resolveLabel("", "eng"))
-        assertEquals("eng", ExoTrackMapper.resolveLabel(null, "eng"))
-        assertEquals("Commentary", ExoTrackMapper.resolveLabel("Commentary", "eng"))
+        assertEquals("eng", ExoFormatMapper.resolveLabel("", "eng"))
+        assertEquals("eng", ExoFormatMapper.resolveLabel(null, "eng"))
+        assertEquals("Commentary", ExoFormatMapper.resolveLabel("Commentary", "eng"))
     }
 
     @Test
     fun aBlankLabelAndLanguageFallsBackToUnknown() {
-        assertEquals("und", ExoTrackMapper.resolveLabel("", ""))
-        assertEquals("und", ExoTrackMapper.resolveLabel(null, null))
+        assertEquals("und", ExoFormatMapper.resolveLabel("", ""))
+        assertEquals("und", ExoFormatMapper.resolveLabel(null, null))
     }
 
     @Test

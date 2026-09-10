@@ -38,9 +38,9 @@ public object ExoTrackMapper {
                 // through the same flattened order.
                 id = "audio:$index",
                 language = format.language ?: UNKNOWN_LANGUAGE,
-                label = resolveLabel(format.label, format.language),
+                label = ExoFormatMapper.resolveLabel(format.label, format.language),
                 channels = format.channelCount.takeIf { it != Format.NO_VALUE } ?: DEFAULT_CHANNELS,
-                codec = codecFamily(format.codecs, format.sampleMimeType),
+                codec = ExoFormatMapper.codecFamily(format.codecs, format.sampleMimeType),
             )
         }
 
@@ -51,7 +51,7 @@ public object ExoTrackMapper {
                 id = "text:$index",
                 language = format.language ?: UNKNOWN_LANGUAGE,
                 label = resolveSubtitleLabel(format.label, format.language),
-                format = subtitleFormatOf(format.sampleMimeType),
+                format = ExoFormatMapper.subtitleFormatOf(format.sampleMimeType),
                 // Forced is a flag on the track rather than a separate one, and
                 // a chrome that ignored it shows two identical-looking English
                 // entries the viewer has to guess between.
@@ -108,12 +108,22 @@ public object ExoTrackMapper {
             bitrate = format.peakBitrate.takeIf { it != Format.NO_VALUE }
                 ?: format.averageBitrate.takeIf { it != Format.NO_VALUE }
                 ?: 0,
-            codec = codecFamily(format.codecs, format.sampleMimeType),
-            dynamicRange = dynamicRange(format.colorInfo?.colorTransfer),
+            codec = ExoFormatMapper.codecFamily(format.codecs, format.sampleMimeType),
+            dynamicRange = ExoFormatMapper.dynamicRange(format.colorInfo?.colorTransfer),
             width = format.width.takeIf { it != Format.NO_VALUE },
             label = format.label,
         )
     }
+
+    private const val DEFAULT_CHANNELS = 2
+    private const val UNKNOWN_LANGUAGE = "und"
+}
+
+// The value-level half of the mapping, split from the Tracks-level half
+// above along the seam that block already describes: these take a string or
+// an integer rather than a Format, which is what makes them provable without
+// an Android runtime.
+internal object ExoFormatMapper {
 
     // The three decisions below take values rather than a Format on purpose.
     //
@@ -174,7 +184,6 @@ public object ExoTrackMapper {
         else -> mimeType?.substringAfter('/') ?: "vtt"
     }
 
-    private const val DEFAULT_CHANNELS = 2
     private const val UNKNOWN_LANGUAGE = "und"
     private const val UNKNOWN_CODEC = "unknown"
 }

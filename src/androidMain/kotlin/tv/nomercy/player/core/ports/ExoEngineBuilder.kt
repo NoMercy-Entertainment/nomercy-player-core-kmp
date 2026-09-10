@@ -61,32 +61,11 @@ private fun physicalDisplaySize(context: Context): Pair<Int, Int> {
     return edge to edge
 }
 
-internal fun buildEngine(
-    context: Context,
-    auth: AuthHeaders,
+private fun applySelectorParameters(
     selector: DefaultTrackSelector,
-    // Given only by the audio backend. Video has no equaliser today, and
-    // inserting a processor into a video sink to change nothing would cost a
-    // pass over every sample for no reason.
-    processor: BiquadEqAudioProcessor? = null,
-    // What the master playlist declared, handed back as it is read.
-    //
-    // The interceptor that reads it was written, tested and never added to the
-    // client, so on Android the ladder narrowing, the bandwidth sanitiser and the
-    // manifest's own VIDEO-RANGE all did nothing at all — and the dynamic range
-    // was then read off Format.colorInfo, which Media3 leaves null for an HLS
-    // variant until its decoder is configured. An HDR film was reported as SDR by
-    // a player holding the playlist that said PQ.
-    onVariants: (List<QualityDescriptor>) -> Unit = {},
-): ExoEngine {
-    val displaySize: Pair<Int, Int> = physicalDisplaySize(context)
-    val budget: BufferConfig = bufferConfigForDevice(context)
-    val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
-        AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
-    } else {
-        EqualiserRenderersFactory(context, budget.isTvDevice, processor)
-    }
-
+    displaySize: Pair<Int, Int>,
+    renderers: AudioPassthroughRenderersFactory,
+) {
     selector.parameters = selector.buildUponParameters()
         // A rung change that is not seamless is still better than a stall. On
         // TV hardware the seamless path is often unavailable and refusing to
@@ -113,6 +92,35 @@ internal fun buildEngine(
         .setExceedVideoConstraintsIfNecessary(false)
         .setAudioOffloadPreferences(offloadFor(renderers))
         .build()
+}
+
+internal fun buildEngine(
+    context: Context,
+    auth: AuthHeaders,
+    selector: DefaultTrackSelector,
+    // Given only by the audio backend. Video has no equaliser today, and
+    // inserting a processor into a video sink to change nothing would cost a
+    // pass over every sample for no reason.
+    processor: BiquadEqAudioProcessor? = null,
+    // What the master playlist declared, handed back as it is read.
+    //
+    // The interceptor that reads it was written, tested and never added to the
+    // client, so on Android the ladder narrowing, the bandwidth sanitiser and the
+    // manifest's own VIDEO-RANGE all did nothing at all — and the dynamic range
+    // was then read off Format.colorInfo, which Media3 leaves null for an HLS
+    // variant until its decoder is configured. An HDR film was reported as SDR by
+    // a player holding the playlist that said PQ.
+    onVariants: (List<QualityDescriptor>) -> Unit = {},
+): ExoEngine {
+    val displaySize: Pair<Int, Int> = physicalDisplaySize(context)
+    val budget: BufferConfig = bufferConfigForDevice(context)
+    val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
+        AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
+    } else {
+        EqualiserRenderersFactory(context, budget.isTvDevice, processor)
+    }
+
+    applySelectorParameters(selector, displaySize, renderers)
 
     val player: ExoPlayer = ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())

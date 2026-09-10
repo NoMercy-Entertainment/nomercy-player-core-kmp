@@ -79,10 +79,15 @@ private const val EIGHT_BIT_DEPTH: Int = 8
 // but not Dolby Vision names only HLG rather than losing that to a single
 // flag.
 private val HDR_PROBES: List<Pair<String, String>> = listOf(
-    mp4Codec("hvc1.2.4.L120.B0") to HdrFormat.HDR10,
+    mp4Codec(HEVC_MAIN10_HVC1) to HdrFormat.HDR10,
     mp4Codec("dvh1.05.06") to HdrFormat.DOLBY_VISION,
     mp4Codec("hvc1.2.20.L120.B0") to HdrFormat.HLG,
 )
+
+// The two spellings of HEVC Main10 a stream can carry — named because each is
+// asked for both as a profile probe and as a 10-bit probe.
+private const val HEVC_MAIN10_HVC1: String = "hvc1.2.4.L120.B0"
+private const val HEVC_MAIN10_HEV1: String = "hev1.2.4.L120.B0"
 
 // The container/codecs MIME shape AVFoundation is probed with, written once.
 private fun mp4Codec(spec: String): String = """video/mp4; codecs="$spec""""
@@ -113,12 +118,12 @@ private val VIDEO_CODEC_PROBES: List<CodecProbe> = listOf(
         codec = DecodeCodec.H265,
         profiles = listOf(
             mp4Codec("hvc1.1.6.L150.B0") to VideoProfileName.MAIN,
-            mp4Codec("hvc1.2.4.L120.B0") to VideoProfileName.MAIN10,
-            mp4Codec("hev1.2.4.L120.B0") to VideoProfileName.MAIN10,
+            mp4Codec(HEVC_MAIN10_HVC1) to VideoProfileName.MAIN10,
+            mp4Codec(HEVC_MAIN10_HEV1) to VideoProfileName.MAIN10,
         ),
         tenBitProbes = listOf(
-            mp4Codec("hvc1.2.4.L120.B0"),
-            mp4Codec("hev1.2.4.L120.B0"),
+            mp4Codec(HEVC_MAIN10_HVC1),
+            mp4Codec(HEVC_MAIN10_HEV1),
         ),
     ),
     CodecProbe(
