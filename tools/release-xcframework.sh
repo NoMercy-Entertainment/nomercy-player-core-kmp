@@ -18,6 +18,26 @@ here="$(cd "$(dirname "$0")/.." && pwd)"
 # would have uploaded to a release named "master". RELEASE_TAG says it outright.
 tag="${RELEASE_TAG:-${GITHUB_REF_NAME:?this runs on a tag}}"
 
+# gh, by absolute path when PATH does not have it.
+#
+# The fifth tool in the situation build.gradle.kts documents for bash, gh, gtar
+# and docker: a launchd-started runner inherits no login shell, so Homebrew's
+# directories are not on its PATH. The framework built fine and then this script
+# died on "gh: command not found" with the zip already on disk.
+gh_bin() {
+  local candidate
+  for candidate in \
+    "${NOMERCY_GH:-}" \
+    /opt/homebrew/bin/gh \
+    /usr/local/bin/gh \
+    /usr/bin/gh; do
+    if [ -n "$candidate" ] && [ -x "$candidate" ]; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
+  printf 'gh'
+}
 # Through bash: this script is committed executable, and a tag cut before that
 # was true is still a tag somebody may need to re-attach a framework to.
 output="$(bash "$here/tools/package-xcframework.sh" "$name")"
@@ -31,7 +51,7 @@ if [ -z "$zip_path" ] || [ -z "$checksum" ]; then
   exit 1
 fi
 
-gh release upload "$tag" "$zip_path" --clobber
+"$(gh_bin)" release upload "$tag" "$zip_path" --clobber
 
 # The URL carries the tag too, so a manifest cut for one release cannot quietly
 # serve another one's asset.
