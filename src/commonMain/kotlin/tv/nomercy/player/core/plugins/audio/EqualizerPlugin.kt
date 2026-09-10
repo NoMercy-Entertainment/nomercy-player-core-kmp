@@ -347,14 +347,26 @@ public open class EqualizerPlugin(
         }
 
         val alpha: Double = rampAlpha(tau)
-        preGainRampJob = this.launch {
-            while (kotlin.math.abs(target - appliedPreGain) > RAMP_EPSILON) {
-                appliedPreGain += (target - appliedPreGain) * alpha
-                graph?.preGain(appliedPreGain)
-                delay(RAMP_TICK_MS.toLong())
-            }
+        // The lifecycle's interval waits a period before its first call, and
+        // the loop this replaced stepped before its first delay — so the
+        // opening move happens here, or the ramp would stall for a tick.
+        stepPreGain(target, alpha)
+        if (kotlin.math.abs(target - appliedPreGain) > RAMP_EPSILON) {
+            preGainRampJob = this.interval(RAMP_TICK_MS.toLong()) { stepPreGain(target, alpha) }
+        }
+    }
+
+    // One tick of the exponential approach, or the snap that ends it. Cancels
+    // the ramp from inside rather than leaving an interval running against a
+    // value that has already arrived.
+    private fun stepPreGain(target: Double, alpha: Double) {
+        if (kotlin.math.abs(target - appliedPreGain) > RAMP_EPSILON) {
+            appliedPreGain += (target - appliedPreGain) * alpha
+            graph?.preGain(appliedPreGain)
+        } else {
             appliedPreGain = target
             graph?.preGain(target)
+            preGainRampJob?.cancel()
         }
     }
 
@@ -373,16 +385,27 @@ public open class EqualizerPlugin(
         }
 
         val alpha: Double = rampAlpha(tau)
-        bandRampJobs[frequencyHz] = this.launch {
-            var value: Double = start
-            while (kotlin.math.abs(targetGainDb - value) > RAMP_EPSILON) {
-                value += (targetGainDb - value) * alpha
-                appliedBandGains[frequencyHz] = value
-                graph?.bandGain(frequencyHz, value)
-                delay(RAMP_TICK_MS.toLong())
+        appliedBandGains[frequencyHz] = start
+        // Opening move now, for the same reason rampPreGain takes one.
+        stepBandGain(frequencyHz, targetGainDb, alpha)
+        if (kotlin.math.abs(targetGainDb - (appliedBandGains[frequencyHz] ?: targetGainDb)) > RAMP_EPSILON) {
+            bandRampJobs[frequencyHz] = this.interval(RAMP_TICK_MS.toLong()) {
+                stepBandGain(frequencyHz, targetGainDb, alpha)
             }
+        }
+    }
+
+    // The per-band twin of [stepPreGain].
+    private fun stepBandGain(frequencyHz: Int, targetGainDb: Double, alpha: Double) {
+        val value: Double = appliedBandGains[frequencyHz] ?: targetGainDb
+        if (kotlin.math.abs(targetGainDb - value) > RAMP_EPSILON) {
+            val next: Double = value + (targetGainDb - value) * alpha
+            appliedBandGains[frequencyHz] = next
+            graph?.bandGain(frequencyHz, next)
+        } else {
             appliedBandGains[frequencyHz] = targetGainDb
             graph?.bandGain(frequencyHz, targetGainDb)
+            bandRampJobs[frequencyHz]?.cancel()
         }
     }
 
