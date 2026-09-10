@@ -289,6 +289,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun togglePlayback (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun togglePlayback$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun transferTo (Ltv/nomercy/player/core/events/CastTarget;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun transferToExternal ()Ltv/nomercy/player/core/cast/HandoffResult;
 	public fun transitionStrategy ()Ltv/nomercy/player/core/ports/TransitionStrategy;
 	public fun translation (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
 	public fun translation (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
@@ -400,10 +401,12 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun getPhase ()Ltv/nomercy/player/core/player/PlayerPhase;
 	public final fun getPlayState ()Ltv/nomercy/player/core/player/PlayState;
 	public final fun getPlaybackRate ()D
+	public final fun getPreferredAudioLanguageFor ()Lkotlin/jvm/functions/Function1;
 	public final fun getQueue ()Ltv/nomercy/player/core/media/MediaList;
 	public final fun getQueueWired ()Z
 	public final fun getRepeatState ()Ltv/nomercy/player/core/player/RepeatState;
 	public final fun getShuffleState ()Ltv/nomercy/player/core/player/ShuffleState;
+	public final fun getStartPositionFor ()Lkotlin/jvm/functions/Function1;
 	public final fun getVolumeBeforeMute ()I
 	public final fun getVolumeState ()Ltv/nomercy/player/core/player/VolumeState;
 	public final fun guardMutation (Ljava/lang/String;Ljava/util/List;)Z
@@ -424,9 +427,11 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun setOnBufferStateChange (Lkotlin/jvm/functions/Function0;)V
 	public final fun setPlayState (Ltv/nomercy/player/core/player/PlayState;)V
 	public final fun setPlaybackRate (D)V
+	public final fun setPreferredAudioLanguageFor (Lkotlin/jvm/functions/Function1;)V
 	public final fun setQueueWired (Z)V
 	public final fun setRepeatState (Ltv/nomercy/player/core/player/RepeatState;)V
 	public final fun setShuffleState (Ltv/nomercy/player/core/player/ShuffleState;)V
+	public final fun setStartPositionFor (Lkotlin/jvm/functions/Function1;)V
 	public final fun setVolumeBeforeMute (I)V
 	public final fun setVolumeState (Ltv/nomercy/player/core/player/VolumeState;)V
 	public final fun transitionPhase (Ltv/nomercy/player/core/player/PlayerPhase;)V
@@ -564,6 +569,7 @@ public final class tv/nomercy/player/core/controllers/TimeController {
 }
 
 public final class tv/nomercy/player/core/controllers/TransportController {
+	public static final field BACKEND_REFUSED Ljava/lang/String;
 	public fun <init> (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/controllers/QueueController;)V
 	public final fun forward (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun forward$default (Ltv/nomercy/player/core/controllers/TransportController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -850,76 +856,58 @@ public final class tv/nomercy/player/core/cues/VttSubtitlePayload : tv/nomercy/p
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class tv/nomercy/player/core/device/ClientCapabilities {
-	public fun <init> ()V
-	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZZII)V
-	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZZIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Ljava/util/List;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()Ljava/lang/Integer;
-	public final fun component5 ()Ljava/lang/Integer;
-	public final fun component6 ()Z
-	public final fun component7 ()Z
-	public final fun component8 ()I
-	public final fun component9 ()I
-	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZZII)Ltv/nomercy/player/core/device/ClientCapabilities;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/device/ClientCapabilities;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/lang/Integer;Ljava/lang/Integer;ZZIIILjava/lang/Object;)Ltv/nomercy/player/core/device/ClientCapabilities;
+public final class tv/nomercy/player/core/device/AudioCodecCapability {
+	public fun <init> (Ljava/lang/String;IZZ)V
+	public synthetic fun <init> (Ljava/lang/String;IZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun component3 ()Z
+	public final fun component4 ()Z
+	public final fun copy (Ljava/lang/String;IZZ)Ltv/nomercy/player/core/device/AudioCodecCapability;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/device/AudioCodecCapability;Ljava/lang/String;IZZILjava/lang/Object;)Ltv/nomercy/player/core/device/AudioCodecCapability;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioCodecs ()Ljava/util/List;
-	public final fun getContainers ()Ljava/util/List;
-	public final fun getMaxAudioChannels ()I
-	public final fun getMaxBitrateKbps ()I
-	public final fun getMaxHeight ()Ljava/lang/Integer;
-	public final fun getMaxWidth ()Ljava/lang/Integer;
-	public final fun getSupports10Bit ()Z
-	public final fun getSupportsHdr ()Z
-	public final fun getVideoCodecs ()Ljava/util/List;
+	public final fun getCodec ()Ljava/lang/String;
+	public final fun getDecode ()Z
+	public final fun getMaxChannels ()I
+	public final fun getPassthrough ()Z
 	public fun hashCode ()I
-	public final fun toJson ()Ljava/lang/String;
 	public fun toString ()Ljava/lang/String;
 }
 
-public final synthetic class tv/nomercy/player/core/device/ClientCapabilities$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Ltv/nomercy/player/core/device/ClientCapabilities$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltv/nomercy/player/core/device/ClientCapabilities;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltv/nomercy/player/core/device/ClientCapabilities;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
 public final class tv/nomercy/player/core/device/ClientCapabilities_jvmKt {
-	public static final fun platformClientCapabilities ()Ltv/nomercy/player/core/device/ClientCapabilities;
+	public static final fun platformDecodeProfile ()Ltv/nomercy/player/core/device/DeviceDecodeProfile;
 }
 
-public final class tv/nomercy/player/core/device/ClientCodec {
+public final class tv/nomercy/player/core/device/DecodeCodec {
 	public static final field AAC Ljava/lang/String;
 	public static final field AC3 Ljava/lang/String;
 	public static final field AV1 Ljava/lang/String;
+	public static final field DTS Ljava/lang/String;
 	public static final field EAC3 Ljava/lang/String;
 	public static final field FLAC Ljava/lang/String;
 	public static final field H264 Ljava/lang/String;
 	public static final field H265 Ljava/lang/String;
-	public static final field INSTANCE Ltv/nomercy/player/core/device/ClientCodec;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/DecodeCodec;
 	public static final field MP3 Ljava/lang/String;
 	public static final field OPUS Ljava/lang/String;
+	public static final field TRUEHD Ljava/lang/String;
+	public static final field VP9 Ljava/lang/String;
 }
 
-public final class tv/nomercy/player/core/device/ClientContainer {
+public final class tv/nomercy/player/core/device/DecodeContainer {
 	public static final field DASH Ljava/lang/String;
 	public static final field HLS Ljava/lang/String;
-	public static final field INSTANCE Ltv/nomercy/player/core/device/ClientContainer;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/DecodeContainer;
+	public static final field MKV Ljava/lang/String;
 	public static final field MP4 Ljava/lang/String;
+	public static final field TS Ljava/lang/String;
 	public static final field WEBM Ljava/lang/String;
 }
 
-public final class tv/nomercy/player/core/device/ClientResolution {
+public final class tv/nomercy/player/core/device/DecodeResolution {
 	public static final field FHD I
 	public static final field HD I
-	public static final field INSTANCE Ltv/nomercy/player/core/device/ClientResolution;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/DecodeResolution;
 	public static final field UHD I
 	public final fun clamp (I)I
 }
@@ -946,6 +934,33 @@ public final class tv/nomercy/player/core/device/DeviceCapabilities$DefaultImpls
 	public static fun getPrefersFocusNavigation (Ltv/nomercy/player/core/device/DeviceCapabilities;)Z
 }
 
+public final class tv/nomercy/player/core/device/DeviceDecodeProfile {
+	public static final field Companion Ltv/nomercy/player/core/device/DeviceDecodeProfile$Companion;
+	public static final field NO_CAP I
+	public static final field STEREO I
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;ZI)V
+	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;ZIILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun component4 ()Z
+	public final fun component5 ()I
+	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;ZI)Ltv/nomercy/player/core/device/DeviceDecodeProfile;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/device/DeviceDecodeProfile;Ljava/util/List;Ljava/util/List;Ljava/util/List;ZIILjava/lang/Object;)Ltv/nomercy/player/core/device/DeviceDecodeProfile;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAudio ()Ljava/util/List;
+	public final fun getContainers ()Ljava/util/List;
+	public final fun getMaxBitrateKbps ()I
+	public final fun getSupportsHdr ()Z
+	public final fun getVideo ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/device/DeviceDecodeProfile$Companion {
+}
+
 public final class tv/nomercy/player/core/device/FormFactor : java/lang/Enum {
 	public static final field Desktop Ltv/nomercy/player/core/device/FormFactor;
 	public static final field Phone Ltv/nomercy/player/core/device/FormFactor;
@@ -954,6 +969,14 @@ public final class tv/nomercy/player/core/device/FormFactor : java/lang/Enum {
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/device/FormFactor;
 	public static fun values ()[Ltv/nomercy/player/core/device/FormFactor;
+}
+
+public final class tv/nomercy/player/core/device/HdrFormat {
+	public static final field DOLBY_VISION Ljava/lang/String;
+	public static final field HDR10 Ljava/lang/String;
+	public static final field HDR10_PLUS Ljava/lang/String;
+	public static final field HLG Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/HdrFormat;
 }
 
 public final class tv/nomercy/player/core/device/SafeAreaInsets {
@@ -979,6 +1002,41 @@ public final class tv/nomercy/player/core/device/SafeAreaInsets {
 
 public final class tv/nomercy/player/core/device/SafeAreaInsetsKt {
 	public static final fun getDEFAULT_TV_OVERSCAN ()Ltv/nomercy/player/core/device/SafeAreaInsets;
+}
+
+public final class tv/nomercy/player/core/device/VideoCodecCapability {
+	public fun <init> (Ljava/lang/String;Ljava/util/List;IIIILjava/util/List;I)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;IIIILjava/util/List;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()I
+	public final fun component4 ()I
+	public final fun component5 ()I
+	public final fun component6 ()I
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()I
+	public final fun copy (Ljava/lang/String;Ljava/util/List;IIIILjava/util/List;I)Ltv/nomercy/player/core/device/VideoCodecCapability;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/device/VideoCodecCapability;Ljava/lang/String;Ljava/util/List;IIIILjava/util/List;IILjava/lang/Object;)Ltv/nomercy/player/core/device/VideoCodecCapability;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCodec ()Ljava/lang/String;
+	public final fun getHdrFormats ()Ljava/util/List;
+	public final fun getMaxBitDepth ()I
+	public final fun getMaxBitrateKbps ()I
+	public final fun getMaxFramerate ()I
+	public final fun getMaxHeight ()I
+	public final fun getMaxWidth ()I
+	public final fun getProfiles ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/device/VideoProfileName {
+	public static final field BASELINE Ljava/lang/String;
+	public static final field HIGH Ljava/lang/String;
+	public static final field HIGH10 Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/VideoProfileName;
+	public static final field MAIN Ljava/lang/String;
+	public static final field MAIN10 Ljava/lang/String;
 }
 
 public abstract interface class tv/nomercy/player/core/devtools/EventFirehose {
@@ -1425,6 +1483,7 @@ public final class tv/nomercy/player/core/errors/CoreErrorCodes {
 	public static final field HDR_UNPLAYABLE Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/errors/CoreErrorCodes;
 	public static final field LOAD_FAILED Ljava/lang/String;
+	public static final field MEDIA_ABSENT Ljava/lang/String;
 	public static final field MISSING_URL Ljava/lang/String;
 	public static final field NETWORK_TIMEOUT Ljava/lang/String;
 	public static final field NOT_FOUND Ljava/lang/String;
@@ -3726,6 +3785,8 @@ public final class tv/nomercy/player/core/player/ActionOptions {
 }
 
 public final class tv/nomercy/player/core/player/ActionSource {
+	public static final field AUDIO_FOCUS Ljava/lang/String;
+	public static final field BACKEND_SETTLE Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/player/ActionSource;
 	public static final field PLATFORM Ljava/lang/String;
 	public static final field PLUGIN Ljava/lang/String;
@@ -4357,11 +4418,21 @@ public class tv/nomercy/player/core/plugin/MediaSessionPlugin : tv/nomercy/playe
 	public fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Lkotlin/jvm/functions/Function0;)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/TransportCommands;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun clearMetadata ()V
+	protected fun customButtonsFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ljava/util/List;
 	public fun dispose ()V
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	protected fun isPassivelyMirroring ()Z
 	public final fun metadata ()Ltv/nomercy/player/core/ports/NowPlaying;
 	protected fun nowPlayingFor (Ltv/nomercy/player/core/media/PlaylistItem;)Ltv/nomercy/player/core/ports/NowPlaying;
+	protected final fun publishMirroredItem (Ltv/nomercy/player/core/media/PlaylistItem;J)V
+	protected final fun publishMirroredState (ZJ)V
+	protected final fun publishRemoteVolume (I)V
+	protected final fun publishRoutingControllerId (Ljava/lang/String;)V
+	protected final fun refreshCustomButtons ()V
 	public fun use ()V
+	protected fun volumeIsRemote ()Z
+	protected fun volumeSetHandler ()Lkotlin/jvm/functions/Function1;
+	protected fun volumeStepHandler ()Lkotlin/jvm/functions/Function1;
 }
 
 public final class tv/nomercy/player/core/plugin/MediaSessionPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
@@ -4397,6 +4468,7 @@ public class tv/nomercy/player/core/plugin/PlayerVolumeCommands : tv/nomercy/pla
 public abstract class tv/nomercy/player/core/plugin/Plugin {
 	public fun <init> ()V
 	protected fun activateFallback ()V
+	protected final fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public final fun disable (Ljava/lang/String;)V
 	public static synthetic fun disable$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;ILjava/lang/Object;)V
 	protected final fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -4428,6 +4500,7 @@ public abstract class tv/nomercy/player/core/plugin/Plugin {
 	protected final fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
 	public static synthetic fun resolveCueParser$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CueParser;
 	protected fun retryLastOperation ()V
+	protected final fun selectedSubtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public final fun state ()Ltv/nomercy/player/core/plugin/PluginState;
 	protected final fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public static synthetic fun t$default (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
@@ -4525,6 +4598,7 @@ public final class tv/nomercy/player/core/plugin/PluginErrorCodes {
 }
 
 public abstract interface class tv/nomercy/player/core/plugin/PluginHost {
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public abstract fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
 	public abstract fun fetch (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -4535,15 +4609,18 @@ public abstract interface class tv/nomercy/player/core/plugin/PluginHost {
 	public abstract fun report (Ltv/nomercy/player/core/errors/PlayerError;)V
 	public fun resolveCueParser (Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
 	public static synthetic fun resolveCueParser$default (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CueParser;
+	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public abstract fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public static synthetic fun t$default (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
 	public abstract fun websocket (Ljava/lang/String;Ltv/nomercy/player/core/ports/RealtimeFactoryOptions;)Ltv/nomercy/player/core/ports/RealtimeChannel;
 }
 
 public final class tv/nomercy/player/core/plugin/PluginHost$DefaultImpls {
+	public static fun audioTrack (Ltv/nomercy/player/core/plugin/PluginHost;)Ltv/nomercy/player/core/ports/AudioTrack;
 	public static fun item (Ltv/nomercy/player/core/plugin/PluginHost;)Ltv/nomercy/player/core/media/PlaylistItem;
 	public static fun resolveCueParser (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/ports/CueParser;
 	public static synthetic fun resolveCueParser$default (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CueParser;
+	public static fun subtitle (Ltv/nomercy/player/core/plugin/PluginHost;)Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public static synthetic fun t$default (Ltv/nomercy/player/core/plugin/PluginHost;Ljava/lang/String;Ljava/util/Map;ILjava/lang/Object;)Ljava/lang/String;
 }
 
@@ -4768,6 +4845,46 @@ public abstract interface class tv/nomercy/player/core/plugin/VolumeCommands {
 	public abstract fun volume (I)V
 }
 
+public final class tv/nomercy/player/core/plugins/audio/AudioFocusArbiter {
+	public static final field DEFAULT_DUCK_GAIN F
+	public static final field FULL_GAIN F
+	public fun <init> ()V
+	public fun <init> (F)V
+	public synthetic fun <init> (FILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun isPausedByArbiter ()Z
+	public final fun onBecomingNoisy ()Ltv/nomercy/player/core/plugins/audio/FocusAction;
+	public final fun onFocusGained ()Ltv/nomercy/player/core/plugins/audio/FocusAction;
+	public final fun onFocusLost (Ltv/nomercy/player/core/ports/FocusLossKind;)Ltv/nomercy/player/core/plugins/audio/FocusAction;
+	public final fun onUserPaused ()V
+	public final fun onUserResumed ()V
+}
+
+public class tv/nomercy/player/core/plugins/audio/AudioFocusPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/AudioFocusPlugin$Manifest;
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/plugins/audio/AudioFocusArbiter;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/plugins/audio/AudioFocusArbiter;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun dispose ()V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public final fun handleBecomingNoisy ()V
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/AudioFocusPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/AudioFocusPluginKt {
+	public static final fun audioFocusPlugin (Ltv/nomercy/player/core/controllers/ComposedPlayer;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/plugins/audio/AudioFocusArbiter;)Ltv/nomercy/player/core/plugins/audio/AudioFocusPlugin;
+	public static synthetic fun audioFocusPlugin$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Lkotlinx/coroutines/CoroutineScope;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Ltv/nomercy/player/core/plugins/audio/AudioFocusArbiter;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/AudioFocusPlugin;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/AudioGraphEvents {
 	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/AudioGraphEvents;
 	public final fun getChainRebuilt ()Ltv/nomercy/player/core/events/EventKey;
@@ -4923,19 +5040,21 @@ public final class tv/nomercy/player/core/plugins/audio/EqualizerEvents$Saved : 
 
 public final class tv/nomercy/player/core/plugins/audio/EqualizerOptions {
 	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;)V
-	public synthetic fun <init> (Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;Ljava/lang/Double;)V
+	public synthetic fun <init> (Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Z
 	public final fun component3 ()Z
 	public final fun component4 ()Ltv/nomercy/player/core/dsp/EqSliderValues;
-	public final fun copy (Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;)Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun copy (Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;Ljava/lang/Double;)Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;Ljava/lang/String;ZZLtv/nomercy/player/core/dsp/EqSliderValues;Ljava/lang/Double;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/EqualizerOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAutoLoad ()Z
 	public final fun getAutoSave ()Z
 	public final fun getPersistKey ()Ljava/lang/String;
 	public final fun getSliderValues ()Ltv/nomercy/player/core/dsp/EqSliderValues;
+	public final fun getSmoothingTimeConstantSeconds ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -4999,6 +5118,41 @@ public final class tv/nomercy/player/core/plugins/audio/FftSize : java/lang/Enum
 	public static fun values ()[Ltv/nomercy/player/core/plugins/audio/FftSize;
 }
 
+public abstract interface class tv/nomercy/player/core/plugins/audio/FocusAction {
+}
+
+public final class tv/nomercy/player/core/plugins/audio/FocusAction$None : tv/nomercy/player/core/plugins/audio/FocusAction {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/FocusAction$None;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/FocusAction$Pause : tv/nomercy/player/core/plugins/audio/FocusAction {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/FocusAction$Pause;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/FocusAction$Resume : tv/nomercy/player/core/plugins/audio/FocusAction {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/FocusAction$Resume;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/FocusAction$SetDuckGain : tv/nomercy/player/core/plugins/audio/FocusAction {
+	public fun <init> (F)V
+	public final fun component1 ()F
+	public final fun copy (F)Ltv/nomercy/player/core/plugins/audio/FocusAction$SetDuckGain;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/FocusAction$SetDuckGain;FILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/FocusAction$SetDuckGain;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getGain ()F
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/plugins/audio/MixerEvents {
 	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/MixerEvents;
 	public final fun getGainChanged ()Ltv/nomercy/player/core/events/EventKey;
@@ -5013,19 +5167,21 @@ public final class tv/nomercy/player/core/plugins/audio/MixerEvents {
 
 public final class tv/nomercy/player/core/plugins/audio/MixerOptions {
 	public fun <init> ()V
-	public fun <init> (DDDLjava/lang/String;)V
-	public synthetic fun <init> (DDDLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (DDDLjava/lang/String;Ljava/lang/Double;)V
+	public synthetic fun <init> (DDDLjava/lang/String;Ljava/lang/Double;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()D
 	public final fun component2 ()D
 	public final fun component3 ()D
 	public final fun component4 ()Ljava/lang/String;
-	public final fun copy (DDDLjava/lang/String;)Ltv/nomercy/player/core/plugins/audio/MixerOptions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/MixerOptions;DDDLjava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/MixerOptions;
+	public final fun component5 ()Ljava/lang/Double;
+	public final fun copy (DDDLjava/lang/String;Ljava/lang/Double;)Ltv/nomercy/player/core/plugins/audio/MixerOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/MixerOptions;DDDLjava/lang/String;Ljava/lang/Double;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/MixerOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getGainDb ()D
 	public final fun getMaxGainDb ()D
 	public final fun getPan ()D
 	public final fun getPersistKey ()Ljava/lang/String;
+	public final fun getSmoothingTimeConstantSeconds ()Ljava/lang/Double;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -5061,6 +5217,12 @@ public final class tv/nomercy/player/core/plugins/audio/MixerPlugin$Manifest : t
 
 public final class tv/nomercy/player/core/plugins/audio/MixerPluginKt {
 	public static final field DEFAULT_MAX_GAIN_DB D
+}
+
+public final class tv/nomercy/player/core/plugins/audio/ProcessPlaybackOwner {
+	public static final field INSTANCE Ltv/nomercy/player/core/plugins/audio/ProcessPlaybackOwner;
+	public final fun claim (Lkotlin/jvm/functions/Function0;)V
+	public final fun release (Lkotlin/jvm/functions/Function0;)V
 }
 
 public abstract interface class tv/nomercy/player/core/plugins/audio/SpectrumEvents {
@@ -5250,6 +5412,40 @@ public final class tv/nomercy/player/core/plugins/audio/VisualizationTick : java
 	public final fun getId ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
 	public static fun values ()[Ltv/nomercy/player/core/plugins/audio/VisualizationTick;
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VolumeMemoryOptions {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPersistKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public class tv/nomercy/player/core/plugins/audio/VolumeMemoryPlugin : tv/nomercy/player/core/plugin/Plugin {
+	public static final field Manifest Ltv/nomercy/player/core/plugins/audio/VolumeMemoryPlugin$Manifest;
+	public fun <init> (Ltv/nomercy/player/core/plugin/VolumeCommands;Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/plugin/VolumeCommands;Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
+	public synthetic fun getOptions ()Ljava/lang/Object;
+	public fun getOptions ()Ltv/nomercy/player/core/plugins/audio/VolumeMemoryOptions;
+	public fun use ()V
+}
+
+public final class tv/nomercy/player/core/plugins/audio/VolumeMemoryPlugin$Manifest : tv/nomercy/player/core/plugin/PluginManifest {
+	public fun getContributions ()Ljava/util/List;
+	public fun getId ()Ljava/lang/String;
+	public fun getMinCoreVersion ()Ljava/lang/String;
+	public fun getPriority ()I
+	public fun getReplaces ()Ljava/util/List;
+	public fun getRequires ()Ljava/util/List;
+	public fun getTranslations ()Ljava/util/Map;
+	public fun getVersion ()Ljava/lang/String;
 }
 
 public class tv/nomercy/player/core/plugins/audio/WaveformVisualization : tv/nomercy/player/core/plugins/audio/VisualizationPlugin {
@@ -6168,6 +6364,12 @@ public final class tv/nomercy/player/core/ports/AdaptiveLadderDriver {
 	public final fun tick ()Ltv/nomercy/player/core/ports/QualityLevel;
 }
 
+public final class tv/nomercy/player/core/ports/AlwaysGrantedAudioFocus : tv/nomercy/player/core/ports/AudioFocusPort {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/AlwaysGrantedAudioFocus;
+	public fun abandon ()V
+	public fun request (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/ports/FocusRequestResult;
+}
+
 public final class tv/nomercy/player/core/ports/AlwaysVisible : tv/nomercy/player/core/ports/VisibilityMonitor {
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/AlwaysVisible;
 	public fun isVisible ()Z
@@ -6195,6 +6397,7 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun bandwidthEstimate (Ltv/nomercy/player/core/ports/AudioBackend;)I
 	public static fun buffered (Ltv/nomercy/player/core/ports/AudioBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
+	public static fun externalPlayback (Ltv/nomercy/player/core/ports/AudioBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 }
 
@@ -6216,6 +6419,24 @@ public final class tv/nomercy/player/core/ports/AudioDspGraph$DefaultImpls {
 
 public final class tv/nomercy/player/core/ports/AudioDspGraphKt {
 	public static final field DEFAULT_FFT_SIZE I
+}
+
+public abstract interface class tv/nomercy/player/core/ports/AudioFocusPort {
+	public abstract fun abandon ()V
+	public abstract fun request (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/ports/FocusRequestResult;
+}
+
+public final class tv/nomercy/player/core/ports/AudioFocusPortKt {
+	public static final fun defaultAudioFocusPort ()Ltv/nomercy/player/core/ports/AudioFocusPort;
+}
+
+public abstract interface class tv/nomercy/player/core/ports/AudioLoopbackCapture {
+	public abstract fun start (IILkotlin/jvm/functions/Function2;)Z
+	public abstract fun stop ()V
+}
+
+public final class tv/nomercy/player/core/ports/AudioLoopbackCaptureKt {
+	public static final fun defaultAudioLoopbackCapture ()Ltv/nomercy/player/core/ports/AudioLoopbackCapture;
 }
 
 public final class tv/nomercy/player/core/ports/AudioOutput {
@@ -6644,6 +6865,26 @@ public final class tv/nomercy/player/core/ports/CurrentSubtitleSelection {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/ports/CustomTransportButton {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Z
+	public final fun component5 ()Lkotlin/jvm/functions/Function0;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;)Ltv/nomercy/player/core/ports/CustomTransportButton;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/CustomTransportButton;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/CustomTransportButton;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIconKey ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getOnPress ()Lkotlin/jvm/functions/Function0;
+	public fun hashCode ()I
+	public final fun isActive ()Z
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class tv/nomercy/player/core/ports/DecodeCapability {
 	public fun <init> (ZZZ)V
 	public final fun component1 ()Z
@@ -6893,6 +7134,44 @@ public final class tv/nomercy/player/core/ports/FisherYatesShuffle : tv/nomercy/
 	public fun order (Ljava/util/List;I)Ljava/util/List;
 }
 
+public abstract interface class tv/nomercy/player/core/ports/FocusChange {
+}
+
+public final class tv/nomercy/player/core/ports/FocusChange$Gained : tv/nomercy/player/core/ports/FocusChange {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/FocusChange$Gained;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/FocusChange$Lost : tv/nomercy/player/core/ports/FocusChange {
+	public fun <init> (Ltv/nomercy/player/core/ports/FocusLossKind;)V
+	public final fun component1 ()Ltv/nomercy/player/core/ports/FocusLossKind;
+	public final fun copy (Ltv/nomercy/player/core/ports/FocusLossKind;)Ltv/nomercy/player/core/ports/FocusChange$Lost;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/FocusChange$Lost;Ltv/nomercy/player/core/ports/FocusLossKind;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/FocusChange$Lost;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKind ()Ltv/nomercy/player/core/ports/FocusLossKind;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/ports/FocusLossKind : java/lang/Enum {
+	public static final field PERMANENT Ltv/nomercy/player/core/ports/FocusLossKind;
+	public static final field TRANSIENT Ltv/nomercy/player/core/ports/FocusLossKind;
+	public static final field TRANSIENT_CAN_DUCK Ltv/nomercy/player/core/ports/FocusLossKind;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/FocusLossKind;
+	public static fun values ()[Ltv/nomercy/player/core/ports/FocusLossKind;
+}
+
+public final class tv/nomercy/player/core/ports/FocusRequestResult : java/lang/Enum {
+	public static final field DENIED Ltv/nomercy/player/core/ports/FocusRequestResult;
+	public static final field GRANTED Ltv/nomercy/player/core/ports/FocusRequestResult;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Ltv/nomercy/player/core/ports/FocusRequestResult;
+	public static fun values ()[Ltv/nomercy/player/core/ports/FocusRequestResult;
+}
+
 public final class tv/nomercy/player/core/ports/FormFactor : java/lang/Enum {
 	public static final field DESKTOP Ltv/nomercy/player/core/ports/FormFactor;
 	public static final field MOBILE Ltv/nomercy/player/core/ports/FormFactor;
@@ -7015,6 +7294,8 @@ public abstract interface class tv/nomercy/player/core/ports/LanguageMatcher {
 
 public final class tv/nomercy/player/core/ports/LanguageNamesKt {
 	public static final fun labelsNeedQualifier (Ljava/util/List;)Z
+	public static final fun resolveSubtitleLabel (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun subtitleKindOf (Ljava/lang/String;)Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/LanguageNames_jvmKt {
@@ -7031,16 +7312,18 @@ public abstract interface class tv/nomercy/player/core/ports/LeaderLockRequest {
 
 public final class tv/nomercy/player/core/ports/LoadOptions {
 	public fun <init> ()V
-	public fun <init> (JZLjava/util/Map;)V
-	public synthetic fun <init> (JZLjava/util/Map;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (JZLjava/util/Map;Ljava/lang/String;)V
+	public synthetic fun <init> (JZLjava/util/Map;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()J
 	public final fun component2 ()Z
 	public final fun component3 ()Ljava/util/Map;
-	public final fun copy (JZLjava/util/Map;)Ltv/nomercy/player/core/ports/LoadOptions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/LoadOptions;JZLjava/util/Map;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/LoadOptions;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (JZLjava/util/Map;Ljava/lang/String;)Ltv/nomercy/player/core/ports/LoadOptions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/LoadOptions;JZLjava/util/Map;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/LoadOptions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAutoplay ()Z
 	public final fun getHeaders ()Ljava/util/Map;
+	public final fun getPreferredAudioLanguage ()Ljava/lang/String;
 	public final fun getStartPositionMs ()J
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -7098,6 +7381,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun currentTime ()D
 	public abstract fun currentTime (D)V
 	public abstract fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public abstract fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun mute ()V
@@ -7120,6 +7404,7 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun bandwidthEstimate (Ltv/nomercy/player/core/ports/MediaBackend;)I
 	public static fun buffered (Ltv/nomercy/player/core/ports/MediaBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
+	public static fun externalPlayback (Ltv/nomercy/player/core/ports/MediaBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
@@ -7205,6 +7490,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun currentTime (D)V
 	public fun disposeSecondary ()V
 	public fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun loadSecondary (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
@@ -7225,6 +7511,21 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun unmute ()V
 	public fun volume ()F
 	public fun volume (F)V
+}
+
+public final class tv/nomercy/player/core/ports/MpvDspGraph : tv/nomercy/player/core/ports/AudioDspGraph {
+	public static final field DEFAULT_CHANNELS I
+	public static final field DEFAULT_SAMPLE_RATE I
+	public fun <init> (Ltv/nomercy/player/core/ports/MpvVideoBackend;IILtv/nomercy/player/core/ports/AudioLoopbackCapture;)V
+	public synthetic fun <init> (Ltv/nomercy/player/core/ports/MpvVideoBackend;IILtv/nomercy/player/core/ports/AudioLoopbackCapture;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun bandGain (ID)V
+	public fun eqEnabled (Z)V
+	public fun fftSize ()I
+	public fun fftSize (I)V
+	public fun installFrameTap (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public fun preGain (D)V
+	public fun removeFrameTap ()V
+	public fun setEqBands (Ljava/util/List;)V
 }
 
 public final class tv/nomercy/player/core/ports/MpvEditionTitle {
@@ -7256,6 +7557,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun currentTime (D)V
 	public final fun describeRenditions ()Ljava/lang/String;
 	public fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public fun getCanToneMapHdrToSdr ()Z
 	public final fun getLadder ()Ltv/nomercy/player/core/ports/AdaptiveLadderDriver;
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
@@ -7272,6 +7574,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun qualityLevels ()Ljava/util/List;
 	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
+	public final fun setAudioFilter (Ljava/lang/String;)V
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;
 	public fun stop ()V
 	public fun subtitleTrack ()Ltv/nomercy/player/core/ports/SubtitleTrack;
@@ -7341,10 +7644,14 @@ public class tv/nomercy/player/core/ports/NoSystemTransport : tv/nomercy/player/
 	public fun <init> ()V
 	public fun clear ()V
 	public fun clearNowPlaying ()V
+	public fun isReleased ()Z
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+	public fun setRoutingControllerId (Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/ports/NoopWakeLock : tv/nomercy/player/core/ports/WakeLock {
@@ -7356,15 +7663,16 @@ public final class tv/nomercy/player/core/ports/NoopWakeLock : tv/nomercy/player
 }
 
 public final class tv/nomercy/player/core/ports/NowPlaying {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()J
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;J)Ltv/nomercy/player/core/ports/NowPlaying;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/NowPlaying;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JILjava/lang/Object;)Ltv/nomercy/player/core/ports/NowPlaying;
+	public final fun component6 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JZ)Ltv/nomercy/player/core/ports/NowPlaying;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/NowPlaying;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JZILjava/lang/Object;)Ltv/nomercy/player/core/ports/NowPlaying;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAlbum ()Ljava/lang/String;
 	public final fun getArtist ()Ljava/lang/String;
@@ -7372,6 +7680,7 @@ public final class tv/nomercy/player/core/ports/NowPlaying {
 	public final fun getDurationMs ()J
 	public final fun getTitle ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun isLive ()Z
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -8041,14 +8350,22 @@ public final class tv/nomercy/player/core/ports/SubtitleTrack {
 public abstract interface class tv/nomercy/player/core/ports/SystemTransport {
 	public abstract fun clear ()V
 	public fun clearNowPlaying ()V
+	public fun isReleased ()Z
 	public abstract fun release ()V
 	public abstract fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public abstract fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public abstract fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+	public fun setRoutingControllerId (Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/ports/SystemTransport$DefaultImpls {
 	public static fun clearNowPlaying (Ltv/nomercy/player/core/ports/SystemTransport;)V
+	public static fun isReleased (Ltv/nomercy/player/core/ports/SystemTransport;)Z
+	public static fun setCustomButtons (Ltv/nomercy/player/core/ports/SystemTransport;Ljava/util/List;)V
+	public static fun setDeviceVolume (Ltv/nomercy/player/core/ports/SystemTransport;I)V
+	public static fun setRoutingControllerId (Ltv/nomercy/player/core/ports/SystemTransport;Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/ports/SystemTransportKt {
@@ -8148,9 +8465,11 @@ public final class tv/nomercy/player/core/ports/Translator$DefaultImpls {
 
 public final class tv/nomercy/player/core/ports/TransportActions {
 	public fun <init> ()V
-	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)V
-	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)V
+	public synthetic fun <init> (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Lkotlin/jvm/functions/Function0;
+	public final fun component10 ()Lkotlin/jvm/functions/Function1;
+	public final fun component11 ()Lkotlin/jvm/functions/Function0;
 	public final fun component2 ()Lkotlin/jvm/functions/Function0;
 	public final fun component3 ()Lkotlin/jvm/functions/Function0;
 	public final fun component4 ()Lkotlin/jvm/functions/Function0;
@@ -8158,8 +8477,9 @@ public final class tv/nomercy/player/core/ports/TransportActions {
 	public final fun component6 ()Lkotlin/jvm/functions/Function1;
 	public final fun component7 ()Lkotlin/jvm/functions/Function1;
 	public final fun component8 ()Lkotlin/jvm/functions/Function1;
-	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/ports/TransportActions;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
+	public final fun component9 ()Lkotlin/jvm/functions/Function1;
+	public final fun copy (Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;)Ltv/nomercy/player/core/ports/TransportActions;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/TransportActions;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;ILjava/lang/Object;)Ltv/nomercy/player/core/ports/TransportActions;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getOnNext ()Lkotlin/jvm/functions/Function0;
 	public final fun getOnPause ()Lkotlin/jvm/functions/Function0;
@@ -8169,7 +8489,10 @@ public final class tv/nomercy/player/core/ports/TransportActions {
 	public final fun getOnSkipBackward ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnSkipForward ()Lkotlin/jvm/functions/Function1;
 	public final fun getOnStop ()Lkotlin/jvm/functions/Function0;
+	public final fun getOnVolumeSet ()Lkotlin/jvm/functions/Function1;
+	public final fun getOnVolumeStep ()Lkotlin/jvm/functions/Function1;
 	public fun hashCode ()I
+	public final fun isVolumeRemote ()Lkotlin/jvm/functions/Function0;
 	public fun toString ()Ljava/lang/String;
 }
 
@@ -8191,6 +8514,12 @@ public final class tv/nomercy/player/core/ports/UnconfiguredPlatform : tv/nomerc
 	public fun getPip ()Ltv/nomercy/player/core/ports/PipController;
 	public fun getVisibility ()Ltv/nomercy/player/core/ports/VisibilityMonitor;
 	public fun getWakeLock ()Ltv/nomercy/player/core/ports/WakeLock;
+}
+
+public final class tv/nomercy/player/core/ports/UnsupportedAudioLoopbackCapture : tv/nomercy/player/core/ports/AudioLoopbackCapture {
+	public static final field INSTANCE Ltv/nomercy/player/core/ports/UnsupportedAudioLoopbackCapture;
+	public fun start (IILkotlin/jvm/functions/Function2;)Z
+	public fun stop ()V
 }
 
 public final class tv/nomercy/player/core/ports/UnsupportedExternalPlayback : tv/nomercy/player/core/ports/ExternalPlayback {
@@ -8253,6 +8582,7 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun bandwidthEstimate (Ltv/nomercy/player/core/ports/VideoBackend;)I
 	public static fun buffered (Ltv/nomercy/player/core/ports/VideoBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
+	public static fun externalPlayback (Ltv/nomercy/player/core/ports/VideoBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
@@ -8287,10 +8617,14 @@ public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransport : tv
 	public fun <init> (Ltv/nomercy/player/core/ports/desktop/MprisBus;)V
 	public fun clear ()V
 	public fun clearNowPlaying ()V
+	public fun isReleased ()Z
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+	public fun setRoutingControllerId (Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransportKt {
@@ -8363,10 +8697,14 @@ public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransport : t
 	public fun <init> (Ltv/nomercy/player/core/ports/desktop/SmtcControls;)V
 	public fun clear ()V
 	public fun clearNowPlaying ()V
+	public fun isReleased ()Z
 	public fun release ()V
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
+	public fun setCustomButtons (Ljava/util/List;)V
+	public fun setDeviceVolume (I)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
+	public fun setRoutingControllerId (Ljava/lang/String;)V
 }
 
 public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransportKt {
@@ -8444,109 +8782,10 @@ public final class tv/nomercy/player/core/stream/AvcCodecString {
 	public final fun profileIdc (Ljava/lang/String;)Ljava/lang/Integer;
 }
 
-public final class tv/nomercy/player/core/stream/ClientCapabilities {
-	public static final field Companion Ltv/nomercy/player/core/stream/ClientCapabilities$Companion;
-	public static final field STEREO I
-	public fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZII)V
-	public synthetic fun <init> (Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZIIILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun component2 ()Ljava/util/List;
-	public final fun component3 ()Ljava/util/List;
-	public final fun component4 ()I
-	public final fun component5 ()I
-	public final fun component6 ()Z
-	public final fun component7 ()Z
-	public final fun component8 ()I
-	public final fun component9 ()I
-	public final fun copy (Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZII)Ltv/nomercy/player/core/stream/ClientCapabilities;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/stream/ClientCapabilities;Ljava/util/List;Ljava/util/List;Ljava/util/List;IIZZIIILjava/lang/Object;)Ltv/nomercy/player/core/stream/ClientCapabilities;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioCodecs ()Ljava/util/List;
-	public final fun getContainers ()Ljava/util/List;
-	public final fun getMaxAudioChannels ()I
-	public final fun getMaxBitrateKbps ()I
-	public final fun getMaxHeight ()I
-	public final fun getMaxWidth ()I
-	public final fun getSupports10Bit ()Z
-	public final fun getSupportsHdr ()Z
-	public final fun getVideoCodecs ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class tv/nomercy/player/core/stream/ClientCapabilities$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Ltv/nomercy/player/core/stream/ClientCapabilities$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltv/nomercy/player/core/stream/ClientCapabilities;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltv/nomercy/player/core/stream/ClientCapabilities;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class tv/nomercy/player/core/stream/ClientCapabilities$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class tv/nomercy/player/core/stream/LiveSessionRequest {
-	public static final field Companion Ltv/nomercy/player/core/stream/LiveSessionRequest$Companion;
-	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;)V
-	public synthetic fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ltv/nomercy/player/core/stream/ClientCapabilities;
-	public final fun component3 ()D
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;)Ltv/nomercy/player/core/stream/LiveSessionRequest;
-	public static synthetic fun copy$default (Ltv/nomercy/player/core/stream/LiveSessionRequest;Ljava/lang/String;Ltv/nomercy/player/core/stream/ClientCapabilities;DLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Ltv/nomercy/player/core/stream/LiveSessionRequest;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAudioLanguage ()Ljava/lang/String;
-	public final fun getClientCaps ()Ltv/nomercy/player/core/stream/ClientCapabilities;
-	public final fun getPreferredQuality ()Ljava/lang/String;
-	public final fun getStartTimeSeconds ()D
-	public final fun getVideoFileId ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class tv/nomercy/player/core/stream/LiveSessionRequest$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Ltv/nomercy/player/core/stream/LiveSessionRequest$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ltv/nomercy/player/core/stream/LiveSessionRequest;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Ltv/nomercy/player/core/stream/LiveSessionRequest;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class tv/nomercy/player/core/stream/LiveSessionRequest$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class tv/nomercy/player/core/stream/LiveSessionRequestKt {
-	public static final fun toJson (Ltv/nomercy/player/core/stream/LiveSessionRequest;)Ljava/lang/String;
-}
-
 public final class tv/nomercy/player/core/stream/MasterPlaylistRewriter {
 	public static final field INSTANCE Ltv/nomercy/player/core/stream/MasterPlaylistRewriter;
 	public final fun descriptorOf (Ljava/lang/String;)Ltv/nomercy/player/core/media/QualityDescriptor;
 	public final fun rewrite (Ljava/lang/String;Ljava/util/Collection;)Ljava/lang/String;
 	public final fun variants (Ljava/lang/String;)Ljava/util/List;
-}
-
-public final class tv/nomercy/player/core/stream/ServerCodecNames {
-	public static final field AAC Ljava/lang/String;
-	public static final field AC3 Ljava/lang/String;
-	public static final field AV1 Ljava/lang/String;
-	public static final field EAC3 Ljava/lang/String;
-	public static final field FLAC Ljava/lang/String;
-	public static final field H264 Ljava/lang/String;
-	public static final field H265 Ljava/lang/String;
-	public static final field INSTANCE Ltv/nomercy/player/core/stream/ServerCodecNames;
-	public static final field MP3 Ljava/lang/String;
-	public static final field OPUS Ljava/lang/String;
-	public static final field VP9 Ljava/lang/String;
 }
 

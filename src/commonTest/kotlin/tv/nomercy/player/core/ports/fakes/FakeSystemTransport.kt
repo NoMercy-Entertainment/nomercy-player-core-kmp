@@ -35,7 +35,21 @@ class FakeSystemTransport : SystemTransport {
     var cleared: Boolean = false
         private set
 
+    // The metadata-only clear, distinct from [cleared]: clearNowPlaying()
+    // blanks what is displayed without unpublishing the session, which is
+    // what MediaSessionPlugin.announce(null) uses for an exhausted queue
+    // since ffd3e62 — the heavier clear() is reserved for a deliberate stop.
+    var nowPlayingCleared: Boolean = false
+        private set
+
     var released: Boolean = false
+        private set
+
+    override val isReleased: Boolean get() = released
+
+    // What [MediaSessionPlugin.publishRemoteVolume] most recently pushed — the
+    // inbound half, standing in for whatever real slider a platform draws.
+    var lastDeviceVolumePercent: Int? = null
         private set
 
     // Every push in order, because the interesting failures are about ordering
@@ -66,9 +80,19 @@ class FakeSystemTransport : SystemTransport {
         pushes += "actions"
     }
 
+    override fun setDeviceVolume(percent: Int) {
+        lastDeviceVolumePercent = percent
+        pushes += "deviceVolume:$percent"
+    }
+
     override fun clear() {
         cleared = true
         pushes += "clear"
+    }
+
+    override fun clearNowPlaying() {
+        nowPlayingCleared = true
+        pushes += "clearNowPlaying"
     }
 
     override fun release() {
@@ -102,6 +126,13 @@ class FakeSystemTransport : SystemTransport {
         actions.onSkipBackward?.invoke(offsetMs)
     }
 
+    // The system slider dragged to an absolute position — see
+    // [TransportActions.onVolumeSet]'s own doc for how this differs from a
+    // notch.
+    fun simulateOsVolumeSet(percent: Int) {
+        actions.onVolumeSet?.invoke(percent)
+    }
+
     // What the system would draw. A platform hides a control it has no handler
     // for, so this is the difference between a lock screen with a next button
     // and one without.
@@ -114,5 +145,6 @@ class FakeSystemTransport : SystemTransport {
         "seekTo" to actions.onSeekTo,
         "skipBackward" to actions.onSkipBackward,
         "skipForward" to actions.onSkipForward,
+        "volumeSet" to actions.onVolumeSet,
     ).filterValues { handler -> handler != null }.keys
 }

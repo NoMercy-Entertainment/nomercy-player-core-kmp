@@ -29,23 +29,29 @@ public object ExoTrackMapper {
     public fun audioTracks(tracks: Tracks): List<AudioTrack> =
         formatsOf(tracks, C.TRACK_TYPE_AUDIO).mapIndexed { index, format ->
             AudioTrack(
-                id = format.id ?: "audio:$index",
+                // Positional, not format.id: HLS renditions routinely share one
+                // non-null Format.id across every language variant, which made
+                // every row in the picker compare equal to "the selected track"
+                // — confirmed live, real TV, 2026-08-15 (every subtitle option
+                // showed selected at once). Positional is unique by construction
+                // within one Tracks snapshot; selectByTypeOnMain resolves back
+                // through the same flattened order.
+                id = "audio:$index",
                 language = format.language ?: UNKNOWN_LANGUAGE,
-                // The language when there is no label, because a menu row with
-                // an empty title is a row a viewer cannot choose.
-                label = format.label ?: format.language ?: UNKNOWN_LANGUAGE,
+                label = ExoFormatMapper.resolveLabel(format.label, format.language),
                 channels = format.channelCount.takeIf { it != Format.NO_VALUE } ?: DEFAULT_CHANNELS,
-                codec = codecFamily(format.codecs, format.sampleMimeType),
+                codec = ExoFormatMapper.codecFamily(format.codecs, format.sampleMimeType),
             )
         }
 
     public fun subtitleTracks(tracks: Tracks): List<SubtitleTrack> =
         formatsOf(tracks, C.TRACK_TYPE_TEXT).mapIndexed { index, format ->
             SubtitleTrack(
-                id = format.id ?: "text:$index",
+                // Positional — see AudioTrack's identical id above.
+                id = "text:$index",
                 language = format.language ?: UNKNOWN_LANGUAGE,
-                label = format.label ?: format.language ?: UNKNOWN_LANGUAGE,
-                format = subtitleFormatOf(format.sampleMimeType),
+                label = resolveSubtitleLabel(format.label, format.language),
+                format = ExoFormatMapper.subtitleFormatOf(format.sampleMimeType),
                 // Forced is a flag on the track rather than a separate one, and
                 // a chrome that ignored it shows two identical-looking English
                 // entries the viewer has to guess between.
@@ -66,21 +72,21 @@ public object ExoTrackMapper {
     // The selected audio and text tracks, by the same rule as video: one
     // selection means a pinned choice, none means the engine's default.
     public fun selectedAudioTrack(tracks: Tracks): AudioTrack? =
-        selectedIdOf(tracks, C.TRACK_TYPE_AUDIO)?.let { id ->
-            audioTracks(tracks).firstOrNull { it.id == id }
-        }
+        selectedIndexOf(tracks, C.TRACK_TYPE_AUDIO)?.let { index -> audioTracks(tracks).getOrNull(index) }
 
     public fun selectedSubtitleTrack(tracks: Tracks): SubtitleTrack? =
-        selectedIdOf(tracks, C.TRACK_TYPE_TEXT)?.let { id ->
-            subtitleTracks(tracks).firstOrNull { it.id == id }
-        }
+        selectedIndexOf(tracks, C.TRACK_TYPE_TEXT)?.let { index -> subtitleTracks(tracks).getOrNull(index) }
 
-    private fun selectedIdOf(tracks: Tracks, type: Int): String? =
-        tracks.groups
+    // The selected format's position within formatsOf(tracks, type) — not its
+    // Format.id, which is not reliably unique (see AudioTrack.id's own doc).
+    private fun selectedIndexOf(tracks: Tracks, type: Int): Int? {
+        val selected: Format = tracks.groups
             .filter { it.type == type }
             .flatMap(::selectedFormatsIn)
-            .singleOrNull()
-            ?.id
+            .singleOrNull() ?: return null
+        val index = formatsOf(tracks, type).indexOfFirst { it === selected }
+        return index.takeIf { it >= 0 }
+    }
 
     private fun selectedFormatsIn(group: Tracks.Group): List<Format> =
         (0 until group.length)
@@ -102,12 +108,22 @@ public object ExoTrackMapper {
             bitrate = format.peakBitrate.takeIf { it != Format.NO_VALUE }
                 ?: format.averageBitrate.takeIf { it != Format.NO_VALUE }
                 ?: 0,
-            codec = codecFamily(format.codecs, format.sampleMimeType),
-            dynamicRange = dynamicRange(format.colorInfo?.colorTransfer),
+            codec = ExoFormatMapper.codecFamily(format.codecs, format.sampleMimeType),
+            dynamicRange = ExoFormatMapper.dynamicRange(format.colorInfo?.colorTransfer),
             width = format.width.takeIf { it != Format.NO_VALUE },
             label = format.label,
         )
     }
+
+    private const val DEFAULT_CHANNELS = 2
+    private const val UNKNOWN_LANGUAGE = "und"
+}
+
+// The value-level half of the mapping, split from the Tracks-level half
+// above along the seam that block already describes: these take a string or
+// an integer rather than a Format, which is what makes them provable without
+// an Android runtime.
+internal object ExoFormatMapper {
 
     // The three decisions below take values rather than a Format on purpose.
     //
@@ -145,6 +161,20 @@ public object ExoTrackMapper {
         else -> mimeType?.substringAfter('/') ?: UNKNOWN_CODEC
     }
 
+    // The language when there is no label, because a menu row with an empty
+    // title is a row a viewer cannot choose. Blank counts as no label too —
+    // HLS variants routinely carry NAME="" — a plain Elvis operator only
+    // catches null.
+    internal fun resolveLabel(label: String?, language: String?): String =
+        label?.takeIf { it.isNotBlank() }
+            ?: language?.takeIf { it.isNotBlank() }
+            ?: UNKNOWN_LANGUAGE
+
+    // resolveSubtitleLabel/subtitleKindOf live in LanguageNames.kt (commonMain)
+    // — shared with AppPlaylistItem's sidecar-track path, which hits the exact
+    // same bare-kind-word ambiguity from the server's wire response rather
+    // than from a Media3 Format.
+
     internal fun subtitleFormatOf(mimeType: String?): String = when (mimeType) {
         MimeTypes.TEXT_VTT -> "vtt"
         MimeTypes.APPLICATION_SUBRIP -> "srt"
@@ -154,7 +184,6 @@ public object ExoTrackMapper {
         else -> mimeType?.substringAfter('/') ?: "vtt"
     }
 
-    private const val DEFAULT_CHANNELS = 2
     private const val UNKNOWN_LANGUAGE = "und"
     private const val UNKNOWN_CODEC = "unknown"
 }

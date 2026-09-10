@@ -202,6 +202,40 @@ public class PlayerContext(
 
     public var auth: AuthController? = null
 
+    /**
+     * Where an item should begin when nothing asked for a position.
+     *
+     * A seam rather than a field on the item, because saved progress and the
+     * rules for ignoring it (near the end, mostly watched) belong to the
+     * library that knows what an item is — core's [PlaylistItem] has neither a
+     * position nor a runtime. Resuming by seeking after the engine is ready is
+     * not the same thing: the engine loads from zero first, which for a live
+     * transcode means requesting media the encoder was never asked to produce.
+     */
+    public var startPositionFor: (PlaylistItem) -> Long = { 0L }
+
+    /**
+     * The audio language the viewer last chose, before any track list exists
+     * for this item — the same seam as [startPositionFor] and for the same
+     * reason: a backend that only learns the preference once its own track
+     * list has announced has already started the wrong one, and correcting it
+     * afterward is an audible switch and a re-buffer, not a silent choice made
+     * up front. Owner ruling 2026-08-29: the player must pick the right
+     * language track no matter what the encode made the default.
+     */
+    public var preferredAudioLanguageFor: (PlaylistItem) -> String? = { null }
+
+    // An explicit value on the incoming LoadOptions wins over the per-item
+    // seams above. A recovery reload knows where it was, and asking the item
+    // again would send it back to its saved progress; a cast handoff naming
+    // what the sender was listening to likewise outranks the viewer's own
+    // stored language preference.
+    private fun effectiveLoadOptions(item: PlaylistItem, opts: LoadOptions): LoadOptions =
+        opts.copy(
+            startPositionMs = if (opts.startPositionMs > 0L) opts.startPositionMs else startPositionFor(item),
+            preferredAudioLanguage = opts.preferredAudioLanguage ?: preferredAudioLanguageFor(item),
+        )
+
     // The one path from an item to the engine. Every transport route ends up
     // here, so authorisation and the ending-soon latch are handled once instead
     // of at each call site.
@@ -305,6 +339,9 @@ public class PlayerContext(
         val item: PlaylistItem = decision.data.item
 
         val engine: MediaBackend = engineFor(item)
+
+        @Suppress("NAME_SHADOWING")
+        val opts: LoadOptions = effectiveLoadOptions(item, opts)
 
         val url: String = auth?.transformUrl(item.url) ?: item.url
 

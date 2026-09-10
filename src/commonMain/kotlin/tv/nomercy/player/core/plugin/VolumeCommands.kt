@@ -34,15 +34,22 @@ public interface VolumeCommands {
 // [VolumeCommands] wired to the player, so a consumer registering a plugin that
 // needs it writes one line rather than an adapter.
 //
-// Launched on the caller's scope and marked remote for the same reasons
-// [PlayerTransportCommands] gives: the player's verbs suspend, the caller's do
-// not, and something outside this player asked.
+// Launched on the caller's scope, for the same reason [PlayerTransportCommands]
+// launches rather than awaits: the player's verbs suspend, the caller's do not.
+//
+// PLUGIN, not REMOTE — see [PlayerTransportCommands]'s own comment on why:
+// ConnectProtocol.kt's isEcho() treats source == REMOTE as "the Connect layer
+// just re-applied a server frame, don't loop it back out", which silently
+// drops any BeforeVolume/BeforeMute gate built the same way MusicConnectPlugin
+// already gates play/pause/stop/next/previous/seek. Unused today (no such
+// gate exists yet), but REMOTE here would hit exactly the bug that tag caused
+// on the transport side the moment one is added.
 public open class PlayerVolumeCommands(
     private val player: ComposedPlayer,
     private val scope: CoroutineScope,
 ) : VolumeCommands {
 
-    private val options = ActionOptions(source = ActionSource.REMOTE)
+    private val options = ActionOptions(source = ActionSource.PLUGIN)
 
     override fun volume(level: Int) {
         scope.launch { player.volume(level, options) }

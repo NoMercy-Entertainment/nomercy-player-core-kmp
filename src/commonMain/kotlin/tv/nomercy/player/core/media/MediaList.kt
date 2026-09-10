@@ -85,7 +85,10 @@ public class MediaList<T : PlaylistItem>(
         val playingId: String? = current()?.id
         entries.clear()
         entries.addAll(items)
-        moveCursor(playingId?.let { indexOf(it) }?.takeIf { it >= 0 } ?: defaultCursor())
+        moveCursorAfterContentChange(
+            playingId?.let { indexOf(it) }?.takeIf { it >= 0 } ?: defaultCursor(),
+            previousItemId = playingId,
+        )
 
         // After the cursor lands, so a parked selection wins over the default —
         // it is the more specific instruction and it was given first.
@@ -168,7 +171,7 @@ public class MediaList<T : PlaylistItem>(
         val ordered: List<T> = shuffleStrategy.order(entries.toList(), cursor)
         entries.clear()
         entries.addAll(ordered)
-        moveCursor(playingId?.let { indexOf(it) } ?: defaultCursor())
+        moveCursorAfterContentChange(playingId?.let { indexOf(it) } ?: defaultCursor(), previousItemId = playingId)
         bus.emit(key<MediaListChange<T>>(EVENT_SHUFFLE), MediaListChange(get()))
         emitChange()
     }
@@ -177,7 +180,7 @@ public class MediaList<T : PlaylistItem>(
         if (entries.isEmpty()) return
         val playingId: String? = current()?.id
         entries.sortWith(comparator)
-        moveCursor(playingId?.let { indexOf(it) } ?: defaultCursor())
+        moveCursorAfterContentChange(playingId?.let { indexOf(it) } ?: defaultCursor(), previousItemId = playingId)
         bus.emit(key<MediaListChange<T>>(EVENT_SORT), MediaListChange(get()))
         emitChange()
     }
@@ -270,6 +273,27 @@ public class MediaList<T : PlaylistItem>(
         if (cursor == next) return
         cursor = next
         notifyCurrent()
+    }
+
+    // set()/shuffle()/sort() replace or reorder entries before landing the
+    // cursor, so "the index didn't move" is not "nothing changed" the way it
+    // is for setCurrent() — the item AT that index can be a completely
+    // different one. moveCursor's plain index check swallowed the
+    // notification whenever that happened to be true, which for set() is the
+    // COMMON case: a fresh single-item queue (any "play this track now" call)
+    // always resolves to index 0, same as the previous track's. A metadata
+    // consumer only hears about the current item through this notification —
+    // MediaSessionPlugin, and past it the OS media session, a car, a lock
+    // screen — so every second same-position track change was invisible to
+    // anything reading the platform session (confirmed live, real device,
+    // 2026-09-07: Android Auto and dumpsys media_session both kept showing
+    // the FIRST track played after a second, different one started).
+    private fun moveCursorAfterContentChange(next: Int, previousItemId: String?) {
+        if (cursor != next) {
+            moveCursor(next)
+            return
+        }
+        if (entries.getOrNull(next)?.id != previousItemId) notifyCurrent()
     }
 
     private fun notifyCurrent() {

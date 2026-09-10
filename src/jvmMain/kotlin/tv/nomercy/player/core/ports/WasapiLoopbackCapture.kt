@@ -49,33 +49,7 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     override fun start(sampleRate: Int, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
         if (running.get()) return true
 
-        val initHr = Ole32.INSTANCE.CoInitializeEx(Pointer.NULL, Ole32.COINIT_MULTITHREADED)
-        comInitialized = COMUtils.SUCCEEDED(initHr.toInt())
-        if (!comInitialized) return false
-
-        val enumerator = createDeviceEnumerator() ?: return cleanupAndFail()
-        val device = getDefaultRenderDevice(enumerator) ?: return cleanupAndFail()
-        val client = activateAudioClient(device) ?: return cleanupAndFail()
-
-        val format = WaveFormatEx().apply {
-            wFormatTag = WORD(WAVE_FORMAT_IEEE_FLOAT.toLong())
-            nChannels = WORD(channels.toLong())
-            nSamplesPerSec = DWORD(sampleRate.toLong())
-            wBitsPerSample = WORD(32L)
-            nBlockAlign = WORD((channels * 4).toLong())
-            nAvgBytesPerSec = DWORD((sampleRate * channels * 4).toLong())
-            cbSize = WORD(0L)
-        }
-
-        val initResult = audioClientInitialize(client, format)
-        if (!COMUtils.SUCCEEDED(initResult)) return cleanupAndFail()
-        audioClient = client
-
-        val capture = getCaptureClientService(client) ?: return cleanupAndFail()
-        captureClient = capture
-
-        val startResult = audioClientStart(client)
-        if (!COMUtils.SUCCEEDED(startResult)) return cleanupAndFail()
+        val capture = openCaptureClient(sampleRate, channels) ?: return cleanupAndFail()
 
         running.set(true)
         captureThread = Thread({ pumpLoop(capture, channels, onFrame) }, "nomercy-wasapi-loopback").apply {
@@ -83,6 +57,42 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
             start()
         }
         return true
+    }
+
+    // Each step yields the next COM handle or leaves the chain; the caller
+    // turns a null into the cleanup, so acquisition reads as a sequence rather
+    // than as eight separate exits.
+    private fun openCaptureClient(sampleRate: Int, channels: Int): Unknown? {
+        val initHr = Ole32.INSTANCE.CoInitializeEx(Pointer.NULL, Ole32.COINIT_MULTITHREADED)
+        comInitialized = COMUtils.SUCCEEDED(initHr.toInt())
+        if (!comInitialized) return null
+
+        val client = createDeviceEnumerator()
+            ?.let(::getDefaultRenderDevice)
+            ?.let(::activateAudioClient)
+            ?: return null
+
+        audioClient = client
+        return startCapture(client, sampleRate, channels)
+    }
+
+    private fun startCapture(client: Unknown, sampleRate: Int, channels: Int): Unknown? {
+        if (!COMUtils.SUCCEEDED(audioClientInitialize(client, waveFormat(sampleRate, channels)))) return null
+
+        val capture = getCaptureClientService(client) ?: return null
+        captureClient = capture
+
+        return if (COMUtils.SUCCEEDED(audioClientStart(client))) capture else null
+    }
+
+    private fun waveFormat(sampleRate: Int, channels: Int): WaveFormatEx = WaveFormatEx().apply {
+        wFormatTag = WORD(WAVE_FORMAT_IEEE_FLOAT.toLong())
+        nChannels = WORD(channels.toLong())
+        nSamplesPerSec = DWORD(sampleRate.toLong())
+        wBitsPerSample = WORD(BITS_PER_FLOAT_SAMPLE.toLong())
+        nBlockAlign = WORD((channels * BYTES_PER_FLOAT_SAMPLE).toLong())
+        nAvgBytesPerSec = DWORD((sampleRate * channels * BYTES_PER_FLOAT_SAMPLE).toLong())
+        cbSize = WORD(0L)
     }
 
     override fun stop() {
@@ -110,39 +120,40 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     // enough for that trade to matter.
     private fun pumpLoop(capture: Unknown, channels: Int, onFrame: (FloatArray, Int) -> Unit) {
         while (running.get()) {
-            val packetFrames = IntByReference()
-            val sizeResult = invoke(capture, VTBL_CAPTURECLIENT_GET_NEXT_PACKET_SIZE, packetFrames)
-            if (!COMUtils.SUCCEEDED(sizeResult) || packetFrames.value == 0) {
-                Thread.sleep(POLL_INTERVAL_MS)
-                continue
-            }
-
-            val dataPointer = PointerByReference()
-            val framesToRead = IntByReference()
-            val flags = IntByReference()
-            val getResult = invoke(
-                capture, VTBL_CAPTURECLIENT_GET_BUFFER, dataPointer, framesToRead, flags,
-                Pointer.NULL, Pointer.NULL,
-            )
-            if (!COMUtils.SUCCEEDED(getResult)) {
-                Thread.sleep(POLL_INTERVAL_MS)
-                continue
-            }
-
-            val frames = framesToRead.value
-            // AUDCLNT_BUFFERFLAGS_SILENT (bit 1) — WASAPI hands back a valid
-            // pointer with unspecified contents while the endpoint is
-            // silent, not a null one, so this is the only way to tell the
-            // two apart.
-            val silent = (flags.value and 0x2) != 0
-            if (frames > 0 && !silent) {
-                val samples = FloatArray(frames * channels)
-                dataPointer.value.read(0, samples, 0, samples.size)
-                onFrame(samples, frames)
-            }
-
-            invoke(capture, VTBL_CAPTURECLIENT_RELEASE_BUFFER, frames)
+            if (!drainOnePacket(capture, channels, onFrame)) Thread.sleep(POLL_INTERVAL_MS)
         }
+    }
+
+    // True when a packet was taken from the endpoint, false when there was
+    // nothing there or the call failed — the caller waits out a poll interval
+    // on false, which is what the loop's two `continue`s used to say.
+    private fun drainOnePacket(capture: Unknown, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
+        val packetFrames = IntByReference()
+        val sizeResult = invoke(capture, VTBL_CAPTURECLIENT_GET_NEXT_PACKET_SIZE, packetFrames)
+        if (!COMUtils.SUCCEEDED(sizeResult) || packetFrames.value == 0) return false
+
+        val dataPointer = PointerByReference()
+        val framesToRead = IntByReference()
+        val flags = IntByReference()
+        val getResult = invoke(
+            capture, VTBL_CAPTURECLIENT_GET_BUFFER, dataPointer, framesToRead, flags,
+            Pointer.NULL, Pointer.NULL,
+        )
+        if (!COMUtils.SUCCEEDED(getResult)) return false
+
+        val frames = framesToRead.value
+        // AUDCLNT_BUFFERFLAGS_SILENT (bit 1) — WASAPI hands back a valid
+        // pointer with unspecified contents while the endpoint is silent, not
+        // a null one, so this is the only way to tell the two apart.
+        val silent = (flags.value and BUFFERFLAGS_SILENT) != 0
+        if (frames > 0 && !silent) {
+            val samples = FloatArray(frames * channels)
+            dataPointer.value.read(0, samples, 0, samples.size)
+            onFrame(samples, frames)
+        }
+
+        invoke(capture, VTBL_CAPTURECLIENT_RELEASE_BUFFER, frames)
+        return true
     }
 
     private fun createDeviceEnumerator(): Unknown? {
@@ -168,7 +179,14 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
         val iid = IID(IID_IAUDIOCLIENT)
         val result = PointerByReference()
         // CLSCTX_ALL, no activation params.
-        val hr = invoke(device, VTBL_DEVICE_ACTIVATE, iid, com.sun.jna.platform.win32.WTypes.CLSCTX_ALL, Pointer.NULL, result)
+        val hr = invoke(
+            device,
+            VTBL_DEVICE_ACTIVATE,
+            iid,
+            com.sun.jna.platform.win32.WTypes.CLSCTX_ALL,
+            Pointer.NULL,
+            result,
+        )
         if (!COMUtils.SUCCEEDED(hr) || result.value == null) return null
         return Unknown(result.value)
     }
@@ -200,12 +218,23 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     // documented position minus those three).
     private fun invoke(target: Unknown, vtableIndex: Int, vararg args: Any?): Int {
         val result = target.pointer.getPointer(0).getPointer((vtableIndex * Native.POINTER_SIZE).toLong())
-        @Suppress("UNCHECKED_CAST")
+        // A COM vtable slot is an untyped function pointer by construction —
+        // there is nothing to check the cast against until the call is made.
+        @Suppress("UNCHECKED_CAST", "NoUncheckedCast")
         return com.sun.jna.Function.getFunction(result).invokeInt(arrayOf(target.pointer, *args))
     }
 
     private companion object {
         const val WAVE_FORMAT_IEEE_FLOAT = 3
+
+        // The capture format is IEEE float, so a sample is one 32-bit float —
+        // both numbers below are that one fact, in the two units the
+        // WAVEFORMATEX fields want it in.
+        const val BITS_PER_FLOAT_SAMPLE = 32
+        const val BYTES_PER_FLOAT_SAMPLE = 4
+
+        // AUDCLNT_BUFFERFLAGS_SILENT.
+        const val BUFFERFLAGS_SILENT = 0x2
         const val AUDCLNT_STREAMFLAGS_LOOPBACK = 0x00020000
         const val THREAD_JOIN_TIMEOUT_MS = 1_000L
         const val POLL_INTERVAL_MS = 10L

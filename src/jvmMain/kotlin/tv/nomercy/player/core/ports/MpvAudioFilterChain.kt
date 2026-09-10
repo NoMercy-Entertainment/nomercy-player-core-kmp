@@ -42,15 +42,16 @@ internal object MpvAudioFilterChain {
         }
 
         if (enabled) {
-            for (band in bands) {
-                if (band.gainDb == 0.0) continue
-                stages += "equalizer=f=${band.frequency}:width_type=q:w=${format(band.bandwidth)}:g=${format(band.gainDb)}"
-            }
+            stages += bands.filterNot { band -> band.gainDb == 0.0 }.map(::equalizerStage)
         }
 
         if (stages.isEmpty()) return EMPTY
         return "lavfi=[${stages.joinToString(",")}]"
     }
+
+    private fun equalizerStage(band: EqBand): String =
+        "equalizer=f=${band.frequency}:width_type=q" +
+            ":w=${format(band.bandwidth)}:g=${format(band.gainDb)}"
 
     // Below this, floating-point noise on a preGain round-tripped through a
     // slider (0.999999999) would otherwise chain a `volume=` stage that

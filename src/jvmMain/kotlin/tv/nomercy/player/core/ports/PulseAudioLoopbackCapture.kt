@@ -6,6 +6,14 @@
 //  SPDX-License-Identifier: Apache-2.0
 // -----------------------------------------------------------------------------
 
+// JNA resolves a native function by its symbol NAME, so the bindings below have
+// to spell the PulseAudio symbols exactly — pa_simple_new, not paSimpleNew.
+// Renaming them to satisfy Kotlin's convention would stop them resolving at
+// runtime.
+// pa_simple_new's nine arguments are PulseAudio's signature, not a shape this
+// binding chose, so LongParameterList is a property of the C API here.
+@file:Suppress("FunctionNaming", "LongParameterList")
+
 package tv.nomercy.player.core.ports
 
 import com.sun.jna.Library
@@ -33,19 +41,9 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     override fun start(sampleRate: Int, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
         if (running.get()) return true
 
-        val pulse = runCatching { Native.load("pulse-simple", PulseSimple::class.java) }.getOrNull() ?: return false
-        val monitorSource = defaultMonitorSourceName() ?: return false
-
-        val spec = PaSampleSpec().apply {
-            format = PA_SAMPLE_FLOAT32LE
-            rate = sampleRate
-            this.channels = channels.toByte()
-        }
-        val error = IntByReference()
-        val handle = pulse.pa_simple_new(
-            null, STREAM_NAME, PA_STREAM_RECORD, monitorSource, STREAM_NAME, spec, null, null, error,
-        )
-        if (handle == null) return false
+        val opened = openPulse(sampleRate, channels) ?: return false
+        val pulse = opened.library
+        val handle = opened.stream
 
         stream = handle
         running.set(true)
@@ -58,7 +56,7 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
             // Half a spectrum analysis window per read: small enough that a
             // frame is fresh when it reaches PcmEqualiser, large enough that
             // this is not a syscall per handful of samples.
-            val framesPerRead = 1024
+            val framesPerRead = FRAMES_PER_READ
             val buffer = FloatArray(framesPerRead * channels)
             val byteBuffer = com.sun.jna.Memory((framesPerRead * channels * Float.SIZE_BYTES).toLong())
 
@@ -92,6 +90,31 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     // PulseAudio special-case syntax but does not reliably resolve through
     // every pa_simple build encountered in the wild — the sink's real name
     // does.
+    // The library and the stream opened on it. start() needs both — the stream
+    // to read and the library to read it with — and neither is any use alone,
+    // so they are obtained together or not at all.
+    private class OpenedPulse(val library: PulseSimple, val stream: Pointer)
+
+    private fun openPulse(sampleRate: Int, channels: Int): OpenedPulse? {
+        val pulse = runCatching { Native.load("pulse-simple", PulseSimple::class.java) }.getOrNull() ?: return null
+        return openMonitorStream(pulse, sampleRate, channels)?.let { handle -> OpenedPulse(pulse, handle) }
+    }
+
+    // The monitor source and the stream it opens on, together — start() only
+    // needs to know whether it got one.
+    private fun openMonitorStream(pulse: PulseSimple, sampleRate: Int, channels: Int): Pointer? {
+        val monitorSource = defaultMonitorSourceName() ?: return null
+        val spec = PaSampleSpec().apply {
+            format = PA_SAMPLE_FLOAT32LE
+            rate = sampleRate
+            this.channels = channels.toByte()
+        }
+        val error = IntByReference()
+        return pulse.pa_simple_new(
+            null, STREAM_NAME, PA_STREAM_RECORD, monitorSource, STREAM_NAME, spec, null, null, error,
+        )
+    }
+
     private fun defaultMonitorSourceName(): String? = runCatching {
         val process = ProcessBuilder("pactl", "get-default-sink").redirectErrorStream(true).start()
         val sinkName = process.inputStream.bufferedReader().readText().trim()
@@ -100,6 +123,10 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     }.getOrNull()
 
     private companion object {
+        // Small enough that a frame is fresh when it reaches PcmEqualiser,
+        // large enough that this is not a syscall per handful of samples.
+        const val FRAMES_PER_READ = 1024
+
         const val STREAM_NAME = "NoMercyPlayer"
         const val PA_STREAM_RECORD = 2
         const val PA_SAMPLE_FLOAT32LE = 5
@@ -135,6 +162,6 @@ private interface PulseSimple : Library {
         error: IntByReference,
     ): Pointer?
 
-    fun pa_simple_read(s: Pointer, data: Pointer, bytes: Long, error: IntByReference): Int
-    fun pa_simple_free(s: Pointer)
+    fun pa_simple_read(stream: Pointer, data: Pointer, bytes: Long, error: IntByReference): Int
+    fun pa_simple_free(stream: Pointer)
 }

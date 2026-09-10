@@ -1157,7 +1157,10 @@ public open class ComposedPlayer(
 
     public open fun backlogClear(): Unit = queue.backlogClear()
 
-    public open suspend fun item(id: String, autoplay: Boolean = false): Unit = queue.item(id, autoplay)
+    // Autoplay defaults ON: picking an item is a decision to watch it, and
+    // every caller that meant otherwise says so. The old default left a queue
+    // pick, an episode dialog and a remote all loading onto a still frame.
+    public open suspend fun item(id: String, autoplay: Boolean = true): Unit = queue.item(id, autoplay)
 
     public open suspend fun playItem(id: String): Unit = queue.playItem(id)
 
@@ -1327,7 +1330,9 @@ public open class ComposedPlayer(
     // ladder does.
     public open fun audioTracks(): List<AudioTrack> = video?.audioTracks().orEmpty()
 
-    public open fun audioTrack(): AudioTrack? = video?.audioTrack()
+    // Also the PluginHost seam — same answer to both callers, same reasoning
+    // as item() above.
+    override fun audioTrack(): AudioTrack? = video?.audioTrack()
 
     // Two events, because they answer different questions and always have on
     // the web: `audioTrack` says WHICH, `audioTrackState` says whether anybody
@@ -1397,7 +1402,9 @@ public open class ComposedPlayer(
     // developer cannot search for.
     public open fun subtitles(): List<SubtitleTrack> = video?.subtitleTracks().orEmpty()
 
-    public open fun subtitle(): SubtitleTrack? = video?.subtitleTrack()
+    // Also the PluginHost seam — same answer to both callers, same reasoning
+    // as item() above.
+    override fun subtitle(): SubtitleTrack? = video?.subtitleTrack()
 
     // Null turns captions off, which is a selection a viewer makes rather than
     // an error — and it is the one every engine spells differently underneath.

@@ -14,6 +14,7 @@ import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.RepeatState
+import tv.nomercy.player.testing.FakeMediaBackend
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -296,5 +297,29 @@ class TransportControllerTest {
         // announcing one would flash a spinner over a static frame.
         assertEquals(emptyList(), phases.map { it.to })
         assertEquals(listOf(30.0), rig.backend.seekedTo)
+    }
+
+    // An engine that declines to start. A browser or OS refusing playback
+    // without a user gesture is the everyday reason, and it is the case the
+    // optimistic state before the call gets wrong.
+    private class RefusingBackend : FakeMediaBackend() {
+        override suspend fun play(): Unit = error("autoplay refused")
+    }
+
+    @Test
+    fun anEngineRefusingToStartRevertsTheStateAndSaysWhy() = runTest {
+        val rig = Rig().ready()
+        rig.ctx.backend = RefusingBackend()
+        val prevented = EventLog().capture(rig.ctx, CoreEvents.PlayPrevented)
+
+        assertFailsWith<IllegalStateException> { rig.transport.play() }
+
+        // Left on PLAYING, every UI that renders from state draws a Pause
+        // button over silence and the viewer's first press pauses nothing.
+        assertEquals(PlayState.PAUSED, rig.ctx.playState)
+        assertEquals(PlayerPhase.READY, rig.ctx.phase)
+        assertEquals(1, prevented.size)
+        // The web trio's own wire value, so one listener serves both.
+        assertEquals("backend-refused", prevented.single().reason)
     }
 }

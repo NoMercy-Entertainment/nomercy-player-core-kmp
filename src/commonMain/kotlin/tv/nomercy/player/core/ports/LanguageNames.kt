@@ -36,3 +36,53 @@ public expect fun displayLanguage(tag: String): String
 // here rather than beside any one engine's mapper.
 public fun labelsNeedQualifier(languages: List<String>): Boolean =
     languages.size != languages.toSet().size
+
+// A subtitle rendition's label, when the source only gave a bare variant word.
+//
+// The media server (and HLS SUBTITLES groups it generates) names a track's
+// VARIANT — "full", "sdh", "sign", "forced", "alt" — not a human label, on both
+// the sidecar wire response AND the embedded-track path a native engine reads
+// off the manifest. Left alone, six same-kind tracks in six different
+// languages all render the identical bare word, with nothing to tell them
+// apart (confirmed live, real TV, 2026-08-15). Shared here rather than
+// duplicated per engine, because both paths hand this exact ambiguity to
+// exactly the same fix.
+public fun resolveSubtitleLabel(label: String?, language: String?): String {
+    val kind: String? = subtitleKindOf(label)
+
+    // Resolved once, used by both tiers below: a track with no kind word is
+    // exactly as entitled to a real language name as one with "full" in its
+    // label. Excludes the tag itself — "und" IS a real ISO-639-2 code, but
+    // showing it verbatim in a menu answers nothing a viewer can act on, so
+    // it is treated the same as no language at all rather than round-tripped
+    // through displayLanguage (which mostly just echoes an unrecognised tag
+    // back unchanged, per its own doc — including this one).
+    val langName: String? = language
+        ?.takeIf { it.isNotBlank() && !it.equals(UNKNOWN_SUBTITLE_LANGUAGE, ignoreCase = true) }
+        ?.let(::displayLanguage)
+
+    if (kind != null) {
+        return if (langName != null) "$langName ($kind)" else kind
+    }
+    return label?.takeIf { it.isNotBlank() }
+        ?: langName
+        ?: UNKNOWN_SUBTITLE_LANGUAGE
+}
+
+// Whole tokens, not substrings — "Maltese" contains "alt", and a title named
+// "Sign of Four" would otherwise claim the signs variant.
+public fun subtitleKindOf(label: String?): String? {
+    val tokens: Set<String> = label.orEmpty().lowercase()
+        .split('.', ' ', '_', '-', '/', '(', ')', '[', ']')
+        .filterTo(mutableSetOf()) { it.isNotBlank() }
+    return when {
+        "sdh" in tokens -> "SDH"
+        "sign" in tokens || "signs" in tokens -> "Signs"
+        "full" in tokens -> "Full"
+        "forced" in tokens -> "Forced"
+        "alt" in tokens -> "Alt"
+        else -> null
+    }
+}
+
+private const val UNKNOWN_SUBTITLE_LANGUAGE = "und"

@@ -38,4 +38,16 @@ public object ActionSource {
     // "never resume a player the user paused" is built on. Native-only: the
     // reference has no audio-focus concept for this to answer to.
     public const val AUDIO_FOCUS: String = "audio-focus"
+
+    // The backend's own transient Pause/Play blip while an engine catches up
+    // to a seek — BackendBridge.announcePause/announcePlay reacting to the
+    // backend's own isPlaying callback, not a genuine pause a viewer would
+    // recognise as one. Deliberately its own source rather than PLATFORM:
+    // PLATFORM also carries real, recognisable pauses (the offline policy,
+    // the cast-handoff pause) that a listener like AudioFocusPlugin needs to
+    // treat as user-visible state, not filter out alongside this blip.
+    // Native-only, same reasoning as AUDIO_FOCUS. Confirmed live, real
+    // device, 2026-08-12: folding this into PLATFORM's own filter silently
+    // broke the offline-pause policy against the next unrelated focus event.
+    public const val BACKEND_SETTLE: String = "backend-settle"
 }

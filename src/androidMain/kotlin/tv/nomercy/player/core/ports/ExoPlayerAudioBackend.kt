@@ -38,6 +38,22 @@ public class ExoPlayerAudioBackend(
     private var current: ExoPlayerVideoBackend = ExoPlayerVideoBackend(context, scope, currentEqualiser)
     private var standby: ExoPlayerVideoBackend? = null
 
+    // Forwarded to every underlying [ExoPlayerVideoBackend] this class owns —
+    // `current` above, and `standby` wherever [loadSecondary] builds one.
+    // Nothing here had this seam at all until now: every music request went out
+    // with no Authorization header and the server correctly 401'd it
+    // (confirmed live, real TV, 2026-08-12 — `HttpDataSource$InvalidResponseCodeException:
+    // Response code: 401`, found only after fixing the two earlier bugs that
+    // were masking it: setup() never called, and the queue silently no-op'ing
+    // while IDLE). [ExoPlayerVideoBackend] already has this exact seam
+    // (`authHeaders.provider`); this class just never had a way to reach it.
+    public var authHeaderProvider: () -> Map<String, String> = { emptyMap() }
+        set(value) {
+            field = value
+            current.authHeaders.provider = value
+            standby?.authHeaders?.provider = value
+        }
+
     private val crossfader = EqualPowerCrossfader()
 
     // The listeners a caller registered follow the swap. Without this, a chrome
@@ -142,6 +158,7 @@ public class ExoPlayerAudioBackend(
             scope,
             BiquadEqAudioProcessor().also { standbyEqualiser = it },
         ).also {
+            it.authHeaders.provider = authHeaderProvider
             standby = it
         }
         next.volume(0f)

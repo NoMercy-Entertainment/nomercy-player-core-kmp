@@ -10,6 +10,7 @@ package tv.nomercy.player.core.plugin
 
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.ports.CustomTransportButton
 import tv.nomercy.player.core.ports.NowPlaying
 import tv.nomercy.player.core.ports.SystemTransport
 import tv.nomercy.player.core.ports.TransportActions
@@ -27,6 +28,12 @@ import tv.nomercy.player.core.ports.defaultSystemTransport
 // Both directions cross a narrow seam. Outward through SystemTransport, inward
 // through TransportCommands, and neither of them is the player: a lock screen
 // that could reach the player object could change the subtitle track.
+// The function count is SystemTransport's plus TransportCommands', because this
+// plugin is the join between them: one handler per action the platform can
+// raise, and one push per thing the platform has to be told. Splitting it would
+// put the outward half and the inward half in two objects that must agree on
+// the same session, which is the drift this seam exists to prevent.
+@Suppress("TooManyFunctions")
 public open class MediaSessionPlugin(
     private val commands: TransportCommands,
     private val openTransport: () -> SystemTransport = ::defaultSystemTransport,
@@ -56,19 +63,70 @@ public open class MediaSessionPlugin(
 
     private var durationMs: Long = 0
 
+    // Whether a real CoreEvents.Time update has arrived for the CURRENT item.
+    // Reset alongside durationMs on every announce(); flipped true the moment
+    // one lands, live or not — that flip is what tells "live" apart from
+    // "not measured yet" below.
+    private var durationKnown: Boolean = false
+
     override fun use() {
         val opened: SystemTransport = openTransport()
         transport = opened
         opened.setActionHandlers(handlers())
 
         on(CoreEvents.Item) { change -> announce(change.item) }
-        on(CoreEvents.Play) { push(TransportPlaybackState.PLAYING) }
-        on(CoreEvents.Pause) { push(TransportPlaybackState.PAUSED) }
+        // Gated: a device passively mirroring another one's session keeps its
+        // OWN engine paused on purpose (see MusicConnectPlugin.applyPassiveFrame
+        // — it pauses the local engine every frame to guarantee it never
+        // becomes a second stream). That local pause/resume-around-idle still
+        // fires these same events, and left unguarded they raced
+        // publishMirroredItem/publishMirroredState — the consumer's own
+        // correct source of truth for what a passive device shows — for
+        // ownership of this transport's PlaybackState. Whichever of the two
+        // landed last won, several times a second, which is what turned a
+        // passively mirrored PLAYING session into a system notification that
+        // visibly flickered between playing and paused. Confirmed live, real
+        // Samsung device, 2026-09-09 (video-captured + Samsung's own SystemUI
+        // logs), root-caused via the exact 5s match between the flip period
+        // and the far side's own position-report cadence.
+        on(CoreEvents.Play) { if (!isPassivelyMirroring()) push(TransportPlaybackState.PLAYING) }
+        on(CoreEvents.Pause) { if (!isPassivelyMirroring()) push(TransportPlaybackState.PAUSED) }
         on(CoreEvents.Time) { update ->
             positionMs = toMillis(update.time)
-            durationMs = toMillis(update.duration)
+            val newDurationMs = toMillis(update.duration)
+            // Only pushed when the duration actually moves — the item's
+            // duration is usually still unknown at announce() (Item fires
+            // before the engine has read it), so every notification built
+            // that way carried durationMs=0 forever and Media3 drew no seek
+            // bar for it at all, confirmed live, real device, 2026-08-12.
+            //
+            // Routed through pushNowPlaying(), NOT announce() — announce()
+            // resets positionMs to 0 and durationKnown to false, which called
+            // from here (every tick, once durationKnown flips back to false
+            // by its own reset) snapped the reported position back to zero
+            // every second and produced exactly the flicker this file's top
+            // comment already warns against — confirmed live, real device,
+            // 2026-08-12 (the seek bar vanished within a few seconds of
+            // playback starting).
+            val changed = durationMs != newDurationMs
+            val firstTickForItem = !durationKnown
+            durationKnown = true
+            durationMs = newDurationMs
+            if (firstTickForItem || changed) {
+                item()?.let { pushNowPlaying(it) }
+            }
         }
         on(CoreEvents.Seek) { position ->
+            positionMs = toMillis(position.time)
+            push(lastState)
+        }
+        // Seeked fires ~11ms BEFORE the real BACKEND_SETTLE blip lands
+        // (SeekedOrderingTraceTest, real hardware, 2026-08-15), so this
+        // push(lastState) can be stale — harmless, since the unconditional
+        // Play/Pause handlers above overwrite it once the settle event
+        // arrives. Kept for positionMs, which should update immediately
+        // rather than wait for that settle.
+        on(CoreEvents.Seeked) { position ->
             positionMs = toMillis(position.time)
             push(lastState)
         }
@@ -98,6 +156,27 @@ public open class MediaSessionPlugin(
         transport = null
     }
 
+    /**
+     * The transport to publish through — reopening one if the held reference
+     * has gone stale (see [SystemTransport.isReleased]'s own doc for why that
+     * happens even though this plugin never released it itself). Every
+     * outward push in this class reads through here rather than the raw
+     * [transport] field, so a plugin that outlives another engine's own
+     * transport takeover recovers on its own next update instead of pushing
+     * silently into a dead session forever.
+     *
+     * Null only before [use] has ever run, or after [dispose] — an
+     * uninstalled plugin has nothing to reopen.
+     */
+    private fun liveTransport(): SystemTransport? {
+        val current: SystemTransport = transport ?: return null
+        if (!current.isReleased) return current
+        val reopened: SystemTransport = openTransport()
+        transport = reopened
+        reopened.setActionHandlers(handlers())
+        return reopened
+    }
+
     // What the system shows for this item.
     //
     // Open, because a PlaylistItem carries an id, a url and a title and nothing
@@ -107,7 +186,20 @@ public open class MediaSessionPlugin(
     protected open fun nowPlayingFor(item: PlaylistItem): NowPlaying = NowPlaying(
         title = item.title ?: item.url.substringAfterLast('/'),
         durationMs = durationMs,
+        // Live only once a real update has confirmed there is no duration —
+        // never on the transient durationMs==0 every item starts at.
+        isLive = durationKnown && durationMs <= 0L,
     )
+
+    // The lego-brick custom buttons for this item — favorite, or whatever
+    // else a consumer wants beside the standard transport controls. Empty by
+    // default: this library has no concept of what any of them mean, the
+    // same reasoning as [nowPlayingFor]'s own comment. A subclass overrides
+    // this rather than calling SystemTransport.setCustomButtons directly, so
+    // the buttons stay in step with the item they were built for — announce
+    // pushes both together, and a consumer cannot push one without the
+    // other going stale.
+    protected open fun customButtonsFor(item: PlaylistItem): List<CustomTransportButton> = emptyList()
 
     private var lastState: TransportPlaybackState = TransportPlaybackState.STOPPED
 
@@ -131,21 +223,59 @@ public open class MediaSessionPlugin(
      */
     public fun clearMetadata() {
         announced = null
-        transport?.clearNowPlaying()
+        liveTransport()?.clearNowPlaying()
+    }
+
+    /** Rebuilds the custom buttons for what is playing, for a consumer whose own
+     *  button state changed without the item changing. */
+    protected fun refreshCustomButtons() {
+        val opened: SystemTransport = liveTransport() ?: return
+        val current: PlaylistItem = item() ?: return
+        opened.setCustomButtons(customButtonsFor(current))
     }
 
     private var announced: NowPlaying? = null
 
     private fun announce(item: PlaylistItem?) {
-        val opened: SystemTransport = transport ?: return
+        val opened: SystemTransport = liveTransport() ?: return
         if (item == null) {
-            // The cursor past the end of an exhausted queue. Nothing is playing
-            // and the lock screen should say so rather than keep the last item.
-            opened.clear()
+            // The cursor past the end of an exhausted queue — OR the transient
+            // null a queue REPLACE passes through on its way to the real item
+            // (confirmed live: every playTrack() call fires this on its way to
+            // announcing the real item, not only on genuine exhaustion). Using
+            // the heavier clear() here — which now also unpublishes the
+            // session and resets the foreground-promotion flag, see its own
+            // comment — turned every ordinary track change into a spurious
+            // stop/republish cycle and reintroduced
+            // ForegroundServiceDidNotStartInTimeException on a real device,
+            // 2026-08-12. clearNowPlaying() only blanks the displayed
+            // metadata, which is all a transient (or genuinely empty) cursor
+            // needs — the session itself stays exactly as it was.
+            opened.clearNowPlaying()
             return
         }
 
         positionMs = 0
+        // Reset alongside position — a track change carries over the PREVIOUS
+        // track's durationMs otherwise, since only the Time handler ever wrote
+        // it, and that handler only re-announces on the 0-to-known transition
+        // (see its own comment). Without this reset that transition never
+        // happens again after the first track: switching songs (or to a radio
+        // station with a different length) left the notification/mini-player
+        // showing the old track's stale duration and a progress bar computed
+        // against it — confirmed live, real device, 2026-08-12.
+        durationMs = 0
+        durationKnown = false
+        pushNowPlaying(item)
+        opened.setCustomButtons(customButtonsFor(item))
+    }
+
+    // The metadata half of announce(), without the item-change resets —
+    // positionMs and durationKnown carry over. This is what the Time
+    // handler's duration correction calls: it is fixing up the CURRENT
+    // item's metadata, not starting a new one, so it must not touch either.
+    private fun pushNowPlaying(item: PlaylistItem) {
+        val opened: SystemTransport = liveTransport() ?: return
         val playing: NowPlaying = nowPlayingFor(item)
         announced = playing
         opened.setNowPlaying(playing)
@@ -153,12 +283,109 @@ public open class MediaSessionPlugin(
 
     private fun push(state: TransportPlaybackState) {
         lastState = state
-        transport?.setPlaybackState(state, positionMs, PLAYING_RATE)
+        liveTransport()?.setPlaybackState(state, positionMs, PLAYING_RATE)
     }
 
     // What the system may ask for. Seek and the two transport verbs always;
     // queue movement only if the player has a queue, because a control with no
     // handler is hidden rather than drawn doing nothing.
+    /**
+     * A hardware volume press, in notches, or null to leave the platform's own
+     * default alone. Overridden by a consumer whose device may be controlling
+     * playback somewhere else — see [TransportActions.onVolumeStep].
+     */
+    protected open fun volumeStepHandler(): ((Int) -> Unit)? = null
+
+    /**
+     * A system slider dragged to an absolute percent, or null to leave only
+     * [volumeStepHandler]'s ±1 reading available — see [TransportActions.onVolumeSet].
+     */
+    protected open fun volumeSetHandler(): ((Int) -> Unit)? = null
+
+    /** True while the press belongs to another device — see [TransportActions.isVolumeRemote]. */
+    protected open fun volumeIsRemote(): Boolean = false
+
+    /**
+     * True while this device's own engine is being kept deliberately idle to
+     * mirror a session actually happening elsewhere — see [publishMirroredItem]/
+     * [publishMirroredState]'s own doc for why an idle engine still fires real
+     * Play/Pause events. While this is true, [use]'s own CoreEvents.Play/Pause
+     * listeners publish nothing, so a consumer's explicit mirrored publish is
+     * never raced by the local engine's own paused-on-purpose noise. False by
+     * default: only a consumer that has a concept of "mirroring" knows when it
+     * applies, the same reasoning [volumeIsRemote] already uses.
+     */
+    protected open fun isPassivelyMirroring(): Boolean = false
+
+    /**
+     * Publish a state this player's own engine cannot report.
+     *
+     * A device mirroring a session happening elsewhere has an idle engine, so
+     * every event this plugin listens to says paused — and a paused session is
+     * skipped when the platform decides who receives a hardware volume key,
+     * which sends the press to the local speaker instead. A consumer that knows
+     * playback is live somewhere else says so here.
+     */
+    /**
+     * Publish the item a mirroring device is showing.
+     *
+     * Registering this plugin is not enough on its own: it builds its metadata
+     * from the engine's item, and a device mirroring a session elsewhere has
+     * none — so nothing was ever published and the platform had no session for
+     * the app at all (measured: "Media button session is null"). A session that
+     * does not exist cannot be handed a volume key.
+     *
+     * [durationMs] overrides whatever [nowPlayingFor] would have read off this
+     * device's OWN engine — always 0 while mirroring, because a device that
+     * never loads anything never gets a real CoreEvents.Time tick to learn a
+     * duration from. Publishing that 0 drew a system notification with no seek
+     * bar at all, even though the far side's real duration was sitting right
+     * there in the frame this call is built from. Confirmed live, real Samsung
+     * device, 2026-09-09.
+     */
+    protected fun publishMirroredItem(item: PlaylistItem, durationMs: Long) {
+        val playing: NowPlaying = nowPlayingFor(item).copy(
+            durationMs = durationMs,
+            isLive = durationMs <= 0L,
+        )
+        liveTransport()?.setNowPlaying(playing)
+    }
+
+    protected fun publishMirroredState(isPlaying: Boolean, positionMs: Long) {
+        liveTransport()?.setPlaybackState(
+            if (isPlaying) TransportPlaybackState.PLAYING else TransportPlaybackState.PAUSED,
+            positionMs,
+            if (isPlaying) 1.0 else 0.0,
+        )
+    }
+
+    /**
+     * The active device's REAL, server-reported volume, pushed down into
+     * whatever slider the platform draws for it.
+     *
+     * A consumer whose device may be controlling — or merely watching —
+     * playback happening elsewhere calls this every time that real level
+     * changes, including a change this device had no part in (another
+     * client's own press, the far end's own remote). Without a live push
+     * here the platform's slider only ever shows local interaction history:
+     * see [SystemTransport.setDeviceVolume]'s own doc for the bug this closes.
+     */
+    protected fun publishRemoteVolume(percent: Int) {
+        liveTransport()?.setDeviceVolume(percent)
+    }
+
+    /**
+     * The real system route this session's playback is now going through —
+     * see [SystemTransport.setRoutingControllerId]'s own doc. A consumer with
+     * a platform route provider (Android's `MediaRoute2ProviderService`)
+     * calls this the moment a route is selected, and again with `null` the
+     * moment it's released, so the platform's own output-switcher chip has a
+     * real name to resolve instead of falling back to a placeholder.
+     */
+    protected fun publishRoutingControllerId(routingControllerId: String?) {
+        liveTransport()?.setRoutingControllerId(routingControllerId)
+    }
+
     private fun handlers(): TransportActions = TransportActions(
         onPlay = commands::play,
         onPause = commands::pause,
@@ -174,6 +401,9 @@ public open class MediaSessionPlugin(
         // seekbackward and seekforward handlers call optional player methods.
         onSkipBackward = commands::skipBackward,
         onSkipForward = commands::skipForward,
+        onVolumeStep = volumeStepHandler(),
+        onVolumeSet = volumeSetHandler(),
+        isVolumeRemote = { volumeIsRemote() },
     )
 }
 

@@ -9,6 +9,8 @@
 package tv.nomercy.player.core.ports
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -29,6 +31,9 @@ import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,8 +42,13 @@ import tv.nomercy.player.core.media.QualityDescriptor
 import tv.nomercy.player.core.events.SubtitleCue
 import tv.nomercy.player.core.events.SubtitleCueChange
 
+private const val LOG_TAG = "nm-video-backend"
 private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
+
+// Mirrors the web trio's HLS_EXT_RE: `.m3u8` then a query, fragment, or end of
+// URL — a plain endsWith miss on `master.m3u8#t=30` wrongly disabled tunneling.
+internal val HLS_EXT_RE = Regex("""\.m3u8(?:[?#]|$)""", RegexOption.IGNORE_CASE)
 
 // The Android engine, over Media3.
 //
@@ -56,7 +66,11 @@ private const val TIME_UPDATE_INTERVAL_MS = 250L
 // the implementation to satisfy a threshold would put half of one object's
 // state behind a delegate — which is how the track cache and the playback cache
 // would drift apart.
-@Suppress("TooManyFunctions")
+// LargeClass for the same reason, and measured: it sits three units over the
+// limit. The outage ladder, the track cache and the playback state are read by
+// each other on the same main thread, and the split that would satisfy the
+// count is the delegate the paragraph above rules out.
+@Suppress("TooManyFunctions", "LargeClass")
 public class ExoPlayerVideoBackend(
     context: Context,
     scope: CoroutineScope? = null,
@@ -139,6 +153,58 @@ public class ExoPlayerVideoBackend(
     // gives a viewer the same failure on every item, and the sink's answer does
     // not change while the same cable is plugged into the same receiver.
     private var tunnelingRefusedByAudioSink: Boolean = false
+
+    // Riding out a server that went away mid-playback — a host restart, a LAN
+    // drop, a Wi-Fi roam. Media3 reports these as fatal source errors, but
+    // nothing about the media is broken: the bytes are back the moment the
+    // server is. See the transient branch in onPlayerError.
+    private var networkRetryAttempt: Int = 0
+    private var networkRecoveryJob: Job? = null
+    private var positionBeforeNetworkLoss: Long = 0L
+    // Set once the ladder is spent, so a device that regains connectivity later
+    // still rebuilds the session instead of leaving the viewer on a dead error.
+    private var awaitingNetworkReturn: Boolean = false
+    // Whether this outage started at the connection level, which is what tells
+    // a restarting server's 404 apart from a video that is genuinely gone.
+    private var sawConnectionFailure: Boolean = false
+
+    private val connectivityManager: ConnectivityManager? =
+        context.getSystemService(ConnectivityManager::class.java)
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    // registerDefaultNetworkCallback delivers onAvailable for the network that
+    // is ALREADY up, immediately. Proven on a Nokia box: the ladder announced
+    // rung 1 and 37ms later "connectivity returned" reset it to rung 1 again.
+    // A route that never went away is not a route coming back.
+    private var ignoreFirstOnAvailable: Boolean = false
+
+    private val recovering = MutableStateFlow(false)
+
+    /**
+     * True while the reconnect ladder is riding out a source the server stopped
+     * serving.
+     *
+     * The engine is the first thing in an app to learn the origin is gone: it
+     * asks for bytes constantly, while a realtime socket behind the same tunnel
+     * can stay up long after the server behind it died. A host watches this to
+     * probe reachability on the engine's evidence rather than waiting for a
+     * socket that may never drop — which is why a server restart could leave a
+     * TV on a dead player and never raise the server-offline screen.
+     */
+    public val isRecoveringFromOutage: StateFlow<Boolean> = recovering.asStateFlow()
+
+    /**
+     * Whether this session means to play, as opposed to having been paused.
+     *
+     * Survives buffering, so it separates "the bytes stopped" from "the viewer
+     * paused before any of this" — which is what a host needs to decide whether
+     * an outage screen owes playback back when it leaves.
+     */
+    public val isPlaybackIntended: Boolean
+        get() = runCatching { player.playWhenReady }.getOrDefault(false)
+
+    // Once per player. A tracks change fires on every rung switch and a
+    // viewer does not need the same refusal repeated for the whole film.
+    private var reportedUnsupported: Boolean = false
 
     // Whether a video output surface exists yet, and therefore whether
     // tunneling may be asked for at all.
@@ -255,6 +321,34 @@ public class ExoPlayerVideoBackend(
                         "viewport=${trackSelector.parameters.viewportWidth}x" +
                         "${trackSelector.parameters.viewportHeight}",
                 )
+                // The tracks the menus read. Nothing else refreshed them on this
+                // event, so the audio and subtitle lists held whatever the last
+                // state change happened to see — for a file that plays straight
+                // through with no rebuffer, that is nothing at all, and both
+                // menus stay empty for the whole title.
+                refreshCache()
+                reportUnsupportedVideo(tracks)
+            }
+
+            // A stream this device cannot decode is SILENT in Media3: the
+            // renderer is dropped, the audio plays on, and nothing is thrown.
+            // Measured on an SM-A137F against an HEVC Main10 rung — four
+            // `NoSupport [codec.profileLevel, hvc1.2.4.L120.B0]` lines in
+            // logcat, no ExoPlaybackException, and a black picture the viewer
+            // has no explanation for.
+            private fun reportUnsupportedVideo(tracks: Tracks) {
+                val video: List<Tracks.Group> = tracks.groups.filter { it.type == C.TRACK_TYPE_VIDEO }
+                if (video.isEmpty()) return
+                // Every rung refused, not merely the one that was picked: a
+                // manifest with a playable alternative is an ABR decision, and
+                // reporting that would cry wolf on every adaptive stream.
+                val anyPlayable: Boolean = video.any { group ->
+                    (0 until group.length).any { index -> group.isTrackSupported(index) }
+                }
+                if (anyPlayable || reportedUnsupported) return
+
+                reportedUnsupported = true
+                bus.emit(CanonicalBackendEvent.ERROR, CoreErrorCodes.CODEC_UNSUPPORTED)
             }
 
             override fun onPlaybackStateChanged(state: Int) {
@@ -297,17 +391,44 @@ public class ExoPlayerVideoBackend(
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 refreshCache()
                 if (isPlaying) {
+                    // Bytes are flowing again — retire any in-flight reconnect and
+                    // hand the full backoff ladder back.
+                    //
+                    // On PLAYING, not on STATE_READY. A re-prepare against a dead
+                    // server reaches READY off the buffer it already holds, which
+                    // zeroed the counter between every rung: the ladder announced
+                    // 10/10, reset to 1/10, and looped forever. The viewer sat on
+                    // "Buffering..." with no offline screen and no error, because
+                    // the give-up budget could never actually be spent.
+                    if (networkRetryAttempt != 0) {
+                        Log.i(
+                            LOG_TAG,
+                            "Playback recovered after $networkRetryAttempt reconnect attempt(s)",
+                        )
+                    }
+                    resetOutageLadder()
+                    positionBeforeNetworkLoss = 0L
+
                     bus.emit(CanonicalBackendEvent.PLAYING)
                     startTicking()
                 } else {
-                    bus.emit(CanonicalBackendEvent.PAUSE)
+                    // Media3 also reports not-playing while STATE_BUFFERING with
+                    // playWhenReady still true — a stall, not a pause. The comment
+                    // above already draws this distinction for the true branch;
+                    // the false branch was announcing PAUSE unconditionally,
+                    // which told every listener (chrome visibility included) that
+                    // the viewer had paused whenever the network merely stalled.
+                    if (!exoPlayer.playWhenReady) {
+                        bus.emit(CanonicalBackendEvent.PAUSE)
+                    }
                     stopTicking()
                 }
             }
 
             override fun onPlayerError(error: PlaybackException) {
                 if (recoverFromTunnelingRefusal(error)) return
-                bus.emit(CanonicalBackendEvent.ERROR, error.errorCodeName)
+                if (rideOutSourceOutage(error)) return
+                bus.emit(CanonicalBackendEvent.ERROR, terminalCodeFor(error))
             }
 
             // The cues of whichever text track is selected, as the engine
@@ -339,7 +460,7 @@ public class ExoPlayerVideoBackend(
         val wanted: Boolean = !engine.renderers.requestSdrToneMap &&
             videoSurfaceAttached && TunnelingRule.shouldTunnel(
             isTv = isTvDevice,
-            sourceIsHls = url.substringBefore('?').endsWith(".m3u8", ignoreCase = true),
+            sourceIsHls = HLS_EXT_RE.containsMatchIn(url),
             refusedByAudioSink = tunnelingRefusedByAudioSink,
         )
         trackSelector.parameters = trackSelector.buildUponParameters()
@@ -366,10 +487,215 @@ public class ExoPlayerVideoBackend(
         return true
     }
 
-    override suspend fun load(url: String, opts: LoadOptions): Unit = onMain {
+    /**
+     * What to call a failure that survived every recovery above.
+     *
+     * Media3's own code name says how the fetch failed, never what the viewer
+     * should do about it — a 404 on an episode nobody has encoded yet arrives
+     * as the same ERROR_CODE_IO_BAD_HTTP_STATUS as a proxy hiccup. The one
+     * failure a viewer can act on gets its own name so a consumer can offer to
+     * move to the next item instead of showing a dead end.
+     */
+    private fun terminalCodeFor(error: PlaybackException): String =
+        if (SourceOutage.isMediaAbsentStatus(SourceOutage.httpStatusOf(error))) {
+            CoreErrorCodes.MEDIA_ABSENT
+        } else {
+            error.errorCodeName
+        }
+
+    /**
+     * A server that went away is an outage to ride out, not a dead file.
+     *
+     * Tearing the session down with an error overlay is what made a brief
+     * server blip read to a viewer as a corrupt film. Re-prepare from the
+     * position that was lost, on a backoff, and hold the UI in its waiting
+     * state so it reads as reconnecting rather than dead. Only once the ladder
+     * is spent does the failure become real and the error surface.
+     *
+     * Returns whether it handled the error, so the caller does not also report
+     * one the viewer is about to stop seeing.
+     */
+    private fun rideOutSourceOutage(error: PlaybackException): Boolean {
+        if (error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
+            error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
+        ) {
+            sawConnectionFailure = true
+        }
+
+        if (!SourceOutage.isTransient(error.errorCode)) return false
+
+        val limit: Int = SourceOutage.retryLimitFor(
+            error.errorCode,
+            SourceOutage.httpStatusOf(error),
+            sawConnectionFailure,
+        )
+        val attempt: Int = networkRetryAttempt
+        if (attempt >= limit) {
+            // The ladder is spent. The session stays revivable rather than
+            // dead: the error surfaces so the viewer sees what happened, and
+            // the connectivity callback rebuilds playback if this device gets a
+            // network back later.
+            awaitingNetworkReturn = true
+            ensureNetworkCallback()
+            recovering.value = false
+            return false
+        }
+
+        // Captured on the FIRST failure only. Every later prepare() has already
+        // reset the timeline, so reading it again would resume from zero.
+        if (attempt == 0) {
+            positionBeforeNetworkLoss = runCatching { player.currentPosition }.getOrDefault(0L)
+        }
+
+        // An outage on THIS device's side is not evidence that the server is
+        // gone, so it must not spend the give-up budget — a two-minute Wi-Fi
+        // drop would burn the whole ladder without a single attempt ever having
+        // a route to try. Hold at the slowest rung and let the connectivity
+        // callback take over the moment a network is back.
+        val deviceOffline: Boolean = !hasNetwork()
+        if (!deviceOffline) networkRetryAttempt = attempt + 1
+        ensureNetworkCallback()
+
+        Log.w(
+            LOG_TAG,
+            "Transient source error (${error.errorCodeName}) — reconnect attempt " +
+                "${attempt + 1}/$limit in ${SourceOutage.BACKOFF_MS[attempt]}ms " +
+                "from ${positionBeforeNetworkLoss}ms" +
+                if (deviceOffline) " (device offline, budget held)" else "",
+        )
+        recovering.value = true
+        bus.emit(CanonicalBackendEvent.WAITING)
+        reconnect(SourceOutage.BACKOFF_MS[attempt])
+        return true
+    }
+
+    private fun reconnect(delayMs: Long) {
+        networkRecoveryJob?.cancel()
+        networkRecoveryJob = main.launch {
+            if (delayMs > 0) delay(delayMs)
+            runCatching {
+                // playWhenReady survives a source error but is cleared by
+                // pause(), so reading it HERE rather than at failure time is
+                // what lets an intervening pause — the viewer's, or an outage
+                // screen's — suppress the auto-resume instead of being
+                // overridden by it.
+                val shouldResume: Boolean = player.playWhenReady
+                player.prepare()
+                if (positionBeforeNetworkLoss > 0) player.seekTo(positionBeforeNetworkLoss)
+                if (shouldResume) {
+                    // Through the bus, not just the engine. A media session is
+                    // published from CanonicalBackendEvent.PLAY; resuming with a
+                    // bare player.play() left the lock screen and every Connect
+                    // consumer frozen on PAUSED at the second the outage began,
+                    // while the film played on.
+                    bus.emit(CanonicalBackendEvent.PLAY)
+                    player.play()
+                }
+            }.onFailure { failure ->
+                Log.e(LOG_TAG, "Reconnect attempt failed: ${failure.message}", failure)
+            }
+        }
+    }
+
+    /**
+     * Whether the device itself is on a network right now. Deliberately "is
+     * there a default network", not "is the internet validated": a NoMercy
+     * server is usually a box on the same LAN, and a Wi-Fi network with no
+     * internet route still reaches it.
+     */
+    private fun hasNetwork(): Boolean {
+        val manager: ConnectivityManager = connectivityManager ?: return true
+        return runCatching { manager.activeNetwork != null }.getOrDefault(true)
+    }
+
+    /**
+     * Watches for the device coming back online so an outage longer than the
+     * backoff ladder still ends in playback rather than a dead error. Without
+     * it, a Wi-Fi drop that outlasts the ladder leaves the session
+     * unrecoverable until the viewer backs out and picks the episode again.
+     */
+    private fun ensureNetworkCallback() {
+        if (networkCallback != null) return
+        val manager: ConnectivityManager = connectivityManager ?: return
+
+        ignoreFirstOnAvailable = hasNetwork()
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                main.launch {
+                    // The callback fires once on registration when the network
+                    // is already up; that arrival is not a return from an
+                    // outage. After that, only reconnect if something was
+                    // actually waiting on the network.
+                    val spurious: Boolean = ignoreFirstOnAvailable
+                    ignoreFirstOnAvailable = false
+                    val waiting: Boolean = networkRetryAttempt != 0 || awaitingNetworkReturn
+                    if (!spurious && waiting) {
+                        Log.i(LOG_TAG, "Connectivity returned — reconnecting now")
+                        // A fresh outage deserves the whole ladder: the attempts
+                        // spent waiting for the network to come back say nothing
+                        // about whether the server answers now.
+                        resetOutageLadder()
+                        reconnect(0L)
+                    }
+                }
+            }
+        }
+
+        runCatching {
+            manager.registerDefaultNetworkCallback(callback)
+            networkCallback = callback
+        }.onFailure { failure ->
+            Log.w(LOG_TAG, "Could not register network callback: ${failure.message}")
+        }
+    }
+
+    private fun releaseNetworkCallback() {
+        val manager: ConnectivityManager = connectivityManager ?: return
+        networkCallback?.let { callback ->
+            runCatching { manager.unregisterNetworkCallback(callback) }
+                .onFailure { failure ->
+                    Log.w(LOG_TAG, "Could not unregister network callback: ${failure.message}")
+                }
+        }
+        networkCallback = null
+    }
+
+    /** Hands the full backoff budget back, so a later unrelated drop does not inherit a spent one. */
+    private fun resetOutageLadder() {
+        networkRecoveryJob?.cancel()
+        networkRecoveryJob = null
+        networkRetryAttempt = 0
+        awaitingNetworkReturn = false
+        sawConnectionFailure = false
+        recovering.value = false
+    }
+
+    // Not onMain: that helper's post-block refreshCache() reads
+    // player.currentPosition, which right after prepare() still answers the
+    // OUTGOING item's position — Media3 hasn't processed the new timeline
+    // synchronously. That refresh landed AFTER this function's own cachedTime
+    // reset below and silently overwrote it with the stale value, which is why
+    // a next/previous skip kept reporting the old episode's time as the new
+    // one's start. cachedTime is set here, last, after this function's own
+    // explicit refreshCache() call — not delegated to a wrapper that runs one
+    // more time behind this function's back.
+    override suspend fun load(url: String, opts: LoadOptions): Unit = withContext(mainDispatcher) {
+        // Silence the outgoing item the instant a switch is decided, not once
+        // the incoming one is ready. TransportController.advanceTo() moves the
+        // queue cursor and fires the chrome's loading state before this runs
+        // (see its own comment on that ordering) — with playWhenReady left
+        // alone here, the OLD item's audio/video kept rendering under that
+        // spinner for as long as the new source took to buffer, seconds on an
+        // HLS episode change. The subsequent play(opts) call re-arms it once
+        // the new item is actually ready.
+        player.playWhenReady = false
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
         refusedAsUnplayable = false
+        // A new source is a new session: the rungs the previous one spent say
+        // nothing about whether this one can be fetched.
+        resetOutageLadder()
+        positionBeforeNetworkLoss = 0L
         // The previous item's last line, taken off the picture before the next
         // one's first frame arrives. The web backend does this in unload() for
         // the same reason.
@@ -397,22 +723,72 @@ public class ExoPlayerVideoBackend(
             val carried: Map<String, String> = opts.headers
             authHeaders.provider = { carried }
         }
-        player.setMediaItem(MediaItem.fromUri(url))
+        // The position goes ON the item, not after prepare(). Seeking
+        // afterwards works only because a finished file has every segment: the
+        // engine loads from zero, then jumps. A live transcode has exactly the
+        // part the encoder has written, so a resumed episode fetched segment 0
+        // from a session that starts minutes later and waited on it forever.
+        // The preferred language, ON the track selector before prepare() —
+        // ExoPlayer picks the matching track at selection time using this
+        // instead of falling back to the manifest's own default, so the
+        // engine starts in the right language rather than starting in the
+        // wrong one and correcting it once VideoPreferencesPlugin's restore
+        // sees the announced track list. That correction is a real,
+        // audible switch and a re-buffer, not a silent choice — confirmed
+        // live, reported as "audio plays the first track, then switches and
+        // buffers".
+        if (!opts.preferredAudioLanguage.isNullOrBlank()) {
+            trackSelector.parameters = trackSelector.buildUponParameters()
+                .setPreferredAudioLanguage(opts.preferredAudioLanguage)
+                .build()
+        }
+        player.setMediaItem(MediaItem.fromUri(url), opts.startPositionMs.coerceAtLeast(0L))
         // prepare, not play: starting is a separate decision above, and an
         // engine that started on its own would ignore a refused beforePlay.
         player.prepare()
-        if (opts.startPositionMs > 0L) player.seekTo(opts.startPositionMs)
+        // Synced from the player FIRST, then immediately overridden below —
+        // player.currentPosition here still answers the OUTGOING item, since
+        // Media3 doesn't apply the new MediaItem's timeline synchronously
+        // inside prepare(). Calling this now (rather than trusting a later
+        // caller of onMain/fireAndForget to do it) guarantees nothing races
+        // between this refresh and the override that follows it.
+        refreshCache()
+        // currentTime() answers from this cache, not player.currentPosition,
+        // for exactly the reason above. A next/previous skip reported the
+        // stale value refreshCache() just wrote as the new episode's start
+        // instead of 0 (or the resume position) — confirmed against this
+        // file's own currentTime(seconds) setter for the ms/seconds
+        // convention. This assignment MUST be the last thing load() does:
+        // it is the one line that makes the reset stick.
+        cachedTime = opts.startPositionMs.coerceAtLeast(0L) / MILLIS_PER_SECOND
     }
 
     override suspend fun play(): Unit = onMain {
         bus.emit(CanonicalBackendEvent.PLAY)
-        player.play()
+        // An idle player ignores play(): a source that died after the ladder ran
+        // out leaves the engine in STATE_IDLE with no timeline to resume, so the
+        // press did nothing at all and the player read as dead. The media item
+        // is still there, so re-preparing resumes at the second it was lost
+        // rather than rebuilding from the last position anything was told about.
+        if (awaitingNetworkReturn && player.playbackState == Player.STATE_IDLE) {
+            Log.w(LOG_TAG, "play() after a spent reconnect ladder — re-preparing the source")
+            resetOutageLadder()
+            player.playWhenReady = true
+            reconnect(0L)
+        } else {
+            player.play()
+        }
     }
 
     override fun pause(): Unit = fireAndForget { player.pause() }
 
     override fun stop(): Unit = fireAndForget {
         stopTicking()
+        // A pending reconnect would otherwise fire its prepare()/play() after
+        // this stop and quietly resurrect playback — under the outage screen,
+        // in the very case that asked us to stop.
+        resetOutageLadder()
+        positionBeforeNetworkLoss = 0L
         player.stop()
     }
 
@@ -497,7 +873,11 @@ public class ExoPlayerVideoBackend(
         cachedSubtitleTrack = ExoTrackMapper.selectedSubtitleTrack(tracks)
         cachedState = when (player.playbackState) {
             Player.STATE_READY -> if (player.isPlaying) BackendState.PLAYING else BackendState.PAUSED
-            Player.STATE_BUFFERING -> BackendState.LOADING
+            // Media3 buffers whether or not anybody asked it to play, and a
+            // player told to stay put is not loading — it is stopped, holding
+            // whatever it holds. Reporting LOADING there is what a media
+            // element never does, and the reference reads this answer directly.
+            Player.STATE_BUFFERING -> if (player.playWhenReady) BackendState.LOADING else BackendState.PAUSED
             Player.STATE_ENDED -> BackendState.READY
             else -> BackendState.IDLE
         }
@@ -661,14 +1041,21 @@ public class ExoPlayerVideoBackend(
         refreshCache()
     }
 
-    // By id, because that is what the track the caller was handed carries. An
-    // index would be this engine's numbering, which is exactly what the rest of
-    // the library refuses to pass around.
+    // By id, because that is what the track the caller was handed carries — the
+    // caller never sees this engine's numbering. The id itself IS that
+    // numbering now (ExoTrackMapper's positional "audio:n"/"text:n"), because
+    // matching against the raw Format.id below it used to resolve to was
+    // wrong: HLS renditions routinely share one non-null Format.id across every
+    // language variant, so firstOrNull matched the wrong track and every row in
+    // the picker compared equal to "selected" (confirmed live, real TV,
+    // 2026-08-15). Parsed back out here rather than passed as a second
+    // parameter, so ExoTrackMapper stays the only place that owns the format.
     private fun selectByTypeOnMain(type: Int, id: String) {
+        val flatIndex: Int = id.substringAfterLast(':').toIntOrNull() ?: return
         val located: Pair<Tracks.Group, Int> = player.currentTracks.groups
             .filter { it.type == type }
             .flatMap { group -> (0 until group.length).map { group to it } }
-            .firstOrNull { (group, track) -> group.getTrackFormat(track).id == id }
+            .getOrNull(flatIndex)
             ?: return
 
         player.trackSelectionParameters = player.trackSelectionParameters
@@ -688,6 +1075,8 @@ public class ExoPlayerVideoBackend(
     // thinks something is playing.
     override fun release(): Unit = fireAndForget {
         stopTicking()
+        resetOutageLadder()
+        releaseNetworkCallback()
         player.release()
     }
 
@@ -715,10 +1104,18 @@ public class ExoPlayerVideoBackend(
     // The synchronous half of the contract against a main-thread-only engine.
     // Launching rather than blocking, because blocking the caller to satisfy
     // Media3's threading rule would deadlock a caller already on main.
+    //
+    // Guarded: a call queued right before release() (also fireAndForget) can
+    // run after it — a seek/pause reaching a torn-down player throws
+    // IllegalStateException, otherwise uncaught and fatal on this scope.
     private fun fireAndForget(block: () -> Unit) {
         main.launch {
-            block()
-            refreshCache()
+            runCatching {
+                block()
+                refreshCache()
+            }.onFailure { failure ->
+                Log.w(LOG_TAG, "fireAndForget after teardown: ${failure.message}")
+            }
         }
     }
 }

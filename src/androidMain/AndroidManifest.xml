@@ -25,20 +25,34 @@
                 android:value="androidx.startup" />
         </provider>
 
-        <!-- What keeps the process alive with the screen off (P21.20).
-             android:exported="false": only this app's own MediaController
-             and the framework's MediaSessionManager (the lock screen, the
-             notification, Android Auto) ever bind to it, never another
-             app's process directly. The intent-filter action is the
-             standard framework contract androidx.media3.session.MediaSessionService
-             consumers all declare — it is what makes the system able to
-             find this Service by capability rather than by name. -->
+        <!-- What keeps the process alive with the screen off (P21.20), and
+             what a car finds when it looks for something to play.
+
+             android:exported="true" is not optional here: a Bluetooth head
+             unit builds its player list by enumerating BROWSABLE media
+             services in other processes, and so do Android Auto and the
+             assistant. Exported="false" is visible only to this app's own
+             MediaController — which is why NoMercy never appeared on a head
+             unit and its cover art never loaded there. What an outside
+             caller can actually do is still decided by the session's own
+             onConnect (see Media3SystemTransport.TransportSessionCallback);
+             exporting makes the service findable, not open.
+
+             Three actions, because three different callers look for three
+             different names: media3 controllers use the MediaLibraryService
+             action, older media3 and framework controllers use the
+             MediaSessionService one, and the legacy browse enumerator every
+             car still uses looks for android.media.browse.MediaBrowserService.
+             A service missing that last one is controllable once something
+             else starts it and invisible in the car's own player list. -->
         <service
             android:name="tv.nomercy.player.core.ports.NoMercyPlaybackService"
-            android:exported="false"
+            android:exported="true"
             android:foregroundServiceType="mediaPlayback">
             <intent-filter>
+                <action android:name="androidx.media3.session.MediaLibraryService" />
                 <action android:name="androidx.media3.session.MediaSessionService" />
+                <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
     </application>

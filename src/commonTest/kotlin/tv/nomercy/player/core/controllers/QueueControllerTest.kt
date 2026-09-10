@@ -177,11 +177,25 @@ class QueueControllerTest {
     }
 
     @Test
-    fun choosingAnItemLoadsItWithoutStartingItUnlessAsked() = runTest {
+    fun choosingAnItemPlaysItUnlessToldNotTo() = runTest {
+        // Picking an item is a decision to watch it. This asserted the opposite,
+        // and the old default it was written against is what left a queue pick,
+        // an episode dialog and a remote all loading onto a still frame.
         val rig = Rig().ready()
         rig.queue.queue(items("a", "b"))
 
         rig.queue.item("b")
+
+        assertEquals(listOf("https://example.test/b"), rig.backend.loadedUrls)
+        assertEquals(1, rig.backend.playCount)
+    }
+
+    @Test
+    fun choosingAnItemWithAutoplayOffOnlyLoadsIt() = runTest {
+        val rig = Rig().ready()
+        rig.queue.queue(items("a", "b"))
+
+        rig.queue.item("b", autoplay = false)
 
         assertEquals(listOf("https://example.test/b"), rig.backend.loadedUrls)
         assertEquals(0, rig.backend.playCount)

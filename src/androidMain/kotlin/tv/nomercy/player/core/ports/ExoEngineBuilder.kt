@@ -61,32 +61,11 @@ private fun physicalDisplaySize(context: Context): Pair<Int, Int> {
     return edge to edge
 }
 
-internal fun buildEngine(
-    context: Context,
-    auth: AuthHeaders,
+private fun applySelectorParameters(
     selector: DefaultTrackSelector,
-    // Given only by the audio backend. Video has no equaliser today, and
-    // inserting a processor into a video sink to change nothing would cost a
-    // pass over every sample for no reason.
-    processor: BiquadEqAudioProcessor? = null,
-    // What the master playlist declared, handed back as it is read.
-    //
-    // The interceptor that reads it was written, tested and never added to the
-    // client, so on Android the ladder narrowing, the bandwidth sanitiser and the
-    // manifest's own VIDEO-RANGE all did nothing at all — and the dynamic range
-    // was then read off Format.colorInfo, which Media3 leaves null for an HLS
-    // variant until its decoder is configured. An HDR film was reported as SDR by
-    // a player holding the playlist that said PQ.
-    onVariants: (List<QualityDescriptor>) -> Unit = {},
-): ExoEngine {
-    val displaySize: Pair<Int, Int> = physicalDisplaySize(context)
-    val budget: BufferConfig = bufferConfigForDevice(context)
-    val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
-        AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
-    } else {
-        EqualiserRenderersFactory(context, budget.isTvDevice, processor)
-    }
-
+    displaySize: Pair<Int, Int>,
+    renderers: AudioPassthroughRenderersFactory,
+) {
     selector.parameters = selector.buildUponParameters()
         // A rung change that is not seamless is still better than a stall. On
         // TV hardware the seamless path is often unavailable and refusing to
@@ -113,6 +92,35 @@ internal fun buildEngine(
         .setExceedVideoConstraintsIfNecessary(false)
         .setAudioOffloadPreferences(offloadFor(renderers))
         .build()
+}
+
+internal fun buildEngine(
+    context: Context,
+    auth: AuthHeaders,
+    selector: DefaultTrackSelector,
+    // Given only by the audio backend. Video has no equaliser today, and
+    // inserting a processor into a video sink to change nothing would cost a
+    // pass over every sample for no reason.
+    processor: BiquadEqAudioProcessor? = null,
+    // What the master playlist declared, handed back as it is read.
+    //
+    // The interceptor that reads it was written, tested and never added to the
+    // client, so on Android the ladder narrowing, the bandwidth sanitiser and the
+    // manifest's own VIDEO-RANGE all did nothing at all — and the dynamic range
+    // was then read off Format.colorInfo, which Media3 leaves null for an HLS
+    // variant until its decoder is configured. An HDR film was reported as SDR by
+    // a player holding the playlist that said PQ.
+    onVariants: (List<QualityDescriptor>) -> Unit = {},
+): ExoEngine {
+    val displaySize: Pair<Int, Int> = physicalDisplaySize(context)
+    val budget: BufferConfig = bufferConfigForDevice(context)
+    val renderers: AudioPassthroughRenderersFactory = if (processor == null) {
+        AudioPassthroughRenderersFactory.create(context, budget.isTvDevice)
+    } else {
+        EqualiserRenderersFactory(context, budget.isTvDevice, processor)
+    }
+
+    applySelectorParameters(selector, displaySize, renderers)
 
     val player: ExoPlayer = ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())
@@ -122,6 +130,13 @@ internal fun buildEngine(
             DefaultMediaSourceFactory(
                 dataSourceFactory(context, auth, onVariants),
                 DefaultExtractorsFactory(),
+            ).setLoadErrorHandlingPolicy(
+                // processor is only ever given to the audio engine (this
+                // function's own doc) — the one engine that never live-
+                // transcodes, so it never has a "not written yet" 404 to wait
+                // out. See PendingSegmentRetryPolicy's own doc for the bug
+                // this closes.
+                PendingSegmentRetryPolicy(allowPendingSegments = processor == null),
             ),
         )
         .setLoadControl(loadControlFor(budget))
@@ -136,7 +151,7 @@ internal fun buildEngine(
         .setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
         // handleAudioFocus is FALSE. P21's AudioFocusArbiter/AudioFocusPlugin
         // is what decides pause/duck/resume now, over the shared
-        // AudioFocusPort (AudioManagerFocusPort on Android) — the same
+        // AudioFocusPort (AndroidAudioFocusPort on Android) — the same
         // arbitration every platform uses, including the cross-player
         // ProcessPlaybackOwner rule ExoPlayer's own internal handling has no
         // way to know about (a video and a music player each requesting
@@ -234,6 +249,13 @@ private fun dataSourceFactory(
     onVariants: (List<QualityDescriptor>) -> Unit,
 ): DataSource.Factory {
     val client = OkHttpClient.Builder()
+        // A live-transcoded segment does not exist until the encoder writes
+        // it, and the server holds the request open until it does. OkHttp's
+        // 10s default gave up first: measured on an SM-A137F playing a
+        // transcoded episode, which died on SocketTimeoutException about a
+        // minute in while the encoder was still working.
+        .readTimeout(SEGMENT_READ_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
+        .callTimeout(SEGMENT_CALL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
         // Auth first, so the repair below sees the response that the
         // authenticated request actually returned rather than a 401 body.
         .addInterceptor(auth.asInterceptor())
@@ -283,3 +305,8 @@ private fun loadControlFor(budget: BufferConfig): DefaultLoadControl {
 // Media3's own default. Named because the number appearing bare next to a
 // budget measured in megabytes reads as if the two were related.
 private const val ALLOCATION_CHUNK_BYTES = 64 * 1024
+
+// Long enough for an encoder to produce a segment, short enough that a dead
+// server still fails rather than hanging the player forever.
+private const val SEGMENT_READ_TIMEOUT_S = 60L
+private const val SEGMENT_CALL_TIMEOUT_S = 120L

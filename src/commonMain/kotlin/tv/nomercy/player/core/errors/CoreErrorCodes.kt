@@ -42,6 +42,17 @@ public object CoreErrorCodes {
     // A url a factory was required for and none claimed.
     public const val NO_FACTORY_MATCH: String = "core:stream/no-factory-match"
 
+    /**
+     * The server answered, and answered that this item's media is not there.
+     *
+     * Separate from every other playback failure because it is the one a viewer
+     * can act on: an episode that has not been encoded yet is not a broken
+     * player and not a bad connection, and the next episode is probably fine.
+     * Reported as its own code so a consumer can offer to move on instead of
+     * showing the same dead-end overlay it shows for a decode failure.
+     */
+    public const val MEDIA_ABSENT: String = "core:stream/media-absent"
+
     // The rest of the HTTP ladder, raised by AuthFetch. Named per status where
     // the answer differs — a 410 is never worth retrying and a 429 is worth
     // retrying slowly — and by class where it does not.

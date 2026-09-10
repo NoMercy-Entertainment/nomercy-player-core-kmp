@@ -100,9 +100,15 @@ class PlayerTransportCommandsTest {
     }
 
     @Test
-    fun anActionFromOutsideTheProcessIsMarkedAsRemote() = runTest {
-        // So a listener can tell a car's steering wheel from the app's own
-        // button. Both are legitimate and they are not the same event.
+    fun anActionFromOutsideTheProcessIsMarkedPluginNotRemote() = runTest {
+        // Not REMOTE: MusicConnectPlugin's isEcho() reads that value as "the
+        // Connect layer just re-applied a server frame", and a lock-screen or
+        // car button tagged that way silently never reached guard() at all —
+        // confirmed live, real phone, 2026-09-09. PLUGIN is the other tag
+        // guard() does not treat as an echo, so the same distinguishing
+        // information (this came from outside the process, not the app's own
+        // on-screen button) survives without colliding with Connect's own use
+        // of REMOTE.
         val player = ComposedPlayer(backend = FakeMediaBackend(), scope = backgroundScope)
         val sources: MutableList<String?> = mutableListOf()
         player.setup(PlayerConfig())
@@ -114,7 +120,7 @@ class PlayerTransportCommandsTest {
 
         PlayerTransportCommands(player, eager()).pause()
 
-        assertEquals(listOf<String?>(ActionSource.REMOTE), sources)
+        assertEquals(listOf<String?>(ActionSource.PLUGIN), sources)
     }
 
     @Test

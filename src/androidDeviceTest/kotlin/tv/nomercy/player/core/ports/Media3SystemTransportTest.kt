@@ -63,6 +63,26 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun theRoutingControllerIdReachesTheSessionsDeviceInfo() {
+        // The output-switcher chip reads DeviceInfo.routingControllerId to
+        // resolve a real device name — without it Android falls back to a
+        // generic "Other device" placeholder even on a genuinely remote
+        // session. DeviceInfo is only built while a remote volume handler is
+        // wired (see getState()'s own gate), so both are set here.
+        var routingControllerId: String? = null
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(TransportActions(onVolumeStep = {}, isVolumeRemote = { true }))
+            bridge.setNowPlaying(NowPlaying(title = "x"))
+            bridge.setRoutingControllerId("route-42")
+            routingControllerId = bridge.deviceInfo.routingControllerId
+        }
+
+        assertEquals("route-42", routingControllerId)
+    }
+
+    @Test
     fun playingIsWhatMedia3CallsReadyAndWanting() {
         // Media3 has no "playing": it has a ready state and a play-when-ready
         // flag, and a lock screen showing a pause button is reading both. A
@@ -134,6 +154,127 @@ class Media3SystemTransportTest {
         }
 
         assertEquals(30_000, seekedTo)
+    }
+
+    @Test
+    fun aPushedRemoteVolumeReachesTheSessionsDeviceVolume() {
+        // The inbound half, on the real bridge: setRemoteVolume is what a
+        // live server frame (via MediaSessionPlugin.publishRemoteVolume) ends
+        // up calling, and Media3's own deviceVolume is what the system slider
+        // actually reads to draw itself.
+        var deviceVolume = -1
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(TransportActions(onVolumeStep = { }, isVolumeRemote = { true }))
+            bridge.setRemoteVolume(64)
+            deviceVolume = bridge.deviceVolume
+        }
+
+        assertEquals(64, deviceVolume, "a pushed remote volume did not reach the session")
+    }
+
+    @Test
+    fun aDraggedDeviceVolumeSendsTheExactTargetRatherThanANotch() {
+        // The bug this closes: a drag across the whole bar (20% to 80%) used
+        // to compute only a direction and move the real device by one ±1
+        // step. onVolumeSet, when wired, gets the whole target instead.
+        var sentPercent = -1
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(
+                TransportActions(
+                    onVolumeStep = { },
+                    onVolumeSet = { percent -> sentPercent = percent },
+                    isVolumeRemote = { true },
+                ),
+            )
+            bridge.setDeviceVolume(80, 0)
+        }
+
+        assertEquals(80, sentPercent, "a dragged volume was not sent as its own absolute target")
+    }
+
+    @Test
+    fun withNoAbsoluteHandlerADraggedVolumeStillFallsBackToOneStep() {
+        // Non-breaking for a caller that never wires onVolumeSet — the
+        // original ±1-per-command behaviour survives unchanged.
+        var steppedDirection: Int? = null
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer()
+            bridge.setActions(TransportActions(onVolumeStep = { direction -> steppedDirection = direction }))
+            bridge.setDeviceVolume(80, 0)
+        }
+
+        assertEquals(1, steppedDirection, "no onVolumeSet should still step by one notch")
+    }
+
+    @Test
+    fun aRejectedForegroundServiceStartRetriesOnTheNextPlayingTransition() {
+        // The bug: startPlaybackService() swallows a real OS rejection
+        // (ForegroundServiceStartNotAllowedException — normal for a device
+        // backgrounded and only mirroring another device's session) by
+        // design, but the caller used to latch servicePromotionRequested
+        // shut on the FIRST attempt regardless of whether it succeeded. One
+        // rejection while backgrounded then permanently killed the
+        // notification for this instance's whole life. Not reproducible via
+        // a real OS rejection here — instrumentation itself is normally
+        // foreground-exempt — so the platform call is faked instead: reject
+        // once, then confirm the very next PLAYING transition tries again.
+        var attempts = 0
+        var transport: SystemTransport? = null
+
+        onMainThread {
+            transport = Media3SystemTransport(
+                context(),
+                requestForegroundService = { _, _ ->
+                    attempts++
+                    if (attempts == 1) error("simulated ForegroundServiceStartNotAllowedException")
+                },
+            )
+            transport?.setNowPlaying(NowPlaying(title = "x", durationMs = 1_000))
+            transport?.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
+            transport?.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
+        }
+
+        assertEquals(2, attempts, "a rejected start was not retried on the next PLAYING transition")
+
+        onMainThread { transport?.release() }
+    }
+
+    @Test
+    fun aTransportSupersededByAnotherInstancesConstructorReportsItselfAsReleased() {
+        // The real bug, reproduced without a fake: a second Media3SystemTransport
+        // (what a video engine builds when it takes over the app's one shared
+        // session) pre-emptively releases whichever MediaLibrarySession the
+        // first one owns. That kills the FIRST instance's underlying session,
+        // but the first instance's own `released` boolean only ever flips from
+        // its own release() — the takeover has no reference back to that
+        // wrapper to flip it directly. isReleased has to notice some other
+        // way, or MediaSessionPlugin.liveTransport() keeps handing back a
+        // wrapper whose session is already gone and nothing ever gets rebuilt.
+        // Confirmed live, real device, 2026-09-09: exactly this sequence left
+        // a passively-mirroring phone's notification gone for 10+ minutes,
+        // through a genuine track change, and even a full app foreground.
+        var first: SystemTransport? = null
+        var second: SystemTransport? = null
+
+        onMainThread { first = Media3SystemTransport(context()) }
+        assertTrue(first?.isReleased == false, "a freshly built transport reported itself already released")
+
+        onMainThread { second = Media3SystemTransport(context()) }
+
+        assertTrue(
+            first?.isReleased == true,
+            "the superseded transport still reports itself live after a newer instance took over",
+        )
+
+        onMainThread {
+            second?.release()
+            first?.release()
+        }
     }
 
     @Test

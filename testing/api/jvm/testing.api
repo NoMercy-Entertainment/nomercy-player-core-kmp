@@ -1,3 +1,21 @@
+public class tv/nomercy/player/testing/FakeAudioBackend : tv/nomercy/player/testing/FakeMediaBackend, tv/nomercy/player/core/ports/AudioBackend {
+	public fun <init> ()V
+	public fun audioGraph ()Ltv/nomercy/player/core/ports/AudioDspGraph;
+	public fun crossfade (JLtv/nomercy/player/core/ports/CrossfadeCurve;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun disposeSecondary ()V
+	public final fun getCrossfadeSupported ()Z
+	public final fun getCrossfades ()Ljava/util/List;
+	public final fun getSecondaryDisposals ()I
+	public final fun getSecondaryLoads ()Ljava/util/List;
+	public final fun getSecondaryPrimes ()Ljava/util/List;
+	public fun loadSecondary (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public fun secondaryGain ()F
+	public fun secondaryGain (F)V
+	public final fun setCrossfadeSupported (Z)V
+	public fun supportsCrossfade ()Z
+}
+
 public final class tv/nomercy/player/testing/FakeFetchCall {
 	public fun <init> (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;)V
 	public final fun component1 ()Ljava/lang/String;
@@ -44,6 +62,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
 	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeMediaBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
 	public final fun getBufferedValue ()D
@@ -92,6 +111,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;)V
 	public synthetic fun <init> (Ljava/util/List;Lkotlinx/coroutines/CoroutineScope;Ltv/nomercy/player/core/ports/Storage;Ltv/nomercy/player/core/ports/Logger;Ltv/nomercy/player/testing/FakeFetcher;Lkotlin/jvm/functions/Function2;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun addPlugin (Ltv/nomercy/player/core/plugin/Plugin;Ljava/lang/Object;)Ltv/nomercy/player/core/player/Player;
+	public fun audioTrack ()Ltv/nomercy/player/core/ports/AudioTrack;
 	public fun dispatchBefore (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun dispose ()V
 	public fun emit (Ltv/nomercy/player/core/events/EventKey;Ljava/lang/Object;)V
@@ -124,6 +144,7 @@ public final class tv/nomercy/player/testing/FakePlayer : tv/nomercy/player/core
 	public fun setup (Ltv/nomercy/player/core/player/PlayerConfig;)Ltv/nomercy/player/core/player/Player;
 	public fun state ()Ltv/nomercy/player/core/player/PlayerState;
 	public fun stop (Ltv/nomercy/player/core/player/ActionOptions;)V
+	public fun subtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public fun t (Ljava/lang/String;Ljava/util/Map;)Ljava/lang/String;
 	public fun time ()D
 	public fun time (D)V
@@ -176,10 +197,13 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun currentTime ()D
 	public fun currentTime (D)V
 	public fun duration ()D
+	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public final fun fire (Ljava/lang/String;Ljava/lang/Object;)V
 	public static synthetic fun fire$default (Ltv/nomercy/player/testing/FakeVideoBackend;Ljava/lang/String;Ljava/lang/Object;ILjava/lang/Object;)V
 	public final fun getAudio ()Ljava/util/List;
 	public fun getCanToneMapHdrToSdr ()Z
+	public final fun getChosenAudio ()Ltv/nomercy/player/core/ports/AudioTrack;
+	public final fun getChosenSubtitle ()Ltv/nomercy/player/core/ports/SubtitleTrack;
 	public final fun getLevels ()Ljava/util/List;
 	public final fun getPauseCount ()I
 	public final fun getPlayCount ()I
@@ -201,6 +225,8 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setAudio (Ljava/util/List;)V
+	public final fun setChosenAudio (Ltv/nomercy/player/core/ports/AudioTrack;)V
+	public final fun setChosenSubtitle (Ltv/nomercy/player/core/ports/SubtitleTrack;)V
 	public final fun setLevels (Ljava/util/List;)V
 	public final fun setSubtitleTracks (Ljava/util/List;)V
 	public fun state ()Ltv/nomercy/player/core/ports/BackendState;

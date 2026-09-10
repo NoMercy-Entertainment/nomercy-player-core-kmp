@@ -19,6 +19,12 @@ package tv.nomercy.player.core.ports
 //
 // Narrow on purpose. Handing an OS integration the whole player is how a lock
 // screen ends up able to change the subtitle track.
+// The member count is the contract's. These ten are what a lock screen, a car
+// head unit and a cast receiver each have to be told or asked, and six already
+// carry defaults so an actual implements only what its platform has. Splitting
+// the interface to satisfy a threshold would change every actual and every
+// consumer across the trio and the app, to say the same thing in two names.
+@Suppress("ComplexInterface")
 public interface SystemTransport {
 
     // What is playing. Called when the item changes rather than on every tick:
@@ -50,10 +56,75 @@ public interface SystemTransport {
     // register its commands at startup registers the ones it was given here.
     public fun setActionHandlers(actions: TransportActions)
 
+    /**
+     * The lego-brick custom buttons drawn beside the standard transport
+     * controls.
+     *
+     * Defaulted to nothing so an existing implementation keeps compiling —
+     * the same reasoning as [clearNowPlaying]: a platform that cannot draw
+     * these is no worse off than before, and one that can — Media3's
+     * `CommandButton` custom layout today, CarPlay's own custom set later —
+     * overrides it. Called with the app's whole current set every time it
+     * changes, including a state-only change on one button (an existing id
+     * with a flipped isActive) — same replace-the-whole-list contract as
+     * [setActionHandlers].
+     */
+    public fun setCustomButtons(buttons: List<CustomTransportButton>): Unit = Unit
+
     // Nothing is playing any more. Distinct from release: the transport is still
     // alive and will be used again, so a platform that tears down its session
     // here would have to build another one on the next item.
     public fun clear()
+
+    /**
+     * The remote device's REAL level, pushed in — the inbound half of the
+     * volume conversation. [TransportActions.onVolumeSet]/[TransportActions.onVolumeStep]
+     * carry a press or a drag OUT to wherever volume is actually enforced;
+     * this is what tells the platform's own slider the truth once that
+     * enforcement (a server round trip, another client's own change) is
+     * known, so the drawn position is never a locally-invented guess.
+     *
+     * Defaulted to nothing for the same reason as [clearNowPlaying]: a
+     * platform with no remote-volume slider concept of its own is no worse
+     * off than before, and Android's — the only one with anything to push
+     * this into today — overrides it.
+     */
+    public fun setDeviceVolume(percent: Int): Unit = Unit
+
+    /**
+     * The id of the real system route this playback is now going through —
+     * Android's `MediaRouter2.RoutingController.id`, set the moment a
+     * platform-level route provider (a `MediaRoute2ProviderService`) hands
+     * one over on selection, and cleared (null) the moment that route ends.
+     *
+     * Defaulted to nothing for the same reason as [clearNowPlaying]: a
+     * platform with no such provider is no worse off than before. Android's
+     * `DeviceInfo.Builder.setRoutingControllerId` is the one consumer today —
+     * without it, the system's own output-switcher chip has nothing to
+     * resolve a real device name from and falls back to a generic
+     * placeholder ("Other device"), even though the session is genuinely
+     * `PLAYBACK_TYPE_REMOTE`.
+     */
+    public fun setRoutingControllerId(routingControllerId: String?): Unit = Unit
+
+    /**
+     * Whether this instance's platform session has already been released —
+     * by its own [release] call, or because a newer transport instance took
+     * over as the app's one shared session (Android's own single-owner
+     * contract: building a new `Media3SystemTransport` releases whichever
+     * one published before it). A caller that kept this reference across
+     * such a takeover has a transport that silently accepts every call and
+     * shows nothing for it — [tv.nomercy.player.core.plugin.MediaSessionPlugin]
+     * reads this to know when to open a fresh one instead of pushing into a
+     * dead session. Confirmed live: leaving a video screen while a passive
+     * music mirror kept running left the notification permanently gone,
+     * because music's own transport had gone stale minutes earlier (when
+     * video's own transport took over) and nothing noticed.
+     *
+     * Defaulted to false for the same reason as [clearNowPlaying]: a
+     * platform with no such takeover concept is never stale.
+     */
+    public val isReleased: Boolean get() = false
 
     public fun release()
 }
@@ -74,6 +145,12 @@ public data class NowPlaying(
     val album: String? = null,
     val artworkUrl: String? = null,
     val durationMs: Long = 0,
+    // True only once the engine has actually reported a time update for this
+    // item AND that update carries no duration — a genuine live stream, not
+    // just a track whose duration hasn't arrived yet. durationMs==0 is worn
+    // by both states; conflating them marked every freshly-announced track
+    // "LIVE" for the instant before its real duration landed.
+    val isLive: Boolean = false,
 )
 
 // The three states a system transport can show. Deliberately not the player's
@@ -106,6 +183,28 @@ public data class TransportActions(
     // registered. The offset is the one the system asked for, in milliseconds.
     val onSkipBackward: ((Long) -> Unit)? = null,
     val onSkipForward: ((Long) -> Unit)? = null,
+    // The hardware volume rocker. Wired only by a consumer that has somewhere
+    // else to send it: with no handler the system keeps its default, which is
+    // this device's own output stream. A phone controlling playback happening
+    // in another room needs the press to leave the phone, and the press never
+    // reaches an Activity — the platform hands a volume key to the media
+    // session, not to the foreground window.
+    val onVolumeStep: ((Int) -> Unit)? = null,
+    // The other shape a system slider sends: not a notch, a POSITION — the
+    // whole percent the viewer dragged to. Android's SimpleBasePlayer bridge
+    // is handed both a direction and a target for the same gesture, and
+    // computing one back-and-forth notch from a drag across the whole bar is
+    // how a 20%-to-80% drag ended up moving the real device by one step
+    // (confirmed live, 2026-09-08: TransportSimpleBasePlayer.handleSetDeviceVolume
+    // discarded the target and kept only its sign). Null falls back to
+    // [onVolumeStep]'s own ±1 read of that sign — non-breaking for a caller
+    // that never wires this in.
+    val onVolumeSet: ((Int) -> Unit)? = null,
+    // Asked on every state build, because the answer changes while the app
+    // runs: the press belongs elsewhere only while this device is not the one
+    // playing. Declaring it always meant the device that IS playing had its own
+    // speaker driven by the session too.
+    val isVolumeRemote: (() -> Boolean)? = null,
 )
 
 // How far a skip button goes when the system has no opinion of its own.

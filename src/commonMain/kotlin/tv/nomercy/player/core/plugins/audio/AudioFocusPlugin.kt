@@ -70,14 +70,32 @@ public open class AudioFocusPlugin(
             // safe to repeat rather than only being the user branch's job.
             ProcessPlaybackOwner.claim(pause)
 
-            if (source.source == ActionSource.AUDIO_FOCUS) return@on
-            arbiter.onUserResumed()
-            opened.request(::onFocusChange)
+            // BACKEND_SETTLE excluded alongside AUDIO_FOCUS — it is the
+            // backend's own transient Pause/Play blip while a seek settles,
+            // not a viewer decision. Reading it as user intent re-requested
+            // real Android audio focus on every seek and, when that
+            // request's own callback paused again (tagged AUDIO_FOCUS,
+            // which by design never auto-resumes), left the transport stuck
+            // paused after a seek that never stopped playing — confirmed
+            // live, real device, 2026-08-12.
+            //
+            // PLATFORM itself is NOT excluded here, deliberately: it also
+            // covers PolicyController's offline-pause (a real, non-transient
+            // pause a viewer would recognise as "paused"), and folding that
+            // into this branch left the arbiter's pausedByUser flag unset —
+            // the next unrelated focus blip (headset unplug, a call ending)
+            // then resumed playback with no network, silently overriding
+            // the offline policy. See BACKEND_SETTLE's own doc.
+            if (isUserDriven(source)) {
+                arbiter.onUserResumed()
+                opened.request(::onFocusChange)
+            }
         }
 
         on(CoreEvents.Pause) { source: PlaySource ->
-            if (source.source == ActionSource.AUDIO_FOCUS) return@on
-            arbiter.onUserPaused()
+            if (isUserDriven(source)) {
+                arbiter.onUserPaused()
+            }
         }
 
         // A deliberate stop releases both focus and process ownership outright
@@ -105,6 +123,12 @@ public open class AudioFocusPlugin(
     public fun handleBecomingNoisy() {
         apply(arbiter.onBecomingNoisy())
     }
+
+    // A play/pause the VIEWER caused, as opposed to one this plugin or the
+    // backend caused. Only those move the arbiter's pausedByUser flag — see
+    // the two call sites for what going the other way cost.
+    private fun isUserDriven(source: PlaySource): Boolean =
+        source.source != ActionSource.AUDIO_FOCUS && source.source != ActionSource.BACKEND_SETTLE
 
     private fun onFocusChange(change: FocusChange) {
         val action: FocusAction = when (change) {

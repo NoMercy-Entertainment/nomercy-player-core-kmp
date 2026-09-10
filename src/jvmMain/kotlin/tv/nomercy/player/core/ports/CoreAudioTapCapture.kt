@@ -6,6 +6,16 @@
 //  SPDX-License-Identifier: Apache-2.0
 // -----------------------------------------------------------------------------
 
+// JNA resolves a native function by its symbol NAME, so every binding below has
+// to spell the CoreAudio symbol exactly — AudioObjectGetPropertyData, not
+// audioObjectGetPropertyData. Renaming them to satisfy Kotlin's convention
+// would not be a style change, it would stop the symbols resolving at runtime.
+// The same holds for the k-prefixed CoreAudio selector constants.
+// The arities are Apple's too: AudioObjectGetPropertyData takes six arguments
+// and the vtable invoke that reaches it takes the same, so LongParameterList
+// here is a property of the C API, not of this binding.
+@file:Suppress("FunctionNaming", "TopLevelPropertyNaming", "LongParameterList")
+
 package tv.nomercy.player.core.ports
 
 import com.sun.jna.Library
@@ -41,30 +51,82 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
     override fun start(sampleRate: Int, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
         if (running.get()) return true
 
-        val coreAudio = runCatching {
-            Native.load("/System/Library/Frameworks/CoreAudio.framework/CoreAudio", CoreAudioLib::class.java)
-        }.getOrNull() ?: return false
-        val coreFoundation = runCatching {
-            Native.load("/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation", CoreFoundationLib::class.java)
-        }.getOrNull() ?: return false
+        ioProcId = openDevice(channels, onFrame) ?: return false
 
-        val defaultOutputUid = defaultOutputDeviceUid(coreAudio, coreFoundation) ?: return false
-        val description = buildAggregateDescription(coreFoundation, defaultOutputUid) ?: return false
+        running.set(true)
+        return true
+    }
+
+    private class CoreAudioLibs(val audio: CoreAudioLib, val foundation: CoreFoundationLib)
+
+    private fun loadLibraries(): CoreAudioLibs? {
+        val audio = runCatching {
+            Native.load("/System/Library/Frameworks/CoreAudio.framework/CoreAudio", CoreAudioLib::class.java)
+        }.getOrNull() ?: return null
+        val foundation = runCatching {
+            Native.load(
+                "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
+                CoreFoundationLib::class.java,
+            )
+        }.getOrNull() ?: return null
+        return CoreAudioLibs(audio, foundation)
+    }
+
+    private fun openDevice(channels: Int, onFrame: (FloatArray, Int) -> Unit): Pointer? {
+        val libs = loadLibraries() ?: return null
+        if (!createAggregateDevice(libs.audio, libs.foundation)) return null
+        return startedIoProc(libs.audio, channels, onFrame)
+    }
+
+    // Attaches the callback and starts the device, tearing the aggregate back
+    // down if either half fails — a half-built aggregate device outlives the
+    // process that made it.
+    private fun startedIoProc(
+        coreAudio: CoreAudioLib,
+        channels: Int,
+        onFrame: (FloatArray, Int) -> Unit,
+    ): Pointer? {
+        val procId: Pointer? = attachIoProc(coreAudio, channels, onFrame)
+        if (procId == null) {
+            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
+            return null
+        }
+        if (coreAudio.AudioDeviceStart(aggregateDeviceId, procId) != 0) {
+            coreAudio.AudioDeviceDestroyIOProcID(aggregateDeviceId, procId)
+            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
+            return null
+        }
+        return procId
+    }
+
+    private fun createAggregateDevice(coreAudio: CoreAudioLib, coreFoundation: CoreFoundationLib): Boolean {
+        val description = aggregateDescription(coreAudio, coreFoundation) ?: return false
 
         val deviceIdRef = IntByReference()
-        val created = coreAudio.AudioHardwareCreateAggregateDevice(description, deviceIdRef)
-        if (created != 0) return false
+        if (coreAudio.AudioHardwareCreateAggregateDevice(description, deviceIdRef) != 0) return false
         aggregateDeviceId = deviceIdRef.value
+        return true
+    }
 
-        // The callback ABI (`AudioDeviceIOProc`) is a C function pointer
-        // taking the raw `AudioBufferList*` CoreAudio hands the process every
-        // render cycle — that pointer, and the frame count implied by its
-        // byte length at the negotiated sample rate/channel count, is the
-        // whole of what reaches [onFrame]. No format negotiation is
-        // attempted beyond what [buildAggregateDescription] requested;
-        // CoreAudio may still hand back its own hardware rate, in which
-        // case the caller receives frames at a different rate than it asked
-        // for. Unresolved here — needs a real device to observe.
+    private fun aggregateDescription(coreAudio: CoreAudioLib, coreFoundation: CoreFoundationLib): Pointer? {
+        val defaultOutputUid = defaultOutputDeviceUid(coreAudio, coreFoundation) ?: return null
+        return buildAggregateDescription(coreFoundation, defaultOutputUid)
+    }
+
+    // The callback ABI (`AudioDeviceIOProc`) is a C function pointer taking the
+    // raw `AudioBufferList*` CoreAudio hands the process every render cycle —
+    // that pointer, and the frame count implied by its byte length at the
+    // negotiated sample rate/channel count, is the whole of what reaches
+    // [onFrame]. No format negotiation is attempted beyond what
+    // [buildAggregateDescription] requested; CoreAudio may still hand back its
+    // own hardware rate, in which case the caller receives frames at a
+    // different rate than it asked for. Unresolved here — needs a real device
+    // to observe.
+    private fun attachIoProc(
+        coreAudio: CoreAudioLib,
+        channels: Int,
+        onFrame: (FloatArray, Int) -> Unit,
+    ): Pointer? {
         val procId = PointerByReference()
         val procCreated = coreAudio.AudioDeviceCreateIOProcID(
             aggregateDeviceId,
@@ -79,25 +141,8 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
             null,
             procId,
         )
-        val resolvedProcId: Pointer = procId.value ?: run {
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-        if (procCreated != 0) {
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-        ioProcId = resolvedProcId
-
-        val started = coreAudio.AudioDeviceStart(aggregateDeviceId, resolvedProcId)
-        if (started != 0) {
-            coreAudio.AudioDeviceDestroyIOProcID(aggregateDeviceId, resolvedProcId)
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-
-        running.set(true)
-        return true
+        if (procCreated != 0) return null
+        return procId.value
     }
 
     override fun stop() {
@@ -120,7 +165,7 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
     private fun defaultOutputDeviceUid(coreAudio: CoreAudioLib, cf: CoreFoundationLib): String? {
         val address = AudioObjectPropertyAddress(kAudioHardwarePropertyDefaultOutputDevice)
         val deviceId = IntByReference()
-        val size = IntByReference(4)
+        val size = IntByReference(SIZE_OF_UINT32)
         val gotDevice = coreAudio.AudioObjectGetPropertyData(
             kAudioObjectSystemObject, address, 0, null, size, deviceId,
         )
@@ -128,7 +173,7 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
 
         val uidAddress = AudioObjectPropertyAddress(kAudioDevicePropertyDeviceUID)
         val uidRef = PointerByReference()
-        val uidSize = IntByReference(8)
+        val uidSize = IntByReference(SIZE_OF_POINTER)
         val gotUid = coreAudio.AudioObjectGetPropertyData(
             deviceId.value, uidAddress, 0, null, uidSize, uidRef,
         )
@@ -174,6 +219,12 @@ private class AudioObjectPropertyAddress(selector: Int) : com.sun.jna.Structure(
     override fun getFieldOrder(): List<String> = listOf("mSelector", "mScope", "mElement")
 }
 
+// C type widths, in bytes. The offsets below are built from these rather than
+// written as bare numbers, because every one of them is "how wide is the field
+// I am stepping over", not an arbitrary quantity.
+private const val SIZE_OF_UINT32 = 4
+private const val SIZE_OF_POINTER = 8
+
 private const val kAudioObjectSystemObject = 1
 private const val kAudioObjectPropertyScopeGlobal = 0x676c6f62 // 'glob'
 private const val kAudioObjectPropertyElementMain = 0
@@ -200,12 +251,14 @@ private fun interface AudioDeviceIoProcCallback : com.sun.jna.Callback {
 internal typealias AudioBufferListPointer = Pointer
 
 private fun AudioBufferListPointer.frameCount(channels: Int): Int {
-    val dataByteSize = getInt(4 + 4) // skip mNumberBuffers(4) + mBuffers[0].mNumberChannels(4)
+    // skip mNumberBuffers + mBuffers[0].mNumberChannels
+    val dataByteSize = getInt((SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
     return dataByteSize / (Float.SIZE_BYTES * channels)
 }
 
 private fun AudioBufferListPointer.readInterleavedFloat(channels: Int, frames: Int): FloatArray {
-    val dataPointer = getPointer(4 + 4 + 4) // mNumberBuffers + mNumberChannels + mDataByteSize
+    // mNumberBuffers + mNumberChannels + mDataByteSize
+    val dataPointer = getPointer((SIZE_OF_UINT32 + SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
     val out = FloatArray(frames * channels)
     dataPointer.read(0, out, 0, out.size)
     return out
@@ -239,7 +292,12 @@ private interface CoreAudioLib : Library {
 // wrapped so the capture class above never juggles raw CFString/CFNumber
 // creation itself.
 private interface CoreFoundationLib : Library {
-    fun CFDictionaryCreateMutable(allocator: Pointer?, capacity: Int, keyCallBacks: Pointer?, valueCallBacks: Pointer?): Pointer
+    fun CFDictionaryCreateMutable(
+        allocator: Pointer?,
+        capacity: Int,
+        keyCallBacks: Pointer?,
+        valueCallBacks: Pointer?,
+    ): Pointer
     fun CFArrayCreateMutable(allocator: Pointer?, capacity: Int, callBacks: Pointer?): Pointer
     fun CFArrayAppendValue(array: Pointer, value: Pointer)
     fun CFDictionarySetValue(dict: Pointer, key: Pointer, value: Pointer)
@@ -250,7 +308,6 @@ private interface CoreFoundationLib : Library {
 }
 
 private const val kCFStringEncodingUTF8 = 0x08000100
-private const val kCFBooleanTrueAddress = 0 // placeholder — real symbol is kCFBooleanTrue, a data import, not a function
 private const val kCFNumberSInt32Type = 3
 
 private fun CoreFoundationLib.cfDictionaryCreateMutable(capacity: Int): Pointer =
@@ -277,7 +334,8 @@ private fun CoreFoundationLib.cfDictionarySetJavaBool(dict: Pointer, key: String
     // to read the exported data symbol directly, which this file does not
     // attempt.
     val keyRef = CFStringCreateWithCString(null, key, kCFStringEncodingUTF8)
-    val intValue = com.sun.jna.Memory(4).also { it.setInt(0, if (value) 1 else 0) }
+    val intValue = com.sun.jna.Memory(SIZE_OF_UINT32.toLong())
+        .also { it.setInt(0, if (value) 1 else 0) }
     val valueRef = CFNumberCreate(null, kCFNumberSInt32Type, intValue)
     CFDictionarySetValue(dict, keyRef, valueRef)
 }
