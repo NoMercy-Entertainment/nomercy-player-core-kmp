@@ -51,6 +51,17 @@ if [ -z "$zip_path" ] || [ -z "$checksum" ]; then
   exit 1
 fi
 
+# The release object, when nothing has made one yet.
+#
+# `gh release upload` needs a RELEASE, and a tag is not one. Nothing in the
+# pipeline created it, so v0.1.0 failed here with a bare "release not found"
+# after the framework had already been built twice. Creating it here keeps the
+# asset and the release that carries it in one place, which is the same reason
+# the checksum is stamped in this script rather than a step away from it.
+if ! "$(gh_bin)" release view "$tag" >/dev/null 2>&1; then
+  "$(gh_bin)" release create "$tag" --title "$tag" --generate-notes
+fi
+
 "$(gh_bin)" release upload "$tag" "$zip_path" --clobber
 
 # The URL carries the tag too, so a manifest cut for one release cannot quietly
