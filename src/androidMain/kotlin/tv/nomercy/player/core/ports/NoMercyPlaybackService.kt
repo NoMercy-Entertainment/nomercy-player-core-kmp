@@ -8,6 +8,10 @@
 
 package tv.nomercy.player.core.ports
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaLibraryService
@@ -70,6 +74,15 @@ public class NoMercyPlaybackService : MediaLibraryService() {
                     .also { it.setSmallIcon(branding.smallIconResId) },
             )
         }
+        // Unconditional — this project's minSdk (29) is already past the O
+        // (26) floor a notification channel needs, same as
+        // [Media3SystemTransport.startPlaybackService]'s own note.
+        val manager = getSystemService(NotificationManager::class.java)
+        if (manager.getNotificationChannel(STARTUP_CHANNEL_ID) == null) {
+            manager.createNotificationChannel(
+                NotificationChannel(STARTUP_CHANNEL_ID, STARTUP_CHANNEL_ID, NotificationManager.IMPORTANCE_LOW),
+            )
+        }
         val job = Job()
         scopeJob = job
         val scope = CoroutineScope(Dispatchers.Main.immediate + job)
@@ -78,24 +91,53 @@ public class NoMercyPlaybackService : MediaLibraryService() {
             .launchIn(scope)
     }
 
-    // The promotion that never came.
+    // The promotion that used to never come.
     //
-    // `startForegroundService` starts a clock: the platform kills the process
-    // with ForegroundServiceDidNotStartInTimeException unless something calls
-    // `startForeground` within a few seconds. The base class does that for us,
-    // but ONLY once a registered session reports that it is playing — and a
-    // session that never starts (a play that failed, a source that never
-    // opened, a session published and released inside the window) leaves the
-    // clock running with nothing to answer it. The phone crashed mid-episode,
-    // reported 2026-08-31.
+    // `startForegroundService` starts a clock owned by the PLATFORM, not this
+    // process: Android kills the app with ForegroundServiceDidNotStartInTimeException
+    // unless SOMETHING calls `Service.startForeground` within a few seconds,
+    // full stop — it does not wait for a real reason to show up first. The
+    // base class calls it for us, but only once a registered session reports
+    // that it is actually PLAYING, and that depends on the source finishing
+    // its buffering — a network condition the platform's clock never asked
+    // about. `stopIfNeverPromoted` below only covers the "no play is coming"
+    // half of that gap (a play that failed, a source that never opened); a
+    // play that IS coming but is simply slow to buffer correctly declines to
+    // self-stop and then gets killed anyway once Android's real deadline
+    // passes, because nothing had satisfied it in the meantime. Confirmed
+    // live, real TV, 2026-09-10: a device-transfer claim (ChangeDeviceCommand
+    // then StartPlaybackCommand landing here as a genuine local play) crashed
+    // the app with ForegroundServiceDidNotStartInTimeException while
+    // playWhenReady was already true — the exact case the old comment on this
+    // method assumed the base class would always eventually cover.
     //
-    // So the service ends itself before the platform does. Stopping in time is
-    // as good an answer to the clock as promoting is, and a service with no
-    // playing session has nothing to keep alive.
+    // So this calls `startForeground` itself, immediately, with a placeholder
+    // — satisfying the platform's clock the instant the service exists,
+    // regardless of how long the real session takes to actually start
+    // playing. `reconcile`'s own `addSession` lets the base class replace
+    // this with the real notification the moment it has one; calling
+    // `startForeground` more than once to update the notification is the
+    // normal, documented way Media3's own notification manager behaves.
     override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
+        startForeground(STARTUP_NOTIFICATION_ID, startupNotification())
         mainHandler.removeCallbacks(stopIfNeverPromoted)
         mainHandler.postDelayed(stopIfNeverPromoted, PROMOTION_GRACE_MS)
         return super.onStartCommand(intent, flags, startId)
+    }
+
+    // Deliberately minimal — branding may not be installed, and this is
+    // visible for at most the few hundred ms until `reconcile` hands the base
+    // class a real session to build its own notification from. The system
+    // fallback icon costs zero dependency on the consuming app having
+    // supplied anything.
+    private fun startupNotification(): Notification {
+        val branding = PlatformEnvironment.mediaNotificationBranding
+        val channelId =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) STARTUP_CHANNEL_ID else ""
+        return Notification.Builder(this, channelId)
+            .setSmallIcon(branding?.smallIconResId ?: android.R.drawable.ic_media_play)
+            .setOngoing(true)
+            .build()
     }
 
     private val mainHandler: android.os.Handler = android.os.Handler(android.os.Looper.getMainLooper())
@@ -144,6 +186,12 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         // this runs on. Long enough for a real play to promote, short enough
         // that a play which never happens ends quietly instead of fatally.
         const val PROMOTION_GRACE_MS: Long = 4_000L
+
+        // Replaced by Media3's own real notification within milliseconds in
+        // the normal case — see [onStartCommand]'s own comment for why this
+        // needs to exist at all rather than waiting for that real one.
+        const val STARTUP_CHANNEL_ID = "nomercy-playback-startup"
+        const val STARTUP_NOTIFICATION_ID = 8271
     }
 
     override fun onDestroy() {
