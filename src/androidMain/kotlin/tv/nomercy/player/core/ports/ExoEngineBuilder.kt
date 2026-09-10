@@ -143,7 +143,7 @@ internal fun buildEngine(
         .setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
         // handleAudioFocus is FALSE. P21's AudioFocusArbiter/AudioFocusPlugin
         // is what decides pause/duck/resume now, over the shared
-        // AudioFocusPort (AudioManagerFocusPort on Android) — the same
+        // AudioFocusPort (AndroidAudioFocusPort on Android) — the same
         // arbitration every platform uses, including the cross-player
         // ProcessPlaybackOwner rule ExoPlayer's own internal handling has no
         // way to know about (a video and a music player each requesting

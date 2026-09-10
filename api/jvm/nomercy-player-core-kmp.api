@@ -1030,6 +1030,15 @@ public final class tv/nomercy/player/core/device/VideoCodecCapability {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class tv/nomercy/player/core/device/VideoProfileName {
+	public static final field BASELINE Ljava/lang/String;
+	public static final field HIGH Ljava/lang/String;
+	public static final field HIGH10 Ljava/lang/String;
+	public static final field INSTANCE Ltv/nomercy/player/core/device/VideoProfileName;
+	public static final field MAIN Ljava/lang/String;
+	public static final field MAIN10 Ljava/lang/String;
+}
+
 public abstract interface class tv/nomercy/player/core/devtools/EventFirehose {
 	public abstract fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
 }

@@ -97,19 +97,19 @@ private val VIDEO_CODEC_PROBES: List<CodecProbe> = listOf(
     CodecProbe(
         codec = DecodeCodec.H264,
         profiles = listOf(
-            """video/mp4; codecs="avc1.42E01E"""" to "baseline",
-            """video/mp4; codecs="avc1.4D401E"""" to "main",
-            """video/mp4; codecs="avc1.640028"""" to "high",
-            """video/mp4; codecs="avc1.6E0033"""" to "high10",
+            """video/mp4; codecs="avc1.42E01E"""" to VideoProfileName.BASELINE,
+            """video/mp4; codecs="avc1.4D401E"""" to VideoProfileName.MAIN,
+            """video/mp4; codecs="avc1.640028"""" to VideoProfileName.HIGH,
+            """video/mp4; codecs="avc1.6E0033"""" to VideoProfileName.HIGH10,
         ),
         tenBitProbes = listOf("""video/mp4; codecs="avc1.6E0033""""),
     ),
     CodecProbe(
         codec = DecodeCodec.H265,
         profiles = listOf(
-            """video/mp4; codecs="hvc1.1.6.L150.B0"""" to "main",
-            """video/mp4; codecs="hvc1.2.4.L120.B0"""" to "main10",
-            """video/mp4; codecs="hev1.2.4.L120.B0"""" to "main10",
+            """video/mp4; codecs="hvc1.1.6.L150.B0"""" to VideoProfileName.MAIN,
+            """video/mp4; codecs="hvc1.2.4.L120.B0"""" to VideoProfileName.MAIN10,
+            """video/mp4; codecs="hev1.2.4.L120.B0"""" to VideoProfileName.MAIN10,
         ),
         tenBitProbes = listOf(
             """video/mp4; codecs="hvc1.2.4.L120.B0"""",
@@ -119,8 +119,8 @@ private val VIDEO_CODEC_PROBES: List<CodecProbe> = listOf(
     CodecProbe(
         codec = DecodeCodec.AV1,
         profiles = listOf(
-            """video/mp4; codecs="av01.0.05M.08"""" to "main",
-            """video/mp4; codecs="av01.0.08M.10"""" to "main10",
+            """video/mp4; codecs="av01.0.05M.08"""" to VideoProfileName.MAIN,
+            """video/mp4; codecs="av01.0.08M.10"""" to VideoProfileName.MAIN10,
         ),
         tenBitProbes = listOf("""video/mp4; codecs="av01.0.08M.10""""),
     ),

@@ -82,6 +82,21 @@ public object HdrFormat {
     public const val HLG: String = "hlg"
 }
 
+/**
+ * The codec profile names this library reports, lowercase and vendor-neutral.
+ *
+ * Every platform probe answers in these, so a consumer comparing a profile
+ * across an Android phone and an Apple TV is comparing the same strings rather
+ * than each actual's own spelling of them.
+ */
+public object VideoProfileName {
+    public const val BASELINE: String = "baseline"
+    public const val MAIN: String = "main"
+    public const val MAIN10: String = "main10"
+    public const val HIGH: String = "high"
+    public const val HIGH10: String = "high10"
+}
+
 /** The codec names this library reports, lowercase and vendor-neutral. */
 public object DecodeCodec {
     public const val H264: String = "h264"

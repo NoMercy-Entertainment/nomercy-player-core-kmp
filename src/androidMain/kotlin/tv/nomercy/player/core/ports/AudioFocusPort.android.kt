@@ -21,7 +21,7 @@ import android.media.AudioManager
 // initializer is not a reason for a player to refuse to start.
 public actual fun defaultAudioFocusPort(): AudioFocusPort =
     if (PlatformEnvironment.isInstalled()) {
-        AudioManagerFocusPort(PlatformEnvironment.requireContext().androidContext)
+        AndroidAudioFocusPort(PlatformEnvironment.requireContext().androidContext)
     } else {
         AlwaysGrantedAudioFocus
     }
@@ -35,7 +35,7 @@ public actual fun defaultAudioFocusPort(): AudioFocusPort =
 // fresh request built around the caller's current callback rather than one
 // still closing over whichever listener happened to be active when the
 // object was first built.
-public class AudioManagerFocusPort(context: Context) : AudioFocusPort {
+public class AndroidAudioFocusPort(context: Context) : AudioFocusPort {
 
     private val manager: AudioManager =
         context.getSystemService(Context.AUDIO_SERVICE) as AudioManager

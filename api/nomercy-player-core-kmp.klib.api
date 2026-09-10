@@ -8458,6 +8458,19 @@ final object tv.nomercy.player.core.device/HdrFormat { // tv.nomercy.player.core
         final fun <get-HLG>(): kotlin/String // tv.nomercy.player.core.device/HdrFormat.HLG.<get-HLG>|<get-HLG>(){}[0]
 }
 
+final object tv.nomercy.player.core.device/VideoProfileName { // tv.nomercy.player.core.device/VideoProfileName|null[0]
+    final const val BASELINE // tv.nomercy.player.core.device/VideoProfileName.BASELINE|{}BASELINE[0]
+        final fun <get-BASELINE>(): kotlin/String // tv.nomercy.player.core.device/VideoProfileName.BASELINE.<get-BASELINE>|<get-BASELINE>(){}[0]
+    final const val HIGH // tv.nomercy.player.core.device/VideoProfileName.HIGH|{}HIGH[0]
+        final fun <get-HIGH>(): kotlin/String // tv.nomercy.player.core.device/VideoProfileName.HIGH.<get-HIGH>|<get-HIGH>(){}[0]
+    final const val HIGH10 // tv.nomercy.player.core.device/VideoProfileName.HIGH10|{}HIGH10[0]
+        final fun <get-HIGH10>(): kotlin/String // tv.nomercy.player.core.device/VideoProfileName.HIGH10.<get-HIGH10>|<get-HIGH10>(){}[0]
+    final const val MAIN // tv.nomercy.player.core.device/VideoProfileName.MAIN|{}MAIN[0]
+        final fun <get-MAIN>(): kotlin/String // tv.nomercy.player.core.device/VideoProfileName.MAIN.<get-MAIN>|<get-MAIN>(){}[0]
+    final const val MAIN10 // tv.nomercy.player.core.device/VideoProfileName.MAIN10|{}MAIN10[0]
+        final fun <get-MAIN10>(): kotlin/String // tv.nomercy.player.core.device/VideoProfileName.MAIN10.<get-MAIN10>|<get-MAIN10>(){}[0]
+}
+
 final object tv.nomercy.player.core.drm/ClearOnly : tv.nomercy.player.core.drm/DrmCapability { // tv.nomercy.player.core.drm/ClearOnly|null[0]
     final fun supports(tv.nomercy.player.core.drm/DrmScheme): kotlin/Boolean // tv.nomercy.player.core.drm/ClearOnly.supports|supports(tv.nomercy.player.core.drm.DrmScheme){}[0]
 }

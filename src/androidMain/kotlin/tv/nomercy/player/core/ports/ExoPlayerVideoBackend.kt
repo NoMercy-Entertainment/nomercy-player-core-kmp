@@ -42,6 +42,7 @@ import tv.nomercy.player.core.media.QualityDescriptor
 import tv.nomercy.player.core.events.SubtitleCue
 import tv.nomercy.player.core.events.SubtitleCueChange
 
+private const val LOG_TAG = "nm-video-backend"
 private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
 
@@ -397,7 +398,7 @@ public class ExoPlayerVideoBackend(
                     // the give-up budget could never actually be spent.
                     if (networkRetryAttempt != 0) {
                         Log.i(
-                            "nm-video-backend",
+                            LOG_TAG,
                             "Playback recovered after $networkRetryAttempt reconnect attempt(s)",
                         )
                     }
@@ -552,7 +553,7 @@ public class ExoPlayerVideoBackend(
         ensureNetworkCallback()
 
         Log.w(
-            "nm-video-backend",
+            LOG_TAG,
             "Transient source error (${error.errorCodeName}) — reconnect attempt " +
                 "${attempt + 1}/$limit in ${SourceOutage.BACKOFF_MS[attempt]}ms " +
                 "from ${positionBeforeNetworkLoss}ms" +
@@ -587,7 +588,7 @@ public class ExoPlayerVideoBackend(
                     player.play()
                 }
             }.onFailure { failure ->
-                Log.e("nm-video-backend", "Reconnect attempt failed: ${failure.message}", failure)
+                Log.e(LOG_TAG, "Reconnect attempt failed: ${failure.message}", failure)
             }
         }
     }
@@ -625,7 +626,7 @@ public class ExoPlayerVideoBackend(
                     ignoreFirstOnAvailable = false
                     val waiting: Boolean = networkRetryAttempt != 0 || awaitingNetworkReturn
                     if (!spurious && waiting) {
-                        Log.i("nm-video-backend", "Connectivity returned — reconnecting now")
+                        Log.i(LOG_TAG, "Connectivity returned — reconnecting now")
                         // A fresh outage deserves the whole ladder: the attempts
                         // spent waiting for the network to come back say nothing
                         // about whether the server answers now.
@@ -640,7 +641,7 @@ public class ExoPlayerVideoBackend(
             manager.registerDefaultNetworkCallback(callback)
             networkCallback = callback
         }.onFailure { failure ->
-            Log.w("nm-video-backend", "Could not register network callback: ${failure.message}")
+            Log.w(LOG_TAG, "Could not register network callback: ${failure.message}")
         }
     }
 
@@ -649,7 +650,7 @@ public class ExoPlayerVideoBackend(
         networkCallback?.let { callback ->
             runCatching { manager.unregisterNetworkCallback(callback) }
                 .onFailure { failure ->
-                    Log.w("nm-video-backend", "Could not unregister network callback: ${failure.message}")
+                    Log.w(LOG_TAG, "Could not unregister network callback: ${failure.message}")
                 }
         }
         networkCallback = null
@@ -766,7 +767,7 @@ public class ExoPlayerVideoBackend(
         // is still there, so re-preparing resumes at the second it was lost
         // rather than rebuilding from the last position anything was told about.
         if (awaitingNetworkReturn && player.playbackState == Player.STATE_IDLE) {
-            Log.w("nm-video-backend", "play() after a spent reconnect ladder — re-preparing the source")
+            Log.w(LOG_TAG, "play() after a spent reconnect ladder — re-preparing the source")
             resetOutageLadder()
             player.playWhenReady = true
             reconnect(0L)
@@ -1109,7 +1110,7 @@ public class ExoPlayerVideoBackend(
                 block()
                 refreshCache()
             }.onFailure { failure ->
-                Log.w("nm-video-backend", "fireAndForget after teardown: ${failure.message}")
+                Log.w(LOG_TAG, "fireAndForget after teardown: ${failure.message}")
             }
         }
     }

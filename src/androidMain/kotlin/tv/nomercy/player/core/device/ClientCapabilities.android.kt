@@ -244,27 +244,27 @@ private val TEN_BIT_PROFILE_OF: Map<String, Int> = mapOf(
 // across every codec, so this table is keyed by MIME first.
 private val PROFILE_NAMES: Map<String, Map<Int, String>> = mapOf(
     MediaFormat.MIMETYPE_VIDEO_AVC to mapOf(
-        CodecProfileLevel.AVCProfileBaseline to "baseline",
-        CodecProfileLevel.AVCProfileMain to "main",
-        CodecProfileLevel.AVCProfileHigh to "high",
-        CodecProfileLevel.AVCProfileHigh10 to "high10",
+        CodecProfileLevel.AVCProfileBaseline to VideoProfileName.BASELINE,
+        CodecProfileLevel.AVCProfileMain to VideoProfileName.MAIN,
+        CodecProfileLevel.AVCProfileHigh to VideoProfileName.HIGH,
+        CodecProfileLevel.AVCProfileHigh10 to VideoProfileName.HIGH10,
     ),
     MediaFormat.MIMETYPE_VIDEO_HEVC to mapOf(
-        CodecProfileLevel.HEVCProfileMain to "main",
-        CodecProfileLevel.HEVCProfileMain10 to "main10",
+        CodecProfileLevel.HEVCProfileMain to VideoProfileName.MAIN,
+        CodecProfileLevel.HEVCProfileMain10 to VideoProfileName.MAIN10,
     ),
     MediaFormat.MIMETYPE_VIDEO_AV1 to mapOf(
-        CodecProfileLevel.AV1ProfileMain8 to "main",
-        CodecProfileLevel.AV1ProfileMain10 to "main10",
+        CodecProfileLevel.AV1ProfileMain8 to VideoProfileName.MAIN,
+        CodecProfileLevel.AV1ProfileMain10 to VideoProfileName.MAIN10,
     ),
 )
 
 // libmpv reports no profileLevels through MediaCodecList (it isn't in it), so
 // this is what it opens rather than what a hardware decoder enumerates.
 private val SOFTWARE_PROFILES: Map<String, List<String>> = mapOf(
-    DecodeCodec.H264 to listOf("baseline", "main", "high", "high10"),
-    DecodeCodec.H265 to listOf("main", "main10"),
-    DecodeCodec.AV1 to listOf("main", "main10"),
+    DecodeCodec.H264 to listOf(VideoProfileName.BASELINE, VideoProfileName.MAIN, VideoProfileName.HIGH, VideoProfileName.HIGH10),
+    DecodeCodec.H265 to listOf(VideoProfileName.MAIN, VideoProfileName.MAIN10),
+    DecodeCodec.AV1 to listOf(VideoProfileName.MAIN, VideoProfileName.MAIN10),
     DecodeCodec.VP9 to listOf("profile0", "profile2"),
 )
 
