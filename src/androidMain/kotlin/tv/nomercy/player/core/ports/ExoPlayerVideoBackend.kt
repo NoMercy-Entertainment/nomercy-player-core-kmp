@@ -423,7 +423,7 @@ public class ExoPlayerVideoBackend(
             override fun onPlayerError(error: PlaybackException) {
                 if (recoverFromTunnelingRefusal(error)) return
                 if (rideOutSourceOutage(error)) return
-                bus.emit(CanonicalBackendEvent.ERROR, error.errorCodeName)
+                bus.emit(CanonicalBackendEvent.ERROR, terminalCodeFor(error))
             }
 
             // The cues of whichever text track is selected, as the engine
@@ -481,6 +481,22 @@ public class ExoPlayerVideoBackend(
         player.prepare()
         return true
     }
+
+    /**
+     * What to call a failure that survived every recovery above.
+     *
+     * Media3's own code name says how the fetch failed, never what the viewer
+     * should do about it — a 404 on an episode nobody has encoded yet arrives
+     * as the same ERROR_CODE_IO_BAD_HTTP_STATUS as a proxy hiccup. The one
+     * failure a viewer can act on gets its own name so a consumer can offer to
+     * move to the next item instead of showing a dead end.
+     */
+    private fun terminalCodeFor(error: PlaybackException): String =
+        if (SourceOutage.isMediaAbsentStatus(SourceOutage.httpStatusOf(error))) {
+            CoreErrorCodes.MEDIA_ABSENT
+        } else {
+            error.errorCodeName
+        }
 
     /**
      * A server that went away is an outage to ride out, not a dead file.
@@ -570,8 +586,8 @@ public class ExoPlayerVideoBackend(
                     bus.emit(CanonicalBackendEvent.PLAY)
                     player.play()
                 }
-            }.onFailure { e ->
-                Log.e("nm-video-backend", "Reconnect attempt failed: ${e.message}", e)
+            }.onFailure { failure ->
+                Log.e("nm-video-backend", "Reconnect attempt failed: ${failure.message}", failure)
             }
         }
     }
@@ -620,8 +636,8 @@ public class ExoPlayerVideoBackend(
         runCatching {
             manager.registerDefaultNetworkCallback(callback)
             networkCallback = callback
-        }.onFailure { e ->
-            Log.w("nm-video-backend", "Could not register network callback: ${e.message}")
+        }.onFailure { failure ->
+            Log.w("nm-video-backend", "Could not register network callback: ${failure.message}")
         }
     }
 
@@ -629,8 +645,8 @@ public class ExoPlayerVideoBackend(
         val manager: ConnectivityManager = connectivityManager ?: return
         networkCallback?.let { callback ->
             runCatching { manager.unregisterNetworkCallback(callback) }
-                .onFailure { e ->
-                    Log.w("nm-video-backend", "Could not unregister network callback: ${e.message}")
+                .onFailure { failure ->
+                    Log.w("nm-video-backend", "Could not unregister network callback: ${failure.message}")
                 }
         }
         networkCallback = null
@@ -646,7 +662,16 @@ public class ExoPlayerVideoBackend(
         recovering.value = false
     }
 
-    override suspend fun load(url: String, opts: LoadOptions): Unit = onMain {
+    // Not onMain: that helper's post-block refreshCache() reads
+    // player.currentPosition, which right after prepare() still answers the
+    // OUTGOING item's position — Media3 hasn't processed the new timeline
+    // synchronously. That refresh landed AFTER this function's own cachedTime
+    // reset below and silently overwrote it with the stale value, which is why
+    // a next/previous skip kept reporting the old episode's time as the new
+    // one's start. cachedTime is set here, last, after this function's own
+    // explicit refreshCache() call — not delegated to a wrapper that runs one
+    // more time behind this function's back.
+    override suspend fun load(url: String, opts: LoadOptions): Unit = withContext(mainDispatcher) {
         // Silence the outgoing item the instant a switch is decided, not once
         // the incoming one is ready. TransportController.advanceTo() moves the
         // queue cursor and fires the chrome's loading state before this runs
@@ -695,10 +720,39 @@ public class ExoPlayerVideoBackend(
         // engine loads from zero, then jumps. A live transcode has exactly the
         // part the encoder has written, so a resumed episode fetched segment 0
         // from a session that starts minutes later and waited on it forever.
+        // The preferred language, ON the track selector before prepare() —
+        // ExoPlayer picks the matching track at selection time using this
+        // instead of falling back to the manifest's own default, so the
+        // engine starts in the right language rather than starting in the
+        // wrong one and correcting it once VideoPreferencesPlugin's restore
+        // sees the announced track list. That correction is a real,
+        // audible switch and a re-buffer, not a silent choice — confirmed
+        // live, reported as "audio plays the first track, then switches and
+        // buffers".
+        if (!opts.preferredAudioLanguage.isNullOrBlank()) {
+            trackSelector.parameters = trackSelector.buildUponParameters()
+                .setPreferredAudioLanguage(opts.preferredAudioLanguage)
+                .build()
+        }
         player.setMediaItem(MediaItem.fromUri(url), opts.startPositionMs.coerceAtLeast(0L))
         // prepare, not play: starting is a separate decision above, and an
         // engine that started on its own would ignore a refused beforePlay.
         player.prepare()
+        // Synced from the player FIRST, then immediately overridden below —
+        // player.currentPosition here still answers the OUTGOING item, since
+        // Media3 doesn't apply the new MediaItem's timeline synchronously
+        // inside prepare(). Calling this now (rather than trusting a later
+        // caller of onMain/fireAndForget to do it) guarantees nothing races
+        // between this refresh and the override that follows it.
+        refreshCache()
+        // currentTime() answers from this cache, not player.currentPosition,
+        // for exactly the reason above. A next/previous skip reported the
+        // stale value refreshCache() just wrote as the new episode's start
+        // instead of 0 (or the resume position) — confirmed against this
+        // file's own currentTime(seconds) setter for the ms/seconds
+        // convention. This assignment MUST be the last thing load() does:
+        // it is the one line that makes the reset stick.
+        cachedTime = opts.startPositionMs.coerceAtLeast(0L) / MILLIS_PER_SECOND
     }
 
     override suspend fun play(): Unit = onMain {
@@ -1051,7 +1105,9 @@ public class ExoPlayerVideoBackend(
             runCatching {
                 block()
                 refreshCache()
-            }.onFailure { e -> Log.w("nm-video-backend", "fireAndForget after teardown: ${e.message}") }
+            }.onFailure { failure ->
+                Log.w("nm-video-backend", "fireAndForget after teardown: ${failure.message}")
+            }
         }
     }
 }

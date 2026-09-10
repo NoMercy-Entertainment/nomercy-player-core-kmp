@@ -141,6 +141,6 @@ private interface PulseSimple : Library {
         error: IntByReference,
     ): Pointer?
 
-    fun pa_simple_read(s: Pointer, data: Pointer, bytes: Long, error: IntByReference): Int
-    fun pa_simple_free(s: Pointer)
+    fun pa_simple_read(stream: Pointer, data: Pointer, bytes: Long, error: IntByReference): Int
+    fun pa_simple_free(stream: Pointer)
 }

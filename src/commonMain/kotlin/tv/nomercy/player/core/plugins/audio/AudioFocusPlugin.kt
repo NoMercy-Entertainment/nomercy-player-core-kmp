@@ -86,14 +86,16 @@ public open class AudioFocusPlugin(
             // the next unrelated focus blip (headset unplug, a call ending)
             // then resumed playback with no network, silently overriding
             // the offline policy. See BACKEND_SETTLE's own doc.
-            if (source.source == ActionSource.AUDIO_FOCUS || source.source == ActionSource.BACKEND_SETTLE) return@on
-            arbiter.onUserResumed()
-            opened.request(::onFocusChange)
+            if (isUserDriven(source)) {
+                arbiter.onUserResumed()
+                opened.request(::onFocusChange)
+            }
         }
 
         on(CoreEvents.Pause) { source: PlaySource ->
-            if (source.source == ActionSource.AUDIO_FOCUS || source.source == ActionSource.BACKEND_SETTLE) return@on
-            arbiter.onUserPaused()
+            if (isUserDriven(source)) {
+                arbiter.onUserPaused()
+            }
         }
 
         // A deliberate stop releases both focus and process ownership outright
@@ -121,6 +123,12 @@ public open class AudioFocusPlugin(
     public fun handleBecomingNoisy() {
         apply(arbiter.onBecomingNoisy())
     }
+
+    // A play/pause the VIEWER caused, as opposed to one this plugin or the
+    // backend caused. Only those move the arbiter's pausedByUser flag — see
+    // the two call sites for what going the other way cost.
+    private fun isUserDriven(source: PlaySource): Boolean =
+        source.source != ActionSource.AUDIO_FOCUS && source.source != ActionSource.BACKEND_SETTLE
 
     private fun onFocusChange(change: FocusChange) {
         val action: FocusAction = when (change) {
