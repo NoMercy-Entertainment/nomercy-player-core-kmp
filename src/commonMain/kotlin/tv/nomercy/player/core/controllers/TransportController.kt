@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CancellationException
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
@@ -39,10 +40,31 @@ public class TransportController(
 
         val loadedToStart: Boolean = loadCurrentItemIfTheEngineHasNothing()
 
+        val priorPhase: PlayerPhase = ctx.phase
         ctx.playState = PlayState.PLAYING
         ctx.transitionPhase(PlayerPhase.STARTING)
         ctx.emit(CoreEvents.Play, PlaySource(opts.source))
-        ctx.backend?.play()
+        try {
+            ctx.backend?.play()
+        }
+        catch (cause: CancellationException) {
+            throw cause
+        }
+        // The state above is optimistic: it assumes the engine accepts. When the
+        // engine refuses — a browser or OS declining playback without a user
+        // gesture is the usual reason — leaving PLAYING makes every UI that
+        // renders from state draw a Pause button over silence, and the viewer's
+        // first press pauses something that never started. The web trio fixed
+        // this in 2.2.1; this is the same fix, same `backend-refused` wire
+        // reason, so a listener written against either behaves the same.
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
+            ctx.playState = PlayState.PAUSED
+            if (ctx.phase == PlayerPhase.STARTING) {
+                ctx.transitionPhase(if (priorPhase == PlayerPhase.READY) PlayerPhase.READY else PlayerPhase.PAUSED)
+            }
+            ctx.emit(CoreEvents.PlayPrevented, PreventedAction(BACKEND_REFUSED, opts.source))
+            throw cause
+        }
 
         // After the engine is kicked, not before it. In the reference the load
         // is still settling when playback starts, so readiness is the last thing
@@ -216,5 +238,11 @@ public class TransportController(
         if (!outcome.prevented) return true
         ctx.emit(prevented, PreventedAction(outcome.reason, opts.source))
         return false
+    }
+
+    private companion object {
+        // The web trio's wire value, matched exactly — a listener written
+        // against either trio reads the same string.
+        const val BACKEND_REFUSED: String = "backend-refused"
     }
 }
