@@ -178,8 +178,12 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Through bash, so a file mode in whatever tree is checked out cannot
+      # decide whether the release step runs. The scripts are committed
+      # executable now, but a tag cut before that fix is still a tag someone
+      # may need to re-attach a framework to.
       - name: Package, attach and stamp
-        run: ./tools/release-xcframework.sh NoMercyPlayerCore Package.swift
+        run: bash ./tools/release-xcframework.sh NoMercyPlayerCore Package.swift
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_DEFAULT_BRANCH: master
