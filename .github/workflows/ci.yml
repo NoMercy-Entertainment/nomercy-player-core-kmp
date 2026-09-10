@@ -38,6 +38,19 @@ jobs:
 
       - uses: android-actions/setup-android@v3
 
+      # Chrome, for the same reason as the Android SDK above: a GitHub-hosted
+      # ubuntu image ships one and this runner does not. Kotlin/Wasm runs its
+      # tests in a real browser through karma, so without it
+      # :testing:wasmJsBrowserTest fails with "Errors occurred during launch of
+      # browser for testing - ChromeHeadless" and the build never reaches the
+      # tests it was asked for.
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+
+      # Karma looks the browser up by this variable rather than by PATH.
+      - name: Point karma at that Chrome
+        run: echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+
       - uses: gradle/actions/setup-gradle@v4
 
       # First, and on its own, because drift from the ecosystem contract is
