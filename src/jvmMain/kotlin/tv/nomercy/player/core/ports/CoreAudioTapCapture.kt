@@ -127,7 +127,7 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
     private fun defaultOutputDeviceUid(coreAudio: CoreAudioLib, cf: CoreFoundationLib): String? {
         val address = AudioObjectPropertyAddress(kAudioHardwarePropertyDefaultOutputDevice)
         val deviceId = IntByReference()
-        val size = IntByReference(4)
+        val size = IntByReference(SIZE_OF_UINT32)
         val gotDevice = coreAudio.AudioObjectGetPropertyData(
             kAudioObjectSystemObject, address, 0, null, size, deviceId,
         )
@@ -135,7 +135,7 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
 
         val uidAddress = AudioObjectPropertyAddress(kAudioDevicePropertyDeviceUID)
         val uidRef = PointerByReference()
-        val uidSize = IntByReference(8)
+        val uidSize = IntByReference(SIZE_OF_POINTER)
         val gotUid = coreAudio.AudioObjectGetPropertyData(
             deviceId.value, uidAddress, 0, null, uidSize, uidRef,
         )
@@ -181,6 +181,12 @@ private class AudioObjectPropertyAddress(selector: Int) : com.sun.jna.Structure(
     override fun getFieldOrder(): List<String> = listOf("mSelector", "mScope", "mElement")
 }
 
+// C type widths, in bytes. The offsets below are built from these rather than
+// written as bare numbers, because every one of them is "how wide is the field
+// I am stepping over", not an arbitrary quantity.
+private const val SIZE_OF_UINT32 = 4
+private const val SIZE_OF_POINTER = 8
+
 private const val kAudioObjectSystemObject = 1
 private const val kAudioObjectPropertyScopeGlobal = 0x676c6f62 // 'glob'
 private const val kAudioObjectPropertyElementMain = 0
@@ -207,12 +213,14 @@ private fun interface AudioDeviceIoProcCallback : com.sun.jna.Callback {
 internal typealias AudioBufferListPointer = Pointer
 
 private fun AudioBufferListPointer.frameCount(channels: Int): Int {
-    val dataByteSize = getInt(4 + 4) // skip mNumberBuffers(4) + mBuffers[0].mNumberChannels(4)
+    // skip mNumberBuffers + mBuffers[0].mNumberChannels
+    val dataByteSize = getInt((SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
     return dataByteSize / (Float.SIZE_BYTES * channels)
 }
 
 private fun AudioBufferListPointer.readInterleavedFloat(channels: Int, frames: Int): FloatArray {
-    val dataPointer = getPointer(4 + 4 + 4) // mNumberBuffers + mNumberChannels + mDataByteSize
+    // mNumberBuffers + mNumberChannels + mDataByteSize
+    val dataPointer = getPointer((SIZE_OF_UINT32 + SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
     val out = FloatArray(frames * channels)
     dataPointer.read(0, out, 0, out.size)
     return out
@@ -284,7 +292,8 @@ private fun CoreFoundationLib.cfDictionarySetJavaBool(dict: Pointer, key: String
     // to read the exported data symbol directly, which this file does not
     // attempt.
     val keyRef = CFStringCreateWithCString(null, key, kCFStringEncodingUTF8)
-    val intValue = com.sun.jna.Memory(4).also { it.setInt(0, if (value) 1 else 0) }
+    val intValue = com.sun.jna.Memory(SIZE_OF_UINT32.toLong())
+        .also { it.setInt(0, if (value) 1 else 0) }
     val valueRef = CFNumberCreate(null, kCFNumberSInt32Type, intValue)
     CFDictionarySetValue(dict, keyRef, valueRef)
 }
