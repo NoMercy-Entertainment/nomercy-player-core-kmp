@@ -99,8 +99,8 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
 
         val bitDepth: Int = when {
             software -> MAX_SOFTWARE_BIT_DEPTH
-            TEN_BIT_PROFILE_OF[mime]?.let { profile -> supports(mime, profile) } == true -> 10
-            else -> 8
+            TEN_BIT_PROFILE_OF[mime]?.let { profile -> supports(mime, profile) } == true -> TEN_BIT_DEPTH
+            else -> EIGHT_BIT_DEPTH
         }
 
         // VideoCapabilities is per-codec-instance rather than per-mime, so this
@@ -145,7 +145,8 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
             maxBitrateKbps = if (software) {
                 DeviceDecodeProfile.NO_CAP
             } else {
-                videoCaps?.bitrateRange?.upper?.let { it / 1000 } ?: DeviceDecodeProfile.NO_CAP
+                videoCaps?.bitrateRange?.upper?.let { bps -> bps / BITS_PER_KILOBIT }
+                    ?: DeviceDecodeProfile.NO_CAP
             },
         )
     }
@@ -174,14 +175,16 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && passthroughSupported(encoding)
             }
             ?: false
-        if (!decode && !passthrough) return@mapNotNull null
-
-        AudioCodecCapability(
-            codec = codec,
-            maxChannels = if (codec == DecodeCodec.AAC) DeviceDecodeProfile.STEREO else MAX_SURROUND_CHANNELS,
-            passthrough = passthrough,
-            decode = decode,
-        )
+        if (!decode && !passthrough) {
+            null
+        } else {
+            AudioCodecCapability(
+                codec = codec,
+                maxChannels = if (codec == DecodeCodec.AAC) DeviceDecodeProfile.STEREO else MAX_SURROUND_CHANNELS,
+                passthrough = passthrough,
+                decode = decode,
+            )
+        }
     }
 
     return DeviceDecodeProfile(
@@ -212,6 +215,12 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
 
 private const val MAX_SOFTWARE_BIT_DEPTH: Int = 12
 private const val MAX_SURROUND_CHANNELS: Int = 6
+private const val TEN_BIT_DEPTH: Int = 10
+private const val EIGHT_BIT_DEPTH: Int = 8
+
+// The Android API reports bitrate in bits per second; DeviceDecodeProfile
+// carries kilobits.
+private const val BITS_PER_KILOBIT: Int = 1000
 
 private val VIDEO_MIME_TYPES: List<Pair<String, String>> = listOf(
     // H264 first, as web does it: the server transcodes to the client's first

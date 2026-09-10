@@ -23,40 +23,42 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
 
     val hdr: List<String> = HDR_PROBES.filter { (probe, _) -> plays(probe) }.map { (_, format) -> format }.distinct()
 
-    val video: List<VideoCodecCapability> = VIDEO_CODEC_PROBES.mapNotNull { entry ->
-        val codec = entry.codec
-        if (!entry.profiles.any { (probe, _) -> plays(probe) }) return@mapNotNull null
+    val video: List<VideoCodecCapability> = VIDEO_CODEC_PROBES
+        .filter { entry -> entry.profiles.any { (probe, _) -> plays(probe) } }
+        .map { entry ->
+            val codec = entry.codec
+            val profiles: List<String> = entry.profiles.filter { (probe, _) -> plays(probe) }.map { (_, name) -> name }
+            val maxBitDepth: Int = if (entry.tenBitProbes.any(::plays)) TEN_BIT_DEPTH else EIGHT_BIT_DEPTH
 
-        val profiles: List<String> = entry.profiles.filter { (probe, _) -> plays(probe) }.map { (_, name) -> name }
-        val maxBitDepth: Int = if (entry.tenBitProbes.any(::plays)) 10 else 8
+            VideoCodecCapability(
+                codec = codec,
+                profiles = profiles,
+                maxBitDepth = maxBitDepth,
+                // Left at the platform ceiling rather than guessed. On an Apple
+                // TV the panel is whatever is plugged in today, and AVFoundation
+                // has no API answering the attached display's actual resolution.
+                maxWidth = DecodeResolution.UHD,
+                maxHeight = DecodeResolution.UHD,
+                maxFramerate = MAX_FRAMERATE,
+                hdrFormats = if (codec == DecodeCodec.H265 || codec == DecodeCodec.AV1) hdr else emptyList(),
+                maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
+            )
+        }
 
-        VideoCodecCapability(
-            codec = codec,
-            profiles = profiles,
-            maxBitDepth = maxBitDepth,
-            // Left at the platform ceiling rather than guessed. On an Apple TV
-            // the panel is whatever is plugged in today, and AVFoundation has
-            // no API answering the attached display's actual resolution.
-            maxWidth = DecodeResolution.UHD,
-            maxHeight = DecodeResolution.UHD,
-            maxFramerate = MAX_FRAMERATE,
-            hdrFormats = if (codec == DecodeCodec.H265 || codec == DecodeCodec.AV1) hdr else emptyList(),
-            maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
-        )
-    }
-
-    val audio: List<AudioCodecCapability> = AUDIO_PROBES.mapNotNull { (probe, codec) ->
-        if (!plays(probe)) return@mapNotNull null
-        AudioCodecCapability(
-            codec = codec,
-            maxChannels = if (codec == DecodeCodec.AAC) DeviceDecodeProfile.STEREO else MAX_SURROUND_CHANNELS,
-            // AVPlayer decodes what it plays; passthrough is a receiver-attached
-            // question tvOS answers through AVAudioSession, not through this
-            // MIME probe, so this actual claims decode only.
-            passthrough = false,
-            decode = true,
-        )
-    }
+    val audio: List<AudioCodecCapability> = AUDIO_PROBES
+        .filter { (probe, _) -> plays(probe) }
+        .map { (_, codec) ->
+            AudioCodecCapability(
+                codec = codec,
+                maxChannels = if (codec == DecodeCodec.AAC) DeviceDecodeProfile.STEREO else MAX_SURROUND_CHANNELS,
+                // AVPlayer decodes what it plays; passthrough is a
+                // receiver-attached question tvOS answers through
+                // AVAudioSession, not through this MIME probe, so this actual
+                // claims decode only.
+                passthrough = false,
+                decode = true,
+            )
+        }
 
     return DeviceDecodeProfile(
         video = video,
@@ -70,6 +72,8 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
 
 private const val MAX_FRAMERATE: Int = 60
 private const val MAX_SURROUND_CHANNELS: Int = 6
+private const val TEN_BIT_DEPTH: Int = 10
+private const val EIGHT_BIT_DEPTH: Int = 8
 
 // The probe string each HDR format is asked with, so a chip that plays HLG
 // but not Dolby Vision names only HLG rather than losing that to a single

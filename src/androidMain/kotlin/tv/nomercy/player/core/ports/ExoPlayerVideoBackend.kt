@@ -617,18 +617,21 @@ public class ExoPlayerVideoBackend(
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 main.launch {
-                    if (ignoreFirstOnAvailable) {
-                        ignoreFirstOnAvailable = false
-                        return@launch
+                    // The callback fires once on registration when the network
+                    // is already up; that arrival is not a return from an
+                    // outage. After that, only reconnect if something was
+                    // actually waiting on the network.
+                    val spurious: Boolean = ignoreFirstOnAvailable
+                    ignoreFirstOnAvailable = false
+                    val waiting: Boolean = networkRetryAttempt != 0 || awaitingNetworkReturn
+                    if (!spurious && waiting) {
+                        Log.i("nm-video-backend", "Connectivity returned — reconnecting now")
+                        // A fresh outage deserves the whole ladder: the attempts
+                        // spent waiting for the network to come back say nothing
+                        // about whether the server answers now.
+                        resetOutageLadder()
+                        reconnect(0L)
                     }
-                    if (networkRetryAttempt == 0 && !awaitingNetworkReturn) return@launch
-
-                    Log.i("nm-video-backend", "Connectivity returned — reconnecting now")
-                    // A fresh outage deserves the whole ladder: the attempts
-                    // spent waiting for the network to come back say nothing
-                    // about whether the server answers now.
-                    resetOutageLadder()
-                    reconnect(0L)
                 }
             }
         }
@@ -767,9 +770,9 @@ public class ExoPlayerVideoBackend(
             resetOutageLadder()
             player.playWhenReady = true
             reconnect(0L)
-            return@onMain
+        } else {
+            player.play()
         }
-        player.play()
     }
 
     override fun pause(): Unit = fireAndForget { player.pause() }

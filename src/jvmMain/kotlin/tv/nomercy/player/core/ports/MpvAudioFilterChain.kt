@@ -44,7 +44,8 @@ internal object MpvAudioFilterChain {
         if (enabled) {
             for (band in bands) {
                 if (band.gainDb == 0.0) continue
-                stages += "equalizer=f=${band.frequency}:width_type=q:w=${format(band.bandwidth)}:g=${format(band.gainDb)}"
+                stages += "equalizer=f=${band.frequency}:width_type=q" +
+                    ":w=${format(band.bandwidth)}:g=${format(band.gainDb)}"
             }
         }
 

@@ -61,9 +61,9 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
             wFormatTag = WORD(WAVE_FORMAT_IEEE_FLOAT.toLong())
             nChannels = WORD(channels.toLong())
             nSamplesPerSec = DWORD(sampleRate.toLong())
-            wBitsPerSample = WORD(32L)
-            nBlockAlign = WORD((channels * 4).toLong())
-            nAvgBytesPerSec = DWORD((sampleRate * channels * 4).toLong())
+            wBitsPerSample = WORD(BITS_PER_FLOAT_SAMPLE.toLong())
+            nBlockAlign = WORD((channels * BYTES_PER_FLOAT_SAMPLE).toLong())
+            nAvgBytesPerSec = DWORD((sampleRate * channels * BYTES_PER_FLOAT_SAMPLE).toLong())
             cbSize = WORD(0L)
         }
 
@@ -168,7 +168,14 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
         val iid = IID(IID_IAUDIOCLIENT)
         val result = PointerByReference()
         // CLSCTX_ALL, no activation params.
-        val hr = invoke(device, VTBL_DEVICE_ACTIVATE, iid, com.sun.jna.platform.win32.WTypes.CLSCTX_ALL, Pointer.NULL, result)
+        val hr = invoke(
+            device,
+            VTBL_DEVICE_ACTIVATE,
+            iid,
+            com.sun.jna.platform.win32.WTypes.CLSCTX_ALL,
+            Pointer.NULL,
+            result,
+        )
         if (!COMUtils.SUCCEEDED(hr) || result.value == null) return null
         return Unknown(result.value)
     }
@@ -206,6 +213,12 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
 
     private companion object {
         const val WAVE_FORMAT_IEEE_FLOAT = 3
+
+        // The capture format is IEEE float, so a sample is one 32-bit float —
+        // both numbers below are that one fact, in the two units the
+        // WAVEFORMATEX fields want it in.
+        const val BITS_PER_FLOAT_SAMPLE = 32
+        const val BYTES_PER_FLOAT_SAMPLE = 4
         const val AUDCLNT_STREAMFLAGS_LOOPBACK = 0x00020000
         const val THREAD_JOIN_TIMEOUT_MS = 1_000L
         const val POLL_INTERVAL_MS = 10L

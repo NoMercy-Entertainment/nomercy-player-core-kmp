@@ -52,7 +52,10 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
             Native.load("/System/Library/Frameworks/CoreAudio.framework/CoreAudio", CoreAudioLib::class.java)
         }.getOrNull() ?: return false
         val coreFoundation = runCatching {
-            Native.load("/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation", CoreFoundationLib::class.java)
+            Native.load(
+                "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
+                CoreFoundationLib::class.java,
+            )
         }.getOrNull() ?: return false
 
         val defaultOutputUid = defaultOutputDeviceUid(coreAudio, coreFoundation) ?: return false
@@ -254,7 +257,12 @@ private interface CoreAudioLib : Library {
 // wrapped so the capture class above never juggles raw CFString/CFNumber
 // creation itself.
 private interface CoreFoundationLib : Library {
-    fun CFDictionaryCreateMutable(allocator: Pointer?, capacity: Int, keyCallBacks: Pointer?, valueCallBacks: Pointer?): Pointer
+    fun CFDictionaryCreateMutable(
+        allocator: Pointer?,
+        capacity: Int,
+        keyCallBacks: Pointer?,
+        valueCallBacks: Pointer?,
+    ): Pointer
     fun CFArrayCreateMutable(allocator: Pointer?, capacity: Int, callBacks: Pointer?): Pointer
     fun CFArrayAppendValue(array: Pointer, value: Pointer)
     fun CFDictionarySetValue(dict: Pointer, key: Pointer, value: Pointer)
@@ -265,7 +273,6 @@ private interface CoreFoundationLib : Library {
 }
 
 private const val kCFStringEncodingUTF8 = 0x08000100
-private const val kCFBooleanTrueAddress = 0 // placeholder — real symbol is kCFBooleanTrue, a data import, not a function
 private const val kCFNumberSInt32Type = 3
 
 private fun CoreFoundationLib.cfDictionaryCreateMutable(capacity: Int): Pointer =

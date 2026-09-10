@@ -64,7 +64,7 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
             // Half a spectrum analysis window per read: small enough that a
             // frame is fresh when it reaches PcmEqualiser, large enough that
             // this is not a syscall per handful of samples.
-            val framesPerRead = 1024
+            val framesPerRead = FRAMES_PER_READ
             val buffer = FloatArray(framesPerRead * channels)
             val byteBuffer = com.sun.jna.Memory((framesPerRead * channels * Float.SIZE_BYTES).toLong())
 
@@ -106,6 +106,10 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     }.getOrNull()
 
     private companion object {
+        // Small enough that a frame is fresh when it reaches PcmEqualiser,
+        // large enough that this is not a syscall per handful of samples.
+        const val FRAMES_PER_READ = 1024
+
         const val STREAM_NAME = "NoMercyPlayer"
         const val PA_STREAM_RECORD = 2
         const val PA_SAMPLE_FLOAT32LE = 5
