@@ -36,17 +36,29 @@ import tv.nomercy.player.core.ports.engines.MpvVideoEngineProvider
  * flag ANDed across every codec it lists at all.
  */
 public actual fun platformDecodeProfile(): DeviceDecodeProfile {
-    val decoders: List<MediaCodecInfo> = MediaCodecList(MediaCodecList.REGULAR_CODECS)
+    val survey = DecoderSurvey()
+    val video = VideoProfileBuilder(survey)
+    return DeviceDecodeProfile(
+        video = VIDEO_MIME_TYPES.mapNotNull { (mime, codec) -> video.capabilityFor(mime, codec) },
+        audio = AUDIO_MIME_TYPES.mapNotNull { (mime, codec) -> survey.audioCapabilityFor(mime, codec) },
+        containers = survey.containers(),
+        supportsHdr = survey.supportsHdr(),
+        // No client-imposed cap, for the reason web gives: the server hard-
+        // transcodes above this, and a guess forces transcoding of compatible
+        // files over a LAN.
+        maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
+    )
+}
+
+// One pass over MediaCodecList, the display and the software engine, asked
+// once and then queried per codec. Built as an object rather than a run of
+// local functions closing over the same values, because that run was one
+// method carrying every branch in this file.
+private class DecoderSurvey {
+
+    private val decoders: List<MediaCodecInfo> = MediaCodecList(MediaCodecList.REGULAR_CODECS)
         .codecInfos
         .filterNot(MediaCodecInfo::isEncoder)
-
-    fun decodersFor(mime: String): List<MediaCodecInfo> = decoders
-        .filter { info -> info.supportedTypes.any { type -> type.equals(mime, ignoreCase = true) } }
-
-    fun supports(mime: String, profile: Int? = null): Boolean = decodersFor(mime)
-        .any { info ->
-            profile == null || info.getCapabilitiesForType(mime).profileLevels.any { it.profile == profile }
-        }
 
     // ffmpeg opens what the file holds rather than what the chip offers, so the
     // software engine contributes the whole video set — but only once a payload
@@ -55,7 +67,7 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
     // worse than never having asked.
     val software: Boolean = MpvVideoEngineProvider.isAvailable()
 
-    val displayHdrTypes: Set<Int> = runCatching {
+    private val displayHdrTypes: Set<Int> = runCatching {
         PlatformEnvironment.requireContext().androidContext
             .getSystemService(android.content.Context.DISPLAY_SERVICE)
             .let { it as android.hardware.display.DisplayManager }
@@ -64,6 +76,21 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
             ?.supportedHdrTypes
             ?.toSet()
     }.getOrNull() ?: emptySet()
+
+    private val metrics: DisplayMetrics = PlatformEnvironment.requireContext()
+        .androidContext
+        .resources
+        .displayMetrics
+    val maxWidth: Int = DecodeResolution.clamp(maxOf(metrics.widthPixels, metrics.heightPixels))
+    val maxHeight: Int = DecodeResolution.clamp(minOf(metrics.widthPixels, metrics.heightPixels))
+
+    fun decodersFor(mime: String): List<MediaCodecInfo> = decoders
+        .filter { info -> info.supportedTypes.any { type -> type.equals(mime, ignoreCase = true) } }
+
+    fun supports(mime: String, profile: Int? = null): Boolean = decodersFor(mime)
+        .any { info ->
+            profile == null || info.getCapabilitiesForType(mime).profileLevels.any { it.profile == profile }
+        }
 
     fun displayHdrFormats(): List<String> = buildList {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -78,13 +105,6 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
         }
     }
 
-    val metrics: DisplayMetrics = PlatformEnvironment.requireContext()
-        .androidContext
-        .resources
-        .displayMetrics
-    val maxWidth: Int = DecodeResolution.clamp(maxOf(metrics.widthPixels, metrics.heightPixels))
-    val maxHeight: Int = DecodeResolution.clamp(minOf(metrics.widthPixels, metrics.heightPixels))
-
     fun profileNamesFor(mime: String, codec: String): List<String> {
         if (software) return SOFTWARE_PROFILES[codec] ?: emptyList()
         val table = PROFILE_NAMES[mime] ?: return emptyList()
@@ -94,71 +114,28 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
             .distinct()
     }
 
-    fun videoCapabilityFor(mime: String, codec: String): VideoCodecCapability? {
-        if (!software && !supports(mime)) return null
-
-        val bitDepth: Int = when {
-            software -> MAX_SOFTWARE_BIT_DEPTH
-            TEN_BIT_PROFILE_OF[mime]?.let { profile -> supports(mime, profile) } == true -> TEN_BIT_DEPTH
-            else -> EIGHT_BIT_DEPTH
-        }
-
-        // VideoCapabilities is per-codec-instance rather than per-mime, so this
-        // takes the most permissive hardware decoder for the type — the same
-        // decoder MediaCodec itself would pick when asked to decode it.
-        val videoCaps: MediaCodecInfo.VideoCapabilities? = decodersFor(mime)
-            .firstNotNullOfOrNull { info ->
-                runCatching { info.getCapabilitiesForType(mime).videoCapabilities }.getOrNull()
-            }
-
-        val hdr: List<String> = when {
-            software -> listOf(HdrFormat.HDR10, HdrFormat.HDR10_PLUS, HdrFormat.DOLBY_VISION, HdrFormat.HLG)
-            codec == DecodeCodec.H265 || codec == DecodeCodec.AV1 || codec == DecodeCodec.VP9 -> {
-                val hasEditingFeature = decodersFor(mime).any { info ->
-                    info.getCapabilitiesForType(mime).isFeatureSupported(FEATURE_HdrEditing)
-                }
-                if (hasEditingFeature || displayHdrFormats().isNotEmpty()) displayHdrFormats() else emptyList()
-            }
-            else -> emptyList()
-        }
-
-        return VideoCodecCapability(
-            codec = codec,
-            profiles = profileNamesFor(mime, codec),
-            maxBitDepth = bitDepth,
-            maxWidth = if (software) {
-                DecodeResolution.UHD
-            } else {
-                videoCaps?.supportedWidths?.upper?.let(DecodeResolution::clamp) ?: maxWidth
-            },
-            maxHeight = if (software) {
-                DecodeResolution.UHD
-            } else {
-                videoCaps?.supportedHeights?.upper?.let(DecodeResolution::clamp) ?: maxHeight
-            },
-            maxFramerate = if (software) {
-                60
-            } else {
-                videoCaps?.supportedFrameRates?.upper?.toInt() ?: 60
-            },
-            hdrFormats = hdr,
-            maxBitrateKbps = if (software) {
-                DeviceDecodeProfile.NO_CAP
-            } else {
-                videoCaps?.bitrateRange?.upper?.let { bps -> bps / BITS_PER_KILOBIT }
-                    ?: DeviceDecodeProfile.NO_CAP
-            },
+    // Media3 plays HLS, DASH and progressive MP4 out of the box, and libmpv
+    // plays all of them, plus MKV/TS which libmpv demuxes natively; neither is
+    // conditional on the device.
+    fun containers(): List<String> = if (software) {
+        listOf(
+            DecodeContainer.HLS,
+            DecodeContainer.MP4,
+            DecodeContainer.DASH,
+            DecodeContainer.MKV,
+            DecodeContainer.TS,
         )
+    } else {
+        listOf(DecodeContainer.HLS, DecodeContainer.MP4, DecodeContainer.DASH, DecodeContainer.TS)
     }
 
-    val video: List<VideoCodecCapability> = VIDEO_MIME_TYPES.mapNotNull { (mime, codec) ->
-        videoCapabilityFor(mime, codec)
-    }
+    fun supportsHdr(): Boolean = displayHdrFormats().isNotEmpty() ||
+        supports(MediaFormat.MIMETYPE_VIDEO_HEVC, CodecProfileLevel.HEVCProfileMain10)
 
     // Passthrough support is a bitstream question, not a decode one: it asks
     // whether the current output route (HDMI/ARC/optical) accepts the encoded
     // format unmodified, and `AudioManager` exposes exactly that per-encoding.
-    fun passthroughSupported(encoding: Int): Boolean = runCatching {
+    private fun passthroughSupported(encoding: Int): Boolean = runCatching {
         AudioManager.getDirectPlaybackSupport(
             AudioFormat.Builder().setEncoding(encoding).build(),
             android.media.AudioAttributes.Builder()
@@ -168,55 +145,105 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
         ) != AudioManager.DIRECT_PLAYBACK_NOT_SUPPORTED
     }.getOrDefault(false)
 
-    val audio: List<AudioCodecCapability> = AUDIO_MIME_TYPES.mapNotNull { (mime, codec) ->
+    fun audioCapabilityFor(mime: String, codec: String): AudioCodecCapability? {
         val decode: Boolean = supports(mime)
         val passthrough: Boolean = AUDIO_PASSTHROUGH_ENCODING[codec]
             ?.let { encoding ->
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && passthroughSupported(encoding)
             }
             ?: false
-        if (!decode && !passthrough) {
-            null
-        } else {
-            AudioCodecCapability(
-                codec = codec,
-                maxChannels = if (codec == DecodeCodec.AAC) DeviceDecodeProfile.STEREO else MAX_SURROUND_CHANNELS,
-                passthrough = passthrough,
-                decode = decode,
-            )
-        }
+        if (!decode && !passthrough) return null
+        return AudioCodecCapability(
+            codec = codec,
+            maxChannels = if (codec == DecodeCodec.AAC) DeviceDecodeProfile.STEREO else MAX_SURROUND_CHANNELS,
+            passthrough = passthrough,
+            decode = decode,
+        )
     }
 
-    return DeviceDecodeProfile(
-        video = video,
-        audio = audio,
-        // Media3 plays HLS, DASH and progressive MP4 out of the box, and libmpv
-        // plays all of them, plus MKV/TS which libmpv demuxes natively; neither
-        // is conditional on the device.
-        containers = if (software) {
-            listOf(
-                DecodeContainer.HLS,
-                DecodeContainer.MP4,
-                DecodeContainer.DASH,
-                DecodeContainer.MKV,
-                DecodeContainer.TS,
-            )
-        } else {
-            listOf(DecodeContainer.HLS, DecodeContainer.MP4, DecodeContainer.DASH, DecodeContainer.TS)
-        },
-        supportsHdr = displayHdrFormats().isNotEmpty() ||
-            supports(MediaFormat.MIMETYPE_VIDEO_HEVC, CodecProfileLevel.HEVCProfileMain10),
-        // No client-imposed cap, for the reason web gives: the server hard-
-        // transcodes above this, and a guess forces transcoding of compatible
-        // files over a LAN.
-        maxBitrateKbps = DeviceDecodeProfile.NO_CAP,
-    )
+}
+
+// Turns what [DecoderSurvey] found into the video half of the profile. Split
+// from the survey because surveying the device and describing a codec are two
+// jobs, and holding both put every branch in this file behind one object.
+private class VideoProfileBuilder(private val survey: DecoderSurvey) {
+
+    fun capabilityFor(mime: String, codec: String): VideoCodecCapability? {
+        if (!survey.software && !survey.supports(mime)) return null
+
+        val caps: MediaCodecInfo.VideoCapabilities? = capsFor(mime)
+
+        return VideoCodecCapability(
+            codec = codec,
+            profiles = survey.profileNamesFor(mime, codec),
+            maxBitDepth = bitDepthFor(mime),
+            maxWidth = dimension(caps?.supportedWidths?.upper, survey.maxWidth),
+            maxHeight = dimension(caps?.supportedHeights?.upper, survey.maxHeight),
+            maxFramerate = framerate(caps),
+            hdrFormats = hdrFormatsFor(mime, codec),
+            maxBitrateKbps = bitrateKbps(caps),
+        )
+    }
+
+    // The most permissive hardware decoder for the type — the same one
+    // MediaCodec itself would pick when asked to decode it. VideoCapabilities
+    // is per-codec-instance rather than per-mime, which is why this is a search
+    // rather than a lookup.
+    private fun capsFor(mime: String): MediaCodecInfo.VideoCapabilities? = survey.decodersFor(mime)
+        .firstNotNullOfOrNull { info ->
+            runCatching { info.getCapabilitiesForType(mime).videoCapabilities }.getOrNull()
+        }
+
+    private fun bitDepthFor(mime: String): Int = when {
+        survey.software -> MAX_SOFTWARE_BIT_DEPTH
+        TEN_BIT_PROFILE_OF[mime]?.let { profile -> survey.supports(mime, profile) } == true -> TEN_BIT_DEPTH
+        else -> EIGHT_BIT_DEPTH
+    }
+
+    private fun hdrFormatsFor(mime: String, codec: String): List<String> = when {
+        survey.software -> listOf(HdrFormat.HDR10, HdrFormat.HDR10_PLUS, HdrFormat.DOLBY_VISION, HdrFormat.HLG)
+        codec == DecodeCodec.H265 || codec == DecodeCodec.AV1 || codec == DecodeCodec.VP9 -> hdrFromDisplay(mime)
+        else -> emptyList()
+    }
+
+    private fun hdrFromDisplay(mime: String): List<String> {
+        val hasEditingFeature = survey.decodersFor(mime).any { info ->
+            info.getCapabilitiesForType(mime).isFeatureSupported(FEATURE_HdrEditing)
+        }
+        val fromDisplay = survey.displayHdrFormats()
+        return if (hasEditingFeature || fromDisplay.isNotEmpty()) fromDisplay else emptyList()
+    }
+
+    // The software engine decodes what the file holds, so it answers with the
+    // ceiling rather than with a chip's limits; the hardware path clamps what
+    // the decoder declares and falls back to the panel when it declares nothing.
+    private fun dimension(declared: Int?, screenFallback: Int): Int = if (survey.software) {
+        DecodeResolution.UHD
+    } else {
+        declared?.let(DecodeResolution::clamp) ?: screenFallback
+    }
+
+    private fun framerate(caps: MediaCodecInfo.VideoCapabilities?): Int = if (survey.software) {
+        MAX_FRAMERATE
+    } else {
+        caps?.supportedFrameRates?.upper?.toInt() ?: MAX_FRAMERATE
+    }
+
+    private fun bitrateKbps(caps: MediaCodecInfo.VideoCapabilities?): Int = if (survey.software) {
+        DeviceDecodeProfile.NO_CAP
+    } else {
+        caps?.bitrateRange?.upper?.let { bps -> bps / BITS_PER_KILOBIT } ?: DeviceDecodeProfile.NO_CAP
+    }
 }
 
 private const val MAX_SOFTWARE_BIT_DEPTH: Int = 12
 private const val MAX_SURROUND_CHANNELS: Int = 6
 private const val TEN_BIT_DEPTH: Int = 10
 private const val EIGHT_BIT_DEPTH: Int = 8
+
+// What the software engine reports, and the fallback when a hardware decoder
+// declines to name its own ceiling.
+private const val MAX_FRAMERATE: Int = 60
 
 // The Android API reports bitrate in bits per second; DeviceDecodeProfile
 // carries kilobits.
@@ -262,7 +289,12 @@ private val PROFILE_NAMES: Map<String, Map<Int, String>> = mapOf(
 // libmpv reports no profileLevels through MediaCodecList (it isn't in it), so
 // this is what it opens rather than what a hardware decoder enumerates.
 private val SOFTWARE_PROFILES: Map<String, List<String>> = mapOf(
-    DecodeCodec.H264 to listOf(VideoProfileName.BASELINE, VideoProfileName.MAIN, VideoProfileName.HIGH, VideoProfileName.HIGH10),
+    DecodeCodec.H264 to listOf(
+        VideoProfileName.BASELINE,
+        VideoProfileName.MAIN,
+        VideoProfileName.HIGH,
+        VideoProfileName.HIGH10,
+    ),
     DecodeCodec.H265 to listOf(VideoProfileName.MAIN, VideoProfileName.MAIN10),
     DecodeCodec.AV1 to listOf(VideoProfileName.MAIN, VideoProfileName.MAIN10),
     DecodeCodec.VP9 to listOf("profile0", "profile2"),
