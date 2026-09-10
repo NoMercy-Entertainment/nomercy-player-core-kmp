@@ -1,0 +1,86 @@
+name: portal
+
+# Drives the Central Portal deployment a tag left behind.
+#
+# `publishToMavenCentral()` uploads and stops: vanniktech 0.37.0's no-argument
+# form sets automaticRelease = false, so a v* tag leaves a USER_MANAGED draft
+# nobody can see and nothing downstream can resolve. The video and music
+# libraries then fail their own release on "Could not find
+# tv.nomercy:nomercy-player-core-kmp:0.1.0", because a draft is not an artifact.
+#
+# The Portal credentials live only in the org secret store, so the call that
+# finishes a deployment has to be made from a runner rather than a laptop.
+#
+# `status` is read-only and safe to run at any time. `publish` is FINAL:
+# Maven Central never deletes a released version. `drop` discards a draft and
+# is the way back out before publishing, not after.
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_id:
+        description: 'Deployment id from the publish job log, e.g. f441d84e-15ea-4c2d-b16e-99ba808555e9'
+        required: true
+      action:
+        description: 'What to do with it'
+        required: true
+        default: status
+        type: choice
+        options: [status, publish, drop]
+
+permissions:
+  contents: read
+
+jobs:
+  portal:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Talk to the Central Portal
+        env:
+          USERNAME: ${{ secrets.CENTRAL_PORTAL_USERNAME }}
+          PASSWORD: ${{ secrets.CENTRAL_PORTAL_PASSWORD }}
+          ID: ${{ github.event.inputs.deployment_id }}
+          ACTION: ${{ github.event.inputs.action }}
+        run: |
+          set -euo pipefail
+          if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
+            echo "the Portal credentials are not readable from this run" >&2
+            exit 1
+          fi
+          # The Portal takes the user token pair as one base64 bearer, not as
+          # basic auth. Built here so neither half is ever a command argument.
+          token=$(printf '%s:%s' "$USERNAME" "$PASSWORD" | base64 | tr -d '\n')
+          api=https://central.sonatype.com/api/v1/publisher
+
+          say() { echo "::add-mask::$token"; }
+          say
+
+          case "$ACTION" in
+            status)
+              code=$(curl -sS -o body.json -w '%{http_code}' -X POST \
+                -H "Authorization: Bearer $token" "$api/status?id=$ID")
+              echo "http $code"
+              cat body.json
+              echo
+              grep -o '"deploymentState":"[A-Z_]*"' body.json || true
+              [ "$code" = "200" ]
+              ;;
+            publish)
+              code=$(curl -sS -o body.txt -w '%{http_code}' -X POST \
+                -H "Authorization: Bearer $token" "$api/deployment/$ID")
+              echo "http $code"
+              cat body.txt || true
+              echo
+              # 204 is the documented success. Anything else is a refusal worth
+              # reading rather than a step worth passing.
+              [ "$code" = "204" ]
+              ;;
+            drop)
+              code=$(curl -sS -o body.txt -w '%{http_code}' -X DELETE \
+                -H "Authorization: Bearer $token" "$api/deployment/$ID")
+              echo "http $code"
+              cat body.txt || true
+              echo
+              [ "$code" = "204" ]
+              ;;
+          esac
