@@ -111,19 +111,53 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // playWhenReady was already true — the exact case the old comment on this
     // method assumed the base class would always eventually cover.
     //
-    // So this calls `startForeground` itself, immediately, with a placeholder
-    // — satisfying the platform's clock the instant the service exists,
-    // regardless of how long the real session takes to actually start
-    // playing. `reconcile`'s own `addSession` lets the base class replace
-    // this with the real notification the moment it has one; calling
-    // `startForeground` more than once to update the notification is the
-    // normal, documented way Media3's own notification manager behaves.
+    // So a backstop is armed here instead: [promoteIfMedia3HasNot] promotes
+    // with a placeholder, but only once Media3 has demonstrably not done it
+    // first, and only for as long as it takes Media3 to catch up.
     override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
-        startForeground(STARTUP_NOTIFICATION_ID, startupNotification())
+        mainHandler.removeCallbacks(promoteIfMedia3HasNot)
+        mainHandler.postDelayed(promoteIfMedia3HasNot, BACKSTOP_PROMOTION_MS)
         mainHandler.removeCallbacks(stopIfNeverPromoted)
         mainHandler.postDelayed(stopIfNeverPromoted, PROMOTION_GRACE_MS)
         return super.onStartCommand(intent, flags, startId)
     }
+
+    // Only ever runs when Media3 has NOT promoted in time on its own.
+    //
+    // Measured on a real device: in the ordinary case Media3 posts its own
+    // rich media notification (transport controls, artwork, id
+    // DEFAULT_NOTIFICATION_ID) within milliseconds of `reconcile`'s
+    // `addSession`, and promoting with a placeholder before that REPLACES it
+    // — the shade kept the blank placeholder and lost the controls, because
+    // Media3 does not re-post a notification whose state it believes is
+    // already current. So this asks whether Media3 got there first and stays
+    // out of the way when it did.
+    private val promoteIfMedia3HasNot: Runnable = Runnable {
+        if (media3HasPosted()) return@Runnable
+        runCatching { startForeground(STARTUP_NOTIFICATION_ID, startupNotification()) }
+        // Media3 promotes onto its own id once the source finally opens; this
+        // placeholder is then just a second notification nobody asked for.
+        mainHandler.postDelayed(retireePlaceholder, HANDOVER_POLL_MS)
+    }
+
+    private val retireePlaceholder: Runnable = object : Runnable {
+        override fun run() {
+            if (media3HasPosted()) {
+                runCatching {
+                    getSystemService(NotificationManager::class.java).cancel(STARTUP_NOTIFICATION_ID)
+                }
+                return
+            }
+            if (attached != null) mainHandler.postDelayed(this, HANDOVER_POLL_MS)
+        }
+    }
+
+    private fun media3HasPosted(): Boolean =
+        runCatching {
+            getSystemService(NotificationManager::class.java)
+                .activeNotifications
+                .any { it.id == DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID }
+        }.getOrDefault(false)
 
     // Deliberately minimal — branding may not be installed, and this is
     // visible for at most the few hundred ms until `reconcile` hands the base
@@ -148,7 +182,24 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         val wanted: Boolean = runCatching {
             attached?.player?.let { it.isPlaying || it.playWhenReady } == true
         }.getOrDefault(false)
-        if (!wanted) stopSelf()
+        if (!wanted) stopWithoutLeavingAPromotionPending()
+    }
+
+    // Stopping is only a safe answer to the platform's clock once something
+    // has actually called `startForeground` for the start command that
+    // started it. Measured on a real device: a service started with
+    // `startForegroundService` and stopped ~500ms later, before promoting,
+    // still died with ForegroundServiceDidNotStartInTimeException
+    // ("Bringing down service while still waiting for start foreground") —
+    // the stop did not cancel the clock, it just removed anything that could
+    // have answered it. So every stop path promotes first when nothing else
+    // has, and the promotion it posts is torn down by the stop that follows
+    // it a moment later.
+    private fun stopWithoutLeavingAPromotionPending() {
+        if (!media3HasPosted()) {
+            runCatching { startForeground(STARTUP_NOTIFICATION_ID, startupNotification()) }
+        }
+        stopSelf()
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = attached
@@ -177,7 +228,8 @@ public class NoMercyPlaybackService : MediaLibraryService() {
             runCatching { addSession(session) }
         } else {
             mainHandler.removeCallbacks(stopIfNeverPromoted)
-            stopSelf()
+            mainHandler.removeCallbacks(promoteIfMedia3HasNot)
+            stopWithoutLeavingAPromotionPending()
         }
     }
 
@@ -187,9 +239,16 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         // that a play which never happens ends quietly instead of fatally.
         const val PROMOTION_GRACE_MS: Long = 4_000L
 
-        // Replaced by Media3's own real notification within milliseconds in
-        // the normal case — see [onStartCommand]'s own comment for why this
-        // needs to exist at all rather than waiting for that real one.
+        // Under both the platform's own deadline and [PROMOTION_GRACE_MS], so
+        // an ordinary play has already promoted through Media3 by the time
+        // this runs and a slow one still gets a foreground state before
+        // anything kills the process for not having one.
+        const val BACKSTOP_PROMOTION_MS: Long = 2_500L
+
+        // Only alive while the placeholder is, waiting for the real
+        // notification to arrive so the placeholder can be withdrawn.
+        const val HANDOVER_POLL_MS: Long = 1_000L
+
         const val STARTUP_CHANNEL_ID = "nomercy-playback-startup"
         const val STARTUP_NOTIFICATION_ID = 8271
     }
@@ -200,6 +259,8 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         // path, and a throw here is fatal — the phone restarted on a play press
         // (measured 2026-08-17, IllegalArgumentException from this class).
         mainHandler.removeCallbacks(stopIfNeverPromoted)
+        mainHandler.removeCallbacks(promoteIfMedia3HasNot)
+        mainHandler.removeCallbacks(retireePlaceholder)
         attached?.let { runCatching { removeSession(it) } }
         attached = null
         scopeJob?.cancel()
