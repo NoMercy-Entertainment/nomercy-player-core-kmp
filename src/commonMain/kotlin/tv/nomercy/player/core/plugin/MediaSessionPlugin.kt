@@ -28,6 +28,12 @@ import tv.nomercy.player.core.ports.defaultSystemTransport
 // Both directions cross a narrow seam. Outward through SystemTransport, inward
 // through TransportCommands, and neither of them is the player: a lock screen
 // that could reach the player object could change the subtitle track.
+// The function count is SystemTransport's plus TransportCommands', because this
+// plugin is the join between them: one handler per action the platform can
+// raise, and one push per thing the platform has to be told. Splitting it would
+// put the outward half and the inward half in two objects that must agree on
+// the same session, which is the drift this seam exists to prevent.
+@Suppress("TooManyFunctions")
 public open class MediaSessionPlugin(
     private val commands: TransportCommands,
     private val openTransport: () -> SystemTransport = ::defaultSystemTransport,

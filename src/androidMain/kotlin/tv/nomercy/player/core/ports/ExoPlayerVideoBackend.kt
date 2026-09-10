@@ -66,7 +66,11 @@ internal val HLS_EXT_RE = Regex("""\.m3u8(?:[?#]|$)""", RegexOption.IGNORE_CASE)
 // the implementation to satisfy a threshold would put half of one object's
 // state behind a delegate — which is how the track cache and the playback cache
 // would drift apart.
-@Suppress("TooManyFunctions")
+// LargeClass for the same reason, and measured: it sits three units over the
+// limit. The outage ladder, the track cache and the playback state are read by
+// each other on the same main thread, and the split that would satisfy the
+// count is the delegate the paragraph above rules out.
+@Suppress("TooManyFunctions", "LargeClass")
 public class ExoPlayerVideoBackend(
     context: Context,
     scope: CoroutineScope? = null,

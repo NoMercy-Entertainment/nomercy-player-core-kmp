@@ -19,6 +19,12 @@ package tv.nomercy.player.core.ports
 //
 // Narrow on purpose. Handing an OS integration the whole player is how a lock
 // screen ends up able to change the subtitle track.
+// The member count is the contract's. These ten are what a lock screen, a car
+// head unit and a cast receiver each have to be told or asked, and six already
+// carry defaults so an actual implements only what its platform has. Splitting
+// the interface to satisfy a threshold would change every actual and every
+// consumer across the trio and the app, to say the same thing in two names.
+@Suppress("ComplexInterface")
 public interface SystemTransport {
 
     // What is playing. Called when the item changes rather than on every tick:
