@@ -51,42 +51,66 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
     override fun start(sampleRate: Int, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
         if (running.get()) return true
 
-        val coreAudio = runCatching {
-            Native.load("/System/Library/Frameworks/CoreAudio.framework/CoreAudio", CoreAudioLib::class.java)
-        }.getOrNull() ?: return false
-        val coreFoundation = runCatching {
-            Native.load(
-                "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
-                CoreFoundationLib::class.java,
-            )
-        }.getOrNull() ?: return false
-
-        if (!createAggregateDevice(coreAudio, coreFoundation)) return false
-
-        val resolvedProcId: Pointer = attachIoProc(coreAudio, channels, onFrame) ?: run {
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-        ioProcId = resolvedProcId
-
-        if (coreAudio.AudioDeviceStart(aggregateDeviceId, resolvedProcId) != 0) {
-            coreAudio.AudioDeviceDestroyIOProcID(aggregateDeviceId, resolvedProcId)
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
+        ioProcId = openDevice(channels, onFrame) ?: return false
 
         running.set(true)
         return true
     }
 
+    private class CoreAudioLibs(val audio: CoreAudioLib, val foundation: CoreFoundationLib)
+
+    private fun loadLibraries(): CoreAudioLibs? {
+        val audio = runCatching {
+            Native.load("/System/Library/Frameworks/CoreAudio.framework/CoreAudio", CoreAudioLib::class.java)
+        }.getOrNull() ?: return null
+        val foundation = runCatching {
+            Native.load(
+                "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation",
+                CoreFoundationLib::class.java,
+            )
+        }.getOrNull() ?: return null
+        return CoreAudioLibs(audio, foundation)
+    }
+
+    private fun openDevice(channels: Int, onFrame: (FloatArray, Int) -> Unit): Pointer? {
+        val libs = loadLibraries() ?: return null
+        if (!createAggregateDevice(libs.audio, libs.foundation)) return null
+        return startedIoProc(libs.audio, channels, onFrame)
+    }
+
+    // Attaches the callback and starts the device, tearing the aggregate back
+    // down if either half fails — a half-built aggregate device outlives the
+    // process that made it.
+    private fun startedIoProc(
+        coreAudio: CoreAudioLib,
+        channels: Int,
+        onFrame: (FloatArray, Int) -> Unit,
+    ): Pointer? {
+        val procId: Pointer? = attachIoProc(coreAudio, channels, onFrame)
+        if (procId == null) {
+            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
+            return null
+        }
+        if (coreAudio.AudioDeviceStart(aggregateDeviceId, procId) != 0) {
+            coreAudio.AudioDeviceDestroyIOProcID(aggregateDeviceId, procId)
+            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
+            return null
+        }
+        return procId
+    }
+
     private fun createAggregateDevice(coreAudio: CoreAudioLib, coreFoundation: CoreFoundationLib): Boolean {
-        val defaultOutputUid = defaultOutputDeviceUid(coreAudio, coreFoundation) ?: return false
-        val description = buildAggregateDescription(coreFoundation, defaultOutputUid) ?: return false
+        val description = aggregateDescription(coreAudio, coreFoundation) ?: return false
 
         val deviceIdRef = IntByReference()
         if (coreAudio.AudioHardwareCreateAggregateDevice(description, deviceIdRef) != 0) return false
         aggregateDeviceId = deviceIdRef.value
         return true
+    }
+
+    private fun aggregateDescription(coreAudio: CoreAudioLib, coreFoundation: CoreFoundationLib): Pointer? {
+        val defaultOutputUid = defaultOutputDeviceUid(coreAudio, coreFoundation) ?: return null
+        return buildAggregateDescription(coreFoundation, defaultOutputUid)
     }
 
     // The callback ABI (`AudioDeviceIOProc`) is a C function pointer taking the

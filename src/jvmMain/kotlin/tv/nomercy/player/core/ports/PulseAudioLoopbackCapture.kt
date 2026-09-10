@@ -41,8 +41,9 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     override fun start(sampleRate: Int, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
         if (running.get()) return true
 
-        val pulse = runCatching { Native.load("pulse-simple", PulseSimple::class.java) }.getOrNull() ?: return false
-        val handle = openMonitorStream(pulse, sampleRate, channels) ?: return false
+        val opened = openPulse(sampleRate, channels) ?: return false
+        val pulse = opened.library
+        val handle = opened.stream
 
         stream = handle
         running.set(true)
@@ -89,6 +90,16 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     // PulseAudio special-case syntax but does not reliably resolve through
     // every pa_simple build encountered in the wild — the sink's real name
     // does.
+    // The library and the stream opened on it. start() needs both — the stream
+    // to read and the library to read it with — and neither is any use alone,
+    // so they are obtained together or not at all.
+    private class OpenedPulse(val library: PulseSimple, val stream: Pointer)
+
+    private fun openPulse(sampleRate: Int, channels: Int): OpenedPulse? {
+        val pulse = runCatching { Native.load("pulse-simple", PulseSimple::class.java) }.getOrNull() ?: return null
+        return openMonitorStream(pulse, sampleRate, channels)?.let { handle -> OpenedPulse(pulse, handle) }
+    }
+
     // The monitor source and the stream it opens on, together — start() only
     // needs to know whether it got one.
     private fun openMonitorStream(pulse: PulseSimple, sampleRate: Int, channels: Int): Pointer? {
