@@ -68,6 +68,8 @@ jobs:
           path: |
             build/reports/
             build/test-results/
+            */build/reports/
+            */build/test-results/
           retention-days: 7
 
   # The two libraries that consume this one, compiled against this commit.
@@ -180,4 +182,6 @@ jobs:
           path: |
             build/reports/
             build/test-results/
+            */build/reports/
+            */build/test-results/
           retention-days: 7
