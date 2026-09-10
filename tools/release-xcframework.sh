@@ -13,9 +13,14 @@ set -euo pipefail
 name="${1:?usage: release-xcframework.sh <FrameworkName> <path/to/Package.swift>}"
 manifest="${2:?manifest path required}"
 here="$(cd "$(dirname "$0")/.." && pwd)"
-tag="${GITHUB_REF_NAME:?this runs on a tag}"
+# The release to attach to. GITHUB_REF_NAME is the tag on a tag push, but on a
+# workflow_dispatch it is the BRANCH the workflow ran from -- so a re-attach
+# would have uploaded to a release named "master". RELEASE_TAG says it outright.
+tag="${RELEASE_TAG:-${GITHUB_REF_NAME:?this runs on a tag}}"
 
-output="$("$here/tools/package-xcframework.sh" "$name")"
+# Through bash: this script is committed executable, and a tag cut before that
+# was true is still a tag somebody may need to re-attach a framework to.
+output="$(bash "$here/tools/package-xcframework.sh" "$name")"
 echo "$output"
 
 zip_path="$(echo "$output" | sed -n 's/^XCFRAMEWORK_ZIP=//p')"

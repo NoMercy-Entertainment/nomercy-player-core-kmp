@@ -14,8 +14,11 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to package the framework from, e.g. v0.1.0'
+        description: 'Release to attach the framework to, e.g. v0.1.0'
         required: true
+      ref:
+        description: 'Code to build from. Defaults to the tag; give a branch when the tag predates a fix in these scripts.'
+        required: false
 
 permissions:
   contents: read
@@ -167,7 +170,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          ref: ${{ github.event.inputs.ref || github.event.inputs.tag || github.ref }}
 
       - uses: actions/setup-java@v4
         with:
@@ -187,3 +190,4 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_DEFAULT_BRANCH: master
+          RELEASE_TAG: ${{ github.event.inputs.tag || github.ref_name }}
