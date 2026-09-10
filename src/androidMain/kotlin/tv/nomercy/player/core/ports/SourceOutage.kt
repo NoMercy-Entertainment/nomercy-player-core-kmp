@@ -71,7 +71,10 @@ public object SourceOutage {
      * is exactly the case a connection-failure-gated budget would cut short.
      */
     public fun isOriginDownStatus(httpStatus: Int): Boolean =
-        httpStatus in 520..530 || httpStatus == 502 || httpStatus == 503 || httpStatus == 504
+        httpStatus in CLOUDFLARE_ORIGIN_ERROR_RANGE ||
+            httpStatus == HTTP_BAD_GATEWAY ||
+            httpStatus == HTTP_SERVICE_UNAVAILABLE ||
+            httpStatus == HTTP_GATEWAY_TIMEOUT
 
     /**
      * True for the source failures that mean "the bytes are not there right
@@ -89,23 +92,58 @@ public object SourceOutage {
     }
 
     /**
+     * True for a status that means the server answered, and answered that this
+     * media does not exist.
+     *
+     * An episode that has not been encoded yet answers 404, and it will answer
+     * 404 to every retry: the file is not late, it is absent. Waiting is not a
+     * strategy for it, and the viewer is the only one who can decide what to do
+     * instead. 410 is the same answer said more firmly.
+     */
+    public fun isMediaAbsentStatus(httpStatus: Int): Boolean =
+        httpStatus == HTTP_NOT_FOUND || httpStatus == HTTP_GONE
+
+    /**
      * How many rungs this failure is allowed.
      *
      * The full ladder is for an outage: a connection that was refused, or a
      * status that says the origin is down. A bare 4xx is the server answering
      * that this file is not there.
      *
+     * A 404 gets NONE. It used to get five, which is thirty seconds of spinner
+     * on an episode that was never encoded, and at the end of it the viewer was
+     * told nothing useful — Stoney, watching exactly that: "this video is not
+     * encoded yet and should throw a 404 and skip to the next". A definite
+     * answer is worth surfacing the moment it arrives.
+     *
      * [httpStatus] is 0 when the failure carried no HTTP response.
      */
     public fun retryLimitFor(errorCode: Int, httpStatus: Int, sawConnectionFailure: Boolean): Int = when {
+        // A connection failure first means the host went away; the 404 that
+        // follows is a route table still warming up, not a missing file.
         sawConnectionFailure -> BACKOFF_MS.size
         isOriginDownStatus(httpStatus) -> BACKOFF_MS.size
+        isMediaAbsentStatus(httpStatus) -> NO_RETRIES
 
         errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS ||
             errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND -> HTTP_STATUS_RETRY_LIMIT
 
         else -> BACKOFF_MS.size
     }
+
+    /** No rung at all: the answer will not change by asking again. */
+    public const val NO_RETRIES: Int = 0
+
+    private const val HTTP_NOT_FOUND = 404
+    private const val HTTP_GONE = 410
+
+    // Cloudflare answers 52x from the EDGE when the origin behind it is not
+    // reachable — see isOriginDownStatus for why that, not a connection error,
+    // is the shape a NoMercy server restart actually takes.
+    private val CLOUDFLARE_ORIGIN_ERROR_RANGE = 520..530
+    private const val HTTP_BAD_GATEWAY = 502
+    private const val HTTP_SERVICE_UNAVAILABLE = 503
+    private const val HTTP_GATEWAY_TIMEOUT = 504
 
     /** The HTTP status Media3 gave up on, or 0 when the failure carried no response. */
     public fun httpStatusOf(error: Throwable?): Int {

@@ -46,9 +46,12 @@ class SourceOutageTest {
     }
 
     @Test
-    fun `a cold 404 fails fast, the same 404 after a refused connection rides the outage out`() {
+    fun `a cold 404 does not retry at all, the same 404 after a refused connection rides the outage out`() {
+        // Was five rungs — thirty seconds of spinner on an episode that was
+        // never encoded, ending in a message that told the viewer nothing they
+        // could act on. The server answered definitively the first time.
         assertEquals(
-            SourceOutage.HTTP_STATUS_RETRY_LIMIT,
+            SourceOutage.NO_RETRIES,
             SourceOutage.retryLimitFor(
                 PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND,
                 httpStatus = 404,
@@ -78,5 +81,55 @@ class SourceOutageTest {
     @Test
     fun `the ladder's length is the give-up budget`() {
         assertEquals(105_000L, SourceOutage.budgetMs())
+    }
+
+    @Test
+    fun `404 and 410 are the server saying the media is absent`() {
+        assertTrue(SourceOutage.isMediaAbsentStatus(404))
+        assertTrue(SourceOutage.isMediaAbsentStatus(410))
+    }
+
+    @Test
+    fun `a status that is not a definite absence is not treated as one`() {
+        // 403 and 401 are about who is asking, not whether the file exists, and
+        // 500 is the server failing rather than answering. Folding any of them
+        // into "absent" would end a session that a retry or a re-auth fixes.
+        listOf(0, 401, 403, 408, 429, 500, 502, 503, 504, 520, 530).forEach { status ->
+            assertFalse(SourceOutage.isMediaAbsentStatus(status), "$status must not read as an absent file")
+        }
+    }
+
+    @Test
+    fun `an outage status still gets the whole ladder while an absent file gets none`() {
+        // The two verdicts must not collapse into each other: a restarting
+        // server and a missing episode both arrive as a bad HTTP status, and
+        // one of them is worth waiting for.
+        val absent: Int = SourceOutage.retryLimitFor(
+            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS,
+            httpStatus = 404,
+            sawConnectionFailure = false,
+        )
+        val originDown: Int = SourceOutage.retryLimitFor(
+            PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS,
+            httpStatus = 503,
+            sawConnectionFailure = false,
+        )
+
+        assertEquals(SourceOutage.NO_RETRIES, absent)
+        assertEquals(SourceOutage.BACKOFF_MS.size, originDown)
+    }
+
+    @Test
+    fun `a 403 still gets its rungs rather than being read as a missing file`() {
+        // Our own abuse guard answers a bare 403, and that is a session worth
+        // retrying, not an episode to skip past.
+        assertEquals(
+            SourceOutage.HTTP_STATUS_RETRY_LIMIT,
+            SourceOutage.retryLimitFor(
+                PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS,
+                httpStatus = 403,
+                sawConnectionFailure = false,
+            ),
+        )
     }
 }
