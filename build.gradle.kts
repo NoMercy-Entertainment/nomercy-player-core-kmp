@@ -183,7 +183,7 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
     // fails as "Cannot run program gh ... No such file or directory". The
     // workflow already calls brew by absolute path and the payload script
     // already looks for gtar this way; this is the third tool in the same
-    // situation and the last one that assumed PATH.
+    // situation. Docker below was the fourth, found the same way.
     val ghExecutable: String = run {
         val candidates: List<String> = listOfNotNull(
             System.getenv("NOMERCY_GH"),
@@ -215,9 +215,38 @@ val bundleNativePayloads: TaskProvider<Task> = tasks.register("bundleNativePaylo
     // Through providers.exec rather than ProcessBuilder: the configuration
     // cache refuses an external process started at configuration time outright,
     // and the refusal is a build failure rather than a warning.
-    val dockerServesLinux: Boolean = try {
+    //
+    // Located before it is asked anything, for the same reason bash, gh and
+    // gtar are: a launchd-started runner inherits no login shell, so Docker
+    // Desktop's CLI is not on its PATH. The catch below cannot cover that. A
+    // value source that fails to START is recorded as a configuration cache
+    // PROBLEM, and the build fails when the cache is stored, long after every
+    // task has passed — measured on the macOS release runner, where 346 tasks
+    // succeeded and the release still failed on "A problem occurred starting
+    // process 'command 'docker''".
+    //
+    // Still `docker info` and not a file check alone: the binary being present
+    // says nothing about a daemon answering, which is the thing that decides
+    // whether a Linux container can run.
+    val dockerExecutable: String? = run {
+        val explicit: List<String> = listOfNotNull(
+            System.getenv("NOMERCY_DOCKER"),
+            "/opt/homebrew/bin/docker",
+            "/usr/local/bin/docker",
+            "/usr/bin/docker",
+            "C:/Program Files/Docker/Docker/resources/bin/docker.exe",
+        )
+        val onPath: List<String> = System.getenv("PATH").orEmpty()
+            .split(JavaFile.pathSeparatorChar)
+            .filter { entry -> entry.isNotBlank() }
+            .flatMap { dir -> listOf("$dir/docker", "$dir/docker.exe") }
+
+        (explicit + onPath).firstOrNull { path -> JavaFile(path).isFile }
+    }
+
+    val dockerServesLinux: Boolean = dockerExecutable != null && try {
         val probe = providers.exec {
-            commandLine("docker", "info", "--format", "{{.OSType}}")
+            commandLine(dockerExecutable, "info", "--format", "{{.OSType}}")
             isIgnoreExitValue = true
         }
         probe.result.get().exitValue == 0 &&
