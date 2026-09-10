@@ -4,6 +4,19 @@ on:
   push:
     tags: ['v*']
 
+  # Re-attach the framework to a tag that already published.
+  #
+  # A release step you cannot retry is a bad release step. core's v0.1.0
+  # uploaded to Maven Central and then this job failed on a permission bit, and
+  # the only way to retry it was to move the tag -- which would have re-uploaded
+  # the bundle and left two drafts of one version in the Portal. This runs the
+  # packaging alone, against a tag that already exists.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to package the framework from, e.g. v0.1.0'
+        required: true
+
 permissions:
   contents: read
 
@@ -28,6 +41,8 @@ jobs:
   # every declared target, and the Apple frameworks can only be linked here.
   # Publishing from Linux would silently ship an artifact with no Apple variants.
   publish:
+    # Only a tag push publishes. A dispatch is here to redo the framework.
+    if: github.event_name == 'push'
     runs-on: [self-hosted, macOS, ARM64, xcode]
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
@@ -142,6 +157,7 @@ jobs:
   # artifacts nobody can see yet failed to publish.
   xcframework:
     needs: publish
+    if: always() && (needs.publish.result == 'success' || needs.publish.result == 'skipped')
     runs-on: [self-hosted, macOS, ARM64, xcode]
     permissions:
       contents: write
@@ -150,6 +166,8 @@ jobs:
       GRADLE_OPTS: -Dorg.gradle.daemon=false
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - uses: actions/setup-java@v4
         with:
