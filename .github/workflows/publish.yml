@@ -44,6 +44,22 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # Chrome, because `build` runs the Kotlin/Wasm browser tests through karma
+      # and this Mac has no browser on the runner's PATH. Without it the task
+      # discovers zero tests and Gradle fails the build with "test sources
+      # present ... did not discover any tests to execute" — which reads as a
+      # misconfigured suite rather than a machine with no browser.
+      #
+      # ci.yml already does this on Linux. Nothing did it here, because no CI
+      # job ever ran a full `build` on macOS: the apple job runs the simulator
+      # suites, and the wasm target only meets this runner during a release.
+      - uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+
+      # Karma looks the browser up by this variable rather than by PATH.
+      - name: Point karma at that Chrome
+        run: echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+
       # The tag is the source of truth for what gets published. A tag that does
       # not match VERSION_NAME would publish a version nobody asked for, under a
       # name nobody can find.
