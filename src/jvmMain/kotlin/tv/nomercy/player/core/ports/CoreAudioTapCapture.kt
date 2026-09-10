@@ -6,6 +6,13 @@
 //  SPDX-License-Identifier: Apache-2.0
 // -----------------------------------------------------------------------------
 
+// JNA resolves a native function by its symbol NAME, so every binding below has
+// to spell the CoreAudio symbol exactly — AudioObjectGetPropertyData, not
+// audioObjectGetPropertyData. Renaming them to satisfy Kotlin's convention
+// would not be a style change, it would stop the symbols resolving at runtime.
+// The same holds for the k-prefixed CoreAudio selector constants.
+@file:Suppress("FunctionNaming", "TopLevelPropertyNaming")
+
 package tv.nomercy.player.core.ports
 
 import com.sun.jna.Library

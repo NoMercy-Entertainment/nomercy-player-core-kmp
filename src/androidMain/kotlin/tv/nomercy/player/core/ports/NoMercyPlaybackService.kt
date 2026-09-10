@@ -133,11 +133,12 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // already current. So this asks whether Media3 got there first and stays
     // out of the way when it did.
     private val promoteIfMedia3HasNot: Runnable = Runnable {
-        if (media3HasPosted()) return@Runnable
-        runCatching { startForeground(STARTUP_NOTIFICATION_ID, startupNotification()) }
-        // Media3 promotes onto its own id once the source finally opens; this
-        // placeholder is then just a second notification nobody asked for.
-        mainHandler.postDelayed(retireePlaceholder, HANDOVER_POLL_MS)
+        if (!media3HasPosted()) {
+            runCatching { startForeground(STARTUP_NOTIFICATION_ID, startupNotification()) }
+            // Media3 promotes onto its own id once the source finally opens; this
+            // placeholder is then just a second notification nobody asked for.
+            mainHandler.postDelayed(retireePlaceholder, HANDOVER_POLL_MS)
+        }
     }
 
     private val retireePlaceholder: Runnable = object : Runnable {

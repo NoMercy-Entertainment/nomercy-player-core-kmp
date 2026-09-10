@@ -26,13 +26,22 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
         GraphicsEnvironment.getLocalGraphicsEnvironment().defaultScreenDevice.displayMode
     }.getOrNull()
 
-    val maxWidth: Int = bounds?.let { mode -> DecodeResolution.clamp(maxOf(mode.width, mode.height)) } ?: DecodeResolution.UHD
-    val maxHeight: Int = bounds?.let { mode -> DecodeResolution.clamp(minOf(mode.width, mode.height)) } ?: DecodeResolution.UHD
+    val maxWidth: Int = bounds
+        ?.let { mode -> DecodeResolution.clamp(maxOf(mode.width, mode.height)) }
+        ?: DecodeResolution.UHD
+    val maxHeight: Int = bounds
+        ?.let { mode -> DecodeResolution.clamp(minOf(mode.width, mode.height)) }
+        ?: DecodeResolution.UHD
 
     // libmpv tone-maps whatever it opens rather than gating on it, so every
     // format and profile this list names is a ceiling ffmpeg clears, not a
     // hardware answer the way the Android/Apple actuals give one.
-    val allHdrFormats: List<String> = listOf(HdrFormat.HDR10, HdrFormat.HDR10_PLUS, HdrFormat.DOLBY_VISION, HdrFormat.HLG)
+    val allHdrFormats: List<String> = listOf(
+        HdrFormat.HDR10,
+        HdrFormat.HDR10_PLUS,
+        HdrFormat.DOLBY_VISION,
+        HdrFormat.HLG,
+    )
 
     fun video(codec: String, profiles: List<String>): VideoCodecCapability = VideoCodecCapability(
         codec = codec,

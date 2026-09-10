@@ -6,6 +6,12 @@
 //  SPDX-License-Identifier: Apache-2.0
 // -----------------------------------------------------------------------------
 
+// JNA resolves a native function by its symbol NAME, so the bindings below have
+// to spell the PulseAudio symbols exactly — pa_simple_new, not paSimpleNew.
+// Renaming them to satisfy Kotlin's convention would stop them resolving at
+// runtime.
+@file:Suppress("FunctionNaming")
+
 package tv.nomercy.player.core.ports
 
 import com.sun.jna.Library

@@ -126,8 +126,16 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
             codec = codec,
             profiles = profileNamesFor(mime, codec),
             maxBitDepth = bitDepth,
-            maxWidth = if (software) DecodeResolution.UHD else videoCaps?.supportedWidths?.upper?.let(DecodeResolution::clamp) ?: maxWidth,
-            maxHeight = if (software) DecodeResolution.UHD else videoCaps?.supportedHeights?.upper?.let(DecodeResolution::clamp) ?: maxHeight,
+            maxWidth = if (software) {
+                DecodeResolution.UHD
+            } else {
+                videoCaps?.supportedWidths?.upper?.let(DecodeResolution::clamp) ?: maxWidth
+            },
+            maxHeight = if (software) {
+                DecodeResolution.UHD
+            } else {
+                videoCaps?.supportedHeights?.upper?.let(DecodeResolution::clamp) ?: maxHeight
+            },
             maxFramerate = if (software) {
                 60
             } else {
@@ -162,7 +170,9 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
     val audio: List<AudioCodecCapability> = AUDIO_MIME_TYPES.mapNotNull { (mime, codec) ->
         val decode: Boolean = supports(mime)
         val passthrough: Boolean = AUDIO_PASSTHROUGH_ENCODING[codec]
-            ?.let { encoding -> Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && passthroughSupported(encoding) }
+            ?.let { encoding ->
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && passthroughSupported(encoding)
+            }
             ?: false
         if (!decode && !passthrough) return@mapNotNull null
 
@@ -191,7 +201,8 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
         } else {
             listOf(DecodeContainer.HLS, DecodeContainer.MP4, DecodeContainer.DASH, DecodeContainer.TS)
         },
-        supportsHdr = displayHdrFormats().isNotEmpty() || supports(MediaFormat.MIMETYPE_VIDEO_HEVC, CodecProfileLevel.HEVCProfileMain10),
+        supportsHdr = displayHdrFormats().isNotEmpty() ||
+            supports(MediaFormat.MIMETYPE_VIDEO_HEVC, CodecProfileLevel.HEVCProfileMain10),
         // No client-imposed cap, for the reason web gives: the server hard-
         // transcodes above this, and a guess forces transcoding of compatible
         // files over a LAN.
