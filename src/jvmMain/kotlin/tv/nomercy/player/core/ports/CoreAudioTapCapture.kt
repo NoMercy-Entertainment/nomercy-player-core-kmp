@@ -61,23 +61,48 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
             )
         }.getOrNull() ?: return false
 
+        if (!createAggregateDevice(coreAudio, coreFoundation)) return false
+
+        val resolvedProcId: Pointer = attachIoProc(coreAudio, channels, onFrame) ?: run {
+            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
+            return false
+        }
+        ioProcId = resolvedProcId
+
+        if (coreAudio.AudioDeviceStart(aggregateDeviceId, resolvedProcId) != 0) {
+            coreAudio.AudioDeviceDestroyIOProcID(aggregateDeviceId, resolvedProcId)
+            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
+            return false
+        }
+
+        running.set(true)
+        return true
+    }
+
+    private fun createAggregateDevice(coreAudio: CoreAudioLib, coreFoundation: CoreFoundationLib): Boolean {
         val defaultOutputUid = defaultOutputDeviceUid(coreAudio, coreFoundation) ?: return false
         val description = buildAggregateDescription(coreFoundation, defaultOutputUid) ?: return false
 
         val deviceIdRef = IntByReference()
-        val created = coreAudio.AudioHardwareCreateAggregateDevice(description, deviceIdRef)
-        if (created != 0) return false
+        if (coreAudio.AudioHardwareCreateAggregateDevice(description, deviceIdRef) != 0) return false
         aggregateDeviceId = deviceIdRef.value
+        return true
+    }
 
-        // The callback ABI (`AudioDeviceIOProc`) is a C function pointer
-        // taking the raw `AudioBufferList*` CoreAudio hands the process every
-        // render cycle — that pointer, and the frame count implied by its
-        // byte length at the negotiated sample rate/channel count, is the
-        // whole of what reaches [onFrame]. No format negotiation is
-        // attempted beyond what [buildAggregateDescription] requested;
-        // CoreAudio may still hand back its own hardware rate, in which
-        // case the caller receives frames at a different rate than it asked
-        // for. Unresolved here — needs a real device to observe.
+    // The callback ABI (`AudioDeviceIOProc`) is a C function pointer taking the
+    // raw `AudioBufferList*` CoreAudio hands the process every render cycle —
+    // that pointer, and the frame count implied by its byte length at the
+    // negotiated sample rate/channel count, is the whole of what reaches
+    // [onFrame]. No format negotiation is attempted beyond what
+    // [buildAggregateDescription] requested; CoreAudio may still hand back its
+    // own hardware rate, in which case the caller receives frames at a
+    // different rate than it asked for. Unresolved here — needs a real device
+    // to observe.
+    private fun attachIoProc(
+        coreAudio: CoreAudioLib,
+        channels: Int,
+        onFrame: (FloatArray, Int) -> Unit,
+    ): Pointer? {
         val procId = PointerByReference()
         val procCreated = coreAudio.AudioDeviceCreateIOProcID(
             aggregateDeviceId,
@@ -92,25 +117,8 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
             null,
             procId,
         )
-        val resolvedProcId: Pointer = procId.value ?: run {
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-        if (procCreated != 0) {
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-        ioProcId = resolvedProcId
-
-        val started = coreAudio.AudioDeviceStart(aggregateDeviceId, resolvedProcId)
-        if (started != 0) {
-            coreAudio.AudioDeviceDestroyIOProcID(aggregateDeviceId, resolvedProcId)
-            coreAudio.AudioHardwareDestroyAggregateDevice(aggregateDeviceId)
-            return false
-        }
-
-        running.set(true)
-        return true
+        if (procCreated != 0) return null
+        return procId.value
     }
 
     override fun stop() {

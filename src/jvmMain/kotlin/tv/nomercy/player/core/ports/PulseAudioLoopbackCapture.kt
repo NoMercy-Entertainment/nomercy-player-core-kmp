@@ -42,18 +42,7 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
         if (running.get()) return true
 
         val pulse = runCatching { Native.load("pulse-simple", PulseSimple::class.java) }.getOrNull() ?: return false
-        val monitorSource = defaultMonitorSourceName() ?: return false
-
-        val spec = PaSampleSpec().apply {
-            format = PA_SAMPLE_FLOAT32LE
-            rate = sampleRate
-            this.channels = channels.toByte()
-        }
-        val error = IntByReference()
-        val handle = pulse.pa_simple_new(
-            null, STREAM_NAME, PA_STREAM_RECORD, monitorSource, STREAM_NAME, spec, null, null, error,
-        )
-        if (handle == null) return false
+        val handle = openMonitorStream(pulse, sampleRate, channels) ?: return false
 
         stream = handle
         running.set(true)
@@ -100,6 +89,21 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
     // PulseAudio special-case syntax but does not reliably resolve through
     // every pa_simple build encountered in the wild — the sink's real name
     // does.
+    // The monitor source and the stream it opens on, together — start() only
+    // needs to know whether it got one.
+    private fun openMonitorStream(pulse: PulseSimple, sampleRate: Int, channels: Int): Pointer? {
+        val monitorSource = defaultMonitorSourceName() ?: return null
+        val spec = PaSampleSpec().apply {
+            format = PA_SAMPLE_FLOAT32LE
+            rate = sampleRate
+            this.channels = channels.toByte()
+        }
+        val error = IntByReference()
+        return pulse.pa_simple_new(
+            null, STREAM_NAME, PA_STREAM_RECORD, monitorSource, STREAM_NAME, spec, null, null, error,
+        )
+    }
+
     private fun defaultMonitorSourceName(): String? = runCatching {
         val process = ProcessBuilder("pactl", "get-default-sink").redirectErrorStream(true).start()
         val sinkName = process.inputStream.bufferedReader().readText().trim()

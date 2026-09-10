@@ -79,10 +79,15 @@ private const val EIGHT_BIT_DEPTH: Int = 8
 // but not Dolby Vision names only HLG rather than losing that to a single
 // flag.
 private val HDR_PROBES: List<Pair<String, String>> = listOf(
-    """video/mp4; codecs="hvc1.2.4.L120.B0"""" to HdrFormat.HDR10,
-    """video/mp4; codecs="dvh1.05.06"""" to HdrFormat.DOLBY_VISION,
-    """video/mp4; codecs="hvc1.2.20.L120.B0"""" to HdrFormat.HLG,
+    mp4Codec("hvc1.2.4.L120.B0") to HdrFormat.HDR10,
+    mp4Codec("dvh1.05.06") to HdrFormat.DOLBY_VISION,
+    mp4Codec("hvc1.2.20.L120.B0") to HdrFormat.HLG,
 )
+
+// The container/codecs MIME shape AVFoundation is probed with, written once.
+private fun mp4Codec(spec: String): String = """video/mp4; codecs="$spec""""
+
+private fun mp4Audio(spec: String): String = """audio/mp4; codecs="$spec""""
 
 private class CodecProbe(
     val codec: String,
@@ -97,40 +102,40 @@ private val VIDEO_CODEC_PROBES: List<CodecProbe> = listOf(
     CodecProbe(
         codec = DecodeCodec.H264,
         profiles = listOf(
-            """video/mp4; codecs="avc1.42E01E"""" to VideoProfileName.BASELINE,
-            """video/mp4; codecs="avc1.4D401E"""" to VideoProfileName.MAIN,
-            """video/mp4; codecs="avc1.640028"""" to VideoProfileName.HIGH,
-            """video/mp4; codecs="avc1.6E0033"""" to VideoProfileName.HIGH10,
+            mp4Codec("avc1.42E01E") to VideoProfileName.BASELINE,
+            mp4Codec("avc1.4D401E") to VideoProfileName.MAIN,
+            mp4Codec("avc1.640028") to VideoProfileName.HIGH,
+            mp4Codec("avc1.6E0033") to VideoProfileName.HIGH10,
         ),
-        tenBitProbes = listOf("""video/mp4; codecs="avc1.6E0033""""),
+        tenBitProbes = listOf(mp4Codec("avc1.6E0033")),
     ),
     CodecProbe(
         codec = DecodeCodec.H265,
         profiles = listOf(
-            """video/mp4; codecs="hvc1.1.6.L150.B0"""" to VideoProfileName.MAIN,
-            """video/mp4; codecs="hvc1.2.4.L120.B0"""" to VideoProfileName.MAIN10,
-            """video/mp4; codecs="hev1.2.4.L120.B0"""" to VideoProfileName.MAIN10,
+            mp4Codec("hvc1.1.6.L150.B0") to VideoProfileName.MAIN,
+            mp4Codec("hvc1.2.4.L120.B0") to VideoProfileName.MAIN10,
+            mp4Codec("hev1.2.4.L120.B0") to VideoProfileName.MAIN10,
         ),
         tenBitProbes = listOf(
-            """video/mp4; codecs="hvc1.2.4.L120.B0"""",
-            """video/mp4; codecs="hev1.2.4.L120.B0"""",
+            mp4Codec("hvc1.2.4.L120.B0"),
+            mp4Codec("hev1.2.4.L120.B0"),
         ),
     ),
     CodecProbe(
         codec = DecodeCodec.AV1,
         profiles = listOf(
-            """video/mp4; codecs="av01.0.05M.08"""" to VideoProfileName.MAIN,
-            """video/mp4; codecs="av01.0.08M.10"""" to VideoProfileName.MAIN10,
+            mp4Codec("av01.0.05M.08") to VideoProfileName.MAIN,
+            mp4Codec("av01.0.08M.10") to VideoProfileName.MAIN10,
         ),
-        tenBitProbes = listOf("""video/mp4; codecs="av01.0.08M.10""""),
+        tenBitProbes = listOf(mp4Codec("av01.0.08M.10")),
     ),
 )
 
 private val AUDIO_PROBES: List<Pair<String, String>> = listOf(
-    """audio/mp4; codecs="mp4a.40.2"""" to DecodeCodec.AAC,
-    """audio/mp4; codecs="ec-3"""" to DecodeCodec.EAC3,
-    """audio/mp4; codecs="ac-3"""" to DecodeCodec.AC3,
-    """audio/mp4; codecs="fLaC"""" to DecodeCodec.FLAC,
-    """audio/mp4; codecs="Opus"""" to DecodeCodec.OPUS,
+    mp4Audio("mp4a.40.2") to DecodeCodec.AAC,
+    mp4Audio("ec-3") to DecodeCodec.EAC3,
+    mp4Audio("ac-3") to DecodeCodec.AC3,
+    mp4Audio("fLaC") to DecodeCodec.FLAC,
+    mp4Audio("Opus") to DecodeCodec.OPUS,
     """audio/mpeg""" to DecodeCodec.MP3,
 )
