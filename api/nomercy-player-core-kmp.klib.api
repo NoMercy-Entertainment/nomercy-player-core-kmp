@@ -1510,6 +1510,7 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     open fun buffered(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.buffered|buffered(){}[0]
     open fun bufferedRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.bufferedRanges|bufferedRanges(){}[0]
     open fun externalPlayback(): tv.nomercy.player.core.ports/ExternalPlayback? // tv.nomercy.player.core.ports/MediaBackend.externalPlayback|externalPlayback(){}[0]
+    open fun prefetchAt(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.prefetchAt|prefetchAt(kotlin.Double){}[0]
     open fun seekableRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.seekableRanges|seekableRanges(){}[0]
 }
 
