@@ -94,6 +94,12 @@ public interface MediaBackend {
     // wait on the network. A backend with nowhere to keep it does nothing.
     public fun prefetchAt(seconds: Double) {}
 
+    // Prepare a seek to [seconds] ahead of time, so the seek shows its first frame
+    // at once. [isPrerolled] says whether that preparation finished.
+    public fun prerollAt(seconds: Double) {}
+
+    public fun isPrerolled(seconds: Double): Boolean = false
+
     public fun state(): BackendState
 
     public fun on(event: String, fn: (Any?) -> Unit)
