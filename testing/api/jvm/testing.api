@@ -88,6 +88,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
+	public fun prefetchAt (D)V
 	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setBufferedValue (D)V
@@ -219,6 +220,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
+	public fun prefetchAt (D)V
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;

@@ -90,6 +90,10 @@ public interface MediaBackend {
      */
     public fun bandwidthEstimate(): Int = 0
 
+    // Fetch what a seek to [seconds] will read, before the seek, so it does not
+    // wait on the network. A backend with nowhere to keep it does nothing.
+    public fun prefetchAt(seconds: Double) {}
+
     public fun state(): BackendState
 
     public fun on(event: String, fn: (Any?) -> Unit)

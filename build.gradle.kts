@@ -625,6 +625,9 @@ kotlin {
             // can sit in front of it. Media3's default source has no place to
             // put an interceptor.
             implementation(libs.androidx.media3.datasource.okhttp)
+            // Read by the seek prefetch, which finds a target's segments in the
+            // playlists the engine already loaded.
+            implementation(libs.androidx.media3.exoplayer.hls)
             implementation(libs.okhttp)
             implementation(libs.kotlinx.coroutines.android)
         }

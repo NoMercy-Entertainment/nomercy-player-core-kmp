@@ -121,6 +121,7 @@ internal fun buildEngine(
     }
 
     applySelectorParameters(selector, displaySize, renderers)
+    val prefetcher = SeekPrefetcher(context, dataSourceFactory(context, auth, onVariants))
 
     val player: ExoPlayer = ExoPlayer.Builder(context)
         .setLooper(Looper.getMainLooper())
@@ -128,7 +129,7 @@ internal fun buildEngine(
         .setTrackSelector(selector)
         .setMediaSourceFactory(
             DefaultMediaSourceFactory(
-                dataSourceFactory(context, auth, onVariants),
+                prefetcher.playback,
                 DefaultExtractorsFactory(),
             ).setLoadErrorHandlingPolicy(
                 // processor is only ever given to the audio engine (this
@@ -172,7 +173,7 @@ internal fun buildEngine(
         )
         .build()
 
-    return ExoEngine(player = player, renderers = renderers)
+    return ExoEngine(player = player, renderers = renderers, prefetcher = prefetcher)
 }
 
 // The renderers factory with the equaliser spliced into its sink.

@@ -6398,6 +6398,7 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun buffered (Ltv/nomercy/player/core/ports/AudioBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/AudioBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
+	public static fun prefetchAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 }
 
@@ -7391,6 +7392,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun playbackRate ()D
 	public abstract fun playbackRate (D)V
+	public fun prefetchAt (D)V
 	public abstract fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public abstract fun state ()Ltv/nomercy/player/core/ports/BackendState;
@@ -7406,6 +7408,7 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/MediaBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun prefetchAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
@@ -7500,6 +7503,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
+	public fun prefetchAt (D)V
 	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun release ()V
 	public fun secondaryGain ()F
@@ -7569,6 +7573,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
 	public fun playbackRate (D)V
+	public fun prefetchAt (D)V
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
@@ -8585,6 +8590,7 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/VideoBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
+	public static fun prefetchAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
 	public static fun surfaceSize (Ltv/nomercy/player/core/ports/VideoBackend;II)V
 }

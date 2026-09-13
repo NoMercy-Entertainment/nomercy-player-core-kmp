@@ -24,6 +24,7 @@ import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.hls.HlsManifest
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -689,6 +690,7 @@ public class ExoPlayerVideoBackend(
         // HLS episode change. The subsequent play(opts) call re-arms it once
         // the new item is actually ready.
         player.playWhenReady = false
+        engine.prefetcher.forget()
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
         refusedAsUnplayable = false
@@ -1077,7 +1079,16 @@ public class ExoPlayerVideoBackend(
         stopTicking()
         resetOutageLadder()
         releaseNetworkCallback()
+        engine.prefetcher.release()
         player.release()
+    }
+
+    override fun prefetchAt(seconds: Double): Unit = fireAndForget {
+        val manifest: HlsManifest = player.currentManifest as? HlsManifest ?: return@fireAndForget
+        val audio: Format? = player.currentTracks.groups
+            .firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.isSelected }
+            ?.let { group -> (0 until group.length).firstOrNull(group::isTrackSelected)?.let(group::getTrackFormat) }
+        engine.prefetcher.prefetch(manifest, audio?.id, audio?.language, seconds)
     }
 
     private fun startTicking() {

@@ -20,4 +20,5 @@ import androidx.media3.exoplayer.ExoPlayer
 internal class ExoEngine(
     val player: ExoPlayer,
     val renderers: AudioPassthroughRenderersFactory,
+    val prefetcher: SeekPrefetcher,
 )
