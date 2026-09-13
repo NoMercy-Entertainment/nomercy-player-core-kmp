@@ -261,11 +261,11 @@ public class ExoPlayerVideoBackend(
 
     // A second engine that decodes to where a known seek will land, off screen, so the
     // seek becomes a swap instead of a decode from the segment's keyframe.
-    private var standby: ExoEngine? = null
-    private var standbySelector: DefaultTrackSelector? = null
+    private var standby: StandbyEngine? = null
     private var standbyTargetMs: Long? = null
     private var standbyReady: Boolean = false
-    private var standbyOutput: ImageReader? = null
+
+    private class StandbyEngine(val engine: ExoEngine, val selector: DefaultTrackSelector, val output: ImageReader)
 
     private val standbyListener: Player.Listener = object : Player.Listener {
         override fun onPlaybackStateChanged(state: Int) {
@@ -836,28 +836,35 @@ public class ExoPlayerVideoBackend(
     override fun currentTime(): Double = cachedTime
 
     override fun currentTime(seconds: Double): Unit = fireAndForget {
-        val targetMs: Long = (seconds * MILLIS_PER_SECOND).toLong()
-        if (swapToStandby(targetMs)) return@fireAndForget
+        seekOrSwap((seconds * MILLIS_PER_SECOND).toLong())
+    }
+
+    private fun seekOrSwap(targetMs: Long) {
+        if (swapToStandby(targetMs)) return
         discardStandby()
         player.seekTo(targetMs)
     }
 
     override fun prerollAt(seconds: Double): Unit = fireAndForget {
-        val item: MediaItem = player.currentMediaItem ?: return@fireAndForget
-        val targetMs: Long = (seconds * MILLIS_PER_SECOND).toLong()
-        if (standbyTargetMs == targetMs) return@fireAndForget
+        preroll((seconds * MILLIS_PER_SECOND).toLong())
+    }
 
-        val next: ExoEngine = standby ?: buildStandby() ?: return@fireAndForget
-        val output: ImageReader = standbyOutput ?: return@fireAndForget
-        standbySelector?.parameters = trackSelector.parameters
-        next.renderers.requestSdrToneMap = engine.renderers.requestSdrToneMap
-        next.player.trackSelectionParameters = player.trackSelectionParameters
-        next.player.volume = player.volume
-        next.player.setPlaybackSpeed(player.playbackParameters.speed)
-        next.player.setVideoSurface(output.surface)
-        next.player.playWhenReady = false
-        next.player.setMediaItem(item, targetMs)
-        next.player.prepare()
+    private fun preroll(targetMs: Long) {
+        val item: MediaItem = player.currentMediaItem ?: return
+        if (standbyTargetMs == targetMs) return
+        val next: StandbyEngine = standby ?: buildStandby() ?: return
+
+        next.selector.parameters = trackSelector.parameters
+        next.engine.renderers.requestSdrToneMap = engine.renderers.requestSdrToneMap
+        with(next.engine.player) {
+            trackSelectionParameters = player.trackSelectionParameters
+            volume = player.volume
+            setPlaybackSpeed(player.playbackParameters.speed)
+            setVideoSurface(next.output.surface)
+            playWhenReady = false
+            setMediaItem(item, targetMs)
+            prepare()
+        }
         standbyTargetMs = targetMs
         standbyReady = false
     }
@@ -865,45 +872,44 @@ public class ExoPlayerVideoBackend(
     override fun isPrerolled(seconds: Double): Boolean =
         standbyReady && StandbySwap.matches(standbyTargetMs, (seconds * MILLIS_PER_SECOND).toLong())
 
-    private fun buildStandby(): ExoEngine? = runCatching {
+    private fun buildStandby(): StandbyEngine? = runCatching {
         val selector: DefaultTrackSelector = newTrackSelector(androidContext)
-        val next: ExoEngine = newEngine(selector)
         val output: ImageReader = ImageReader.newInstance(
             STANDBY_OUTPUT_SIZE,
             STANDBY_OUTPUT_SIZE,
             ImageFormat.PRIVATE,
             STANDBY_OUTPUT_IMAGES,
         )
-        output.setOnImageAvailableListener({ reader -> reader.acquireLatestImage()?.close() }, Handler(Looper.getMainLooper()))
-        next.player.addListener(standbyListener)
-        standby = next
-        standbySelector = selector
-        standbyOutput = output
-        next
+        output.setOnImageAvailableListener(
+            { reader -> reader.acquireLatestImage()?.close() },
+            Handler(Looper.getMainLooper()),
+        )
+        StandbyEngine(newEngine(selector), selector, output).also { built ->
+            built.engine.player.addListener(standbyListener)
+            standby = built
+        }
     }.onFailure { Log.w(LOG_TAG, "no second engine on this device: ${it.message}") }.getOrNull()
 
     private fun swapToStandby(targetMs: Long): Boolean {
-        val next: ExoEngine = standby ?: return false
-        val selector: DefaultTrackSelector = standbySelector ?: return false
+        val next: StandbyEngine = standby ?: return false
         if (!standbyReady || !StandbySwap.matches(standbyTargetMs, targetMs)) return false
 
         val previous: ExoEngine = engine
         val playWhenReady: Boolean = player.playWhenReady
         previous.player.removeListener(engineListener)
-        next.player.removeListener(standbyListener)
+        next.engine.player.removeListener(standbyListener)
         previous.player.addListener(standbyListener)
-        next.player.addListener(engineListener)
+        next.engine.player.addListener(engineListener)
 
-        standby = previous
-        standbySelector = trackSelector
-        engine = next
-        trackSelector = selector
-        player = next.player
+        standby = StandbyEngine(previous, trackSelector, next.output)
+        engine = next.engine
+        trackSelector = next.selector
+        player = next.engine.player
         standbyTargetMs = null
         standbyReady = false
 
-        next.player.playWhenReady = playWhenReady
-        active.value = next.player
+        player.playWhenReady = playWhenReady
+        active.value = player
         previous.player.stop()
         announceCues(emptyList())
         Log.i(LOG_TAG, "seek to ${targetMs}ms swapped to the pre-rolled engine")
@@ -914,7 +920,7 @@ public class ExoPlayerVideoBackend(
         if (standbyTargetMs == null) return
         standbyTargetMs = null
         standbyReady = false
-        standby?.player?.stop()
+        standby?.engine?.player?.stop()
     }
 
     override fun duration(): Double = cachedDuration
@@ -1198,13 +1204,15 @@ public class ExoPlayerVideoBackend(
         releaseNetworkCallback()
         engine.prefetcher.release()
         player.release()
-        standby?.prefetcher?.release()
-        standby?.player?.release()
-        standbyOutput?.close()
+        standby?.engine?.prefetcher?.release()
+        standby?.engine?.player?.release()
+        standby?.output?.close()
     }
 
-    override fun prefetchAt(seconds: Double): Unit = fireAndForget {
-        val manifest: HlsManifest = player.currentManifest as? HlsManifest ?: return@fireAndForget
+    override fun prefetchAt(seconds: Double): Unit = fireAndForget { prefetch(seconds) }
+
+    private fun prefetch(seconds: Double) {
+        val manifest: HlsManifest = player.currentManifest as? HlsManifest ?: return
         val audio: Format? = player.currentTracks.groups
             .firstOrNull { it.type == C.TRACK_TYPE_AUDIO && it.isSelected }
             ?.let { group -> (0 until group.length).firstOrNull(group::isTrackSelected)?.let(group::getTrackFormat) }

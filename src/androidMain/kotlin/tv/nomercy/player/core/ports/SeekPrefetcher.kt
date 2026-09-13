@@ -102,7 +102,8 @@ internal class SeekPrefetcher(context: Context, private val upstream: DataSource
     private fun specsNear(playlist: HlsMediaPlaylist, fromUs: Long): List<DataSpec> {
         val spans: List<SegmentSpan> = playlist.segments.map { SegmentSpan(it.relativeStartTimeUs, it.durationUs) }
         return segmentsCovering(spans, fromUs, WINDOW_US)
-            .flatMap { index -> listOfNotNull(playlist.segments[index].initializationSegment, playlist.segments[index]) }
+            .map { index -> playlist.segments[index] }
+            .flatMap { segment -> listOfNotNull(segment.initializationSegment, segment) }
             .distinct()
             .map { segment -> specOf(playlist.baseUri, segment) }
     }
