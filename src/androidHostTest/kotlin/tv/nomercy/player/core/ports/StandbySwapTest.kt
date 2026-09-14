@@ -55,6 +55,11 @@ class StandbySwapTest {
     }
 
     @Test
+    fun aSeekToTheEndWithNothingPrerolledStillSeeks() {
+        assertFalse(StandbySwap.endsIntoNextSource(null, EPISODE_ONE, 1_506_000L, 1_506_088L))
+    }
+
+    @Test
     fun aStandbyForThisEpisodeDoesNotEndIt() {
         assertFalse(StandbySwap.endsIntoNextSource(EPISODE_ONE, EPISODE_ONE, 1_506_000L, 1_506_088L))
     }
