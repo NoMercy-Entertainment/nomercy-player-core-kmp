@@ -1511,8 +1511,10 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     open fun bufferedRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.bufferedRanges|bufferedRanges(){}[0]
     open fun externalPlayback(): tv.nomercy.player.core.ports/ExternalPlayback? // tv.nomercy.player.core.ports/MediaBackend.externalPlayback|externalPlayback(){}[0]
     open fun isPrerolled(kotlin/Double): kotlin/Boolean // tv.nomercy.player.core.ports/MediaBackend.isPrerolled|isPrerolled(kotlin.Double){}[0]
+    open fun isSourcePrerolled(kotlin/String, tv.nomercy.player.core.ports/LoadOptions): kotlin/Boolean // tv.nomercy.player.core.ports/MediaBackend.isSourcePrerolled|isSourcePrerolled(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
     open fun prefetchAt(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.prefetchAt|prefetchAt(kotlin.Double){}[0]
     open fun prerollAt(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.prerollAt|prerollAt(kotlin.Double){}[0]
+    open fun prerollSource(kotlin/String, tv.nomercy.player.core.ports/LoadOptions) // tv.nomercy.player.core.ports/MediaBackend.prerollSource|prerollSource(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
     open fun seekableRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.seekableRanges|seekableRanges(){}[0]
 }
 
@@ -3083,6 +3085,8 @@ final class tv.nomercy.player.core.controllers/PlayerContext { // tv.nomercy.pla
     final fun assertReady() // tv.nomercy.player.core.controllers/PlayerContext.assertReady|assertReady(){}[0]
     final fun dispatching(): kotlin.collections/List<kotlin/String> // tv.nomercy.player.core.controllers/PlayerContext.dispatching|dispatching(){}[0]
     final fun guardMutation(kotlin/String, kotlin.collections/List<kotlin/Any?> = ...): kotlin/Boolean // tv.nomercy.player.core.controllers/PlayerContext.guardMutation|guardMutation(kotlin.String;kotlin.collections.List<kotlin.Any?>){}[0]
+    final fun isItemPrerolled(tv.nomercy.player.core.media/PlaylistItem, tv.nomercy.player.core.ports/LoadOptions = ...): kotlin/Boolean // tv.nomercy.player.core.controllers/PlayerContext.isItemPrerolled|isItemPrerolled(tv.nomercy.player.core.media.PlaylistItem;tv.nomercy.player.core.ports.LoadOptions){}[0]
+    final fun prerollItem(tv.nomercy.player.core.media/PlaylistItem, tv.nomercy.player.core.ports/LoadOptions = ...) // tv.nomercy.player.core.controllers/PlayerContext.prerollItem|prerollItem(tv.nomercy.player.core.media.PlaylistItem;tv.nomercy.player.core.ports.LoadOptions){}[0]
     final fun transitionPhase(tv.nomercy.player.core.player/PlayerPhase) // tv.nomercy.player.core.controllers/PlayerContext.transitionPhase|transitionPhase(tv.nomercy.player.core.player.PlayerPhase){}[0]
     final suspend fun <#A1: kotlin/Any?> dispatchBefore(tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/BeforeEvent<#A1>>, #A1): tv.nomercy.player.core.events/BeforeDispatchResult<#A1> // tv.nomercy.player.core.controllers/PlayerContext.dispatchBefore|dispatchBefore(tv.nomercy.player.core.events.EventKey<tv.nomercy.player.core.events.BeforeEvent<0:0>>;0:0){0§<kotlin.Any?>}[0]
     final suspend fun load(tv.nomercy.player.core.media/PlaylistItem, tv.nomercy.player.core.ports/LoadOptions = ...) // tv.nomercy.player.core.controllers/PlayerContext.load|load(tv.nomercy.player.core.media.PlaylistItem;tv.nomercy.player.core.ports.LoadOptions){}[0]

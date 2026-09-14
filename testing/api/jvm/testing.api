@@ -81,6 +81,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public final fun getUnmuteCount ()I
 	public final fun getVolumesSet ()Ljava/util/List;
 	public fun isPrerolled (D)Z
+	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -91,6 +92,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun playbackRate (D)V
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
+	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setBufferedValue (D)V
@@ -215,6 +217,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public final fun getSubtitleTracks ()Ljava/util/List;
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public fun isPrerolled (D)Z
+	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -225,6 +228,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun playbackRate (D)V
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
+	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;

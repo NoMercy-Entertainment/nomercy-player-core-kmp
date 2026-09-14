@@ -311,6 +311,37 @@ public class PlayerContext(
         )
     }
 
+    private fun sourceFor(item: PlaylistItem, opts: LoadOptions): Pair<String, LoadOptions> {
+        val effective: LoadOptions = effectiveLoadOptions(item, opts)
+        val url: String = auth?.transformUrl(item.url) ?: item.url
+
+        // The engine's own requests, authorised.
+        //
+        // The url is signed above and that covers exactly one request: an HLS
+        // engine resolves the child playlists and segments named inside the
+        // manifest relative to it, which drops a query parameter, so everything
+        // after the first request goes out bare. Asked per url so a public item
+        // in the same queue is fetched with nothing attached.
+        val authorised: LoadOptions = auth?.requestHeaders(url)
+            ?.takeIf { headers -> headers.isNotEmpty() }
+            ?.let { headers -> effective.copy(headers = effective.headers + headers) }
+            ?: effective
+        return url to authorised
+    }
+
+    /** Prepares the source a later load of [item] will ask for, so that load starts at once. */
+    public fun prerollItem(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
+        if (item.url.isBlank()) return
+        val (url: String, authorised: LoadOptions) = sourceFor(item, opts)
+        backend?.prerollSource(url, authorised)
+    }
+
+    public fun isItemPrerolled(item: PlaylistItem, opts: LoadOptions = LoadOptions()): Boolean {
+        if (item.url.isBlank()) return false
+        val (url: String, authorised: LoadOptions) = sourceFor(item, opts)
+        return backend?.isSourcePrerolled(url, authorised) ?: false
+    }
+
     internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
         // Announced before the engine sees anything, and refusable.
         //
@@ -340,22 +371,7 @@ public class PlayerContext(
 
         val engine: MediaBackend = engineFor(item)
 
-        @Suppress("NAME_SHADOWING")
-        val opts: LoadOptions = effectiveLoadOptions(item, opts)
-
-        val url: String = auth?.transformUrl(item.url) ?: item.url
-
-        // The engine's own requests, authorised.
-        //
-        // The url is signed above and that covers exactly one request: an HLS
-        // engine resolves the child playlists and segments named inside the
-        // manifest relative to it, which drops a query parameter, so everything
-        // after the first request goes out bare. Asked per url so a public item
-        // in the same queue is fetched with nothing attached.
-        val authorised: LoadOptions = auth?.requestHeaders(url)
-            ?.takeIf { headers -> headers.isNotEmpty() }
-            ?.let { headers -> opts.copy(headers = opts.headers + headers) }
-            ?: opts
+        val (url: String, authorised: LoadOptions) = sourceFor(item, opts)
 
         try {
             engine.load(url, authorised)

@@ -411,9 +411,13 @@ public final class tv/nomercy/player/core/controllers/PlayerContext {
 	public final fun getVolumeState ()Ltv/nomercy/player/core/player/VolumeState;
 	public final fun guardMutation (Ljava/lang/String;Ljava/util/List;)Z
 	public static synthetic fun guardMutation$default (Ltv/nomercy/player/core/controllers/PlayerContext;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Z
+	public final fun isItemPrerolled (Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;)Z
+	public static synthetic fun isItemPrerolled$default (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;ILjava/lang/Object;)Z
 	public final fun load (Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
+	public final fun prerollItem (Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public static synthetic fun prerollItem$default (Ltv/nomercy/player/core/controllers/PlayerContext;Ltv/nomercy/player/core/media/PlaylistItem;Ltv/nomercy/player/core/ports/LoadOptions;ILjava/lang/Object;)V
 	public final fun setAdvisories (Lkotlin/jvm/functions/Function3;)V
 	public final fun setAuth (Ltv/nomercy/player/core/controllers/AuthController;)V
 	public final fun setBackend (Ltv/nomercy/player/core/ports/MediaBackend;)V
@@ -6399,8 +6403,10 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/AudioBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/AudioBackend;D)Z
+	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/AudioBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
+	public static fun prerollSource (Ltv/nomercy/player/core/ports/AudioBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 }
 
@@ -7386,6 +7392,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun duration ()D
 	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public fun isPrerolled (D)Z
+	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public abstract fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public abstract fun mute ()V
@@ -7397,6 +7404,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun playbackRate (D)V
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
+	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public abstract fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public abstract fun state ()Ltv/nomercy/player/core/ports/BackendState;
@@ -7412,9 +7420,11 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/MediaBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/MediaBackend;D)Z
+	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
+	public static fun prerollSource (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
@@ -7501,6 +7511,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun duration ()D
 	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public fun isPrerolled (D)Z
+	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun loadSecondary (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
@@ -7512,6 +7523,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun playbackRate (D)V
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
+	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun release ()V
 	public fun secondaryGain ()F
@@ -7574,6 +7586,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public final fun getLadder ()Ltv/nomercy/player/core/ports/AdaptiveLadderDriver;
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public fun isPrerolled (D)Z
+	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
@@ -7584,6 +7597,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun playbackRate (D)V
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
+	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
@@ -8601,8 +8615,10 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/VideoBackend;D)Z
+	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/VideoBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
+	public static fun prerollSource (Ltv/nomercy/player/core/ports/VideoBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
 	public static fun surfaceSize (Ltv/nomercy/player/core/ports/VideoBackend;II)V
 }

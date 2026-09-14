@@ -263,7 +263,10 @@ public class ExoPlayerVideoBackend(
     // seek becomes a swap instead of a decode from the segment's keyframe.
     private var standby: StandbyEngine? = null
     private var standbyTargetMs: Long? = null
+    private var standbyUrl: String? = null
     private var standbyReady: Boolean = false
+
+    private var loadedUrl: String? = null
 
     private class StandbyEngine(val engine: ExoEngine, val selector: DefaultTrackSelector, val output: ImageReader)
 
@@ -496,15 +499,24 @@ public class ExoPlayerVideoBackend(
         // decoder to convert them — and a tunneled decoder ignores the colour
         // transfer request, so the two together would report a conversion and show
         // the washed-out picture anyway.
-        val wanted: Boolean = !engine.renderers.requestSdrToneMap &&
-            videoSurfaceAttached && TunnelingRule.shouldTunnel(
+        trackSelector.parameters = trackSelector.buildUponParameters()
+            .setTunnelingEnabled(wantsTunneling(url, engine.renderers.requestSdrToneMap))
+            .build()
+    }
+
+    private fun wantsTunneling(url: String, toneMap: Boolean): Boolean =
+        !toneMap && videoSurfaceAttached && TunnelingRule.shouldTunnel(
             isTv = isTvDevice,
             sourceIsHls = HLS_EXT_RE.containsMatchIn(url),
             refusedByAudioSink = tunnelingRefusedByAudioSink,
         )
-        trackSelector.parameters = trackSelector.buildUponParameters()
-            .setTunnelingEnabled(wanted)
-            .build()
+
+    private fun withPreferredAudio(
+        builder: DefaultTrackSelector.Parameters.Builder,
+        opts: LoadOptions,
+    ): DefaultTrackSelector.Parameters.Builder {
+        val language: String = opts.preferredAudioLanguage?.takeIf { it.isNotBlank() } ?: return builder
+        return builder.setPreferredAudioLanguage(language)
     }
 
     // A hostile audio HAL refuses a tunneled configuration by failing to
@@ -719,6 +731,10 @@ public class ExoPlayerVideoBackend(
     // explicit refreshCache() call — not delegated to a wrapper that runs one
     // more time behind this function's back.
     override suspend fun load(url: String, opts: LoadOptions): Unit = withContext(mainDispatcher) {
+        if (!loadFromStandby(url, opts)) loadFresh(url, opts)
+    }
+
+    private fun loadFresh(url: String, opts: LoadOptions) {
         // Silence the outgoing item the instant a switch is decided, not once
         // the incoming one is ready. TransportController.advanceTo() moves the
         // queue cursor and fires the chrome's loading state before this runs
@@ -729,18 +745,8 @@ public class ExoPlayerVideoBackend(
         // the new item is actually ready.
         player.playWhenReady = false
         discardStandby()
-        engine.prefetcher.forget()
-        bus.emit(CanonicalBackendEvent.LOAD_START, url)
-        announcedCanPlay = false
-        refusedAsUnplayable = false
-        // A new source is a new session: the rungs the previous one spent say
-        // nothing about whether this one can be fetched.
-        resetOutageLadder()
-        positionBeforeNetworkLoss = 0L
-        // The previous item's last line, taken off the picture before the next
-        // one's first frame arrives. The web backend does this in unload() for
-        // the same reason.
-        announceCues(emptyList())
+        loadedUrl = url
+        beginSource(url)
         // Armed BEFORE prepare, because a codec reads its colour-transfer request
         // when it is configured and the ladder is not known until after. Arming it
         // on an SDR display costs nothing on SDR content: the factory only asks
@@ -748,22 +754,7 @@ public class ExoPlayerVideoBackend(
         // which is precisely the case CapTo has already ruled out.
         engine.renderers.requestSdrToneMap = !displayIsHdr && canToneMapHdrToSdr
         applyTunneling(url)
-        // What the caller asked to be sent, sent.
-        //
-        // `LoadOptions.headers` is part of the backend contract and the mpv
-        // backend has always honoured it; this one dropped it, so a signed
-        // library played on the desktop and failed here with
-        // ERROR_CODE_IO_BAD_HTTP_STATUS -- a 401 arriving as "unknown error"
-        // over a black picture. Photographed on a phone against a real server.
-        //
-        // Through the same provider a host uses, because the interceptor
-        // beneath already applies it to every manifest and segment request and
-        // a second path would be a second thing to keep in step. A host that
-        // set its own provider keeps it when a load carries no headers.
-        if (opts.headers.isNotEmpty()) {
-            val carried: Map<String, String> = opts.headers
-            authHeaders.provider = { carried }
-        }
+        carryHeaders(opts)
         // The position goes ON the item, not after prepare(). Seeking
         // afterwards works only because a finished file has every segment: the
         // engine loads from zero, then jumps. A live transcode has exactly the
@@ -779,9 +770,7 @@ public class ExoPlayerVideoBackend(
         // live, reported as "audio plays the first track, then switches and
         // buffers".
         if (!opts.preferredAudioLanguage.isNullOrBlank()) {
-            trackSelector.parameters = trackSelector.buildUponParameters()
-                .setPreferredAudioLanguage(opts.preferredAudioLanguage)
-                .build()
+            trackSelector.parameters = withPreferredAudio(trackSelector.buildUponParameters(), opts).build()
         }
         player.setMediaItem(MediaItem.fromUri(url), opts.startPositionMs.coerceAtLeast(0L))
         // prepare, not play: starting is a separate decision above, and an
@@ -802,6 +791,55 @@ public class ExoPlayerVideoBackend(
         // convention. This assignment MUST be the last thing load() does:
         // it is the one line that makes the reset stick.
         cachedTime = opts.startPositionMs.coerceAtLeast(0L) / MILLIS_PER_SECOND
+    }
+
+    private fun beginSource(url: String) {
+        engine.prefetcher.forget()
+        bus.emit(CanonicalBackendEvent.LOAD_START, url)
+        announcedCanPlay = false
+        refusedAsUnplayable = false
+        // A new source is a new session: the rungs the previous one spent say
+        // nothing about whether this one can be fetched.
+        resetOutageLadder()
+        positionBeforeNetworkLoss = 0L
+        // The previous item's last line, taken off the picture before the next
+        // one's first frame arrives. The web backend does this in unload() for
+        // the same reason.
+        announceCues(emptyList())
+    }
+
+    // `LoadOptions.headers` is part of the backend contract, through the provider the
+    // interceptor already applies to every manifest and segment request. A host that
+    // set its own provider keeps it when a load carries no headers.
+    private fun carryHeaders(opts: LoadOptions) {
+        if (opts.headers.isEmpty()) return
+        val carried: Map<String, String> = opts.headers
+        authHeaders.provider = { carried }
+    }
+
+    // The load a pre-roll prepared: the engines trade places and the source is already
+    // buffered, or at least further along than a fresh prepare would be.
+    private fun loadFromStandby(url: String, opts: LoadOptions): Boolean {
+        val next: StandbyEngine = standby ?: return false
+        val startMs: Long = opts.startPositionMs.coerceAtLeast(0L)
+        if (!StandbySwap.matchesSource(standbyUrl, standbyTargetMs, url, startMs)) return false
+
+        val ready: Boolean = standbyReady
+        exchangeEngines(next, playWhenReady = false)
+        loadedUrl = url
+        beginSource(url)
+        carryHeaders(opts)
+        refreshCache()
+        cachedTime = startMs / MILLIS_PER_SECOND
+        if (ready) main.launch { announceReadyEngine() }
+        Log.i(LOG_TAG, "load at ${startMs}ms swapped to the pre-rolled engine, ready=$ready")
+        return true
+    }
+
+    // A swapped-in engine that is already READY reports no state change of its own.
+    private fun announceReadyEngine() {
+        engineListener.onTracksChanged(player.currentTracks)
+        engineListener.onPlaybackStateChanged(player.playbackState)
     }
 
     override suspend fun play(): Unit = onMain {
@@ -839,10 +877,25 @@ public class ExoPlayerVideoBackend(
         seekOrSwap((seconds * MILLIS_PER_SECOND).toLong())
     }
 
+    // A standby holding the next source outlives a seek; only a standby for this source
+    // is made wrong by one.
     private fun seekOrSwap(targetMs: Long) {
         if (swapToStandby(targetMs)) return
-        discardStandby()
+        if (StandbySwap.endsIntoNextSource(standbyUrl, loadedUrl, player.duration, targetMs)) {
+            endNow()
+            return
+        }
+        if (standbyUrl == loadedUrl) discardStandby()
         player.seekTo(targetMs)
+    }
+
+    // The engine would buffer at the end before reporting it; the next source is already waiting.
+    private fun endNow() {
+        stopTicking()
+        cachedTime = player.duration / MILLIS_PER_SECOND
+        bus.emit(CanonicalBackendEvent.TIME_UPDATE, cachedTime)
+        bus.emit(CanonicalBackendEvent.ENDED)
+        Log.i(LOG_TAG, "seek to the end handed over to the pre-rolled next source")
     }
 
     override fun prerollAt(seconds: Double): Unit = fireAndForget {
@@ -851,11 +904,35 @@ public class ExoPlayerVideoBackend(
 
     private fun preroll(targetMs: Long) {
         val item: MediaItem = player.currentMediaItem ?: return
-        if (standbyTargetMs == targetMs) return
-        val next: StandbyEngine = standby ?: buildStandby() ?: return
+        val url: String = loadedUrl ?: return
+        val next: StandbyEngine? = standby ?: buildStandby()
+        if (next == null || StandbySwap.matchesSource(standbyUrl, standbyTargetMs, url, targetMs)) return
 
         next.selector.parameters = trackSelector.parameters
         next.engine.renderers.requestSdrToneMap = engine.renderers.requestSdrToneMap
+        prepareStandby(next, item, targetMs)
+        standbyUrl = url
+    }
+
+    override fun prerollSource(url: String, opts: LoadOptions): Unit = fireAndForget { prerollNextSource(url, opts) }
+
+    private fun prerollNextSource(url: String, opts: LoadOptions) {
+        val startMs: Long = opts.startPositionMs.coerceAtLeast(0L)
+        val toneMap: Boolean = !displayIsHdr && canToneMapHdrToSdr
+        if (StandbySwap.matchesSource(standbyUrl, standbyTargetMs, url, startMs) || wantsTunneling(url, toneMap)) return
+        val next: StandbyEngine = standby ?: buildStandby() ?: return
+
+        carryHeaders(opts)
+        next.selector.parameters = withPreferredAudio(trackSelector.buildUponParameters(), opts)
+            .setTunnelingEnabled(false)
+            .build()
+        next.engine.renderers.requestSdrToneMap = toneMap
+        prepareStandby(next, MediaItem.fromUri(url), startMs)
+        standbyUrl = url
+        Log.i(LOG_TAG, "pre-rolling the next source at ${startMs}ms")
+    }
+
+    private fun prepareStandby(next: StandbyEngine, item: MediaItem, targetMs: Long) {
         with(next.engine.player) {
             trackSelectionParameters = player.trackSelectionParameters
             volume = player.volume
@@ -869,8 +946,14 @@ public class ExoPlayerVideoBackend(
         standbyReady = false
     }
 
-    override fun isPrerolled(seconds: Double): Boolean =
-        standbyReady && StandbySwap.matches(standbyTargetMs, (seconds * MILLIS_PER_SECOND).toLong())
+    override fun isPrerolled(seconds: Double): Boolean = isPrerolledMs((seconds * MILLIS_PER_SECOND).toLong())
+
+    private fun isPrerolledMs(targetMs: Long): Boolean =
+        standbyReady && StandbySwap.matchesSource(standbyUrl, standbyTargetMs, loadedUrl, targetMs)
+
+    override fun isSourcePrerolled(url: String, opts: LoadOptions): Boolean =
+        standbyReady &&
+            StandbySwap.matchesSource(standbyUrl, standbyTargetMs, url, opts.startPositionMs.coerceAtLeast(0L))
 
     private fun buildStandby(): StandbyEngine? = runCatching {
         val selector: DefaultTrackSelector = newTrackSelector(androidContext)
@@ -892,10 +975,15 @@ public class ExoPlayerVideoBackend(
 
     private fun swapToStandby(targetMs: Long): Boolean {
         val next: StandbyEngine = standby ?: return false
-        if (!standbyReady || !StandbySwap.matches(standbyTargetMs, targetMs)) return false
+        if (!isPrerolledMs(targetMs)) return false
 
+        exchangeEngines(next, player.playWhenReady)
+        Log.i(LOG_TAG, "seek to ${targetMs}ms swapped to the pre-rolled engine")
+        return true
+    }
+
+    private fun exchangeEngines(next: StandbyEngine, playWhenReady: Boolean) {
         val previous: ExoEngine = engine
-        val playWhenReady: Boolean = player.playWhenReady
         previous.player.removeListener(engineListener)
         next.engine.player.removeListener(standbyListener)
         previous.player.addListener(standbyListener)
@@ -906,19 +994,19 @@ public class ExoPlayerVideoBackend(
         trackSelector = next.selector
         player = next.engine.player
         standbyTargetMs = null
+        standbyUrl = null
         standbyReady = false
 
         player.playWhenReady = playWhenReady
         active.value = player
         previous.player.stop()
         announceCues(emptyList())
-        Log.i(LOG_TAG, "seek to ${targetMs}ms swapped to the pre-rolled engine")
-        return true
     }
 
     private fun discardStandby() {
         if (standbyTargetMs == null) return
         standbyTargetMs = null
+        standbyUrl = null
         standbyReady = false
         standby?.engine?.player?.stop()
     }

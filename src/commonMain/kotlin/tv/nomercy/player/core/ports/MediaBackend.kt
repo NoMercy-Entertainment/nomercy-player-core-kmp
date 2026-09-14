@@ -100,6 +100,11 @@ public interface MediaBackend {
 
     public fun isPrerolled(seconds: Double): Boolean = false
 
+    // The same for a whole source: a later load with this url and start becomes a swap.
+    public fun prerollSource(url: String, opts: LoadOptions) {}
+
+    public fun isSourcePrerolled(url: String, opts: LoadOptions): Boolean = false
+
     public fun state(): BackendState
 
     public fun on(event: String, fn: (Any?) -> Unit)
