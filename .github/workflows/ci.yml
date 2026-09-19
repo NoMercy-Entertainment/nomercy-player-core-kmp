@@ -47,6 +47,8 @@ jobs:
           java-version: '21'
 
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       # Chrome, for the same reason as the Android SDK above: a GitHub-hosted
       # ubuntu image ships one and this runner does not. Kotlin/Wasm runs its
@@ -149,6 +151,8 @@ jobs:
           java-version: '21'
 
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       - uses: gradle/actions/setup-gradle@v4
 
@@ -181,6 +185,8 @@ jobs:
           java-version: '21'
 
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools'
 
       - uses: gradle/actions/setup-gradle@v4
 
