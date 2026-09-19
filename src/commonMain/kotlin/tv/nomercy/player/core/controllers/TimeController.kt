@@ -119,7 +119,9 @@ public class TimeController(
 
         val now: Long = clock.now()
         val previous: Long? = lastProgressEmit
-        if (previous != null && now - previous < progressIntervalMs) return
+        // A clock that stepped backwards would otherwise hold every progress write
+        // until wall time caught up again, which can be hours.
+        if (previous != null && now - previous in 0 until progressIntervalMs) return
         lastProgressEmit = now
 
         val total: Double = duration()
@@ -210,7 +212,7 @@ public class TimeController(
         // a part of the film nobody is watching.
         if (ctx.playState != PlayState.PLAYING) return anchoredAt
 
-        val sinceMs: Long = (now - anchoredWhen).coerceAtMost(carryCeilingMs())
+        val sinceMs: Long = (now - anchoredWhen).coerceIn(0L, carryCeilingMs())
         return anchoredAt + sinceMs / MILLIS_PER_SECOND * ctx.playbackRate
     }
 
@@ -234,7 +236,10 @@ public class TimeController(
         // is what a seek looked like from here until this branch said so.
         if (ctx.playState != PlayState.PLAYING || answeredWhen < 0L) return target
 
-        val elapsedMs: Long = now - answeredWhen
+        // Never negative. The clock is the wall clock, and a device that syncs its
+        // time backwards made this negative: the slew bounds inverted and coerceIn
+        // threw, killing the app mid-playback on a television (2026-09-19).
+        val elapsedMs: Long = (now - answeredWhen).coerceAtLeast(0L)
         val free: Double = answered + elapsedMs / MILLIS_PER_SECOND * ctx.playbackRate
         val error: Double = target - free
         if (error.absoluteValue > SEEK_THRESHOLD_SECONDS) return target

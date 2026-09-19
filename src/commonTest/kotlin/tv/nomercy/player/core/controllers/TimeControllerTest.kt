@@ -185,6 +185,9 @@ class TimeControllerTest {
 
         // A frame may be off by a frame. Anything larger is a visible jump.
         const val WORST_STEP_ERROR = 0.017
+
+        // What an NTP correction on a television is worth: seconds, in either direction.
+        const val CLOCK_STEP_BACK_MS = 4_000L
     }
 
     private class TestClock : Clock {
@@ -193,6 +196,53 @@ class TimeControllerTest {
         fun advance(by: Long) {
             millis += by
         }
+    }
+
+    // A television syncing its time backwards inverted the slew bounds and coerceIn
+    // threw, killing the app mid-playback three times in a day (2026-09-19).
+    @Test
+    fun aClockThatStepsBackwardsKeepsThePlayerAlive() {
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        rig.backend.currentTime(30.0)
+        rig.time.time()
+        stopwatch.advance(200L)
+        val before: Double = rig.time.time()
+
+        stopwatch.advance(-CLOCK_STEP_BACK_MS)
+
+        assertEquals(before, rig.time.time(), "the playhead did not survive a clock that went back")
+    }
+
+    @Test
+    fun theClockCatchesUpAfterSteppingBackwards() {
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        rig.backend.currentTime(30.0)
+        rig.time.time()
+        stopwatch.advance(-CLOCK_STEP_BACK_MS)
+        rig.time.time()
+
+        stopwatch.advance(500L)
+        rig.backend.currentTime(30.5)
+
+        assertEquals(30.5, rig.time.time(), "the clock stayed stuck after the time change")
+    }
+
+    @Test
+    fun progressIsStillWrittenAfterTheClockStepsBackwards() {
+        val stopwatch = TestClock()
+        val rig = TimeRig(stopwatch).ready()
+        rig.ctx.playState = PlayState.PLAYING
+        val progress = EventLog().capture(rig.ctx, CoreEvents.Progress)
+        rig.ctx.emit(CoreEvents.Time, TimeUpdate(time = 10.0, duration = 100.0, percentage = 10.0))
+
+        stopwatch.advance(-CLOCK_STEP_BACK_MS)
+        rig.ctx.emit(CoreEvents.Time, TimeUpdate(time = 11.0, duration = 100.0, percentage = 11.0))
+
+        assertEquals(listOf(10.0, 11.0), progress.map { it.time }, "watch progress stopped until wall time caught up")
     }
 
     @Test
