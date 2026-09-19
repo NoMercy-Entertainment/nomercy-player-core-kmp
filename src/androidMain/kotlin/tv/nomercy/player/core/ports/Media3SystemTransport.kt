@@ -76,8 +76,14 @@ internal class Media3SystemTransport(
     // before [session] on purpose: its initializer calls buildSession(),
     // which reads this — declared after session it is still null there
     // (confirmed live: NPE out of DataSourceBitmapLoader.loadBitmap).
-    private val artworkLoaderExecutor: ListeningExecutorService =
-        MoreExecutors.listeningDecorator(java.util.concurrent.Executors.newSingleThreadExecutor())
+    //
+    // Wrapped in its own lifecycle owner rather than a bare field: this class
+    // needs a real Android Context to construct at all, which puts it out of
+    // reach of a host test (see ExoTrackMapperTest's own comment on why this
+    // repo dropped Robolectric). The executor itself carries no such
+    // dependency, so the piece that used to leak a thread — never shut down
+    // in [release] — now lives somewhere a host test can actually reach it.
+    private val artworkLoader = ArtworkLoaderExecutor()
 
     private val session: MediaLibrarySession = run {
         // The fixed [SESSION_ID] means Media3 throws "Session ID must be
@@ -138,7 +144,7 @@ internal class Media3SystemTransport(
         // is a MediaSession, so nothing that already held one notices.
         return MediaLibrarySession.Builder(appContext, bridge, TransportSessionCallback())
             .setId(SESSION_ID)
-            .setBitmapLoader(DataSourceBitmapLoader(artworkLoaderExecutor, artworkDataSourceFactory()))
+            .setBitmapLoader(DataSourceBitmapLoader(artworkLoader.service, artworkDataSourceFactory()))
             .build()
             .also { built -> lastBuilt = built }
     }
@@ -538,6 +544,7 @@ internal class Media3SystemTransport(
         pendingBlank?.let { mainHandler.removeCallbacks(it) }
         pendingBlank = null
         browseScope.cancel()
+        artworkLoader.release()
         holdLocks(false)
         // Publish before releasing the Media3 object, so the service's own
         // reconcile sees the `null` transition and removeSession()s a
@@ -625,5 +632,27 @@ internal class Media3SystemTransport(
         // the cost of guessing too short is the empty car display this exists
         // to stop.
         const val BLANK_DEBOUNCE_MS = 3_000L
+    }
+}
+
+// The artwork-loader executor's own lifecycle, split out so it carries no
+// Android Context dependency and a host test can prove [release] actually
+// shuts it down — see [Media3SystemTransport.artworkLoader]'s own comment for
+// why that proof cannot live on the transport class itself.
+internal class ArtworkLoaderExecutor {
+
+    val service: ListeningExecutorService =
+        MoreExecutors.listeningDecorator(
+            java.util.concurrent.Executors.newSingleThreadExecutor { runnable ->
+                Thread(runnable, "nomercy-artwork-loader").apply { isDaemon = true }
+            },
+        )
+
+    private var released = false
+
+    fun release() {
+        if (released) return
+        released = true
+        service.shutdown()
     }
 }

@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.android.asCoroutineDispatcher
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -98,6 +99,15 @@ public class ExoPlayerVideoBackend(
         Handler(Looper.getMainLooper()).asCoroutineDispatcher()
 
     private val main: CoroutineScope = scope ?: CoroutineScope(SupervisorJob() + mainDispatcher)
+
+    // True on the real Android path — PlatformVideoEngines.android.kt builds
+    // this backend without a scope, so `main` above is one this backend built
+    // for itself and release() must cancel it or the SupervisorJob (and every
+    // released reference an in-flight fireAndForget still closes over) stays
+    // reachable forever. False only when a caller supplied its own scope,
+    // which release() must never cancel out from under that caller. Mirrors
+    // ComposedPlayer.ownsScope's own comment.
+    private val ownsScope: Boolean = scope == null
     // The credentials every manifest and segment request carries.
     //
     // A host sets `authHeaders.provider` once and refreshes behind it; the
@@ -1295,6 +1305,11 @@ public class ExoPlayerVideoBackend(
         standby?.engine?.prefetcher?.release()
         standby?.engine?.player?.release()
         standby?.output?.close()
+
+        // Last, not first: everything above still runs on `main`, and
+        // cancelling it any earlier would take the rest of this teardown
+        // down with it.
+        releaseOwnedScope(main, ownsScope)
     }
 
     override fun prefetchAt(seconds: Double): Unit = fireAndForget { prefetch(seconds) }
@@ -1345,4 +1360,13 @@ public class ExoPlayerVideoBackend(
             }
         }
     }
+}
+
+// The cancel-only-when-owned rule release() applies to `main`, pulled out as
+// a pure function so a host test can prove it without the Android main
+// looper the real scope is built on (Looper.getMainLooper() throws outside
+// an Android runtime, which is why this repo dropped Robolectric — see
+// ExoTrackMapperTest's own comment).
+internal fun releaseOwnedScope(scope: CoroutineScope, owns: Boolean) {
+    if (owns) scope.cancel()
 }
