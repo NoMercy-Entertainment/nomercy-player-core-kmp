@@ -11,7 +11,7 @@ package tv.nomercy.player.core.ports
 public const val BYTES_PER_MB: Int = 1024 * 1024
 
 // The phone default, before any device heuristic has run.
-private const val DEFAULT_TARGET_MB = 180
+private const val DEFAULT_TARGET_MB = 90
 
 // How much of the stream to hold, and how much to hold before starting.
 //
@@ -29,6 +29,9 @@ public data class BufferConfig(
     val bufferForPlaybackAfterRebufferMs: Int = 12_000,
     val backBufferMs: Int = 20_000,
     val retainBackBufferFromKeyframe: Boolean = true,
+    // Per engine, and two engines are alive at once whenever a pre-roll or a
+    // crossfade is in flight. The budget is therefore half of what the device
+    // can spare, not all of it.
     val targetBufferBytes: Int = DEFAULT_TARGET_MB * BYTES_PER_MB,
     val isTvDevice: Boolean = false,
 )
@@ -84,12 +87,16 @@ public object BufferBudget {
         )
     }
 
-    private const val LOW_RAM_SHARE = 0.35
-    private const val TV_SHARE = 0.30
-    private const val PHONE_SHARE = 0.35
+    // One share for every device, because the constraint is the same everywhere:
+    // the buffer lives in the Java heap, two engines can hold one each, and a
+    // television's heap ceiling is far lower than its RAM suggests.
+    private const val LOW_RAM_SHARE = 0.15
+    private const val TV_SHARE = 0.12
+    private const val PHONE_SHARE = 0.15
 
-    // A hundred megabytes is the budget the unscaled windows below were tuned at.
-    private const val SCALE_PIVOT = 100.0
+    // Fifty megabytes is the per-engine budget the unscaled windows below were
+    // tuned at.
+    private const val SCALE_PIVOT = 50.0
 
     private const val MIN_BUFFER_MS = 20_000
     private const val MAX_BUFFER_MS = 90_000
@@ -102,11 +109,11 @@ public object BufferBudget {
     // The bounds every window is clamped into. Named rather than inline because
     // each one is a limit that was learned: below a floor the player stalls on
     // every hiccup, above a ceiling it holds memory no stream needs.
-    private const val LOW_RAM_FLOOR_MB = 50
-    private const val LOW_RAM_CEILING_MB = 64
-    private const val BUDGET_FLOOR_MB = 80
-    private const val TV_CEILING_MB = 200
-    private const val PHONE_CEILING_MB = 350
+    private const val LOW_RAM_FLOOR_MB = 25
+    private const val LOW_RAM_CEILING_MB = 32
+    private const val BUDGET_FLOOR_MB = 32
+    private const val TV_CEILING_MB = 100
+    private const val PHONE_CEILING_MB = 175
 
     private const val MIN_SCALE = 0.5
     private const val MAX_SCALE = 2.0

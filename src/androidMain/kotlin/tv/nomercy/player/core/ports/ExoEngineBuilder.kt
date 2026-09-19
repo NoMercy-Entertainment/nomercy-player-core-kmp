@@ -296,10 +296,10 @@ private fun loadControlFor(budget: BufferConfig): DefaultLoadControl {
         // than a re-fetch of something the device still had a moment ago.
         .setBackBuffer(budget.backBufferMs, budget.retainBackBufferFromKeyframe)
         .setTargetBufferBytes(budget.targetBufferBytes)
-        // Time over size. A high-bitrate stream hits the byte ceiling long
-        // before it has buffered enough seconds to ride out a hiccup, and the
-        // result is a player that rebuffers on a connection that is keeping up.
-        .setPrioritizeTimeOverSizeThresholds(true)
+        // Size over time, which overturns the opposite choice made here earlier.
+        // Time first makes the byte target advisory, and ninety seconds of a fat
+        // stream took 188MB of a television's 384MB heap and killed the app.
+        .setPrioritizeTimeOverSizeThresholds(false)
         .build()
 }
 

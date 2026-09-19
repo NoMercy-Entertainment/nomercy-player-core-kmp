@@ -46,12 +46,12 @@ class BufferBudgetTest {
     }
 
     @Test
-    fun aLowRamDeviceIsCappedAtSixtyFourMegabytes() {
+    fun aLowRamDeviceIsCappedAtThirtyTwoMegabytes() {
         // Below a gigabyte the subtitle layer peaks near 45MB and the codec
-        // buffers want their own. Sixty-four is what is left.
+        // buffers want their own. Thirty-two is what is left for each engine.
         val config: BufferConfig = BufferBudget.forMemory(availableMb = 512, isLowRam = true)
 
-        assertEquals(64 * BYTES_PER_MB, config.targetBufferBytes)
+        assertEquals(32 * BYTES_PER_MB, config.targetBufferBytes)
     }
 
     @Test
@@ -60,14 +60,31 @@ class BufferBudgetTest {
         // budget is the exact device that failed.
         val config: BufferConfig = BufferBudget.forMemory(availableMb = 512, isTv = true, isLowRam = true)
 
-        assertEquals(64 * BYTES_PER_MB, config.targetBufferBytes)
+        assertEquals(32 * BYTES_PER_MB, config.targetBufferBytes)
     }
 
     @Test
     fun aGenerousDeviceStillHasACeiling() {
         // A third of a very large heap is more than any stream needs, and
         // holding it is memory taken from the rest of the app for nothing.
-        assertEquals(350 * BYTES_PER_MB, BufferBudget.forMemory(availableMb = 4_096).targetBufferBytes)
+        assertEquals(175 * BYTES_PER_MB, BufferBudget.forMemory(availableMb = 4_096).targetBufferBytes)
+    }
+
+    @Test
+    fun twoEnginesTogetherStayInsideAThirdOfTheHeap() {
+        // The budget is per engine, and a pre-roll or a crossfade holds a second
+        // one. A television died with 188MB of buffer in a 384MB heap because
+        // the budget was written as if only one engine ever existed.
+        for (available in listOf(256, 384, 512, 1_024, 4_096)) {
+            for (tv in listOf(false, true)) {
+                val both: Long = 2L * BufferBudget.forMemory(available, isTv = tv).targetBufferBytes
+
+                assertTrue(
+                    both <= available.toLong() * BYTES_PER_MB / 3,
+                    "two engines want ${both / BYTES_PER_MB}MB of a ${available}MB heap at tv=$tv",
+                )
+            }
+        }
     }
 
     @Test
@@ -75,7 +92,7 @@ class BufferBudgetTest {
         // Below this there is not enough buffer to survive one hiccup, and a
         // player that stalls every few seconds is worse than one using slightly
         // more memory than it has to spare.
-        assertEquals(80 * BYTES_PER_MB, BufferBudget.forMemory(availableMb = 64).targetBufferBytes)
+        assertEquals(32 * BYTES_PER_MB, BufferBudget.forMemory(availableMb = 64).targetBufferBytes)
     }
 
     @Test
