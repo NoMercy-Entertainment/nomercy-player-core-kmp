@@ -114,21 +114,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // So a backstop is armed here instead: [promoteIfMedia3HasNot] promotes
     // with a placeholder, but only once Media3 has demonstrably not done it
     // first, and only for as long as it takes Media3 to catch up.
-    //
-    // But only for a COLD start. [stopIfNeverPromoted] decides "no play is
-    // coming" by reading `playWhenReady` — which is also exactly what a
-    // user pause looks like. A warm start (session already attached and
-    // promoted: a notification action, a media-button route, any in-life
-    // restart) re-arms the backstop, the user pauses from that very intent,
-    // and four seconds later the service stops itself and takes the media
-    // notification with it. Confirmed live, Android 12, 2026-09-16: pause
-    // from the notification controls canceled the notification 4.1–4.4s
-    // later, every time, with the session still published and playback
-    // healthy. So the stop backstop is armed only when no session is
-    // attached yet; on warm starts any stale timer is cancelled instead.
-    // [promoteIfMedia3HasNot] stays armed in both cases — it is harmless
-    // once Media3 has posted (it checks first) and still covers a warm
-    // start whose promotion somehow never happened.
+
     override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
         mainHandler.removeCallbacks(promoteIfMedia3HasNot)
         mainHandler.postDelayed(promoteIfMedia3HasNot, BACKSTOP_PROMOTION_MS)
