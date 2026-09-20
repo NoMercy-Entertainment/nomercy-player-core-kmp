@@ -301,6 +301,10 @@ internal class Media3SystemTransport(
 
     private var servicePromotionRequested = false
 
+    // See SystemTransport.setNotificationEligible. True until a caller says
+    // otherwise, so an ordinary player never has to opt in.
+    private var notificationEligible = true
+
     // The main-thread handle a real stop's unpublish/stopSelf is debounced
     // through — see [clear]'s own comment for why a stop needs a grace
     // window at all before it is allowed to actually tear anything down.
@@ -397,12 +401,21 @@ internal class Media3SystemTransport(
         // after a stop, no item ever reloaded). Falling through here still
         // leaves playWhenReady=true on the bridge for when a real item does
         // load; it only withholds the doomed promotion attempt.
-        // A PLAYBACK_TYPE_REMOTE session (bridge.isVolumeRemoteNow) is, by
-        // every caller that sets it, never local playback — promoting the
-        // LOCAL foreground service for one starts a service guarding audio
-        // that was never playing on this device (confirmed: real-device
-        // volume-routing investigation, 2026-09-10).
-        val eligibleForLocalPromotion = bridge.hasItem && !bridge.isVolumeRemoteNow
+        // Gating this on bridge.isVolumeRemoteNow was wrong, and it cost the
+        // notification for every cast remote and every passively mirroring
+        // Connect client — the exact sessions a viewer most expects to find
+        // in the shade, because the playback they control is in another room
+        // and this notification is the only handle on it. The service is what
+        // posts that notification, so withholding it removed the widget while
+        // leaving the session (and its volume-key routing) intact: playing on
+        // the TV, remote open in the app, nothing in the shade. Reported
+        // live, real phone, 2026-09-20.
+        //
+        // The real distinction is not local-versus-remote. It is whether this
+        // session is a now-playing at all: a bare volume claim published only
+        // so a hardware key has somewhere to route is not, and says so with
+        // setNotificationEligible(false). Everything else is.
+        val eligibleForLocalPromotion = bridge.hasItem && notificationEligible
         val shouldPromoteForegroundService =
             state == TransportPlaybackState.PLAYING && !servicePromotionRequested && eligibleForLocalPromotion
         if (shouldPromoteForegroundService) {
@@ -425,6 +438,15 @@ internal class Media3SystemTransport(
 
     override fun setActionHandlers(actions: TransportActions) {
         bridge.setActions(actions)
+    }
+
+    override fun setNotificationEligible(eligible: Boolean) {
+        // Only ever consulted on the way IN to a promotion, so this must be
+        // set before the first PLAYING push it should apply to. A session
+        // turned ineligible after it was already promoted keeps the service
+        // it has: taking one down is what [clear] and [release] are for, and
+        // doing it here would demote a live notification on a metadata edit.
+        notificationEligible = eligible
     }
 
     override fun setDeviceVolume(percent: Int) {

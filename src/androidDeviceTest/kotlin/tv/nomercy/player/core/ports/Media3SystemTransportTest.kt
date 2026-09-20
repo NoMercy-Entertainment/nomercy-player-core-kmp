@@ -278,6 +278,60 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun aCastRemoteWithRealContentStillGetsItsNotification() {
+        // The regression this guards: the promotion gate used to refuse any
+        // session reporting PLAYBACK_TYPE_REMOTE, which is every cast remote
+        // and every passively mirroring Connect client. The service is what
+        // posts the notification, so the widget vanished while the session
+        // itself stayed alive and kept routing volume keys — playing on the
+        // TV, remote open in the app, nothing in the shade. Reported live,
+        // real phone, 2026-09-20.
+        var attempts = 0
+        var transport: SystemTransport? = null
+
+        onMainThread {
+            transport = Media3SystemTransport(
+                context(),
+                requestForegroundService = { _, _ -> attempts++ },
+            )
+            transport?.setActionHandlers(
+                TransportActions(onVolumeStep = {}, isVolumeRemote = { true }),
+            )
+            transport?.setNowPlaying(NowPlaying(title = "Blade Runner 2049", durationMs = 1_000))
+            transport?.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
+        }
+
+        assertEquals(1, attempts, "a cast remote showing real content was denied its notification")
+
+        onMainThread { transport?.release() }
+    }
+
+    @Test
+    fun aVolumeOnlyClaimNeverAsksForTheService() {
+        // The other half of the same gate, and the reason it cannot simply be
+        // dropped: a session published only so a hardware volume key has
+        // somewhere to route carries a label where a title would be. It must
+        // stay out of the shade — a media notification for nothing is worse
+        // than none.
+        var attempts = 0
+        var transport: SystemTransport? = null
+
+        onMainThread {
+            transport = Media3SystemTransport(
+                context(),
+                requestForegroundService = { _, _ -> attempts++ },
+            )
+            transport?.setNotificationEligible(false)
+            transport?.setNowPlaying(NowPlaying(title = "NoMercy on the TV"))
+            transport?.setPlaybackState(TransportPlaybackState.PLAYING, 0, 1.0)
+        }
+
+        assertEquals(0, attempts, "a bare volume claim asked for a media notification")
+
+        onMainThread { transport?.release() }
+    }
+
+    @Test
     fun clearingLeavesNothingForTheLockScreenToShow() {
         var title: CharSequence? = "still here"
 

@@ -50,12 +50,9 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     var hasItem: Boolean = false
         private set
 
-    // Read by Media3SystemTransport's own PLAYING-branch service-promotion
-    // check. True only for a session whose actions report
-    // PLAYBACK_TYPE_REMOTE (see [getState]'s DeviceInfo branch below) — by
-    // construction that is never genuine local playback (RemoteCastSystemSession
-    // hardcodes it true; AppMusicMediaSessionPlugin only turns it true while
-    // this device is a passive, engine-idle Connect mirror).
+    // True for a session whose actions report PLAYBACK_TYPE_REMOTE — see
+    // [getState]'s DeviceInfo branch, which reads this to decide whether the
+    // system's own volume slider drives this device or another one.
     val isVolumeRemoteNow: Boolean
         get() = actions.isVolumeRemote?.invoke() == true
 
@@ -137,7 +134,7 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
                 // platform against this device's own stream, and the player is
                 // never asked. Only a REMOTE device is routed to the player,
                 // which is the whole point of taking the press.
-                if (actions.onVolumeStep != null && actions.isVolumeRemote?.invoke() == true) {
+                if (actions.onVolumeStep != null && isVolumeRemoteNow) {
                     state.setDeviceInfo(
                         DeviceInfo.Builder(DeviceInfo.PLAYBACK_TYPE_REMOTE)
                             .setMaxVolume(REMOTE_VOLUME_MAX)

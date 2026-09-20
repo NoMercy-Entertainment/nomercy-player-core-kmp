@@ -19,9 +19,9 @@ package tv.nomercy.player.core.ports
 //
 // Narrow on purpose. Handing an OS integration the whole player is how a lock
 // screen ends up able to change the subtitle track.
-// The member count is the contract's. These ten are what a lock screen, a car
-// head unit and a cast receiver each have to be told or asked, and six already
-// carry defaults so an actual implements only what its platform has. Splitting
+// The member count is the contract's. These eleven are what a lock screen, a
+// car head unit and a cast receiver each have to be told or asked, and seven
+// already carry defaults so an actual implements only what its platform has. Splitting
 // the interface to satisfy a threshold would change every actual and every
 // consumer across the trio and the app, to say the same thing in two names.
 @Suppress("ComplexInterface")
@@ -106,6 +106,28 @@ public interface SystemTransport {
      * `PLAYBACK_TYPE_REMOTE`.
      */
     public fun setRoutingControllerId(routingControllerId: String?): Unit = Unit
+
+    /**
+     * Whether this session may own the system's media notification.
+     *
+     * True by default, which is every real session: local playback, and a
+     * remote one that is genuinely showing content playing on another device
+     * (a cast remote, a passively mirroring Connect client). Those are the
+     * sessions a viewer expects to find in the shade and on a lock screen,
+     * and on Android the notification only exists while a session is handed
+     * to the media service — so a session withheld from it shows nothing at
+     * all, however correct its metadata is.
+     *
+     * Set false by a session that is not a now-playing at all: a bare volume
+     * claim, published only so the platform has somewhere to route a hardware
+     * volume key, with a label where a title would be. That one must stay out
+     * of the shade — it would draw a media notification for nothing.
+     *
+     * Defaulted to nothing for the same reason as [clearNowPlaying]: a
+     * platform with no notification of its own to withhold is no worse off
+     * than before.
+     */
+    public fun setNotificationEligible(eligible: Boolean): Unit = Unit
 
     /**
      * Whether this instance's platform session has already been released —
