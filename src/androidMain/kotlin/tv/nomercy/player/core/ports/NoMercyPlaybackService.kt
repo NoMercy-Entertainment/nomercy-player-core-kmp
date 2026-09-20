@@ -178,12 +178,26 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     private val mainHandler: android.os.Handler = android.os.Handler(android.os.Looper.getMainLooper())
 
     private val stopIfNeverPromoted: Runnable = Runnable {
+        // NEVER promoted is the whole condition, and it used to be missing.
+        // onStartCommand re-arms this on every start, and a cast remote starts
+        // the service again whenever its transport is rebuilt — so a session
+        // that had been showing its notification for a minute still had a
+        // fresh four-second timer running. Pausing the TV then failed the
+        // `wanted` test below and this stopped a service that had promoted
+        // long ago: the widget vanished four seconds after every pause, where
+        // local playback keeps its notification and its resume button.
+        // Confirmed live, real phone and TV, 2026-09-20.
+        //
+        // Once Media3 has posted, the platform's start deadline is already
+        // answered and this guard has nothing left to guard. A playback that
+        // really ends still tears the service down through reconcile(null).
+        //
         // playWhenReady rather than isPlaying: a stream still opening has not
         // started yet and is exactly the case worth waiting for.
         val wanted: Boolean = runCatching {
             attached?.player?.let { it.isPlaying || it.playWhenReady } == true
         }.getOrDefault(false)
-        if (!wanted) stopWithoutLeavingAPromotionPending()
+        if (!wanted && !media3HasPosted()) stopWithoutLeavingAPromotionPending()
     }
 
     // Stopping is only a safe answer to the platform's clock once something
