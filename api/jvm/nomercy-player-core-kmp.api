@@ -7678,6 +7678,7 @@ public class tv/nomercy/player/core/ports/NoSystemTransport : tv/nomercy/player/
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
 	public fun setDeviceVolume (I)V
+	public fun setNotificationEligible (Z)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 	public fun setRoutingControllerId (Ljava/lang/String;)V
@@ -8384,6 +8385,7 @@ public abstract interface class tv/nomercy/player/core/ports/SystemTransport {
 	public abstract fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
 	public fun setDeviceVolume (I)V
+	public fun setNotificationEligible (Z)V
 	public abstract fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public abstract fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 	public fun setRoutingControllerId (Ljava/lang/String;)V
@@ -8394,6 +8396,7 @@ public final class tv/nomercy/player/core/ports/SystemTransport$DefaultImpls {
 	public static fun isReleased (Ltv/nomercy/player/core/ports/SystemTransport;)Z
 	public static fun setCustomButtons (Ltv/nomercy/player/core/ports/SystemTransport;Ljava/util/List;)V
 	public static fun setDeviceVolume (Ltv/nomercy/player/core/ports/SystemTransport;I)V
+	public static fun setNotificationEligible (Ltv/nomercy/player/core/ports/SystemTransport;Z)V
 	public static fun setRoutingControllerId (Ltv/nomercy/player/core/ports/SystemTransport;Ljava/lang/String;)V
 }
 
@@ -8656,6 +8659,7 @@ public final class tv/nomercy/player/core/ports/desktop/LinuxMprisTransport : tv
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
 	public fun setDeviceVolume (I)V
+	public fun setNotificationEligible (Z)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 	public fun setRoutingControllerId (Ljava/lang/String;)V
@@ -8736,6 +8740,7 @@ public final class tv/nomercy/player/core/ports/desktop/WindowsSmtcTransport : t
 	public fun setActionHandlers (Ltv/nomercy/player/core/ports/TransportActions;)V
 	public fun setCustomButtons (Ljava/util/List;)V
 	public fun setDeviceVolume (I)V
+	public fun setNotificationEligible (Z)V
 	public fun setNowPlaying (Ltv/nomercy/player/core/ports/NowPlaying;)V
 	public fun setPlaybackState (Ltv/nomercy/player/core/ports/TransportPlaybackState;JD)V
 	public fun setRoutingControllerId (Ljava/lang/String;)V

@@ -1630,6 +1630,7 @@ abstract interface tv.nomercy.player.core.ports/SystemTransport { // tv.nomercy.
     open fun clearNowPlaying() // tv.nomercy.player.core.ports/SystemTransport.clearNowPlaying|clearNowPlaying(){}[0]
     open fun setCustomButtons(kotlin.collections/List<tv.nomercy.player.core.ports/CustomTransportButton>) // tv.nomercy.player.core.ports/SystemTransport.setCustomButtons|setCustomButtons(kotlin.collections.List<tv.nomercy.player.core.ports.CustomTransportButton>){}[0]
     open fun setDeviceVolume(kotlin/Int) // tv.nomercy.player.core.ports/SystemTransport.setDeviceVolume|setDeviceVolume(kotlin.Int){}[0]
+    open fun setNotificationEligible(kotlin/Boolean) // tv.nomercy.player.core.ports/SystemTransport.setNotificationEligible|setNotificationEligible(kotlin.Boolean){}[0]
     open fun setRoutingControllerId(kotlin/String?) // tv.nomercy.player.core.ports/SystemTransport.setRoutingControllerId|setRoutingControllerId(kotlin.String?){}[0]
 }
 
