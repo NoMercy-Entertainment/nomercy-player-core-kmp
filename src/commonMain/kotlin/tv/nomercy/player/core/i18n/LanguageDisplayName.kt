@@ -18,7 +18,7 @@ package tv.nomercy.player.core.i18n
  * and `Uit` in Dutch, above rows reading `English (Full)` and `Croatian (Full)`.
  *
  * Mirrors `languageDisplayName` in
- * `packages/nomercy-video-player/src/plugins/desktop-ui/data/language-names.ts`.
+ * `packages/player-web/nomercy-video-player/src/plugins/desktop-ui/data/language-names.ts`.
  */
 
 /**

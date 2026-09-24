@@ -12,7 +12,7 @@ import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 
 // Kotlin mirror of the web EventEmitter
-// (packages/nomercy-player-core/src/adapters/event-bus/default.ts). Listeners
+// (packages/player-web/nomercy-player-core/src/adapters/event-bus/default.ts). Listeners
 // are stored insertion-ordered per event name; emit() snapshots that list
 // before iterating so an off() called from inside a handler takes effect on
 // the next emit, not the one already in progress. E is a phantom marker

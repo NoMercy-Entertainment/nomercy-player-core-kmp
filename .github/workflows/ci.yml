@@ -133,17 +133,17 @@ jobs:
       # sibling checkout at ../nomercy-player-core-kmp when one is there.
       - uses: actions/checkout@v4
         with:
-          path: packages-native/nomercy-player-core-kmp
+          path: packages/player-kmp/nomercy-player-core-kmp
 
       - uses: actions/checkout@v4
         with:
           repository: NoMercy-Entertainment/nomercy-video-player-kmp
-          path: packages-native/nomercy-video-player-kmp
+          path: packages/player-kmp/nomercy-video-player-kmp
 
       - uses: actions/checkout@v4
         with:
           repository: NoMercy-Entertainment/nomercy-music-player-kmp
-          path: packages-native/nomercy-music-player-kmp
+          path: packages/player-kmp/nomercy-music-player-kmp
 
       - uses: actions/setup-java@v4
         with:
@@ -161,11 +161,11 @@ jobs:
       # target the runner can build, because androidMain code that reaches for a
       # symbol commonMain never touched is exactly what the app trips over.
       - name: Video player compiles against this core
-        working-directory: packages-native/nomercy-video-player-kmp
+        working-directory: packages/player-kmp/nomercy-video-player-kmp
         run: ./gradlew assemble --console=plain
 
       - name: Music player compiles against this core
-        working-directory: packages-native/nomercy-music-player-kmp
+        working-directory: packages/player-kmp/nomercy-music-player-kmp
         run: ./gradlew assemble --console=plain
 
   # The half that legally requires Apple hardware: executing Kotlin/Native tests
