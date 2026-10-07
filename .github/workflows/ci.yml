@@ -37,7 +37,10 @@ jobs:
   # check covers the iOS and tvOS public surface, because Kotlin/Native compiles
   # klibs on any host; only linking a framework needs macOS.
   jvm-android:
-    runs-on: [self-hosted, Linux, X64, beast-unit]
+    # GitHub-hosted for now, like every job in this file: the self-hosted
+    # runners failed on setup-android, a Windows libmpv download and the tvOS
+    # simulator (#48). Back to self-hosted once those are fixed.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
@@ -126,7 +129,7 @@ jobs:
   # The consumers are taken at master because that is the ref the app's release
   # workflow clones. Green here means the app can resolve this core.
   downstream:
-    runs-on: [self-hosted, Linux, X64, beast-unit]
+    runs-on: ubuntu-latest
     steps:
       # The monorepo layout, because that is what both consumers'
       # settings.gradle.kts looks for: each substitutes the coordinate with a
@@ -173,7 +176,7 @@ jobs:
   # only runs during framework linking, so this job is the first place its output
   # is exercised at all.
   apple:
-    runs-on: [self-hosted, macOS, ARM64, xcode]
+    runs-on: macos-15
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
     steps:
