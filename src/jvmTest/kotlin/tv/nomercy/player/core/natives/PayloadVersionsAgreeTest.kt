@@ -19,7 +19,7 @@ import kotlin.test.assertTrue
 // task copies. tools/native-payloads.lock tells the build script what to build
 // and what to call it. Nothing compared them, and the macOS entry had no
 // version pinned at all — so the script fell back to the WINDOWS version and
-// packed libmpv-2026.06.10-macos-arm64.tar.gz while the catalogue asked for
+// packed libmpv-2026.10.07-macos-arm64.tar.gz while the catalog asked for
 // 0.41.0. The build succeeded, the archive was written, and the caller found
 // nothing at the name it wanted.
 //

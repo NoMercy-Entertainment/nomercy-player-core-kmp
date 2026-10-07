@@ -29,14 +29,20 @@
 # Two versions, because the two platforms take libmpv from two places: the
 # Windows payload is upstream's dev package and the Linux one is Debian's
 # libmpv2. A single number would name one of them wrongly.
-libmpv.version=2026.06.10
+libmpv.version=2026.10.07
 libmpv.linux-x64.version=0.35.1
 libmpv.android-arm64.version=0.41.0
 libmpv.android-arm.version=0.41.0
 
 libmpv.windows-x64.kind=7z
-libmpv.windows-x64.source=https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20260610/mpv-dev-x86_64-20260610-git-304426c.7z
-libmpv.windows-x64.sha256=8cbb25ea784f01afbb3f904217cab1317430a8bcfd5680fd827a866367f71cc9
+# Upstream prunes old releases. The 20260610 build returned 404 and broke every
+# fresh Windows build, so this pin must be refreshed whenever the URL 404s: pick
+# a current mpv-dev-x86_64 asset (plain x86_64, not -v3), recompute the sha256
+# of the downloaded file, and bump libmpv.version and natives/payloads.json to
+# the same date. This is a stopgap; the real fix is an LGPL libmpv built by us
+# (issue #60).
+libmpv.windows-x64.source=https://github.com/shinchiro/mpv-winbuild-cmake/releases/download/20261007/mpv-dev-x86_64-20261007-git-eb0ee10315.7z
+libmpv.windows-x64.sha256=3fd93055d437310ad094d3f80c9b04f9a56e8b138bcb7d9c5cf01870abbfe5a5
 
 # Linux has no portable libmpv build either, and for the same reason libVLC has
 # none: the project ships source and the distributions ship packages. So it is
@@ -67,7 +73,7 @@ libmpv.android-arm.sha256=
 # Its own version, because the fallback is the Windows one.
 #
 # Without this line the script fell back to libmpv.version and packed
-# libmpv-2026.06.10-macos-arm64.tar.gz while the catalogue -- which is what the
+# libmpv-2026.10.07-macos-arm64.tar.gz while the catalog -- which is what the
 # loader fetches and what the bundling task copies -- names 0.41.0. The build
 # succeeded, the file was written, and the caller found nothing at the name it
 # asked for. PayloadVersionsAgreeTest is the check that was missing.

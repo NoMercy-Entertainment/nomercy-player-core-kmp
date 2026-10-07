@@ -75,7 +75,7 @@ class NativeArchivesTest {
         val libmpv = assertNotNull(NativeArchives.of(NativeRuntimeKind.LIB_MPV, HostPlatform.WINDOWS_X64))
         assertEquals(
             "https://github.com/NoMercy-Entertainment/nomercy-player-core-kmp/releases/download/" +
-                "natives-libmpv-2026.06.10/libmpv-2026.06.10-windows-x64.tar.gz",
+                "natives-libmpv-2026.10.07/libmpv-2026.10.07-windows-x64.tar.gz",
             libmpv.url,
         )
     }
