@@ -46,7 +46,10 @@ jobs:
   publish:
     # Only a tag push publishes. A dispatch is here to redo the framework.
     if: github.event_name == 'push'
-    runs-on: [self-hosted, macOS, ARM64, xcode]
+    # Hosted, like CI's apple job: the Mac mini has no tvOS simulator, and the
+    # v0.2.8 tag failed on :tvosSimulatorArm64Test there
+    # (NoMercy-Entertainment/nomercy-github-runner#48).
+    runs-on: macos-15
     env:
       DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
       GRADLE_OPTS: -Dorg.gradle.daemon=false
@@ -163,7 +166,7 @@ jobs:
   xcframework:
     needs: publish
     if: always() && (needs.publish.result == 'success' || needs.publish.result == 'skipped')
-    runs-on: [self-hosted, macOS, ARM64, xcode]
+    runs-on: macos-15
     permissions:
       contents: write
     env:
