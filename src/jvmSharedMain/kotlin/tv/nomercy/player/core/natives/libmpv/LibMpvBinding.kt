@@ -12,6 +12,7 @@ import com.sun.jna.Library
 import com.sun.jna.NativeLibrary
 import com.sun.jna.Memory
 import com.sun.jna.Native
+import com.sun.jna.Platform
 import com.sun.jna.Pointer
 import com.sun.jna.PointerType
 import com.sun.jna.ptr.PointerByReference
@@ -212,8 +213,51 @@ public interface LibMpv : Library {
                 NativeLibrary.addSearchPath(SONAME, payload.absolutePath)
                 if (HostPlatform.isAndroid()) loadAndroidDependencies(payload)
             }
-            return Native.load(SONAME, LibMpv::class.java)
+            val library: LibMpv = Native.load(SONAME, LibMpv::class.java)
+            useCNumericLocale()
+            return library
         }
+
+        /**
+         * libmpv refuses to create a handle unless the process's numeric locale
+         * is "C": `mpv_create` returns null and logs "Non-C locale detected.
+         * This is not supported." mpv parses and prints numbers with the C
+         * runtime, and a locale whose decimal separator is a comma would turn
+         * every `0.5` it reads into `0`.
+         *
+         * The JVM sets the locale from the environment at startup, so any Mac
+         * or Linux user whose region formats numbers differently got a black
+         * player. An environment variable cannot fix it after the JVM has
+         * started (tried in core #65); only libc's own `setlocale` can.
+         * Windows and Android are left alone: Windows passes as is, and
+         * Android's libc only has the C locale.
+         */
+        private fun useCNumericLocale() {
+            val category: Int = numericCategory() ?: return
+            LibC.INSTANCE.setlocale(category, "C")
+        }
+
+        /** The numeric locale libmpv will see, or null where it is not checked. */
+        internal fun numericLocale(): String? {
+            val category: Int = numericCategory() ?: return null
+            return LibC.INSTANCE.setlocale(category, null)
+        }
+
+        // <locale.h> numbers the categories per C library: LC_NUMERIC is 4 in
+        // the macOS SDK (locale.h) and 1 in glibc (bits/locale.h __LC_NUMERIC).
+        private fun numericCategory(): Int? {
+            val os: String = System.getProperty("os.name")
+            return when {
+                HostPlatform.isAndroid() -> null
+                os.startsWith("Windows", ignoreCase = true) -> null
+                os.startsWith("Mac", ignoreCase = true) -> LC_NUMERIC_DARWIN
+                else -> LC_NUMERIC_GLIBC
+            }
+        }
+
+        private const val LC_NUMERIC_DARWIN: Int = 4
+        private const val LC_NUMERIC_GLIBC: Int = 1
+    }
 
         // Android resolves no transitive SONAMEs for a library loaded from a
         // payload directory, so libmpv's own dependencies are loaded by hand and
@@ -225,6 +269,16 @@ public interface LibMpv : Library {
                 if (library.isFile) System.load(library.absolutePath)
             }
         }
+    }
+}
+
+/** The one libc call libmpv's locale check needs. */
+@Suppress("FunctionNaming")
+internal interface LibC : Library {
+    fun setlocale(category: Int, locale: String?): String?
+
+    companion object {
+        val INSTANCE: LibC by lazy { Native.load(Platform.C_LIBRARY_NAME, LibC::class.java) }
     }
 }
 

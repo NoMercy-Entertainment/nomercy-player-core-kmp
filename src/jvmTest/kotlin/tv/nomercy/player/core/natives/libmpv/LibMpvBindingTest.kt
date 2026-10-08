@@ -56,6 +56,24 @@ class LibMpvBindingTest {
         }
     }
 
+    // A Mac or Linux user whose region writes 0,5 got a null handle and a black
+    // player: mpv_create refuses any numeric locale but "C". Loading the
+    // library is what has to fix it, because every caller loads first.
+    @Test
+    fun loadingTheLibraryLeavesTheNumericLocaleMpvAccepts() {
+        if (libraryOrNull() == null) {
+            println("SKIPPED: no ${LibMpv.SONAME} on jna.library.path")
+            return
+        }
+
+        val locale: String? = LibMpv.numericLocale()
+        if (locale == null) {
+            println("SKIPPED: mpv does not check the numeric locale on ${System.getProperty("os.name")}")
+            return
+        }
+        assertEquals("C", locale, "LC_NUMERIC after LibMpv.load()")
+    }
+
     @Test
     fun theSonameIsThePlatformsNotTheBareName() {
         // Windows ships libmpv-2.dll, Linux libmpv.so.2, macOS libmpv.2.dylib.
