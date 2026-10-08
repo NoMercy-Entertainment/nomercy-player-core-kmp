@@ -67,6 +67,13 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      # The macOS libmpv payload is assembled from Homebrew's mpv on the host
+      # (tools/native-payload-macos-mpv.sh). The Mac mini had it installed; a
+      # hosted runner does not, and v0.2.8 failed on "no libmpv.dylib under
+      # /opt/homebrew/opt/mpv/lib".
+      - name: Install mpv for the macOS payload
+        run: brew install mpv
+
       # A browser for the Kotlin/Wasm tests `build` runs through karma.
       #
       # Preferring one already installed, because the action's own download is
