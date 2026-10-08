@@ -8,6 +8,9 @@
 
 package tv.nomercy.player.core.natives.libmpv
 
+import com.sun.jna.Library
+import com.sun.jna.Native
+import com.sun.jna.Platform
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -59,19 +62,43 @@ class LibMpvBindingTest {
     // A Mac or Linux user whose region writes 0,5 got a null handle and a black
     // player: mpv_create refuses any numeric locale but "C". Loading the
     // library is what has to fix it, because every caller loads first.
+    // Anything in the process may set the locale from the user's region before
+    // the player starts (on CI the full suite did), so the test sets a comma
+    // locale itself and then asks for a handle.
     @Test
-    fun loadingTheLibraryLeavesTheNumericLocaleMpvAccepts() {
-        if (libraryOrNull() == null) {
-            println("SKIPPED: no ${LibMpv.SONAME} on jna.library.path")
-            return
+    fun aHandleIsCreatedWhenTheProcessHasACommaDecimalLocale() {
+        val category: Int? = when {
+            System.getProperty("os.name").startsWith("Mac", ignoreCase = true) -> 4
+            System.getProperty("os.name").startsWith("Linux", ignoreCase = true) -> 1
+            else -> null
         }
-
-        val locale: String? = LibMpv.numericLocale()
-        if (locale == null) {
+        if (category == null) {
             println("SKIPPED: mpv does not check the numeric locale on ${System.getProperty("os.name")}")
             return
         }
-        assertEquals("C", locale, "LC_NUMERIC after LibMpv.load()")
+        val libc: TestLibC = Native.load(Platform.C_LIBRARY_NAME, TestLibC::class.java)
+        val hostile: String? = listOf("nl_NL.UTF-8", "de_DE.UTF-8", "fr_FR.UTF-8")
+            .firstNotNullOfOrNull { name -> libc.setlocale(category, name) }
+        if (hostile == null) {
+            println("SKIPPED: no comma-decimal locale installed")
+            return
+        }
+        try {
+            val mpv: LibMpv? = libraryOrNull()
+            if (mpv == null) {
+                println("SKIPPED: no ${LibMpv.SONAME} on jna.library.path")
+                return
+            }
+            val handle: MpvHandle = assertNotNull(mpv.mpv_create(), "mpv_create returned null under $hostile")
+            mpv.mpv_terminate_destroy(handle)
+        } finally {
+            libc.setlocale(category, "C")
+        }
+    }
+
+    @Suppress("FunctionNaming")
+    interface TestLibC : Library {
+        fun setlocale(category: Int, locale: String?): String?
     }
 
     @Test

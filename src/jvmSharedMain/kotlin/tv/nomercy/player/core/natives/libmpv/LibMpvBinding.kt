@@ -237,27 +237,17 @@ public interface LibMpv : Library {
             LibC.INSTANCE.setlocale(category, "C")
         }
 
-        /** The numeric locale libmpv will see, or null where it is not checked. */
-        internal fun numericLocale(): String? {
-            val category: Int = numericCategory() ?: return null
-            return LibC.INSTANCE.setlocale(category, null)
-        }
-
         // <locale.h> numbers the categories per C library: LC_NUMERIC is 4 in
         // the macOS SDK (locale.h) and 1 in glibc (bits/locale.h __LC_NUMERIC).
-        private fun numericCategory(): Int? {
-            val os: String = System.getProperty("os.name")
-            return when {
-                HostPlatform.isAndroid() -> null
-                os.startsWith("Windows", ignoreCase = true) -> null
-                os.startsWith("Mac", ignoreCase = true) -> LC_NUMERIC_DARWIN
-                else -> LC_NUMERIC_GLIBC
-            }
+        private fun numericCategory(): Int? = when {
+            HostPlatform.isAndroid() -> null
+            Platform.isWindows() -> null
+            Platform.isMac() -> LC_NUMERIC_DARWIN
+            else -> LC_NUMERIC_GLIBC
         }
 
         private const val LC_NUMERIC_DARWIN: Int = 4
         private const val LC_NUMERIC_GLIBC: Int = 1
-    }
 
         // Android resolves no transitive SONAMEs for a library loaded from a
         // payload directory, so libmpv's own dependencies are loaded by hand and
