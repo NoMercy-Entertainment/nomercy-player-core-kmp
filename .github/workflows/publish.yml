@@ -136,7 +136,12 @@ jobs:
           fi
 
       # Gates first. A release that skips them is a release nothing checked.
+      # LC_NUMERIC=C: libmpv refuses to start under a non-C numeric locale
+      # ("Non-C locale detected") and mpv_create returns null, which failed
+      # LibMpvBindingTest on the hosted runner now that mpv is installed there.
       - run: ./gradlew build
+        env:
+          LC_NUMERIC: C
 
       # Three artifacts leave this repository, and a release missing one of
       # them is only noticed by the consumer who resolves it. The engine, the
