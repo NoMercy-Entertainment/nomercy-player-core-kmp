@@ -37,9 +37,9 @@ jobs:
   # check covers the iOS and tvOS public surface, because Kotlin/Native compiles
   # klibs on any host; only linking a framework needs macOS.
   jvm-android:
-    # GitHub-hosted for now, like every job in this file: the self-hosted
-    # runners failed on setup-android, a Windows libmpv download and the tvOS
-    # simulator (#48). Back to self-hosted once those are fixed.
+    # Internal builds use the managed Linux fleet. Outside fork pull requests
+    # retain GitHub-hosted isolation.
+    timeout-minutes: 7200
     runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","Linux","X64","beast-unit"]') || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v7
@@ -59,12 +59,24 @@ jobs:
       # :testing:wasmJsBrowserTest fails with "Errors occurred during launch of
       # browser for testing - ChromeHeadless" and the build never reaches the
       # tests it was asked for.
-      - uses: browser-actions/setup-chrome@v1
+      - uses: browser-actions/setup-chrome@v2
         id: setup-chrome
+        with:
+          chrome-version: stable
+          install-dependencies: true
 
       # Karma looks the browser up by this variable rather than by PATH.
       - name: Point karma at that Chrome
         run: echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> "$GITHUB_ENV"
+
+      - name: Verify Chrome can launch headlessly
+        run: |
+          set -euo pipefail
+          "$CHROME_BIN" --version
+          "$CHROME_BIN" --headless --no-sandbox --disable-dev-shm-usage \
+            --dump-dom 'data:text/html,<title>nomercy-ci-browser</title>' \
+            > "$RUNNER_TEMP/nomercy-chrome-preflight.html"
+          grep -q '<title>nomercy-ci-browser</title>' "$RUNNER_TEMP/nomercy-chrome-preflight.html"
 
       # Skiko, which is what Compose Multiplatform renders through on the JVM,
       # dlopens libGL when its class initialises. A GitHub-hosted ubuntu image
@@ -129,6 +141,7 @@ jobs:
   # The consumers are taken at master because that is the ref the app's release
   # workflow clones. Green here means the app can resolve this core.
   downstream:
+    timeout-minutes: 7200
     runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","Linux","X64","beast-unit"]') || 'ubuntu-latest' }}
     steps:
       # The monorepo layout, because that is what both consumers'
