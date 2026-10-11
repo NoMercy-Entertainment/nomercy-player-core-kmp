@@ -47,7 +47,18 @@ kotlin {
     // via nomercy-video-player-kmp's wasmJsTest) needs these fakes on that
     // target too, or its test classpath cannot resolve this artifact at all.
     wasmJs {
-        browser()
+        browser {
+        // Chrome refuses to start as root without --no-sandbox, and the
+        // self-hosted Linux runners run as root. karma.config.d/no-sandbox.js
+        // says the same thing, but the run log still named the stock
+        // "ChromeHeadless" launcher timing out, so say it here too, where
+        // Gradle cannot skip it.
+        testTask {
+            useKarma {
+                useChromeHeadlessNoSandbox()
+            }
+        }
+        }
     }
 
     // The same Apple targets the engine has, assembled into their own
