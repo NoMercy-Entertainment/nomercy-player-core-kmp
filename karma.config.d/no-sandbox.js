@@ -7,6 +7,10 @@
 // /dev/shm is 64 MB and Chrome crashes part-way through a run rather than
 // failing to launch, which is the harder version of this to read.
 config.set({
+    // Concurrent builds on the capped fleet can delay the browser handshake.
+    // Keep all assertions enabled and allow the browser time to attach.
+    captureTimeout: 300000,
+    browserNoActivityTimeout: 120000,
     customLaunchers: {
         ChromeHeadlessNoSandbox: {
             base: 'ChromeHeadless',
