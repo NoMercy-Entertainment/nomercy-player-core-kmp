@@ -4,6 +4,8 @@
 // tests needs its own copy — :testing:wasmJsBrowserTest is the task that
 // actually failed.
 config.set({
+    captureTimeout: 300000,
+    browserNoActivityTimeout: 120000,
     customLaunchers: {
         ChromeHeadlessNoSandbox: {
             base: 'ChromeHeadless',
