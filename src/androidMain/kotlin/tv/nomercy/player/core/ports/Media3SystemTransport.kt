@@ -161,8 +161,8 @@ internal class Media3SystemTransport(
     // already uses for the same forced-static-seam reason.
     private fun artworkDataSourceFactory(): DataSource.Factory {
         val headers: () -> Map<String, String> = { PlatformEnvironment.artworkAuthHeaders?.invoke().orEmpty() }
-        val client = OkHttpClient.Builder()
-            .addInterceptor { chain ->
+        val client = SharedHttpClient.derive {
+            addInterceptor { chain ->
                 val request = chain.request()
                 val extra = headers()
                 if (extra.isEmpty()) {
@@ -175,7 +175,7 @@ internal class Media3SystemTransport(
                     chain.proceed(builder.build())
                 }
             }
-            .build()
+        }
         return DefaultDataSource.Factory(appContext, OkHttpDataSource.Factory(client))
     }
 

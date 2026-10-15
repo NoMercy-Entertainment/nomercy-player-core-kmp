@@ -249,28 +249,28 @@ private fun dataSourceFactory(
     auth: AuthHeaders,
     onVariants: (List<QualityDescriptor>) -> Unit,
 ): DataSource.Factory {
-    val client = OkHttpClient.Builder()
+    val client = SharedHttpClient.derive {
         // A live-transcoded segment does not exist until the encoder writes
         // it, and the server holds the request open until it does. OkHttp's
         // 10s default gave up first: measured on an SM-A137F playing a
         // transcoded episode, which died on SocketTimeoutException about a
         // minute in while the encoder was still working.
-        .readTimeout(SEGMENT_READ_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
-        .callTimeout(SEGMENT_CALL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
+        readTimeout(SEGMENT_READ_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
+        callTimeout(SEGMENT_CALL_TIMEOUT_S, java.util.concurrent.TimeUnit.SECONDS)
         // Auth first, so the repair below sees the response that the
         // authenticated request actually returned rather than a 401 body.
-        .addInterceptor(auth.asInterceptor())
-        .addInterceptor(CodecFixInterceptor())
+        addInterceptor(auth.asInterceptor())
+        addInterceptor(CodecFixInterceptor())
         // No ceiling and no narrowing: the rung policy belongs to the backend,
         // which measures the surface. This is here to READ, which is the half
         // that was missing entirely.
-        .addInterceptor(
+        addInterceptor(
             BandwidthSanitizingInterceptor(
                 ceiling = Long.MAX_VALUE,
                 onVariants = onVariants,
             ),
         )
-        .build()
+    }
 
     return DefaultDataSource.Factory(context, OkHttpDataSource.Factory(client))
 }
