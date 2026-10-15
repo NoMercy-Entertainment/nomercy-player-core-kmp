@@ -393,20 +393,25 @@ public class BackendBridge(
             if (ctx.phase == PlayerPhase.STARTING) ctx.transitionPhase(PlayerPhase.PLAYING)
             ctx.emit(CoreEvents.Playing, Unit)
 
-            // Once per item, after the first frame is actually on screen. A
-            // chrome waiting to take its poster down needs the frame to exist
-            // first, or it swaps a still image for a black one.
-            if (!announcedFirstFrame) {
-                announcedFirstFrame = true
-                ctx.emit(CoreEvents.FirstFrame, Unit)
-            }
+            // Fallback for an engine with no frame signal (audio, fakes).
+            if (!backend.reportsRenderedFirstFrame) announceFirstFrame()
         }
+
+        // Once per item, when a frame is really drawn: a chrome taking its
+        // poster down earlier swaps a still image for a black one.
+        listen(backend, CanonicalBackendEvent.FIRST_FRAME_RENDERED) { announceFirstFrame() }
 
         listen(backend, CanonicalBackendEvent.PAUSE) { announcePause() }
 
         // The other half of the same bridge, for a start the player did not ask
         // for — focus coming back, or that same media key.
         listen(backend, CanonicalBackendEvent.PLAY) { announcePlay() }
+    }
+
+    private fun announceFirstFrame() {
+        if (announcedFirstFrame) return
+        announcedFirstFrame = true
+        ctx.emit(CoreEvents.FirstFrame, Unit)
     }
 
     private fun listen(backend: MediaBackend, event: String, handler: (Any?) -> Unit) {

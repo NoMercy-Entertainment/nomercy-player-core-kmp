@@ -24,6 +24,10 @@ public object CanonicalBackendEvent {
     public const val PLAYING: String = "playing"
     public const val TIME_UPDATE: String = "timeupdate"
 
+    // A video frame has been drawn to the surface. Only an engine that reports
+    // reportsRenderedFirstFrame emits it; PLAYING comes before any picture.
+    public const val FIRST_FRAME_RENDERED: String = "firstframerendered"
+
     // The length, once an engine knows it.
     //
     // A browser knows it by loadedmetadata, which is why the reference never

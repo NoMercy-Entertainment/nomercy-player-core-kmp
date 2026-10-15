@@ -6402,6 +6402,7 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun buffered (Ltv/nomercy/player/core/ports/AudioBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/AudioBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
+	public static fun getReportsRenderedFirstFrame (Ltv/nomercy/player/core/ports/AudioBackend;)Z
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/AudioBackend;D)Z
 	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/AudioBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
@@ -6742,6 +6743,7 @@ public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
 	public static final field DURATION_CHANGE Ljava/lang/String;
 	public static final field ENDED Ljava/lang/String;
 	public static final field ERROR Ljava/lang/String;
+	public static final field FIRST_FRAME_RENDERED Ljava/lang/String;
 	public static final field FRAGMENT_LOADED Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/ports/CanonicalBackendEvent;
 	public static final field LEVEL_CONSIDERED Ljava/lang/String;
@@ -7391,6 +7393,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun currentTime (D)V
 	public abstract fun duration ()D
 	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
+	public fun getReportsRenderedFirstFrame ()Z
 	public fun isPrerolled (D)Z
 	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public abstract fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -7419,6 +7422,7 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun buffered (Ltv/nomercy/player/core/ports/MediaBackend;)D
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/MediaBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
+	public static fun getReportsRenderedFirstFrame (Ltv/nomercy/player/core/ports/MediaBackend;)Z
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/MediaBackend;D)Z
 	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -7510,6 +7514,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun disposeSecondary ()V
 	public fun duration ()D
 	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
+	public fun getReportsRenderedFirstFrame ()Z
 	public fun isPrerolled (D)Z
 	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public fun load (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -7584,6 +7589,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun externalPlayback ()Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public fun getCanToneMapHdrToSdr ()Z
 	public final fun getLadder ()Ltv/nomercy/player/core/ports/AdaptiveLadderDriver;
+	public fun getReportsRenderedFirstFrame ()Z
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public fun isPrerolled (D)Z
 	public fun isSourcePrerolled (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
@@ -8616,6 +8622,7 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun bufferedRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
 	public static fun externalPlayback (Ltv/nomercy/player/core/ports/VideoBackend;)Ltv/nomercy/player/core/ports/ExternalPlayback;
 	public static fun getCanToneMapHdrToSdr (Ltv/nomercy/player/core/ports/VideoBackend;)Z
+	public static fun getReportsRenderedFirstFrame (Ltv/nomercy/player/core/ports/VideoBackend;)Z
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/VideoBackend;D)Z
 	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/VideoBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z

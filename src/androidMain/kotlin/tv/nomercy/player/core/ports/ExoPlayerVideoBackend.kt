@@ -437,6 +437,10 @@ public class ExoPlayerVideoBackend(
                 applyHdrDecision()
             }
 
+            override fun onRenderedFirstFrame() {
+                bus.emit(CanonicalBackendEvent.FIRST_FRAME_RENDERED)
+            }
+
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 refreshCache()
                 if (isPlaying) {
@@ -1064,6 +1068,8 @@ public class ExoPlayerVideoBackend(
     // this engine reports no ranges, and the default would read the empty list
     // as nothing buffered.
     override fun buffered(): Double = cachedBuffered
+
+    override val reportsRenderedFirstFrame: Boolean = true
 
     override fun playbackRate(): Double = cachedRate
 

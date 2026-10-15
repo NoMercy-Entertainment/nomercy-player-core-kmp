@@ -1489,6 +1489,9 @@ abstract interface tv.nomercy.player.core.ports/Logger { // tv.nomercy.player.co
 }
 
 abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.player.core.ports/MediaBackend|null[0]
+    open val reportsRenderedFirstFrame // tv.nomercy.player.core.ports/MediaBackend.reportsRenderedFirstFrame|{}reportsRenderedFirstFrame[0]
+        open fun <get-reportsRenderedFirstFrame>(): kotlin/Boolean // tv.nomercy.player.core.ports/MediaBackend.reportsRenderedFirstFrame.<get-reportsRenderedFirstFrame>|<get-reportsRenderedFirstFrame>(){}[0]
+
     abstract fun currentTime(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.currentTime|currentTime(){}[0]
     abstract fun currentTime(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.currentTime|currentTime(kotlin.Double){}[0]
     abstract fun duration(): kotlin/Double // tv.nomercy.player.core.ports/MediaBackend.duration|duration(){}[0]
@@ -9243,6 +9246,8 @@ final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.
         final fun <get-ENDED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ENDED.<get-ENDED>|<get-ENDED>(){}[0]
     final const val ERROR // tv.nomercy.player.core.ports/CanonicalBackendEvent.ERROR|{}ERROR[0]
         final fun <get-ERROR>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.ERROR.<get-ERROR>|<get-ERROR>(){}[0]
+    final const val FIRST_FRAME_RENDERED // tv.nomercy.player.core.ports/CanonicalBackendEvent.FIRST_FRAME_RENDERED|{}FIRST_FRAME_RENDERED[0]
+        final fun <get-FIRST_FRAME_RENDERED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.FIRST_FRAME_RENDERED.<get-FIRST_FRAME_RENDERED>|<get-FIRST_FRAME_RENDERED>(){}[0]
     final const val FRAGMENT_LOADED // tv.nomercy.player.core.ports/CanonicalBackendEvent.FRAGMENT_LOADED|{}FRAGMENT_LOADED[0]
         final fun <get-FRAGMENT_LOADED>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.FRAGMENT_LOADED.<get-FRAGMENT_LOADED>|<get-FRAGMENT_LOADED>(){}[0]
     final const val LEVEL_CONSIDERED // tv.nomercy.player.core.ports/CanonicalBackendEvent.LEVEL_CONSIDERED|{}LEVEL_CONSIDERED[0]

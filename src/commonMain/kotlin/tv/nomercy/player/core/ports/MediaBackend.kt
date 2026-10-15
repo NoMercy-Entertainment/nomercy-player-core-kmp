@@ -107,6 +107,10 @@ public interface MediaBackend {
 
     public fun state(): BackendState
 
+    // True when this engine emits FIRST_FRAME_RENDERED. The bridge then holds
+    // CoreEvents.FirstFrame for it; false keeps the PLAYING fallback.
+    public val reportsRenderedFirstFrame: Boolean get() = false
+
     public fun on(event: String, fn: (Any?) -> Unit)
     public fun off(event: String, fn: (Any?) -> Unit)
 
