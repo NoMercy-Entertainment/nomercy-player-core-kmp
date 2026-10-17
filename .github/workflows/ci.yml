@@ -32,6 +32,15 @@ env:
   GH_TOKEN: ${{ github.token }}
 
 jobs:
+  release-script:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - run: /bin/bash tools/test-release-maven.sh
+
   # Everything that does not need Apple hardware. `build` runs jvmTest, the
   # Android host tests, detekt, and both API checks — JVM and klib. The klib
   # check covers the iOS and tvOS public surface, because Kotlin/Native compiles
