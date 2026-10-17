@@ -75,6 +75,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public final fun getPlayCount ()I
 	public final fun getRatesSet ()Ljava/util/List;
 	public final fun getReleaseCount ()I
+	public fun getReportsRenderedFirstFrame ()Z
 	public final fun getSeekedTo ()Ljava/util/List;
 	public final fun getStateValue ()Ltv/nomercy/player/core/ports/BackendState;
 	public final fun getStopCount ()I
@@ -213,6 +214,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public final fun getPauseCount ()I
 	public final fun getPlayCount ()I
 	public final fun getReleaseCount ()I
+	public fun getReportsRenderedFirstFrame ()Z
 	public final fun getSeekedTo ()Ljava/util/List;
 	public final fun getSubtitleTracks ()Ljava/util/List;
 	public fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
