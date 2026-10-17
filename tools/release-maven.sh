@@ -14,8 +14,10 @@ from pathlib import Path
 import sys
 
 root, version = Path(sys.argv[1]), sys.argv[2]
+# No .md5: core's Apple targets make ~1180 files, over the 1000-asset release
+# limit. Gradle verifies with .sha1 alone.
 files = sorted(p for p in root.rglob('*') if p.is_file() and p.name != 'maven-metadata.xml'
-               and not p.name.startswith('maven-metadata.xml.'))
+               and not p.name.startswith('maven-metadata.xml.') and p.suffix != '.md5')
 if not files:
     raise SystemExit('no Maven files staged')
 names = [p.name for p in files]
@@ -26,8 +28,8 @@ if len(files) >= 1000:
 for path in files:
     if f'-{version}' not in path.name:
         raise SystemExit(f'wrong version in {path}')
-    if path.suffix not in ('.asc', '.md5', '.sha1'):
-        for suffix in ('.asc', '.md5', '.sha1'):
+    if path.suffix not in ('.asc', '.sha1'):
+        for suffix in ('.asc', '.sha1'):
             if not (path.parent / (path.name + suffix)).is_file():
                 raise SystemExit(f'missing {suffix} for {path}')
 Path('build/release-maven-files.txt').write_text('\n'.join(str(p) for p in files) + '\n')
