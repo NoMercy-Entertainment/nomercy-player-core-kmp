@@ -14,10 +14,13 @@ from pathlib import Path
 import sys
 
 root, version = Path(sys.argv[1]), sys.argv[2]
-# No .md5: core's Apple targets make ~1180 files, over the 1000-asset release
-# limit. Gradle verifies with .sha1 alone.
-files = sorted(p for p in root.rglob('*') if p.is_file() and p.name != 'maven-metadata.xml'
-               and not p.name.startswith('maven-metadata.xml.') and p.suffix != '.md5')
+# Each file, its .asc and its .sha1 only. Core's Apple targets stage more than
+# the 1000-asset release limit with .md5/.sha256/.sha512; Gradle needs .sha1 alone.
+def kept(p):
+    stem = p.name[:-4] if p.name.endswith('.asc') else p.name[:-5] if p.name.endswith('.sha1') else p.name
+    return not stem.endswith(('.asc', '.md5', '.sha1', '.sha256', '.sha512'))
+files = sorted(p for p in root.rglob('*') if p.is_file() and not p.name.startswith('maven-metadata.xml')
+               and kept(p))
 if not files:
     raise SystemExit('no Maven files staged')
 names = [p.name for p in files]
