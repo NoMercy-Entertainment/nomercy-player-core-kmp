@@ -57,19 +57,17 @@ public fun fillChapterGaps(
 
     val ordered: List<Chapter> = original.sortedBy { it.startTime }
     val first: Chapter = ordered.first()
-    if (first.startTime > CHAPTER_GAP_EPSILON_SECONDS && first.startTime < CHAPTER_ABSORB_SECONDS) {
-        val absorbed: List<Chapter> = listOf(first.copy(startTime = 0.0)) + ordered.drop(1)
-        return ChapterGapFill(absorbed, changed = true)
-    }
     if (first.startTime <= CHAPTER_GAP_EPSILON_SECONDS) {
         // Already covered, and the incoming list may have carried fillers that
         // are no longer needed — so this still returns the derived list.
         return ChapterGapFill(ordered, changed = ordered != chapters)
     }
 
-    val filled: List<Chapter> = listOf(
-        Chapter(startTime = 0.0, title = makeFillerTitle(), synthetic = true),
-    ) + ordered
+    val filled: List<Chapter> = if (first.startTime < CHAPTER_ABSORB_SECONDS) {
+        listOf(first.copy(startTime = 0.0)) + ordered.drop(1)
+    } else {
+        listOf(Chapter(startTime = 0.0, title = makeFillerTitle(), synthetic = true)) + ordered
+    }
 
     return ChapterGapFill(filled, changed = true)
 }
