@@ -56,11 +56,9 @@ internal class EqualizerStore(private val opts: EqualizerOptions) {
     }
 
     // Null means "carry on with what you have" for all three reasons it can
-    // happen: no key, loading switched off, or nothing stored yet. A caller
-    // resetting to flat on a null would throw away a curve every time a host
-    // launched with autoLoad off.
+    // happen: no key or nothing stored yet. A caller resetting to flat on a
+    // null would throw away a curve every time a host launched without one.
     suspend fun loadPersisted(storage: Storage): EqualizerState? {
-        if (!opts.autoLoad) return null
         val key: String = opts.persistKey ?: return null
 
         return storage.getJSON(key, StoredEqualizerState.serializer())?.restored()

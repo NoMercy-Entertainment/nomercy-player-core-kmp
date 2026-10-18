@@ -110,7 +110,7 @@ public open class EqualizerPlugin(
     // localStorage answers immediately, and its own docblock admits an async
     // backend restores late there too.
     override fun use() {
-        if (opts.persistKey == null) return
+        if (opts.persistKey == null || !opts.autoLoad) return
 
         this.launch {
             val restored: EqualizerState? = store.loadPersisted(storage)
@@ -292,6 +292,7 @@ public open class EqualizerPlugin(
     // no way to ask for it.
     public open suspend fun restore() {
         val restored: EqualizerState = store.loadPersisted(storage) ?: return
+        if (restored.bands.isEmpty()) return
 
         current = restored.bands
         chosenPreset = restored.preset
