@@ -104,10 +104,12 @@ public open class AudioPassthroughRenderersFactory protected constructor(
         context: Context,
         enableFloatOutput: Boolean,
         enableAudioTrackPlaybackParams: Boolean,
-    ): AudioSink = DefaultAudioSink.Builder(context)
-        .setEnableFloatOutput(false)
-        .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
-        .build()
+    ): AudioSink = StereoBitstreamDecodingSink(
+        DefaultAudioSink.Builder(context)
+            .setEnableFloatOutput(false)
+            .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+            .build(),
+    )
 
     public companion object {
 

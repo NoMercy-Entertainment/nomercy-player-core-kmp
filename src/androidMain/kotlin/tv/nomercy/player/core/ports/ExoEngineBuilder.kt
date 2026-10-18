@@ -194,11 +194,13 @@ private class EqualiserRenderersFactory(
         context: Context,
         enableFloatOutput: Boolean,
         enableAudioTrackPlaybackParams: Boolean,
-    ): AudioSink = DefaultAudioSink.Builder(context)
-        .setEnableFloatOutput(false)
-        .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
-        .setAudioProcessors(arrayOf(processor))
-        .build()
+    ): AudioSink = StereoBitstreamDecodingSink(
+        DefaultAudioSink.Builder(context)
+            .setEnableFloatOutput(false)
+            .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
+            .setAudioProcessors(arrayOf(processor))
+            .build(),
+    )
 }
 
 // ENABLED, never REQUIRED.
