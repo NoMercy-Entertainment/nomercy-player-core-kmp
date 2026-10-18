@@ -11,6 +11,7 @@ package tv.nomercy.player.core.controllers
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.errors.PlayerError
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.player.ActionOptions
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.RepeatState
@@ -167,16 +168,28 @@ class TransportControllerTest {
     }
 
     @Test
-    fun repeatOneReloadsTheSameItemWithoutMovingTheCursor() = runTest {
+    fun repeatOneReloadsTheSameItemWhenTheTrackEndedOnItsOwn() = runTest {
+        val rig = Rig().ready()
+        rig.queue.queue(items("a", "b"))
+        rig.ctx.repeatState = RepeatState.ONE
+
+        rig.transport.next(ActionOptions(source = "auto-advance"))
+
+        assertEquals("a", rig.queue.item()?.id)
+        assertEquals(0, rig.queue.index())
+        assertEquals("https://example.test/a", rig.backend.loadedUrls.last())
+    }
+
+    @Test
+    fun aUserNextWithRepeatOneMovesToTheNextItem() = runTest {
         val rig = Rig().ready()
         rig.queue.queue(items("a", "b"))
         rig.ctx.repeatState = RepeatState.ONE
 
         rig.transport.next()
 
-        assertEquals("a", rig.queue.item()?.id)
-        assertEquals(0, rig.queue.index())
-        assertEquals("https://example.test/a", rig.backend.loadedUrls.last())
+        assertEquals("b", rig.queue.item()?.id)
+        assertEquals("https://example.test/b", rig.backend.loadedUrls.last())
     }
 
     @Test

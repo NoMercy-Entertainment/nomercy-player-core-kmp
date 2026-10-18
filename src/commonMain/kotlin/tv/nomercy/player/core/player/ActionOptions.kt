@@ -27,6 +27,9 @@ public object ActionSource {
     public const val REMOTE: String = "remote"
     public const val PLUGIN: String = "plugin"
 
+    // The track ended on its own; the only next() that obeys repeat ONE.
+    public const val AUTO_ADVANCE: String = "auto-advance"
+
     // The library acting on its own behalf, for the transport calls no viewer
     // made: the pause before a cast handoff, an engine that stopped itself, and
     // the reference's pause-when-hidden and offline policies. The web spells it

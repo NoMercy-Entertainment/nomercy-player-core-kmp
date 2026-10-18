@@ -8999,6 +8999,8 @@ final object tv.nomercy.player.core.net/HttpFailure { // tv.nomercy.player.core.
 final object tv.nomercy.player.core.player/ActionSource { // tv.nomercy.player.core.player/ActionSource|null[0]
     final const val AUDIO_FOCUS // tv.nomercy.player.core.player/ActionSource.AUDIO_FOCUS|{}AUDIO_FOCUS[0]
         final fun <get-AUDIO_FOCUS>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.AUDIO_FOCUS.<get-AUDIO_FOCUS>|<get-AUDIO_FOCUS>(){}[0]
+    final const val AUTO_ADVANCE // tv.nomercy.player.core.player/ActionSource.AUTO_ADVANCE|{}AUTO_ADVANCE[0]
+        final fun <get-AUTO_ADVANCE>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.AUTO_ADVANCE.<get-AUTO_ADVANCE>|<get-AUTO_ADVANCE>(){}[0]
     final const val BACKEND_SETTLE // tv.nomercy.player.core.player/ActionSource.BACKEND_SETTLE|{}BACKEND_SETTLE[0]
         final fun <get-BACKEND_SETTLE>(): kotlin/String // tv.nomercy.player.core.player/ActionSource.BACKEND_SETTLE.<get-BACKEND_SETTLE>|<get-BACKEND_SETTLE>(){}[0]
     final const val PLATFORM // tv.nomercy.player.core.player/ActionSource.PLATFORM|{}PLATFORM[0]

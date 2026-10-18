@@ -18,6 +18,7 @@ import tv.nomercy.player.core.events.PreventedAction
 import tv.nomercy.player.core.events.SeekPosition
 import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.ActionOptions
+import tv.nomercy.player.core.player.ActionSource
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.RepeatState
@@ -125,7 +126,7 @@ public class TransportController(
     }
 
     // Where the repeat modes live. ONE reloads the same item without moving the
-    // cursor; ALL wraps to the top; OFF says the queue is done rather than
+    // cursor, but only when the track ended on its own; ALL wraps to the top; OFF says the queue is done rather than
     // silently doing nothing, so a chrome can show it.
     public suspend fun next(opts: ActionOptions = ActionOptions()) {
         ctx.assertReady()
@@ -133,7 +134,8 @@ public class TransportController(
 
         ctx.emit(CoreEvents.Next, PlaySource(opts.source))
         when {
-            ctx.repeatState == RepeatState.ONE -> ctx.queue.current()?.let { loadAndPlay(it, opts) }
+            ctx.repeatState == RepeatState.ONE && opts.source == ActionSource.AUTO_ADVANCE ->
+                ctx.queue.current()?.let { loadAndPlay(it, opts) }
             ctx.queue.peekNext() != null -> advanceTo(ctx.queue.currentIndex() + 1, opts)
             ctx.repeatState == RepeatState.ALL -> advanceTo(0, opts)
             else -> ctx.emit(CoreEvents.QueueExhausted, Unit)

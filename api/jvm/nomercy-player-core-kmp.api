@@ -3790,6 +3790,7 @@ public final class tv/nomercy/player/core/player/ActionOptions {
 
 public final class tv/nomercy/player/core/player/ActionSource {
 	public static final field AUDIO_FOCUS Ljava/lang/String;
+	public static final field AUTO_ADVANCE Ljava/lang/String;
 	public static final field BACKEND_SETTLE Ljava/lang/String;
 	public static final field INSTANCE Ltv/nomercy/player/core/player/ActionSource;
 	public static final field PLATFORM Ljava/lang/String;
