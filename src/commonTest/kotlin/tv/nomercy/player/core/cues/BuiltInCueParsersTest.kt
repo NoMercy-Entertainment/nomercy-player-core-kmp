@@ -47,6 +47,14 @@ class BuiltInCueParsersTest {
     }
 
     @Test
+    fun aContentTypeWithACharsetStillSelectsTheParser() {
+        val player = ComposedPlayer()
+
+        assertEquals("vtt", player.resolveCueParser("https://server.test/subtitle/42", "text/vtt; charset=utf-8")?.id)
+        assertEquals("lrc", player.resolveCueParser("https://server.test/lyrics/42", "text/lrc; charset=utf-8")?.id)
+    }
+
+    @Test
     fun aPlayerReadsLrcWithoutAnyoneRegisteringAParser() {
         assertEquals("lrc", ComposedPlayer().resolveCueParser("https://server.test/a/song.lrc")?.id)
     }

@@ -30,7 +30,7 @@ public object LrcCueParser : CueParser<LrcPayload> {
     override val id: String = "lrc"
 
     override fun canParse(url: String, contentType: String?): Boolean =
-        LRC_EXTENSION.containsMatchIn(url) || (contentType != null && LRC_MIME.matches(contentType))
+        LRC_EXTENSION.containsMatchIn(url) || (contentType != null && LRC_MIME.matches(mediaType(contentType)))
 
     override fun parse(raw: String, baseUrl: String?): List<Cue<LrcPayload>> =
         parseLrc(raw).map {
@@ -46,7 +46,7 @@ public object VttSubtitleCueParser : CueParser<VttSubtitlePayload> {
     override fun canParse(url: String, contentType: String?): Boolean = when {
         SPRITE_HINT.containsMatchIn(url) -> false
         VTT_EXTENSION.containsMatchIn(url) -> true
-        else -> contentType != null && VTT_MIME.matches(contentType)
+        else -> contentType != null && VTT_MIME.matches(mediaType(contentType))
     }
 
     override fun parse(raw: String, baseUrl: String?): List<Cue<VttSubtitlePayload>> =
@@ -107,7 +107,10 @@ public fun CueParserRegistry.registerBuiltIns(): CueParserRegistry {
     return this
 }
 
-private val LRC_EXTENSION = Regex("""\.lrc(\?|$)""", RegexOption.IGNORE_CASE)
+// The media type without parameters, so "text/vtt; charset=utf-8" still matches.
+private fun mediaType(contentType: String): String = contentType.substringBefore(';').trim()
+
+private val LRC_EXTENSION =Regex("""\.lrc(\?|$)""", RegexOption.IGNORE_CASE)
 private val LRC_MIME = Regex("""application/x-(lrc|lyrics)|text/lrc""", RegexOption.IGNORE_CASE)
 private val VTT_EXTENSION = Regex("""\.vtt(\?|$)""", RegexOption.IGNORE_CASE)
 private val VTT_MIME = Regex("""text/vtt""", RegexOption.IGNORE_CASE)
