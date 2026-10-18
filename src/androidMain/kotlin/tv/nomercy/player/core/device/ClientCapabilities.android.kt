@@ -40,7 +40,8 @@ public actual fun platformDecodeProfile(): DeviceDecodeProfile {
     val video = VideoProfileBuilder(survey)
     return DeviceDecodeProfile(
         video = VIDEO_MIME_TYPES.mapNotNull { (mime, codec) -> video.capabilityFor(mime, codec) },
-        audio = AUDIO_MIME_TYPES.mapNotNull { (mime, codec) -> survey.audioCapabilityFor(mime, codec) },
+        audio = audioProbes(AUDIO_MIME_TYPES, AUDIO_PASSTHROUGH_ENCODING.keys)
+            .mapNotNull { (mime, codec) -> survey.audioCapabilityFor(mime, codec) },
         containers = survey.containers(),
         supportsHdr = survey.supportsHdr(),
         // No client-imposed cap, for the reason web gives: the server hard-
@@ -311,6 +312,23 @@ private val AUDIO_MIME_TYPES: List<Pair<String, String>> = listOf(
     MediaFormat.MIMETYPE_AUDIO_OPUS to DecodeCodec.OPUS,
     MediaFormat.MIMETYPE_AUDIO_MPEG to DecodeCodec.MP3,
 )
+
+// DTS and TrueHD have no decoder to list, so the passthrough table is what
+// puts them in front of the probe, under the MIME a bitstream route names them.
+private val PASSTHROUGH_ONLY_MIME: Map<String, String> = mapOf(
+    DecodeCodec.DTS to "audio/vnd.dts",
+    DecodeCodec.TRUEHD to "audio/true-hd",
+)
+
+internal fun audioProbes(
+    decodable: List<Pair<String, String>>,
+    passthrough: Set<String>,
+): List<Pair<String, String>> {
+    val known: Set<String> = decodable.mapTo(mutableSetOf()) { it.second }
+    return decodable + passthrough
+        .filter { it !in known }
+        .mapNotNull { codec -> PASSTHROUGH_ONLY_MIME[codec]?.let { mime -> mime to codec } }
+}
 
 // `AudioFormat.ENCODING_*` per wire codec, for the passthrough probe. DTS and
 // TrueHD have no `MediaCodec` decoder on Android at all — they only ever reach
