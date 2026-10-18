@@ -102,6 +102,18 @@ class SpectrumPluginTest {
     }
 
     @Test
+    fun turningSyntheticModeOffDiscardsTheSyntheticFrame() {
+        val spectrum = SpectrumPlugin(FakeDspGraph())
+        spectrum.syntheticMode(true)
+        spectrum.pushFrame(frameAt(9.0))
+
+        spectrum.syntheticMode(false)
+
+        assertNull(spectrum.currentFrame(), "the synthetic frame outlived synthetic mode")
+        assertEquals(0.0, spectrum.bandEnergy(0.0, 20_000.0))
+    }
+
+    @Test
     fun syntheticModeSuppressesTheRealSpectrumRatherThanRacingIt() {
         // Both arriving means a visualiser alternates between the audio and the
         // stand-in every frame, which reads as a display that cannot make up

@@ -130,7 +130,10 @@ public open class SpectrumPlugin(
         // Leaving the last synthetic frame behind would let it be read as the
         // current one after the real spectrum came back, so a visualiser
         // polling currentFrame would draw a shape the audio never had.
-        if (!enabled) syntheticFrame = null
+        if (!enabled) {
+            if (latest === syntheticFrame) latest = null
+            syntheticFrame = null
+        }
     }
 
     public open fun syntheticMode(): Boolean = synthetic
