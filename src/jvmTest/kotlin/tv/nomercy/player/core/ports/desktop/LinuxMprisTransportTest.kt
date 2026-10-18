@@ -127,6 +127,19 @@ class LinuxMprisTransportTest {
     }
 
     @Test
+    fun aRelativeSeekMovesFromTheCurrentPosition() {
+        var seekedToMs: Long = -1
+        transport.setActionHandlers(TransportActions(onSeekTo = { seekedToMs = it }))
+        transport.setPlaybackState(TransportPlaybackState.PLAYING, positionMs = 60_000, playbackRate = 1.0)
+
+        bus.handler?.invoke(MprisMethod.SEEK, 5_000_000L)
+        assertEquals(65_000L, seekedToMs)
+
+        bus.handler?.invoke(MprisMethod.SEEK, -100_000_000L)
+        assertEquals(0L, seekedToMs)
+    }
+
+    @Test
     fun everyMethodReachesTheHandlerItBelongsTo() {
         val called: MutableList<String> = mutableListOf()
         transport.setActionHandlers(
