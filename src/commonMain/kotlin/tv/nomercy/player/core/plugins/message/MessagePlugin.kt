@@ -173,7 +173,14 @@ public open class MessagePlugin(
 
         val message: Message = messages[index]
         transient.value = message.text
-        queueJob = timeout(message.durationMs ?: opts.durationMs) { step(messages, index + 1) }
+        val duration: Long = message.durationMs ?: opts.durationMs
+        // Like show(): no positive duration means it stays until replaced.
+        if (duration <= 0) {
+            queueJob = null
+            return
+        }
+
+        queueJob = timeout(duration) { step(messages, index + 1) }
     }
 
     /**

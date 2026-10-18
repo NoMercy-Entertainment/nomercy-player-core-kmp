@@ -96,6 +96,18 @@ class MessagePluginTest {
         }
     }
 
+    @Test
+    fun aQueuedMessageWithNoPositiveDurationStaysUpLikeShow() = runTest {
+        val plugin = MessagePlugin()
+        testPlugin(plugin, FakePlayer(scope = this)) { _, _ ->
+
+            plugin.queue(listOf(Message("a", durationMs = 0), Message("b", durationMs = 2_000)))
+            advanceTimeBy(5_000)
+
+            assertEquals("a", plugin.toast.value)
+        }
+    }
+
     // Two sequences interleaving produce an order neither caller asked for.
     @Test
     fun asecondQueueCancelsTheFirst() = runTest {
