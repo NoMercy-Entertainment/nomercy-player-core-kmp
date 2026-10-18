@@ -8061,6 +8061,7 @@ open class tv.nomercy.player.core.plugins.audio/EqualizerPlugin : tv.nomercy.pla
     open fun bandSliderStep(kotlin/Int): kotlin/Double // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.bandSliderStep|bandSliderStep(kotlin.Int){}[0]
     open fun bandSliderValue(kotlin/Int): kotlin/Double // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.bandSliderValue|bandSliderValue(kotlin.Int){}[0]
     open fun bands(): kotlin.collections/List<tv.nomercy.player.core.dsp/EqBand> // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.bands|bands(){}[0]
+    open fun dispose() // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.dispose|dispose(){}[0]
     open fun enabled(kotlin/Boolean) // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.enabled|enabled(kotlin.Boolean){}[0]
     open fun equalizerEnabled(): kotlin/Boolean // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.equalizerEnabled|equalizerEnabled(){}[0]
     open fun optionFields(): kotlin.collections/List<tv.nomercy.player.core.plugin/PluginOptionField> // tv.nomercy.player.core.plugins.audio/EqualizerPlugin.optionFields|optionFields(){}[0]
@@ -8102,6 +8103,7 @@ open class tv.nomercy.player.core.plugins.audio/MixerPlugin : tv.nomercy.player.
     final fun pan(kotlin/Double) // tv.nomercy.player.core.plugins.audio/MixerPlugin.pan|pan(kotlin.Double){}[0]
     final fun save() // tv.nomercy.player.core.plugins.audio/MixerPlugin.save|save(){}[0]
     open fun applyPan(kotlin/Double) // tv.nomercy.player.core.plugins.audio/MixerPlugin.applyPan|applyPan(kotlin.Double){}[0]
+    open fun dispose() // tv.nomercy.player.core.plugins.audio/MixerPlugin.dispose|dispose(){}[0]
     open fun use() // tv.nomercy.player.core.plugins.audio/MixerPlugin.use|use(){}[0]
 
     final object Manifest : tv.nomercy.player.core.plugin/PluginManifest { // tv.nomercy.player.core.plugins.audio/MixerPlugin.Manifest|null[0]

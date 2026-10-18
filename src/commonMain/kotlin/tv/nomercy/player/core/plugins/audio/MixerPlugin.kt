@@ -277,16 +277,16 @@ public open class MixerPlugin(
         // The lifecycle's interval waits a period before its first call, and
         // the loop this replaced stepped before its first delay — so the
         // opening move happens here, or the ramp would stall for a tick.
-        step(target, alpha, graph)
+        step(target, alpha)
         if (kotlin.math.abs(target - appliedLinearGain) > RAMP_EPSILON) {
-            rampJob = this.interval(RAMP_TICK_MS.toLong()) { step(target, alpha, graph) }
+            rampJob = this.interval(RAMP_TICK_MS.toLong()) { step(target, alpha) }
         }
     }
 
     // One tick of the exponential approach, or the snap that ends it. Cancels
     // the ramp from inside rather than leaving an interval running against a
     // value that has already arrived.
-    private fun step(target: Double, alpha: Double, graph: AudioDspGraph) {
+    private fun step(target: Double, alpha: Double) {
         if (kotlin.math.abs(target - appliedLinearGain) > RAMP_EPSILON) {
             appliedLinearGain += (target - appliedLinearGain) * alpha
             stage.setMixer(appliedLinearGain)

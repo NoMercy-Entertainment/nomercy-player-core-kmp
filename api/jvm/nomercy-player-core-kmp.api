@@ -5082,6 +5082,7 @@ public class tv/nomercy/player/core/plugins/audio/EqualizerPlugin : tv/nomercy/p
 	public fun bandSliderStep (I)D
 	public fun bandSliderValue (I)D
 	public fun bands ()Ljava/util/List;
+	public fun dispose ()V
 	public fun enabled (Z)V
 	public fun equalizerEnabled ()Z
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
@@ -5198,6 +5199,7 @@ public class tv/nomercy/player/core/plugins/audio/MixerPlugin : tv/nomercy/playe
 	public fun <init> (Ltv/nomercy/player/core/ports/AudioDspGraph;Ltv/nomercy/player/core/plugins/audio/MixerOptions;Z)V
 	public synthetic fun <init> (Ltv/nomercy/player/core/ports/AudioDspGraph;Ltv/nomercy/player/core/plugins/audio/MixerOptions;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	protected fun applyPan (D)V
+	public fun dispose ()V
 	public final fun gain ()D
 	public final fun gain (D)V
 	public fun getManifest ()Ltv/nomercy/player/core/plugin/PluginManifest;
