@@ -212,6 +212,9 @@ internal class Media3SystemTransport(
             controllerSession: MediaSession,
             controller: MediaSession.ControllerInfo,
         ): MediaSession.ConnectionResult {
+            if (!ControllerAccess.allows(controller.isTrusted, controller.packageName, appContext.packageName)) {
+                return MediaSession.ConnectionResult.reject()
+            }
             val available = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
             customButtonHandlers.keys.forEach { id -> available.add(SessionCommand(id, Bundle.EMPTY)) }
             return MediaSession.ConnectionResult.accept(
@@ -655,6 +658,21 @@ internal class Media3SystemTransport(
         // to stop.
         const val BLANK_DEBOUNCE_MS = 3_000L
     }
+}
+
+// Who may bind to the exported playback service. Media3 marks the platform's
+// own controllers trusted; the car display is listed because it is not.
+internal object ControllerAccess {
+    private val knownControllers: Set<String> = setOf(
+        "com.google.android.projection.gearhead",
+        "com.google.android.googlequicksearchbox",
+        "com.google.android.carassistant",
+        "com.android.systemui",
+        "com.android.bluetooth",
+    )
+
+    fun allows(isTrusted: Boolean, controllerPackage: String, ownPackage: String): Boolean =
+        isTrusted || controllerPackage == ownPackage || controllerPackage in knownControllers
 }
 
 // The artwork-loader executor's own lifecycle, split out so it carries no
