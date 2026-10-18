@@ -11,10 +11,10 @@ package tv.nomercy.player.core.plugins.embed
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.Subscription
@@ -168,9 +168,9 @@ public open class EmbedPlugin(
         if (!isOriginAllowed(message.origin)) return
 
         val body: JsonObject = parse(message.payload) ?: return
-        if (body["type"]?.jsonPrimitive?.contentOrNull != EMBED_COMMAND_TYPE) return
+        if ((body["type"] as? JsonPrimitive)?.contentOrNull != EMBED_COMMAND_TYPE) return
 
-        when (val action: EmbedAction? = EmbedAction.of(body["action"]?.jsonPrimitive?.contentOrNull)) {
+        when (val action: EmbedAction? = EmbedAction.of((body["action"] as? JsonPrimitive)?.contentOrNull)) {
             null -> logger.warn("embed: unknown command ${message.payload}")
             else -> handleCommand(EmbedCommand(action, body))
         }

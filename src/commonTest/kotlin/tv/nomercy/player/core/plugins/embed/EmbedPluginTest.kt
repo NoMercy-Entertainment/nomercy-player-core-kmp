@@ -42,6 +42,21 @@ class EmbedPluginTest {
         }
     }
 
+    @Test
+    fun aCommandWhoseFieldsAreNotStringsIsIgnoredRatherThanThrown() = runTest {
+        val pipe = FakeTransport()
+        val commands = RecordingCommands()
+        val plugin = embedPlugin(pipe, commands, listOf(host))
+
+        testPlugin(plugin, FakePlayer(scope = this)) { _, _ ->
+            pipe.deliver(host, """{"type":{}}""")
+            pipe.deliver(host, """{"type":"nm:command","action":[]}""")
+            pipe.deliver(host, """{"type":"nm:command","action":"play"}""")
+
+            assertEquals(listOf("play"), commands.calls)
+        }
+    }
+
     // An embed that accepts commands from anywhere hands its playback to any
     // page that can reach it. Empty refuses everybody, which is the default.
     @Test
