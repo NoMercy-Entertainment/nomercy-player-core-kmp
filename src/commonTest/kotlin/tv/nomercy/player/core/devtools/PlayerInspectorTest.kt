@@ -8,10 +8,15 @@
 
 package tv.nomercy.player.core.devtools
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
 import tv.nomercy.player.core.events.PlaySource
+import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.testing.FakePlayer
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -169,7 +174,26 @@ class PlayerInspectorTest {
 
         assertEquals(1, inspector.events.value.size)
     }
+
+    @Test
+    fun mutedEventsRecordedFromTwoThreadsAreAllCounted() = runTest {
+        var deliver: (String, Any?) -> Unit = { _, _ -> }
+        val inspector = PlayerInspector(
+            player = { fn -> deliver = fn; Subscription { } },
+            muted = (0 until DISTINCT_NAMES).map { "m$it" }.toSet(),
+        )
+
+        withContext(Dispatchers.Default) {
+            listOf("a", "b").map { _ ->
+                async { repeat(DISTINCT_NAMES) { deliver("m$it", null) } }
+            }.awaitAll()
+        }
+
+        assertEquals(2 * DISTINCT_NAMES, inspector.muffled.value.values.sum())
+    }
 }
+
+private const val DISTINCT_NAMES: Int = 3000
 // A toString that throws is the thing under test, so both rules that object to
 // one are off here and nowhere else. The payloads that do this in the wild are
 // not written on purpose either: a field computed on first read that is not

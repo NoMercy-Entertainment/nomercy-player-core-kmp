@@ -74,18 +74,18 @@ public class PlayerInspector(
         synchronized(lock) { buffer.groupingBy { it.name }.eachCount() }
 
     /** Which names are currently dropped. */
-    public fun muted(): Set<String> = muted.toSet()
+    public fun muted(): Set<String> = synchronized(lock) { muted.toSet() }
 
     /**
      * Stop keeping these. Already-buffered lines stay: dropping them would
      * erase the history somebody muted in order to read.
      */
     public fun mute(names: Set<String>) {
-        muted += names
+        synchronized(lock) { muted += names }
     }
 
     public fun unmute(names: Set<String>) {
-        muted -= names
+        synchronized(lock) { muted -= names }
     }
 
     public fun clear() {
@@ -126,11 +126,15 @@ public class PlayerInspector(
         // instead of the log. Muting belongs to the SCROLL, where a heartbeat
         // would push everything else off the top; it was never meant to mean
         // the event did not occur.
-        if (name in muted) {
-            synchronized(lock) { silenced[name] = (silenced[name] ?: 0) + 1 }
-            mutedTally.value = silenced.toMap()
-            return
+        val isMuted: Boolean = synchronized(lock) {
+            (name in muted).also {
+                if (it) {
+                    silenced[name] = (silenced[name] ?: 0) + 1
+                    mutedTally.value = silenced.toMap()
+                }
+            }
         }
+        if (isMuted) return
 
         val event = InspectorEvent(
             sequence = 0,
