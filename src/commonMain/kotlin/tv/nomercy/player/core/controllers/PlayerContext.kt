@@ -285,6 +285,9 @@ public class PlayerContext(
     // Loads run one at a time in call order; a call that a newer one replaced
     // is dropped when its turn comes, so the engine ends on the latest item.
     private var loadEpoch: Int = 0
+
+    // How many loads were asked for so far; a changed count means someone loaded.
+    internal val loadsRequested: Int get() = loadEpoch
     private val loadTurn: Mutex = Mutex()
 
     // The same load with the announcement left to the caller.

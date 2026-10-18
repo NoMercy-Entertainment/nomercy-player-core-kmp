@@ -8,13 +8,22 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorCode
+import tv.nomercy.player.core.errors.ErrorScope
+import tv.nomercy.player.core.errors.PlayerError
+import tv.nomercy.player.core.errors.Severity
+import tv.nomercy.player.core.events.BackendErrorPayload
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.events.PlayerErrorEvent
 import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.media.PlaylistItem
+import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.LoadOptions
 
@@ -141,6 +150,8 @@ internal class FailureRecovery(
     private val clock: Clock,
     private val policy: StreamRecovery = StreamRecovery(),
 ) {
+    private var pending: Job? = null
+
     // Whether the failure was taken over, so the caller knows not to also report
     // it as the end of the item.
     //
@@ -170,10 +181,7 @@ internal class FailureRecovery(
 
         val wait: Long = policy.retryDelayMs(failureKindOf(engineWord))
 
-        scope?.launch {
-            if (wait > 0L) delay(wait)
-            ctx.loadQuietly(item, LoadOptions(startPositionMs = resumeAtMs, autoplay = true))
-        }
+        scheduleReload(item, resumeAtMs, wait)
 
         return true
     }
@@ -214,9 +222,52 @@ internal class FailureRecovery(
             .toLong()
             .coerceAtLeast(0L)
 
-        scope?.launch {
+        scheduleReload(item, resumeAtMs, 0L)
+    }
+
+    // One reload waits at a time. It is dropped when the viewer loaded, skipped
+    // to another item or stopped meanwhile, and a failed one is reported like
+    // any other engine failure instead of escaping into the scope.
+    private fun scheduleReload(item: PlaylistItem, resumeAtMs: Long, wait: Long) {
+        pending?.cancel()
+        val loadsAtSchedule: Int = ctx.loadsRequested
+        pending = scope?.launch {
+            if (wait > 0L) delay(wait)
+            if (stillWanted(item, loadsAtSchedule)) reload(item, resumeAtMs)
+        }
+    }
+
+    private fun stillWanted(item: PlaylistItem, loadsAtSchedule: Int): Boolean =
+        ctx.loadsRequested == loadsAtSchedule &&
+            ctx.playState != PlayState.STOPPED &&
+            reloadTarget()?.id == item.id
+
+    private suspend fun reload(item: PlaylistItem, resumeAtMs: Long) {
+        try {
             ctx.loadQuietly(item, LoadOptions(startPositionMs = resumeAtMs, autoplay = true))
         }
+        catch (cause: CancellationException) {
+            throw cause
+        }
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
+            announceReloadFailure(cause)
+        }
+    }
+
+    private fun announceReloadFailure(cause: Throwable) {
+        val kind: String = ctx.backend?.let { it::class.simpleName } ?: "unknown"
+        val code: String = (cause as? PlayerError)?.code ?: CoreErrorCodes.LOAD_FAILED
+        ctx.emit(CoreEvents.BackendError, BackendErrorPayload(error = cause.message, kind = kind))
+        ctx.emit(
+            CoreEvents.Error,
+            PlayerErrorEvent(
+                code = code,
+                message = cause.message ?: "the reload after a stream failure did not load",
+                severity = Severity.ERROR,
+                scope = ErrorScope.backend(kind),
+                context = mapOf("engine" to kind),
+            ),
+        )
     }
 
     // A word that parses as one of our own codes is a DECISION, not a hiccup: the
