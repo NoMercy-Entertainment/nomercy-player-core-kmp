@@ -9,6 +9,8 @@
 package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.ErrorScope
 import tv.nomercy.player.core.errors.mediaFormatError
@@ -277,9 +279,13 @@ public class PlayerContext(
     // plausibly and is a deadlock: a caller waiting for it before playing waits
     // for something that only happens once playing has already started.
     public suspend fun load(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
-        loadQuietly(item, opts)
-        emit(CoreEvents.MediaReady, Unit)
+        if (loadQuietly(item, opts)) emit(CoreEvents.MediaReady, Unit)
     }
+
+    // Loads run one at a time in call order; a call that a newer one replaced
+    // is dropped when its turn comes, so the engine ends on the latest item.
+    private var loadEpoch: Int = 0
+    private val loadTurn: Mutex = Mutex()
 
     // The same load with the announcement left to the caller.
     //
@@ -342,7 +348,16 @@ public class PlayerContext(
         return backend?.isSourcePrerolled(url, authorised) ?: false
     }
 
-    internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()) {
+    // False when a newer load replaced this one before it reached the engine.
+    internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()): Boolean {
+        val epoch: Int = ++loadEpoch
+        return loadTurn.withLock {
+            if (epoch != loadEpoch) false else loadNow(item, opts)
+        }
+    }
+
+    @Suppress("ReturnCount")
+    private suspend fun loadNow(item: PlaylistItem, opts: LoadOptions): Boolean {
         // Announced before the engine sees anything, and refusable.
         //
         // CoreEvents.BeforeLoad was declared, catalogued and given a payload,
@@ -363,7 +378,7 @@ public class PlayerContext(
                 CoreEvents.LoadPrevented,
                 LoadPreventedPayload(reason = decision.reason ?: PreventReason.ListenerPrevented),
             )
-            return
+            return true
         }
 
         @Suppress("NAME_SHADOWING")
@@ -395,5 +410,6 @@ public class PlayerContext(
         loadedItemId = item.id
         loadedItem = item
         itemEndingSoonEmitted = false
+        return true
     }
 }

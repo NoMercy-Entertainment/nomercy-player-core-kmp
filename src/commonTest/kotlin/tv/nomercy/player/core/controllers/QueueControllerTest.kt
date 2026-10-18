@@ -8,15 +8,56 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.events.CoreEvents
+import tv.nomercy.player.core.player.PlayerPhase
+import tv.nomercy.player.core.ports.LoadOptions
+import tv.nomercy.player.testing.FakeMediaBackend
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+// An engine whose load for each url finishes only when the test says so.
+private class GatedLoadBackend : FakeMediaBackend() {
+    val gates: MutableMap<String, CompletableDeferred<Unit>> = mutableMapOf()
+
+    fun gate(url: String): CompletableDeferred<Unit> = gates.getOrPut(url) { CompletableDeferred() }
+
+    override suspend fun load(url: String, opts: LoadOptions) {
+        gate(url).await()
+        super.load(url, opts)
+    }
+}
+
 class QueueControllerTest {
+
+    @Test
+    fun anOlderSlowLoadCannotLeaveTheWrongMediaLoaded() = runTest {
+        val backend = GatedLoadBackend()
+        val ctx = PlayerContext(backend = backend)
+        val queue = QueueController(ctx)
+        queue.transport = TransportController(ctx, queue)
+        queue.wireQueue()
+        ctx.transitionPhase(PlayerPhase.READY)
+        queue.queue(items("a", "b"))
+
+        val first = launch(start = CoroutineStart.UNDISPATCHED) { queue.item("a") }
+        val second = launch(start = CoroutineStart.UNDISPATCHED) { queue.item("b") }
+        backend.gate("https://example.test/b").complete(Unit)
+        backend.gate("https://example.test/a").complete(Unit)
+        first.join()
+        second.join()
+
+        assertEquals("b", queue.item()?.id)
+        assertEquals("b", ctx.loadedItemId)
+        assertEquals("https://example.test/b", backend.loadedUrls.last())
+        assertEquals(1, backend.playCount)
+    }
 
     @Test
     fun settingTheQueueStartsAtTheFirstItemAndAnnouncesBoth() = runTest {
