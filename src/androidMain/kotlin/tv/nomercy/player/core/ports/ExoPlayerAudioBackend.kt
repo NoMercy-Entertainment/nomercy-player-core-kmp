@@ -8,9 +8,6 @@
 
 package tv.nomercy.player.core.ports
 
-import tv.nomercy.player.core.dsp.EqBand
-import tv.nomercy.player.core.events.Subscription
-import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 import kotlinx.coroutines.CoroutineScope
 
 // Two engines, swapped rather than promoted.
@@ -32,7 +29,7 @@ public class ExoPlayerAudioBackend(
     // One processor per engine, because a biquad carries history and two
     // streams sharing one filter would smear the outgoing track into the
     // incoming one for the length of a crossfade.
-    private val currentEqualiser = BiquadEqAudioProcessor()
+    private var currentEqualiser = BiquadEqAudioProcessor()
     private var standbyEqualiser: BiquadEqAudioProcessor? = null
 
     private var current: ExoPlayerVideoBackend = ExoPlayerVideoBackend(context, scope, currentEqualiser)
@@ -70,32 +67,12 @@ public class ExoPlayerAudioBackend(
     //
     // Settings are fanned out; filter state is not. Both engines get the same
     // numbers and each keeps its own history.
-    private val equaliserGraph: AudioDspGraph = FannedGraph()
+    private val equaliserGraph = FannedGraph(
+        targets = { listOfNotNull(currentEqualiser.graph(), standbyEqualiser?.graph()) },
+        audible = { currentEqualiser.graph() },
+    )
 
     override fun audioGraph(): AudioDspGraph = equaliserGraph
-
-    private inner class FannedGraph : AudioDspGraph {
-        private fun each(action: (AudioDspGraph) -> Unit) {
-            action(currentEqualiser.graph())
-            standbyEqualiser?.let { action(it.graph()) }
-        }
-
-        override fun setEqBands(bands: List<EqBand>): Unit = each { it.setEqBands(bands) }
-
-        override fun bandGain(frequencyHz: Int, gainDb: Double): Unit = each { it.bandGain(frequencyHz, gainDb) }
-
-        override fun preGain(linear: Double): Unit = each { it.preGain(linear) }
-
-        override fun eqEnabled(enabled: Boolean): Unit = each { it.eqEnabled(enabled) }
-
-        // Only the audible engine, because two taps would deliver two frames
-        // per window and a visualiser would draw the outgoing track over the
-        // incoming one for the length of a crossfade.
-        override fun installFrameTap(onFrame: (VisualizationFrame) -> Unit): Subscription =
-            currentEqualiser.graph().installFrameTap(onFrame)
-
-        override fun removeFrameTap(): Unit = currentEqualiser.graph().removeFrameTap()
-    }
 
     override suspend fun load(url: String, opts: LoadOptions): Unit = current.load(url, opts)
 
@@ -156,7 +133,10 @@ public class ExoPlayerAudioBackend(
         val next: ExoPlayerVideoBackend = standby ?: ExoPlayerVideoBackend(
             context,
             scope,
-            BiquadEqAudioProcessor().also { standbyEqualiser = it },
+            BiquadEqAudioProcessor().also {
+                standbyEqualiser = it
+                equaliserGraph.adopt(it.graph())
+            },
         ).also {
             it.authHeaders.provider = authHeaderProvider
             standby = it
@@ -199,11 +179,17 @@ public class ExoPlayerAudioBackend(
         retiring.stop()
         current = incoming
         standby = retiring
+        standbyEqualiser?.let { incomingEqualiser ->
+            standbyEqualiser = currentEqualiser
+            currentEqualiser = incomingEqualiser
+        }
+        equaliserGraph.audibleChanged()
     }
 
     override fun disposeSecondary() {
         val next: ExoPlayerVideoBackend = standby ?: return
         standby = null
+        standbyEqualiser = null
         next.release()
     }
 
