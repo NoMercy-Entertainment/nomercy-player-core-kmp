@@ -8,6 +8,11 @@
 
 package tv.nomercy.player.core.events
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -160,4 +165,26 @@ class EventEmitterTest {
         assertTrue(bus.hasListeners("ping"))
         sub.dispose(); assertFalse(bus.hasListeners("ping"))
     }
+
+    @Test
+    fun registeringAndRemovingListenersWhileAnotherThreadEmitsDoesNotThrow() = runTest {
+        bus.on(ping) {}
+        bus.onAll { _, _ -> }
+
+        withContext(Dispatchers.Default) {
+            listOf(
+                async { repeat(ITERATIONS) { bus.emit(ping, it) } },
+                async {
+                    repeat(ITERATIONS) {
+                        bus.on(ping) { _ -> }.dispose()
+                        bus.onAll { _, _ -> }.dispose()
+                    }
+                },
+            ).awaitAll()
+        }
+
+        assertTrue(bus.hasListeners("ping"))
+    }
 }
+
+private const val ITERATIONS: Int = 10_000

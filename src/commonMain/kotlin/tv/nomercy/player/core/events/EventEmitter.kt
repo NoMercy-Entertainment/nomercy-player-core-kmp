@@ -43,6 +43,9 @@ public class EventEmitter<E> {
     // pop is check-then-act, which failed the same way one index later:/n    // `Index 28 out of bounds for length 28`.
     private val dispatchLock: SynchronizedObject = SynchronizedObject()
 
+    // Guards listeners and firehose. Listeners run outside it, on a copy.
+    private val listenersLock: SynchronizedObject = SynchronizedObject()
+
     // Called with (eventName, error) when a listener throws. Default is
     // swallow-and-continue, mirroring the web path's console.error; a host
     // wires this to its own logger. Never rethrown into the dispatch loop.
@@ -64,8 +67,8 @@ public class EventEmitter<E> {
     // stopImmediatePropagation can cut the loop, and they never pass through
     // emit(). Anything observing the cancellable seam must subscribe by name.
     public fun onAll(fn: (name: String, data: Any?) -> Unit): Subscription {
-        firehose.add(fn)
-        return idempotent { firehose.remove(fn) }
+        synchronized(listenersLock) { firehose.add(fn) }
+        return idempotent { synchronized(listenersLock) { firehose.remove(fn) } }
     }
 
     public fun <T> off(key: EventKey<T>, fn: (T) -> Unit) {
@@ -184,16 +187,18 @@ public class EventEmitter<E> {
         }
     }
 
-    public fun hasListeners(name: String): Boolean = listeners[name]?.isNotEmpty() == true
+    public fun hasListeners(name: String): Boolean =
+        synchronized(listenersLock) { listeners[name]?.isNotEmpty() == true }
 
-    public fun listenerCount(): Int = firehose.size + listeners.values.sumOf { it.size }
+    public fun listenerCount(): Int =
+        synchronized(listenersLock) { firehose.size + listeners.values.sumOf { it.size } }
 
     // Ordered live invokers for name, already snapshotted. Used by
     // dispatchBefore, which needs to call listeners directly rather than
     // through emit() so stopImmediatePropagation can end the loop. Plugin
     // authors: do not call this — use on(event, fn) to listen.
     internal fun listenersOf(name: String): List<(Any?) -> Unit> =
-        listeners[name]?.map { it.invoke } ?: emptyList()
+        synchronized(listenersLock) { listeners[name]?.map { it.invoke } ?: emptyList() }
 
     // The single place every Subscription is minted. Same userFn reference
     // registered twice is deduplicated by identity, matching the web Set. A
@@ -204,25 +209,29 @@ public class EventEmitter<E> {
     // so both dispatch paths get the behaviour: a before-listener registered
     // with once() must fire once too, and dispatchBefore never sees this flag.
     private fun register(name: String, userFn: Any, invoke: (Any?) -> Unit, once: Boolean): Subscription {
-        val list = listeners.getOrPut(name) { mutableListOf() }
-        if (list.none { it.userFn === userFn }) {
-            val call: (Any?) -> Unit = if (once) {
-                { data ->
-                    removeByReference(name, userFn)
-                    invoke(data)
+        synchronized(listenersLock) {
+            val list = listeners.getOrPut(name) { mutableListOf() }
+            if (list.none { it.userFn === userFn }) {
+                val call: (Any?) -> Unit = if (once) {
+                    { data ->
+                        removeByReference(name, userFn)
+                        invoke(data)
+                    }
+                } else {
+                    invoke
                 }
-            } else {
-                invoke
+                list.add(Listener(userFn, call))
             }
-            list.add(Listener(userFn, call))
         }
         return idempotent { removeByReference(name, userFn) }
     }
 
     private fun removeByReference(name: String, userFn: Any) {
-        val list = listeners[name] ?: return
-        list.removeAll { it.userFn === userFn }
-        if (list.isEmpty()) listeners.remove(name)
+        synchronized(listenersLock) {
+            val list = listeners[name] ?: return
+            list.removeAll { it.userFn === userFn }
+            if (list.isEmpty()) listeners.remove(name)
+        }
     }
 
     // Listener throws are isolated here and in dispatchBefore by design — every
@@ -286,7 +295,7 @@ public class EventEmitter<E> {
                 onListenerError?.invoke(name, err)
             }
         }
-        for (fn in firehose.toList()) {
+        for (fn in synchronized(listenersLock) { firehose.toList() }) {
             try {
                 fn(name, data)
             } catch (err: Throwable) {
