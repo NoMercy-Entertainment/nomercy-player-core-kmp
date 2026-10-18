@@ -11,6 +11,7 @@ package tv.nomercy.player.core.drm
 import tv.nomercy.player.core.errors.stateError
 import tv.nomercy.player.core.plugin.Plugin
 import tv.nomercy.player.core.ports.FetchOptions
+import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.plugin.PluginManifest
 
 // Playing content that is protected.
@@ -67,10 +68,12 @@ public open class DrmPlugin(
 
         val request: ByteArray = config.transformLicenseRequest?.invoke(challenge) ?: challenge
 
-        val response: ByteArray = fetch(
-            url,
-            FetchOptions(method = "POST", bodyBytes = request),
-        ).bytes ?: ByteArray(0)
+        val fetched: FetchResponse = fetch(url, FetchOptions(method = "POST", bodyBytes = request))
+        val response: ByteArray = fetched.bytes ?: throw stateError(
+            DrmErrorCodes.LICENSE_REQUEST_FAILED,
+            "DrmPlugin: the licence response carried no bytes (status ${fetched.status}).",
+            mapOf("status" to fetched.status),
+        )
 
         return config.transformLicenseResponse?.invoke(response) ?: response
     }

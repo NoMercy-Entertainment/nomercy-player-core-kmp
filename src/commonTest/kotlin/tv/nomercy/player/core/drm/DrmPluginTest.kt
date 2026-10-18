@@ -8,11 +8,18 @@
 
 package tv.nomercy.player.core.drm
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.controllers.ComposedPlayer
+import tv.nomercy.player.core.errors.PlayerError
+import tv.nomercy.player.core.plugin.PluginRegistry
+import tv.nomercy.player.core.plugin.fakes.FakePluginHost
+import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.testing.FakeMediaBackend
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -112,5 +119,22 @@ class DrmPluginTest {
     fun theManifestMatchesTheWebPlugin() {
         assertEquals("drm", DrmPlugin.Manifest.id)
         assertEquals("2.0.0", DrmPlugin.Manifest.version)
+    }
+
+    @Test
+    fun aLicenseResponseWithoutBytesIsAFailureNotAnEmptyLicense() = runTest {
+        val host = FakePluginHost()
+        val registry = PluginRegistry(
+            host,
+            coreVersion = "2.0.0",
+            scope = CoroutineScope(StandardTestDispatcher(testScheduler)),
+        )
+        val plugin = DrmPlugin(DrmConfig(DrmScheme.CLEAR, licenseUrl = "https://license.example/l"))
+        registry.register(plugin)
+        host.nextFetch = FetchResponse(status = 200, body = "denied", bytes = null)
+
+        val error = assertFailsWith<PlayerError> { plugin.fetchLicense(byteArrayOf(1)) }
+
+        assertEquals(DrmErrorCodes.LICENSE_REQUEST_FAILED, error.code)
     }
 }
