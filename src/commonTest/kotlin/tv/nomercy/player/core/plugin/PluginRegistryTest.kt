@@ -65,6 +65,15 @@ private class FailsInUse(private val disposeOrder: MutableList<String>) : Plugin
     }
 }
 
+private class BadReplacer : Plugin<Unit>() {
+    override val manifest: PluginManifest = object : PluginManifest {
+        override val id: String = "bad-replacer"
+        override val version: String = "1.0.0"
+        override val replaces: List<String> = listOf("a")
+        override val minCoreVersion: String = "9.0.0"
+    }
+}
+
 class PluginRegistryTest {
 
     private fun registry(host: FakePluginHost, scope: CoroutineScope) =
@@ -202,5 +211,19 @@ class PluginRegistryTest {
         assertEquals(0, plugin.beats)
         assertNull(registry.getById("fails"))
         assertEquals(listOf("fails"), order)
+    }
+
+    @Test
+    fun aReplacementThatFailsValidationLeavesTheOldPluginRunning() = runTest {
+        val host = FakePluginHost()
+        val registry = registry(host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+        val old = Named("a", mutableListOf())
+        registry.register(old)
+
+        assertFailsWith<PlayerError> { registry.register(BadReplacer()) }
+        host.emit(EventKey<Int>("beat"), 1)
+
+        assertSame(old, registry.getById("a"))
+        assertEquals(1, old.beats)
     }
 }

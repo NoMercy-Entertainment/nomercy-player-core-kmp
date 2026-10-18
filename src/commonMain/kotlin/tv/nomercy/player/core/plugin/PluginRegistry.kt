@@ -132,13 +132,13 @@ public class PluginRegistry(
             )
         }
 
-        // Swaps happen before validation so replacing a plugin does not trip
-        // the duplicate-id check against the thing being replaced.
+        // Validated first, ignoring what is being replaced, so a refused
+        // replacement leaves the old plugin running.
+        validate(manifest, manifest.replaces.toSet())
+
         for (replacedId in manifest.replaces) {
             if (registrations.any { it.plugin.id == replacedId }) remove(replacedId)
         }
-
-        validate(manifest)
 
         val lifecycle = LifecycleRegistry(scope)
         plugin.initialize(host, opts, lifecycle)
@@ -191,14 +191,14 @@ public class PluginRegistry(
         registrations.clear()
     }
 
-    private fun validate(manifest: PluginManifest) {
-        checkNotAlreadyRegistered(manifest.id)
-        checkRequirements(manifest)
+    private fun validate(manifest: PluginManifest, replacing: Set<String>) {
+        checkNotAlreadyRegistered(manifest.id, replacing)
+        checkRequirements(manifest, replacing)
         checkCoreVersion(manifest)
     }
 
-    private fun checkNotAlreadyRegistered(id: String) {
-        if (registrations.any { it.plugin.id == id }) {
+    private fun checkNotAlreadyRegistered(id: String, replacing: Set<String>) {
+        if (id !in replacing && registrations.any { it.plugin.id == id }) {
             throw registryError(
                 PluginErrorCodes.DUPLICATE_ID,
                 "Plugin \"$id\" is already registered. Declare `replaces` to opt in to a same-id swap.",
@@ -207,10 +207,10 @@ public class PluginRegistry(
         }
     }
 
-    private fun checkRequirements(manifest: PluginManifest) {
+    private fun checkRequirements(manifest: PluginManifest, replacing: Set<String>) {
         for (requirement in manifest.requires) {
             val installed: Registration? = registrations
-                .firstOrNull { it.plugin.id == requirement.manifest.id }
+                .firstOrNull { it.plugin.id == requirement.manifest.id && it.plugin.id !in replacing }
             if (installed == null) {
                 requireDependency(manifest.id, requirement)
             } else {
