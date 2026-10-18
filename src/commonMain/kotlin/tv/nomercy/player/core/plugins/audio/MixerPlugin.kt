@@ -97,6 +97,12 @@ public open class MixerPlugin(
     // bring it back.
     private var applying: Boolean = false
 
+    private val stage: PreGainStage = PreGainStage.acquire(graph)
+
+    override fun dispose() {
+        PreGainStage.release(stage)
+    }
+
     /** Current gain in dB, clamped to the ceiling. */
     public fun gain(): Double = currentGainDb
 
@@ -243,7 +249,7 @@ public open class MixerPlugin(
         if (applying) {
             rampJob?.cancel()
             appliedLinearGain = target
-            graph.preGain(target)
+            stage.setMixer(target)
             return
         }
 
@@ -261,7 +267,7 @@ public open class MixerPlugin(
         val tau: Double? = opts.smoothingTimeConstantSeconds
         if (tau == null || tau <= 0.0) {
             appliedLinearGain = target
-            graph.preGain(target)
+            stage.setMixer(target)
             return
         }
 
@@ -283,10 +289,10 @@ public open class MixerPlugin(
     private fun step(target: Double, alpha: Double, graph: AudioDspGraph) {
         if (kotlin.math.abs(target - appliedLinearGain) > RAMP_EPSILON) {
             appliedLinearGain += (target - appliedLinearGain) * alpha
-            graph.preGain(appliedLinearGain)
+            stage.setMixer(appliedLinearGain)
         } else {
             appliedLinearGain = target
-            graph.preGain(target)
+            stage.setMixer(target)
             rampJob?.cancel()
         }
     }

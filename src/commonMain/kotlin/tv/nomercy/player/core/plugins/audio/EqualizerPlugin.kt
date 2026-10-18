@@ -96,6 +96,12 @@ public open class EqualizerPlugin(
 
     private var on: Boolean = true
 
+    private val stage: PreGainStage? = graph?.let { PreGainStage.acquire(it) }
+
+    override fun dispose() {
+        stage?.let { PreGainStage.release(it) }
+    }
+
     // Whatever the listener left behind, put back before anything reads it.
     //
     // Asynchronous because storage is: one contract covers a synchronous
@@ -328,7 +334,7 @@ public open class EqualizerPlugin(
     private fun snapAll(bands: List<EqBand>, preGainLinear: Double) {
         preGainRampJob?.cancel()
         appliedPreGain = preGainLinear
-        graph?.preGain(preGainLinear)
+        stage?.setEqualizer(preGainLinear)
 
         bandRampJobs.values.forEach { it.cancel() }
         bandRampJobs.clear()
@@ -342,7 +348,7 @@ public open class EqualizerPlugin(
         val tau: Double? = opts.smoothingTimeConstantSeconds
         if (tau == null || tau <= 0.0) {
             appliedPreGain = target
-            graph?.preGain(target)
+            stage?.setEqualizer(target)
             return
         }
 
@@ -362,10 +368,10 @@ public open class EqualizerPlugin(
     private fun stepPreGain(target: Double, alpha: Double) {
         if (kotlin.math.abs(target - appliedPreGain) > RAMP_EPSILON) {
             appliedPreGain += (target - appliedPreGain) * alpha
-            graph?.preGain(appliedPreGain)
+            stage?.setEqualizer(appliedPreGain)
         } else {
             appliedPreGain = target
-            graph?.preGain(target)
+            stage?.setEqualizer(target)
             preGainRampJob?.cancel()
         }
     }
