@@ -108,7 +108,11 @@ public class MpvVideoBackend internal constructor(
 
         // Headers before the file, because mpv reads them when it opens the
         // stream and setting them afterwards applies to the next one.
-        val headers: String = opts.headers.entries.joinToString(",") { (name, value) -> "$name: $value" }
+        // Each entry is length-quoted (%bytes%text), mpv's list syntax, so a comma in a value stays in it.
+        val headers: String = opts.headers.entries.joinToString(",") { (name, value) ->
+            val line = "$name: $value"
+            "%${line.toByteArray(Charsets.UTF_8).size}%$line"
+        }
         mpv.mpv_set_property_string(handle, "http-header-fields", headers)
 
         // Paused unless asked otherwise, and the start position given to the
