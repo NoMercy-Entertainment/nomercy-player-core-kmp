@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import kotlin.random.Random
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -1200,6 +1201,8 @@ public open class ComposedPlayer(
         } catch (failure: PlayerError) {
             reportPlaylistFailure(failure)
             throw failure
+        } catch (cancel: CancellationException) {
+            throw cancel
         } catch (@Suppress("TooGenericExceptionCaught") failure: Throwable) {
             // The transport threw rather than answering with a status. That is
             // not a playlist the server refused, it is one that could not be

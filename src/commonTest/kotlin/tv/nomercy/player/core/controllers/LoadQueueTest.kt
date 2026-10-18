@@ -8,6 +8,10 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.async
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.errors.CoreErrorCodes
 import tv.nomercy.player.core.errors.PlayerError
@@ -70,6 +74,30 @@ class LoadQueueTest {
         player.loadQueue("https://server.test/p", ::linesParser)
 
         assertEquals(listOf("resolving:https://server.test/p", "ready:2"), order)
+    }
+
+    @Test
+    fun cancellingTheCallerDuringTheFetchIsNotAFetchFailure() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        val fetcher = object : Fetcher {
+            override suspend fun fetch(url: String, opts: FetchOptions): FetchResponse {
+                gate.await()
+                return FetchResponse(status = 200, body = "a")
+            }
+        }
+        val player = ComposedPlayer(backend = FakeMediaBackend(), fetcher = fetcher)
+        val errors: MutableList<PlayerErrorEvent> = mutableListOf()
+        player.on(CoreEvents.PlaylistResolveError) { errors += it }
+        player.on(CoreEvents.Error) { errors += it }
+
+        val job = async(start = CoroutineStart.UNDISPATCHED) {
+            player.loadQueue("https://server.test/p", ::linesParser)
+        }
+        job.cancel()
+        val outcome = runCatching { job.await() }.exceptionOrNull()
+
+        assertTrue(outcome is CancellationException, "got $outcome")
+        assertEquals(emptyList(), errors)
     }
 
     @Test
