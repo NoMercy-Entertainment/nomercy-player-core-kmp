@@ -55,9 +55,20 @@ public class MpvAudioBackend internal constructor(
 
     override fun volume(value: Float): Unit = current.volume(value)
 
-    override fun mute(): Unit = current.mute()
+    // Mute is per mpv handle, so it follows both handles and the next standby.
+    private var muted: Boolean = false
 
-    override fun unmute(): Unit = current.unmute()
+    override fun mute() {
+        muted = true
+        current.mute()
+        standby?.mute()
+    }
+
+    override fun unmute() {
+        muted = false
+        current.unmute()
+        standby?.unmute()
+    }
 
     override fun buffered(): Double = current.buffered()
 
@@ -93,6 +104,7 @@ public class MpvAudioBackend internal constructor(
         playingGain = current.volume()
         val next: MpvVideoBackend = standby ?: create().also { standby = it }
         next.volume(0f)
+        if (muted) next.mute() else next.unmute()
         next.load(url)
     }
 
