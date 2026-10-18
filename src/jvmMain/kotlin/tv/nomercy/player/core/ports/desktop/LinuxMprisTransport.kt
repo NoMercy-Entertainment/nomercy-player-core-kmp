@@ -25,6 +25,8 @@ import tv.nomercy.player.core.ports.TransportPlaybackState
 // desktop will try to open itself, and the status strings are matched verbatim.
 public class LinuxMprisTransport(private val bus: MprisBus) : SystemTransport {
 
+    @Volatile private var lastPositionMs: Long = 0
+
     override fun setNowPlaying(nowPlaying: NowPlaying) {
         bus.publishMetadata(mprisMetadataOf(nowPlaying))
     }
@@ -34,6 +36,7 @@ public class LinuxMprisTransport(private val bus: MprisBus) : SystemTransport {
         positionMs: Long,
         playbackRate: Double,
     ) {
+        lastPositionMs = positionMs
         bus.publishStatus(mprisStatusOf(state))
         bus.publishPosition(microsecondsOf(positionMs))
     }
@@ -73,7 +76,9 @@ public class LinuxMprisTransport(private val bus: MprisBus) : SystemTransport {
             // that passed the number through unconverted would seek a thousand
             // times too far and land at the end of every track.
             MprisMethod.SET_POSITION -> actions.onSeekTo?.invoke(millisecondsOf(argumentMicroseconds))
-            MprisMethod.SEEK -> actions.onSeekTo?.invoke(millisecondsOf(argumentMicroseconds))
+            // Seek carries a signed offset from the position last published.
+            MprisMethod.SEEK ->
+                actions.onSeekTo?.invoke((lastPositionMs + millisecondsOf(argumentMicroseconds)).coerceAtLeast(0))
         }
     }
 }
