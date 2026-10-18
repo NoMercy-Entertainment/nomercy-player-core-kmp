@@ -22,9 +22,13 @@ package tv.nomercy.player.core.ports
  * from a shared engine — and releasing one cannot pull the ground out from
  * under the other.
  */
-public class MpvAudioBackend : AudioBackend {
+public class MpvAudioBackend internal constructor(
+    private val create: () -> MpvVideoBackend,
+) : AudioBackend {
 
-    private var current: MpvVideoBackend = MpvVideoBackend()
+    public constructor() : this({ MpvVideoBackend() })
+
+    private var current: MpvVideoBackend = create()
     private var standby: MpvVideoBackend? = null
 
     private val crossfader = EqualPowerCrossfader()
@@ -87,7 +91,7 @@ public class MpvAudioBackend : AudioBackend {
 
     override suspend fun loadSecondary(url: String) {
         playingGain = current.volume()
-        val next: MpvVideoBackend = standby ?: MpvVideoBackend().also { standby = it }
+        val next: MpvVideoBackend = standby ?: create().also { standby = it }
         next.volume(0f)
         next.load(url)
     }

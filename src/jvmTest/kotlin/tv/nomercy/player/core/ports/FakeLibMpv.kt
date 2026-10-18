@@ -8,8 +8,10 @@
 
 package tv.nomercy.player.core.ports
 
+import com.sun.jna.Pointer
 import java.lang.reflect.Proxy
 import java.util.Collections
+import java.util.concurrent.atomic.AtomicLong
 import tv.nomercy.player.core.natives.libmpv.LibMpv
 import tv.nomercy.player.core.natives.libmpv.MpvEvent
 import tv.nomercy.player.core.natives.libmpv.MpvEventId
@@ -20,6 +22,8 @@ internal class FakeLibMpv {
 
     data class PropertySet(val handle: MpvHandle, val name: String, val value: String)
 
+    private val nextHandle = AtomicLong(HANDLE_BASE)
+
     val properties: MutableList<PropertySet> = Collections.synchronizedList(mutableListOf())
 
     val library: LibMpv = Proxy.newProxyInstance(
@@ -27,7 +31,7 @@ internal class FakeLibMpv {
         arrayOf(LibMpv::class.java),
     ) { _, method, args ->
         when (method.name) {
-            "mpv_create" -> MpvHandle()
+            "mpv_create" -> MpvHandle(Pointer(nextHandle.incrementAndGet()))
             "mpv_wait_event" -> MpvEvent.ByReference().apply { eventId = MpvEventId.SHUTDOWN }
             "mpv_set_property_string" -> {
                 properties += PropertySet(args[0] as MpvHandle, args[1] as String, args[2] as String)
@@ -44,4 +48,8 @@ internal class FakeLibMpv {
     } as LibMpv
 
     fun valuesOf(name: String): List<String> = properties.filter { it.name == name }.map { it.value }
+
+    private companion object {
+        const val HANDLE_BASE = 0x1000L
+    }
 }
