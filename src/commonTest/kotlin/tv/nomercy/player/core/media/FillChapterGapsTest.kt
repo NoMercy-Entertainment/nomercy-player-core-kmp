@@ -80,6 +80,26 @@ class FillChapterGapsTest {
     }
 
     @Test
+    fun aShortLeadInMovesTheFirstChapterToZeroInsteadOfGettingAFiller() {
+        // Lists rounded to whole seconds leave gaps near a second; a synthetic
+        // chapter for each would show up in a chapter menu as a real entry.
+        val result: ChapterGapFill = fillChapterGaps(listOf(chapter(1.0), chapter(60.0)), 100.0, ::filler)
+
+        assertTrue(result.changed)
+        assertEquals(listOf(0.0, 60.0), result.chapters.map { it.startTime })
+        assertEquals(0, result.chapters.count { it.synthetic })
+        assertEquals("c1.0", result.chapters.first().title)
+    }
+
+    @Test
+    fun aLeadInOfTwoSecondsOrMoreStillGetsAFiller() {
+        val result: ChapterGapFill = fillChapterGaps(listOf(chapter(2.0)), 100.0, ::filler)
+
+        assertEquals(2, result.chapters.size)
+        assertTrue(result.chapters.first().synthetic)
+    }
+
+    @Test
     fun fillingTwiceDoesNotStackFillers() {
         // The caller re-runs this when the duration arrives, which is after the
         // first fill. Stacking would add a filler per time update.

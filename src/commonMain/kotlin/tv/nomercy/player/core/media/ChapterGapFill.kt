@@ -22,6 +22,9 @@ public data class ChapterGapFill(
 // scanner and a container, not a hole a viewer can land in.
 public const val CHAPTER_GAP_EPSILON_SECONDS: Double = 0.25
 
+// Lists rounded to whole seconds leave gaps below this; a real hole is longer.
+private const val CHAPTER_ABSORB_SECONDS: Double = 2.0
+
 // Makes a chapter list cover the whole item.
 //
 // The web player fills three kinds of hole — before the first chapter, between
@@ -54,6 +57,10 @@ public fun fillChapterGaps(
 
     val ordered: List<Chapter> = original.sortedBy { it.startTime }
     val first: Chapter = ordered.first()
+    if (first.startTime > CHAPTER_GAP_EPSILON_SECONDS && first.startTime < CHAPTER_ABSORB_SECONDS) {
+        val absorbed: List<Chapter> = listOf(first.copy(startTime = 0.0)) + ordered.drop(1)
+        return ChapterGapFill(absorbed, changed = true)
+    }
     if (first.startTime <= CHAPTER_GAP_EPSILON_SECONDS) {
         // Already covered, and the incoming list may have carried fillers that
         // are no longer needed — so this still returns the derived list.
