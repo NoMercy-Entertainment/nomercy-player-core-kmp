@@ -236,6 +236,18 @@ class MediaListTest {
     }
 
     @Test
+    fun removingTheCurrentMiddleItemAnnouncesTheItemThatTookItsPlace() {
+        val list = listOfItems("a", "b", "c")
+        list.setCurrent(1)
+        val seen = mutableListOf<Pair<String?, Int>>()
+        list.onCurrent { seen += it.item?.id to it.index }
+
+        list.removeAt(1)
+
+        assertEquals(listOf<Pair<String?, Int>>("c" to 1), seen)
+    }
+
+    @Test
     fun removingTheOnlyItemLeavesNoCursor() {
         val list = listOfItems("a")
 

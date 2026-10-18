@@ -138,7 +138,7 @@ public class MediaList<T : PlaylistItem>(
     public fun removeAt(index: Int) {
         val removed: T = entries.getOrNull(index) ?: return
         entries.removeAt(index)
-        adjustCursorAfterRemoval(index)
+        adjustCursorAfterRemoval(index, removed.id)
         bus.emit(key<MediaListRemove<T>>(EVENT_REMOVE), MediaListRemove(removed.id, index, removed))
         emitChange()
     }
@@ -307,11 +307,11 @@ public class MediaList<T : PlaylistItem>(
     // Removing above the cursor shifts it down so the same item stays current.
     // Removing the current item leaves the cursor where it was, which now points
     // at whatever moved up into the gap — clamped when the gap was at the end.
-    private fun adjustCursorAfterRemoval(index: Int) {
+    private fun adjustCursorAfterRemoval(index: Int, removedId: String) {
         when {
             entries.isEmpty() -> moveCursor(NO_CURSOR)
             index < cursor -> moveCursor(cursor - 1)
-            index == cursor -> moveCursor(cursor.coerceAtMost(entries.lastIndex))
+            index == cursor -> moveCursorAfterContentChange(cursor.coerceAtMost(entries.lastIndex), removedId)
             else -> Unit
         }
     }
