@@ -827,8 +827,7 @@ public class ExoPlayerVideoBackend(
     // set its own provider keeps it when a load carries no headers.
     private fun carryHeaders(opts: LoadOptions) {
         if (opts.headers.isEmpty()) return
-        val carried: Map<String, String> = opts.headers
-        authHeaders.provider = { carried }
+        authHeaders.carried = opts.headers
     }
 
     // The load a pre-roll prepared: the engines trade places and the source is already

@@ -33,6 +33,11 @@ public class AuthHeaders {
     @Volatile
     public var provider: () -> Map<String, String> = { emptyMap() }
 
+    // What the current load carried, applied over the provider's answer so a
+    // host token that refreshes still reaches every later request.
+    @Volatile
+    internal var carried: Map<String, String> = emptyMap()
+
     internal fun asInterceptor(): Interceptor = Interceptor { chain ->
         chain.proceed(authorized(chain.request()))
     }
@@ -41,7 +46,7 @@ public class AuthHeaders {
     // request meant it, and a blanket provider overwriting it would be the
     // engine quietly disagreeing with the code that asked for the fetch.
     private fun authorized(request: Request): Request {
-        val headers: Map<String, String> = provider()
+        val headers: Map<String, String> = provider() + carried
         if (headers.isEmpty()) return request
 
         val builder: Request.Builder = request.newBuilder()
