@@ -48,16 +48,15 @@ public class MpvEventPump(
         thread.join(JOIN_MS)
     }
 
-    // Nothing thrown here may escape: this is the last thread in the process
-    // that would notice, and a pump that died silently takes every error report
-    // with it -- which is the exact failure it was written to end.
+    // A failed event is dropped and the next one read; only mpv's SHUTDOWN ends
+    // the loop, or a pump that died silently takes every later error report.
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun pump() {
         while (running) {
             val keepGoing: Boolean = try {
                 readOne()
             } catch (failure: RuntimeException) {
-                false
+                true
             }
             if (!keepGoing) return
         }
