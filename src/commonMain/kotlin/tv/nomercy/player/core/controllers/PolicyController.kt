@@ -91,7 +91,7 @@ public class PolicyController(
 
         val isSlowNow: Boolean = isSlow(platform.network.downlinkMbps())
         if (isSlowNow && !wasNetworkSlow) {
-            ctx.emit(CoreEvents.NetworkSlow, NetworkSlowPayload(platform.network.rttMs()?.toString().orEmpty()))
+            ctx.emit(CoreEvents.NetworkSlow, NetworkSlowPayload(platform.network.rttMs()))
         }
         wasNetworkSlow = isSlowNow
     }

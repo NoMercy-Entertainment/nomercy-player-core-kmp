@@ -4388,13 +4388,13 @@ final class tv.nomercy.player.core.events/MuteChange { // tv.nomercy.player.core
 }
 
 final class tv.nomercy.player.core.events/NetworkSlowPayload { // tv.nomercy.player.core.events/NetworkSlowPayload|null[0]
-    constructor <init>(kotlin/String) // tv.nomercy.player.core.events/NetworkSlowPayload.<init>|<init>(kotlin.String){}[0]
+    constructor <init>(kotlin/Double? = ...) // tv.nomercy.player.core.events/NetworkSlowPayload.<init>|<init>(kotlin.Double?){}[0]
 
     final val rttMs // tv.nomercy.player.core.events/NetworkSlowPayload.rttMs|{}rttMs[0]
-        final fun <get-rttMs>(): kotlin/String // tv.nomercy.player.core.events/NetworkSlowPayload.rttMs.<get-rttMs>|<get-rttMs>(){}[0]
+        final fun <get-rttMs>(): kotlin/Double? // tv.nomercy.player.core.events/NetworkSlowPayload.rttMs.<get-rttMs>|<get-rttMs>(){}[0]
 
-    final fun component1(): kotlin/String // tv.nomercy.player.core.events/NetworkSlowPayload.component1|component1(){}[0]
-    final fun copy(kotlin/String = ...): tv.nomercy.player.core.events/NetworkSlowPayload // tv.nomercy.player.core.events/NetworkSlowPayload.copy|copy(kotlin.String){}[0]
+    final fun component1(): kotlin/Double? // tv.nomercy.player.core.events/NetworkSlowPayload.component1|component1(){}[0]
+    final fun copy(kotlin/Double? = ...): tv.nomercy.player.core.events/NetworkSlowPayload // tv.nomercy.player.core.events/NetworkSlowPayload.copy|copy(kotlin.Double?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/NetworkSlowPayload.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/NetworkSlowPayload.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/NetworkSlowPayload.toString|toString(){}[0]

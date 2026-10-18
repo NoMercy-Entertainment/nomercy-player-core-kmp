@@ -166,7 +166,7 @@ public data class MutationPreventedPayload(
 )
 
 public data class NetworkSlowPayload(
-    val rttMs: String,
+    val rttMs: Double? = null,
 )
 
 public data class PlaylistErrorPayload(

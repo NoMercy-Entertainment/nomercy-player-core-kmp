@@ -144,8 +144,8 @@ def kotlin_field_type(ts_type: str) -> str:
         options = [o.strip() for o in text.split('|')]
         if all(o.startswith("'") for o in options):
             return 'String'
-        if 'null' in options:
-            rest = [o for o in options if o != 'null']
+        if 'null' in options or 'undefined' in options:
+            rest = [o for o in options if o not in ('null', 'undefined')]
             if len(rest) == 1:
                 return kotlin_field_type(rest[0]) + '?'
         # A genuine union the contract cannot narrow. String is what every

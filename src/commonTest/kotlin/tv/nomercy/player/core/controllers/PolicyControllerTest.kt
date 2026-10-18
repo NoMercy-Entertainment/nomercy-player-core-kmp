@@ -259,6 +259,33 @@ class PolicyControllerTest {
     }
 
     @Test
+    fun aSlowAnnouncementCarriesTheRoundTripTimeAsANumber() = runTest {
+        val platform = DrivablePlatform()
+        platform.downlink = 0.8
+        platform.rtt = 250.0
+        val player = playing(platform, PlayerConfig())
+        val seen: MutableList<Any?> = mutableListOf()
+        player.on(CoreEvents.NetworkSlow) { seen += it.rttMs }
+
+        platform.goOnline()
+
+        assertEquals(listOf<Any?>(250.0), seen)
+    }
+
+    @Test
+    fun aSlowAnnouncementWithNoRoundTripTimeCarriesNull() = runTest {
+        val platform = DrivablePlatform()
+        platform.downlink = 0.8
+        val player = playing(platform, PlayerConfig())
+        val seen: MutableList<Any?> = mutableListOf("unset")
+        player.on(CoreEvents.NetworkSlow) { seen.clear(); seen += it.rttMs }
+
+        platform.goOnline()
+
+        assertEquals(listOf<Any?>(null), seen)
+    }
+
+    @Test
     fun comingBackUpToSpeedAndDroppingAgainAnnouncesTwice() = runTest {
         val platform = DrivablePlatform()
         platform.downlink = 0.8
