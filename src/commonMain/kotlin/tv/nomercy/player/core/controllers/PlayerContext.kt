@@ -348,7 +348,8 @@ public class PlayerContext(
         return backend?.isSourcePrerolled(url, authorised) ?: false
     }
 
-    // False when a newer load replaced this one before it reached the engine.
+    // False when the engine holds nothing new: a newer load replaced this one,
+    // or a beforeLoad listener refused it.
     internal suspend fun loadQuietly(item: PlaylistItem, opts: LoadOptions = LoadOptions()): Boolean {
         val epoch: Int = ++loadEpoch
         return loadTurn.withLock {
@@ -378,7 +379,7 @@ public class PlayerContext(
                 CoreEvents.LoadPrevented,
                 LoadPreventedPayload(reason = decision.reason ?: PreventReason.ListenerPrevented),
             )
-            return true
+            return false
         }
 
         @Suppress("NAME_SHADOWING")

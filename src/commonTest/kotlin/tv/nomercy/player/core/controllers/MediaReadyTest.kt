@@ -109,4 +109,25 @@ class MediaReadyTest {
 
         assertEquals(emptyList(), seen)
     }
+
+    @Test
+    fun aRefusedLoadDoesNotReportReady() = runTest {
+        val rig: Rig = rig()
+        rig.player.on(CoreEvents.BeforeLoad) { it.preventDefault() }
+
+        rig.player.load(TestItem("a"))
+
+        assertEquals(emptyList(), rig.order)
+    }
+
+    @Test
+    fun playingWhenTheLoadIsRefusedStartsNothing() = runTest {
+        val rig: Rig = rig()
+        rig.player.on(CoreEvents.BeforeLoad) { it.preventDefault() }
+
+        rig.player.play()
+
+        assertEquals(emptyList(), rig.order)
+        assertEquals(0, rig.backend.playCount)
+    }
 }

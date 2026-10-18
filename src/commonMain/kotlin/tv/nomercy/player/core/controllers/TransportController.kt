@@ -39,7 +39,11 @@ public class TransportController(
         ctx.assertReady()
         if (!allowed(CoreEvents.BeforePlay, opts, CoreEvents.PlayPrevented)) return
 
-        val loadedToStart: Boolean = loadCurrentItemIfTheEngineHasNothing()
+        val loadedToStart: Boolean = when (loadCurrentItemIfTheEngineHasNothing()) {
+            LoadStart.REFUSED -> return
+            LoadStart.LOADED -> true
+            LoadStart.NOT_NEEDED -> false
+        }
 
         val priorPhase: PlayerPhase = ctx.phase
         ctx.playState = PlayState.PLAYING
@@ -81,13 +85,14 @@ public class TransportController(
     // Answers whether it loaded, because the caller owes the readiness
     // announcement for a load it caused and must not make one for a track that
     // was already in the engine.
-    private suspend fun loadCurrentItemIfTheEngineHasNothing(): Boolean {
-        if (ctx.loadedItemId != null || ctx.queue.length() == 0) return false
+    private suspend fun loadCurrentItemIfTheEngineHasNothing(): LoadStart {
+        if (ctx.loadedItemId != null || ctx.queue.length() == 0) return LoadStart.NOT_NEEDED
         if (ctx.queue.currentIndex() < 0) ctx.queue.setCurrent(0)
-        val item: PlaylistItem = ctx.queue.current() ?: return false
-        ctx.loadQuietly(item)
-        return true
+        val item: PlaylistItem = ctx.queue.current() ?: return LoadStart.NOT_NEEDED
+        return if (ctx.loadQuietly(item)) LoadStart.LOADED else LoadStart.REFUSED
     }
+
+    private enum class LoadStart { NOT_NEEDED, LOADED, REFUSED }
 
     public suspend fun pause(opts: ActionOptions = ActionOptions()) {
         ctx.assertReady()
@@ -195,7 +200,8 @@ public class TransportController(
     }
 
     private suspend fun loadAndPlay(item: PlaylistItem, opts: ActionOptions) {
-        ctx.load(item)
+        if (!ctx.loadQuietly(item)) return
+        ctx.emit(CoreEvents.MediaReady, Unit)
         play(opts)
     }
 
