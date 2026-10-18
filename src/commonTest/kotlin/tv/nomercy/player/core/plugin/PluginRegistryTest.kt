@@ -47,6 +47,24 @@ private class Exploding(name: String, disposeOrder: MutableList<String>) : Named
     }
 }
 
+private class FailsInUse(private val disposeOrder: MutableList<String>) : Plugin<Unit>() {
+    override val manifest: PluginManifest = object : PluginManifest {
+        override val id: String = "fails"
+        override val version: String = "1.0.0"
+    }
+
+    var beats: Int = 0
+
+    override fun use() {
+        on(EventKey<Int>("beat")) { beats += it }
+        error("use boom")
+    }
+
+    override fun dispose() {
+        disposeOrder.add(id)
+    }
+}
+
 class PluginRegistryTest {
 
     private fun registry(host: FakePluginHost, scope: CoroutineScope) =
@@ -169,5 +187,20 @@ class PluginRegistryTest {
 
         assertEquals(listOf("a"), order)
         assertTrue(registry.isDisposed())
+    }
+
+    @Test
+    fun aUseThatThrowsTearsTheLifecycleDownAndLeavesNoRegistration() = runTest {
+        val host = FakePluginHost()
+        val order = mutableListOf<String>()
+        val registry = registry(host, CoroutineScope(StandardTestDispatcher(testScheduler)))
+        val plugin = FailsInUse(order)
+
+        assertFailsWith<IllegalStateException> { registry.register(plugin) }
+        host.emit(EventKey<Int>("beat"), 1)
+
+        assertEquals(0, plugin.beats)
+        assertNull(registry.getById("fails"))
+        assertEquals(listOf("fails"), order)
     }
 }

@@ -120,6 +120,7 @@ public class PluginRegistry(
 
     // Validate, wire, run use(), announce. Throws a coded PlayerError rather
     // than registering something broken.
+    @Suppress("TooGenericExceptionCaught")
     public fun <O : Any> register(plugin: Plugin<O>, opts: O? = null): PluginRegistry {
         val manifest: PluginManifest = plugin.manifest
         val id: String = manifest.id
@@ -141,8 +142,14 @@ public class PluginRegistry(
 
         val lifecycle = LifecycleRegistry(scope)
         plugin.initialize(host, opts, lifecycle)
-        plugin.use()
-        registrations.add(Registration(plugin, lifecycle))
+        val registration = Registration(plugin, lifecycle)
+        try {
+            plugin.use()
+        } catch (cause: Throwable) {
+            teardown(registration)
+            throw cause
+        }
+        registrations.add(registration)
         host.emit(
             EventKey<Map<String, Any?>>("plugin:installed"),
             mapOf("id" to id, "version" to manifest.version),
