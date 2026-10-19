@@ -130,14 +130,7 @@ internal class CoreAudioTapCapture : AudioLoopbackCapture {
         val procId = PointerByReference()
         val procCreated = coreAudio.AudioDeviceCreateIOProcID(
             aggregateDeviceId,
-            AudioDeviceIoProcCallback { _, inputData, _, _, _, _ ->
-                val frames = inputData.frameCount(channels)
-                if (frames > 0) {
-                    val samples = inputData.readInterleavedFloat(channels, frames)
-                    onFrame(samples, frames)
-                }
-                0
-            },
+            ioProcCallback(channels, onFrame),
             null,
             procId,
         )
@@ -231,16 +224,27 @@ private const val kAudioObjectPropertyElementMain = 0
 private const val kAudioHardwarePropertyDefaultOutputDevice = 0x644f7574 // 'dOut'
 private const val kAudioDevicePropertyDeviceUID = 0x75696420 // 'uid '
 
-private fun interface AudioDeviceIoProcCallback : com.sun.jna.Callback {
+internal fun interface AudioDeviceIoProcCallback : com.sun.jna.Callback {
     fun invoke(
         deviceId: Int,
-        inputData: AudioBufferListPointer,
+        now: Pointer?,
+        inputData: AudioBufferListPointer?,
         inputTime: Pointer?,
         outputData: Pointer?,
         outputTime: Pointer?,
         clientData: Pointer?,
     ): Int
 }
+
+internal fun ioProcCallback(channels: Int, onFrame: (FloatArray, Int) -> Unit) =
+    AudioDeviceIoProcCallback { _, _, inputData, _, _, _, _ ->
+        val frames = inputData?.frameCount(channels) ?: 0
+        if (inputData != null && frames > 0) {
+            val samples = inputData.readInterleavedFloat(channels, frames)
+            onFrame(samples, frames)
+        }
+        0
+    }
 
 // A thin, best-effort reader over CoreAudio's `AudioBufferList*` layout
 // (`UInt32 mNumberBuffers; AudioBuffer mBuffers[]`, each `AudioBuffer` being
