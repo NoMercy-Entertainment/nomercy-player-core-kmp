@@ -12,7 +12,12 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.CValue
 import kotlinx.cinterop.readValue
 import kotlinx.cinterop.useContents
+import platform.AVFoundation.AVAssetTrack
 import platform.AVFoundation.AVMediaCharacteristicAudible
+import platform.AVFoundation.AVMediaTypeAudio
+import platform.AVFoundation.AVMutableAudioMix
+import platform.AVFoundation.audioMix
+import platform.AVFoundation.tracksWithMediaType
 import platform.AVFoundation.AVMediaCharacteristicContainsOnlyForcedSubtitles
 import platform.AVFoundation.AVMediaCharacteristicLegible
 import platform.AVFoundation.AVMediaSelectionGroup
@@ -500,6 +505,15 @@ public class AVPlayerVideoBackend : VideoBackend {
     /** Where the pending load should begin, applied once its item is in the player. */
     @Volatile private var pendingStartMs: Long = 0L
 
+    // Set by the audio backend; a tap lives on one item's mix, so every new item needs its own.
+    internal var audioMixSource: ((AVAssetTrack) -> AVMutableAudioMix?)? = null
+
+    private fun attachAudioMix(item: AVPlayerItem, asset: AVURLAsset) {
+        val source: (AVAssetTrack) -> AVMutableAudioMix? = audioMixSource ?: return
+        val track: AVAssetTrack = asset.tracksWithMediaType(AVMediaTypeAudio).firstOrNull() as? AVAssetTrack ?: return
+        item.audioMix = source(track)
+    }
+
     private fun onAssetLoaded(asset: AVURLAsset) {
         val loaded: Boolean = asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded
         if (!loaded || !asset.playable) {
@@ -508,6 +522,7 @@ public class AVPlayerVideoBackend : VideoBackend {
         }
         loadedAsset = asset
         val item = AVPlayerItem(asset = asset)
+        attachAudioMix(item, asset)
         // Before the player is given the item, so the first cue of a film that
         // opens on dialogue is not missed while the output is being attached.
         legible.attach(item)

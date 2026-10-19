@@ -8,6 +8,10 @@
 
 package tv.nomercy.player.core.ports
 
+import platform.AVFoundation.AVAudioMix
+import platform.AVFoundation.audioMix
+import platform.AVFoundation.currentItem
+
 // Two AVPlayers, swapped rather than promoted.
 //
 // The same shape as the Android and desktop audio backends, deliberately. The
@@ -32,8 +36,13 @@ public class AVPlayerAudioBackend : AudioBackend {
 
     override fun audioGraph(): AudioDspGraph = dsp
 
-    private var current: AVPlayerVideoBackend = AVPlayerVideoBackend()
+    internal fun currentItemAudioMix(): AVAudioMix? = current.avPlayer.currentItem?.audioMix
+
+    private var current: AVPlayerVideoBackend = withGraph(AVPlayerVideoBackend())
     private var standby: AVPlayerVideoBackend? = null
+
+    private fun withGraph(backend: AVPlayerVideoBackend): AVPlayerVideoBackend =
+        backend.also { it.audioMixSource = dsp::audioMix }
 
     private val crossfader = EqualPowerCrossfader()
 
@@ -87,7 +96,7 @@ public class AVPlayerAudioBackend : AudioBackend {
     override fun supportsCrossfade(): Boolean = true
 
     override suspend fun loadSecondary(url: String) {
-        val next: AVPlayerVideoBackend = standby ?: AVPlayerVideoBackend().also { standby = it }
+        val next: AVPlayerVideoBackend = standby ?: withGraph(AVPlayerVideoBackend()).also { standby = it }
         next.volume(0f)
         next.load(url)
     }
