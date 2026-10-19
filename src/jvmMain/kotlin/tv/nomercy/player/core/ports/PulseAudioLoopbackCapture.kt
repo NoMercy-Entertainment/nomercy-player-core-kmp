@@ -32,20 +32,19 @@ import java.util.concurrent.atomic.AtomicBoolean
 // blocking convenience wrapper built for exactly this — one stream, one
 // direction, read in a loop — and the full API's callback/mainloop plumbing
 // buys nothing here that pa_simple does not already give for free.
-internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
+internal class PulseAudioLoopbackCapture(
+    private val opener: PulseStreamOpener = NativePulseStreamOpener,
+    private val joinTimeoutMs: Long = THREAD_JOIN_TIMEOUT_MS,
+) : AudioLoopbackCapture {
 
     private val running = AtomicBoolean(false)
     private var captureThread: Thread? = null
-    private var stream: Pointer? = null
 
     override fun start(sampleRate: Int, channels: Int, onFrame: (FloatArray, Int) -> Unit): Boolean {
         if (running.get()) return true
 
-        val opened = openPulse(sampleRate, channels) ?: return false
-        val pulse = opened.library
-        val handle = opened.stream
+        val handle = opener.open(sampleRate, channels) ?: return false
 
-        stream = handle
         running.set(true)
 
         // A dedicated thread, not a coroutine — pa_simple_read blocks the
@@ -53,19 +52,15 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
         // PulseAudio to have a full buffer ready, which is not work a
         // coroutine dispatcher should have parked on it.
         captureThread = Thread({
-            // Half a spectrum analysis window per read: small enough that a
-            // frame is fresh when it reaches PcmEqualiser, large enough that
-            // this is not a syscall per handful of samples.
-            val framesPerRead = FRAMES_PER_READ
-            val buffer = FloatArray(framesPerRead * channels)
-            val byteBuffer = com.sun.jna.Memory((framesPerRead * channels * Float.SIZE_BYTES).toLong())
-
-            while (running.get()) {
-                val readError = IntByReference()
-                val result = pulse.pa_simple_read(handle, byteBuffer, byteBuffer.size(), readError)
-                if (result < 0) break
-                byteBuffer.read(0, buffer, 0, buffer.size)
-                onFrame(buffer, framesPerRead)
+            val buffer = FloatArray(FRAMES_PER_READ * channels)
+            try {
+                while (running.get()) {
+                    if (!handle.read(buffer)) break
+                    onFrame(buffer, FRAMES_PER_READ)
+                }
+            } finally {
+                // Only this thread reads the stream, so only it may free it.
+                handle.free()
             }
         }, "nomercy-pulse-loopback").apply {
             isDaemon = true
@@ -77,69 +72,77 @@ internal class PulseAudioLoopbackCapture : AudioLoopbackCapture {
 
     override fun stop() {
         running.set(false)
-        captureThread?.join(THREAD_JOIN_TIMEOUT_MS)
+        // A read still blocked after the timeout frees the stream itself on exit.
+        captureThread?.join(joinTimeoutMs)
         captureThread = null
-        stream?.let { PULSE_SIMPLE_FREE?.invoke(it) }
-        stream = null
     }
+}
 
-    // `pactl` rather than binding the full context/mainloop API just to ask
-    // one question: the async API needs a running mainloop thread for a
-    // single-shot "what is the default sink" query, and pa_simple's own
-    // surface has no equivalent call. `@DEFAULT_SINK@.monitor` is documented
-    // PulseAudio special-case syntax but does not reliably resolve through
-    // every pa_simple build encountered in the wild — the sink's real name
-    // does.
-    // The library and the stream opened on it. start() needs both — the stream
-    // to read and the library to read it with — and neither is any use alone,
-    // so they are obtained together or not at all.
-    private class OpenedPulse(val library: PulseSimple, val stream: Pointer)
+// The seam between the capture loop and libpulse, so the stop ordering can be
+// tested without a PulseAudio server.
+internal interface PulseStream {
+    // False when the read failed and the loop must end.
+    fun read(buffer: FloatArray): Boolean
+    fun free()
+}
 
-    private fun openPulse(sampleRate: Int, channels: Int): OpenedPulse? {
+internal fun interface PulseStreamOpener {
+    fun open(sampleRate: Int, channels: Int): PulseStream?
+}
+
+// Small enough that a frame is fresh when it reaches PcmEqualiser,
+// large enough that this is not a syscall per handful of samples.
+private const val FRAMES_PER_READ = 1024
+private const val THREAD_JOIN_TIMEOUT_MS = 1_000L
+private const val STREAM_NAME = "NoMercyPlayer"
+private const val PA_STREAM_RECORD = 2
+private const val PA_SAMPLE_FLOAT32LE = 5
+
+private object NativePulseStreamOpener : PulseStreamOpener {
+    override fun open(sampleRate: Int, channels: Int): PulseStream? {
         val pulse = runCatching { Native.load("pulse-simple", PulseSimple::class.java) }.getOrNull() ?: return null
-        return openMonitorStream(pulse, sampleRate, channels)?.let { handle -> OpenedPulse(pulse, handle) }
+        val handle = openMonitor(pulse, sampleRate, channels) ?: return null
+        return NativePulseStream(pulse, handle, channels)
     }
 
-    // The monitor source and the stream it opens on, together — start() only
-    // needs to know whether it got one.
-    private fun openMonitorStream(pulse: PulseSimple, sampleRate: Int, channels: Int): Pointer? {
+    private fun openMonitor(pulse: PulseSimple, sampleRate: Int, channels: Int): Pointer? {
         val monitorSource = defaultMonitorSourceName() ?: return null
         val spec = PaSampleSpec().apply {
             format = PA_SAMPLE_FLOAT32LE
             rate = sampleRate
             this.channels = channels.toByte()
         }
-        val error = IntByReference()
         return pulse.pa_simple_new(
-            null, STREAM_NAME, PA_STREAM_RECORD, monitorSource, STREAM_NAME, spec, null, null, error,
+            null, STREAM_NAME, PA_STREAM_RECORD, monitorSource, STREAM_NAME, spec, null, null, IntByReference(),
         )
     }
 
+    // `pactl` rather than the async API: it needs a mainloop thread for a
+    // one-shot query. The sink's real name resolves where `@DEFAULT_SINK@`
+    // does not.
     private fun defaultMonitorSourceName(): String? = runCatching {
         val process = ProcessBuilder("pactl", "get-default-sink").redirectErrorStream(true).start()
         val sinkName = process.inputStream.bufferedReader().readText().trim()
         process.waitFor()
         if (sinkName.isEmpty()) null else "$sinkName.monitor"
     }.getOrNull()
+}
 
-    private companion object {
-        // Small enough that a frame is fresh when it reaches PcmEqualiser,
-        // large enough that this is not a syscall per handful of samples.
-        const val FRAMES_PER_READ = 1024
+private class NativePulseStream(
+    private val pulse: PulseSimple,
+    private val handle: Pointer,
+    channels: Int,
+) : PulseStream {
+    private val bytes = com.sun.jna.Memory((FRAMES_PER_READ * channels * Float.SIZE_BYTES).toLong())
 
-        const val STREAM_NAME = "NoMercyPlayer"
-        const val PA_STREAM_RECORD = 2
-        const val PA_SAMPLE_FLOAT32LE = 5
-        const val THREAD_JOIN_TIMEOUT_MS = 1_000L
-
-        // Resolved lazily and held apart from the instance-scoped library
-        // handle only so [stop] can free the stream without re-loading the
-        // library on the way out.
-        val PULSE_SIMPLE_FREE: ((Pointer) -> Unit)? = runCatching {
-            val lib = Native.load("pulse-simple", PulseSimple::class.java)
-            lib::pa_simple_free
-        }.getOrNull()
+    override fun read(buffer: FloatArray): Boolean {
+        val result = pulse.pa_simple_read(handle, bytes, bytes.size(), IntByReference())
+        if (result < 0) return false
+        bytes.read(0, buffer, 0, buffer.size)
+        return true
     }
+
+    override fun free() = pulse.pa_simple_free(handle)
 }
 
 @Structure.FieldOrder("format", "rate", "channels")
