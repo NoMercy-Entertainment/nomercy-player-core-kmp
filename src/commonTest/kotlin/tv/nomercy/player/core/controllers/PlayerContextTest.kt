@@ -158,6 +158,19 @@ class PlayerContextTest {
     }
 
     @Test
+    fun aLoadWithoutStartFreshStillResumesSavedProgress() = runTest {
+        val ctx = newContext()
+        ctx.startPositionFor = { 90_000L }
+
+        ctx.load(TestItem("a"))
+        ctx.load(TestItem("a"), LoadOptions(startFresh = true))
+
+        val seen = ctx.fakeBackend().loadedOptions
+        assertEquals(90_000L, seen[0].startPositionMs)
+        assertEquals(0L, seen[1].startPositionMs)
+    }
+
+    @Test
     fun aContextWithNoBackendSaysSoRatherThanLoadingNothing() = runTest {
         // This used to be a no-op on the reasoning that setup wires the backend
         // and a load before that is harmless. It is not harmless: the load

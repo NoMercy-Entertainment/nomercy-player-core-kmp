@@ -20,4 +20,8 @@ public data class LoadOptions(
     // can act on it selects the right track AT PREPARE, not after the list announces and
     // a post-hoc switch re-buffers audio the viewer already heard start in the wrong one.
     val preferredAudioLanguage: String? = null,
+    // Start at 0 even though startPositionMs is 0: the viewer moved to this item with
+    // next or previous, so its saved progress is not wanted. Without it a 0 means
+    // "nothing asked" and PlayerContext puts the saved progress in its place.
+    val startFresh: Boolean = false,
 )

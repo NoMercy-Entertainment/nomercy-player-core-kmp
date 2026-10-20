@@ -234,7 +234,13 @@ public class PlayerContext(
     // stored language preference.
     private fun effectiveLoadOptions(item: PlaylistItem, opts: LoadOptions): LoadOptions =
         opts.copy(
-            startPositionMs = if (opts.startPositionMs > 0L) opts.startPositionMs else startPositionFor(item),
+            // startFresh keeps a 0 as 0: next and previous begin the incoming
+            // item at its start, not at its saved progress.
+            startPositionMs = when {
+                opts.startPositionMs > 0L -> opts.startPositionMs
+                opts.startFresh -> 0L
+                else -> startPositionFor(item)
+            },
             preferredAudioLanguage = opts.preferredAudioLanguage ?: preferredAudioLanguageFor(item),
         )
 

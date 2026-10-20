@@ -6976,7 +6976,7 @@ final class tv.nomercy.player.core.ports/InProcessLeaderLock : tv.nomercy.player
 }
 
 final class tv.nomercy.player.core.ports/LoadOptions { // tv.nomercy.player.core.ports/LoadOptions|null[0]
-    constructor <init>(kotlin/Long = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ...) // tv.nomercy.player.core.ports/LoadOptions.<init>|<init>(kotlin.Long;kotlin.Boolean;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?){}[0]
+    constructor <init>(kotlin/Long = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ..., kotlin/Boolean = ...) // tv.nomercy.player.core.ports/LoadOptions.<init>|<init>(kotlin.Long;kotlin.Boolean;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?;kotlin.Boolean){}[0]
 
     final val autoplay // tv.nomercy.player.core.ports/LoadOptions.autoplay|{}autoplay[0]
         final fun <get-autoplay>(): kotlin/Boolean // tv.nomercy.player.core.ports/LoadOptions.autoplay.<get-autoplay>|<get-autoplay>(){}[0]
@@ -6984,6 +6984,8 @@ final class tv.nomercy.player.core.ports/LoadOptions { // tv.nomercy.player.core
         final fun <get-headers>(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.ports/LoadOptions.headers.<get-headers>|<get-headers>(){}[0]
     final val preferredAudioLanguage // tv.nomercy.player.core.ports/LoadOptions.preferredAudioLanguage|{}preferredAudioLanguage[0]
         final fun <get-preferredAudioLanguage>(): kotlin/String? // tv.nomercy.player.core.ports/LoadOptions.preferredAudioLanguage.<get-preferredAudioLanguage>|<get-preferredAudioLanguage>(){}[0]
+    final val startFresh // tv.nomercy.player.core.ports/LoadOptions.startFresh|{}startFresh[0]
+        final fun <get-startFresh>(): kotlin/Boolean // tv.nomercy.player.core.ports/LoadOptions.startFresh.<get-startFresh>|<get-startFresh>(){}[0]
     final val startPositionMs // tv.nomercy.player.core.ports/LoadOptions.startPositionMs|{}startPositionMs[0]
         final fun <get-startPositionMs>(): kotlin/Long // tv.nomercy.player.core.ports/LoadOptions.startPositionMs.<get-startPositionMs>|<get-startPositionMs>(){}[0]
 
@@ -6991,7 +6993,8 @@ final class tv.nomercy.player.core.ports/LoadOptions { // tv.nomercy.player.core
     final fun component2(): kotlin/Boolean // tv.nomercy.player.core.ports/LoadOptions.component2|component2(){}[0]
     final fun component3(): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.ports/LoadOptions.component3|component3(){}[0]
     final fun component4(): kotlin/String? // tv.nomercy.player.core.ports/LoadOptions.component4|component4(){}[0]
-    final fun copy(kotlin/Long = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ...): tv.nomercy.player.core.ports/LoadOptions // tv.nomercy.player.core.ports/LoadOptions.copy|copy(kotlin.Long;kotlin.Boolean;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?){}[0]
+    final fun component5(): kotlin/Boolean // tv.nomercy.player.core.ports/LoadOptions.component5|component5(){}[0]
+    final fun copy(kotlin/Long = ..., kotlin/Boolean = ..., kotlin.collections/Map<kotlin/String, kotlin/String> = ..., kotlin/String? = ..., kotlin/Boolean = ...): tv.nomercy.player.core.ports/LoadOptions // tv.nomercy.player.core.ports/LoadOptions.copy|copy(kotlin.Long;kotlin.Boolean;kotlin.collections.Map<kotlin.String,kotlin.String>;kotlin.String?;kotlin.Boolean){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/LoadOptions.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/LoadOptions.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/LoadOptions.toString|toString(){}[0]

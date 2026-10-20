@@ -127,6 +127,29 @@ class TransportControllerTest {
     }
 
     @Test
+    fun nextStartsTheIncomingItemAtZeroNotAtItsSavedProgress() = runTest {
+        val rig = Rig().ready()
+        rig.ctx.startPositionFor = { 90_000L }
+        rig.queue.queue(items("a", "b", "c"))
+
+        rig.transport.next()
+
+        assertEquals(0L, rig.backend.loadedOptions.last().startPositionMs)
+    }
+
+    @Test
+    fun previousStartsTheIncomingItemAtZeroNotAtItsSavedProgress() = runTest {
+        val rig = Rig().ready()
+        rig.ctx.startPositionFor = { 90_000L }
+        rig.queue.queue(items("a", "b", "c"))
+        rig.queue.item("c")
+
+        rig.transport.previous()
+
+        assertEquals(0L, rig.backend.loadedOptions.last().startPositionMs)
+    }
+
+    @Test
     fun theCursorMovesBeforeTheMediaDoes() = runTest {
         val rig = Rig().ready()
         rig.queue.queue(items("a", "b"))

@@ -22,6 +22,7 @@ import tv.nomercy.player.core.player.ActionSource
 import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.RepeatState
+import tv.nomercy.player.core.ports.LoadOptions
 
 // Play, pause, stop, and moving between items.
 //
@@ -196,11 +197,11 @@ public class TransportController(
         // The cursor moves before the media does, so the item event a chrome
         // renders arrives before the buffering it is about to show.
         ctx.queue.setCurrent(index)
-        ctx.queue.current()?.let { loadAndPlay(it, opts) }
+        ctx.queue.current()?.let { loadAndPlay(it, opts, LoadOptions(startFresh = true)) }
     }
 
-    private suspend fun loadAndPlay(item: PlaylistItem, opts: ActionOptions) {
-        if (!ctx.loadQuietly(item)) return
+    private suspend fun loadAndPlay(item: PlaylistItem, opts: ActionOptions, load: LoadOptions = LoadOptions()) {
+        if (!ctx.loadQuietly(item, load)) return
         ctx.emit(CoreEvents.MediaReady, Unit)
         play(opts)
     }
