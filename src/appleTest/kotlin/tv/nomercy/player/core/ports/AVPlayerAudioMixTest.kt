@@ -32,6 +32,7 @@ private const val SAMPLE_RATE = 44_100
 private const val SECONDS = 1
 private const val SETTLE_SECONDS = 0.5
 private const val BYTES_PER_SAMPLE = 2
+private const val MAX_SETTLES = 20
 
 // The equaliser tap has to reach the item that plays, or the graph is inert.
 @OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
@@ -53,7 +54,8 @@ class AVPlayerAudioMixTest {
 
         try {
             runBlocking { backend.load(media("mix-a"), LoadOptions()) }
-            settle()
+            // A loaded hosted simulator can take longer than one settle to attach the mix.
+            repeat(MAX_SETTLES) { if (backend.currentItemAudioMix() == null) settle() }
 
             assertNotNull(backend.currentItemAudioMix(), "the item has no audio mix, so the equaliser hears nothing")
         } finally {

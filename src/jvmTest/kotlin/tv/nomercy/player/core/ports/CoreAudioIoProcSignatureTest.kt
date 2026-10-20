@@ -37,8 +37,9 @@ class CoreAudioIoProcSignatureTest {
     fun inputIsReadFromTheThirdArgumentAndNotFromInNow() {
         var delivered = 0
         val callback = ioProcCallback(channels = 2) { _, _ -> delivered++ }
-        val timestamp = Memory(BUFFER_LIST_BYTES).apply { setInt(8, 4_096) }
-        val emptyList = Memory(BUFFER_LIST_BYTES)
+        // JNA does not zero fresh memory; stale bytes read as a huge buffer count.
+        val timestamp = Memory(BUFFER_LIST_BYTES).apply { clear(); setInt(8, 4_096) }
+        val emptyList = Memory(BUFFER_LIST_BYTES).apply { clear() }
 
         assertEquals(0, callback.invoke(1, timestamp, emptyList, null, null, null, null))
         assertEquals(0, delivered)
