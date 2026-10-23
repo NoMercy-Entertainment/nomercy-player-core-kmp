@@ -55,19 +55,15 @@ import kotlinx.coroutines.flow.onEach
 public class NoMercyPlaybackService : MediaLibraryService() {
 
     private var scopeJob: Job? = null
-    private var browseOnly: BrowseOnlySession? = null
     private var startedByCommand = false
 
-    // A browser (car, watch) can bind before any player exists; it is answered
-    // with a browse-only session until the transport publishes its own.
+    // A browser (car, watch) can bind before any player exists. It is answered
+    // with the shared session, which playback later attaches its player to.
     private val sessions = BrowseSessionCoordinator<MediaLibrarySession>(
-        build = { BrowseOnlySession(this).also { browseOnly = it }.session },
+        build = { SharedLibrarySession.obtain(this) },
         add = { session -> addSession(session) },
         remove = { session -> removeSession(session) },
-        release = {
-            browseOnly?.release()
-            browseOnly = null
-        },
+        release = { SharedLibrarySession.releaseIfIdle() },
     )
 
     override fun onCreate() {

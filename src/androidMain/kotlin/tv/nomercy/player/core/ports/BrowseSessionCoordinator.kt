@@ -8,13 +8,9 @@
 
 package tv.nomercy.player.core.ports
 
-// Which session [NoMercyPlaybackService] answers a browser with.
-//
-// A car that opens the app cold binds the service before any player exists. The
-// transport's session is the answer once there is one; until then a browse-only
-// session stands in, so the car gets a root to ask for. Only one of the two is
-// ever registered: the browse session goes out before the transport's goes in.
-// Main thread only, like the service that owns it.
+// Which session [NoMercyPlaybackService] answers a browser with, and when it
+// registers it. Playback attaches to the session a browser holds, so that one
+// is never removed or released while a browser is bound. Main thread only.
 internal class BrowseSessionCoordinator<S : Any>(
     private val build: () -> S,
     private val add: (S) -> Unit,
@@ -24,23 +20,23 @@ internal class BrowseSessionCoordinator<S : Any>(
     var transport: S? = null
         private set
 
-    private var browse: S? = null
+    private var held: S? = null
     private var binds: Int = 0
 
-    val current: S? get() = transport ?: browse
+    val current: S? get() = held
 
     // True when nothing is left to serve and the service should stop.
     fun onPublished(session: S?): Boolean {
-        if (session == null && transport == null) return false
-        transport?.let { old -> if (old !== session) runCatching { remove(old) } }
-        transport = session
         if (session != null) {
-            dropBrowse()
-            runCatching { add(session) }
-        } else if (binds > 0) {
-            ensureBrowse()
+            hold(session)
+            transport = session
+            return false
         }
-        return session == null && binds == 0
+        val ended: Boolean = transport != null
+        transport = null
+        if (!ended || binds > 0) return false
+        drop()
+        return true
     }
 
     fun onBind() {
@@ -51,31 +47,39 @@ internal class BrowseSessionCoordinator<S : Any>(
     fun onUnbind(): Boolean {
         if (binds > 0) binds--
         if (binds > 0 || transport != null) return false
-        dropBrowse()
+        drop()
         return true
     }
 
     fun sessionForBrowser(): S? {
-        if (transport == null) ensureBrowse()
-        return current
+        if (held == null) {
+            val built: S = runCatching(build).getOrNull() ?: return null
+            hold(built)
+        }
+        return held
     }
 
     fun shutdown() {
-        transport?.let { runCatching { remove(it) } }
         transport = null
-        dropBrowse()
+        drop()
     }
 
-    private fun ensureBrowse() {
-        if (browse != null) return
-        val built: S = runCatching(build).getOrNull() ?: return
-        browse = built
-        runCatching { add(built) }
+    // A different session replaces the held one; the same one is already
+    // registered and is left alone.
+    private fun hold(session: S) {
+        val old: S? = held
+        if (old === session) return
+        if (old != null) {
+            runCatching { remove(old) }
+            runCatching { release(old) }
+        }
+        held = session
+        runCatching { add(session) }
     }
 
-    private fun dropBrowse() {
-        val old: S = browse ?: return
-        browse = null
+    private fun drop() {
+        val old: S = held ?: return
+        held = null
         runCatching { remove(old) }
         runCatching { release(old) }
     }

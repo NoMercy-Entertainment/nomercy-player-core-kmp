@@ -26,14 +26,21 @@ class BrowseSessionCoordinatorTest {
 
     // Stands in for Media3's registry: one live session at a time, and a throw
     // on a second add, the way a duplicate session id answers.
-    private class Registry {
+    // [shared] stands in for the one long-lived session the host hands both the
+    // service and the transport; without it every build is a new session.
+    private class Registry(shared: Session? = null) {
         val registered = mutableListOf<Session>()
         var maxRegistered = 0
         var duplicateAttempts = 0
         var built = 0
+        var buildCalls = 0
+        var removals = 0
 
         val coordinator = BrowseSessionCoordinator(
-            build = { Session("browse-${++built}") },
+            build = {
+                buildCalls++
+                shared ?: Session("browse-${++built}")
+            },
             add = { session ->
                 if (registered.any { it === session }) {
                     duplicateAttempts++
@@ -42,7 +49,10 @@ class BrowseSessionCoordinatorTest {
                 registered += session
                 maxRegistered = maxOf(maxRegistered, registered.size)
             },
-            remove = { session -> registered.removeAll { it === session } },
+            remove = { session ->
+                removals++
+                registered.removeAll { it === session }
+            },
             release = { session -> session.released = true },
         )
     }
@@ -187,6 +197,83 @@ class BrowseSessionCoordinatorTest {
         coordinator.onBind()
 
         assertNull(coordinator.sessionForBrowser())
+    }
+
+    // The car's browser holds the session it was bound to. Destroying it is what
+    // Android Auto reports as onSessionDestroyed and answers with "can't load".
+    @Test
+    fun playbackStartingNeverDestroysTheSessionABoundBrowserHolds() {
+        val shared = Session("shared")
+        val registry = Registry(shared)
+        registry.coordinator.onBind()
+        val held = registry.coordinator.sessionForBrowser()
+
+        val stop = registry.coordinator.onPublished(shared)
+
+        assertFalse(stop)
+        assertSame(shared, held)
+        assertFalse(shared.released)
+        assertEquals(0, registry.removals)
+        assertEquals(listOf(shared), registry.registered)
+    }
+
+    @Test
+    fun playbackEndingWithABrowserBoundKeepsTheSessionRegisteredAndAlive() {
+        val shared = Session("shared")
+        val registry = Registry(shared)
+        registry.coordinator.onBind()
+        registry.coordinator.sessionForBrowser()
+        registry.coordinator.onPublished(shared)
+
+        val stop = registry.coordinator.onPublished(null)
+
+        assertFalse(stop)
+        assertFalse(shared.released)
+        assertEquals(0, registry.removals)
+        assertEquals(listOf(shared), registry.registered)
+        assertSame(shared, registry.coordinator.sessionForBrowser())
+        assertNull(registry.coordinator.transport)
+    }
+
+    @Test
+    fun theSameSessionServesBrowseThenPlaybackThenBrowseWithOneRegistration() {
+        val shared = Session("shared")
+        val registry = Registry(shared)
+        registry.coordinator.onBind()
+        registry.coordinator.sessionForBrowser()
+        registry.coordinator.onPublished(shared)
+        registry.coordinator.onPublished(null)
+        registry.coordinator.onPublished(shared)
+        registry.coordinator.onPublished(null)
+
+        assertEquals(0, registry.duplicateAttempts)
+        assertEquals(1, registry.maxRegistered)
+        assertEquals(0, registry.removals)
+        assertFalse(shared.released)
+    }
+
+    @Test
+    fun aCarConnectingWhilePlaybackAlreadyRunsAttachesToThePlayingSession() {
+        val shared = Session("shared")
+        val registry = Registry(shared)
+        registry.coordinator.onPublished(shared)
+        registry.coordinator.onBind()
+
+        assertSame(shared, registry.coordinator.sessionForBrowser())
+        assertEquals(0, registry.buildCalls)
+        assertEquals(listOf(shared), registry.registered)
+    }
+
+    @Test
+    fun playbackEndingWithNoBrowserRemovesTheSessionAndStopsTheService() {
+        val shared = Session("shared")
+        val registry = Registry(shared)
+        registry.coordinator.onPublished(shared)
+
+        val stop = registry.coordinator.onPublished(null)
+
+        assertTrue(stop)
+        assertTrue(registry.registered.isEmpty())
     }
 
     @Test

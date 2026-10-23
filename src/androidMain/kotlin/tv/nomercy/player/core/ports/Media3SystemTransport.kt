@@ -15,34 +15,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
-import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.datasource.DataSource
-import androidx.media3.datasource.DataSourceBitmapLoader
-import androidx.media3.datasource.DefaultDataSource
-import androidx.media3.datasource.okhttp.OkHttpDataSource
 import androidx.media3.session.CommandButton
-import androidx.media3.session.LibraryResult
-import androidx.media3.session.MediaLibraryService.LibraryParams
 import androidx.media3.session.MediaLibraryService.MediaLibrarySession
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionResult
-import com.google.common.collect.ImmutableList
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import com.google.common.util.concurrent.SettableFuture
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
-import tv.nomercy.player.core.plugin.BrowseNode
-import tv.nomercy.player.core.plugin.BrowseTreeProvider
 
 // The Android lock screen, notification and car display — all of them one
 // session.
@@ -72,135 +53,23 @@ internal class Media3SystemTransport(
 
     private val bridge = TransportSimpleBasePlayer()
 
-    // One thread, shared by every artwork fetch this session makes. Declared
-    // before [session] on purpose: its initializer calls buildSession(),
-    // which reads this — declared after session it is still null there
-    // (confirmed live: NPE out of DataSourceBitmapLoader.loadBitmap).
-    //
-    // Wrapped in its own lifecycle owner rather than a bare field: this class
-    // needs a real Android Context to construct at all, which puts it out of
-    // reach of a host test (see ExoTrackMapperTest's own comment on why this
-    // repo dropped Robolectric). The executor itself carries no such
-    // dependency, so the piece that used to leak a thread — never shut down
-    // in [release] — now lives somewhere a host test can actually reach it.
-    private val artworkLoader = ArtworkLoaderExecutor()
-
-    private val session: MediaLibrarySession = run {
-        // The fixed [SESSION_ID] means Media3 throws "Session ID must be
-        // unique" if a prior instance's own release() (app-side dispose() is
-        // suspend, fired from a Compose DisposableEffect) has not completed
-        // before this constructor runs — confirmed live: navigating back to a
-        // watch screen and re-entering it crashed with exactly this exception
-        // (real TV, 2026-08-11), because the old holder's async dispose lost
-        // the race against the new holder's synchronous construction. Release
-        // whatever is still published under this session's identity first, so
-        // construction is idempotent regardless of which side wins the race.
-        //
-        // NOT routed through `publish(null)` first: that interim null reaches
-        // NoMercyPlaybackService.reconcile() (a StateFlow collector on
-        // Dispatchers.Main.immediate) before this constructor's own `init`
-        // block publishes the real replacement, and reconcile() treats a null
-        // session as "playback stopped" and calls stopSelf() — which then
-        // raced the next line's startForegroundService(), producing a NEW
-        // crash (ForegroundServiceDidNotStartInTimeException, confirmed live
-        // switching from video to music on a real TV, 2026-08-11) in place of
-        // the one this was fixing. Releasing the stale MediaSession directly
-        // and letting the real publish() below carry the old→new transition
-        // through reconcile() in one pass (it already removeSession()s
-        // whatever was attached before addSession()ing the new one) avoids
-        // the phantom "stopped" state entirely.
-        // Guarded: release() is not confirmed idempotent under this race.
-        runCatching { PlaybackForegroundSession.session.value?.release() }
-        buildSession()
-    }
-
-    // The release above is not always enough on its own: it frees whatever
-    // THIS process currently tracks as the active session, but a session from
-    // an even earlier, already-abandoned construction (one that threw before
-    // ever reaching publish()) can still hold the id in Media3's own registry
-    // — confirmed live, real device, 2026-08-16 (the same "Session ID must be
-    // unique" exception recurring through this exact constructor). One retry
-    // after a short yield is a standard mitigation for a registry race like
-    // this, not a guaranteed fix for whatever left the orphan behind.
-    // The id stays fixed: music stopped keeping playback alive when it varied
-    // per instance (reported live, 2026-08-16), because the foreground service
-    // binds to the session it was promoted with. The duplicate-id crash this
-    // was trying to solve is an orphan-release problem, not a naming one.
-    private fun buildSession(): MediaLibrarySession {
-        // The orphan, not the name. A session that was constructed and then
-        // thrown away before publish() still holds SESSION_ID in Media3's
-        // registry, and PlaybackForegroundSession only knows about published
-        // ones — so releasing that was never enough. Every session this process
-        // builds is tracked here and released before the next one, which is what
-        // actually frees the id.
-        lastBuilt?.let { orphan -> runCatching { orphan.release() } }
-        lastBuilt = null
-
-        // A MediaLibrarySession rather than a plain MediaSession, because a
-        // Bluetooth head unit finds a player by enumerating BROWSABLE ones —
-        // a session with no browse side is controllable once something else
-        // starts it and invisible to the car's own player list, which is why
-        // NoMercy never appeared beside Spotify on a head unit. MediaLibrarySession
-        // is a MediaSession, so nothing that already held one notices.
-        return MediaLibrarySession.Builder(appContext, bridge, TransportSessionCallback())
-            .setId(SESSION_ID)
-            .setBitmapLoader(DataSourceBitmapLoader(artworkLoader.service, artworkDataSourceFactory()))
-            .build()
-            .also { built -> lastBuilt = built }
-    }
-
-    // Media3's own default BitmapLoader fetches artworkUri with a bare
-    // HttpDataSource — no Authorization header — so a car, a Bluetooth head
-    // unit or the lock screen got the title and the transport controls but
-    // never the cover: the request reached a server that gates every image
-    // the same way it gates everything else, and was refused (see
-    // ArtworkAuthHeaders' own comment). The engine's own AuthHeaders is not
-    // reachable here — it belongs to one playback backend, built later than
-    // this session and released with it — so this reads the seam the app
-    // installs once at startup, the same shape [mediaNotificationBranding]
-    // already uses for the same forced-static-seam reason.
-    private fun artworkDataSourceFactory(): DataSource.Factory {
-        val headers: () -> Map<String, String> = { PlatformEnvironment.artworkAuthHeaders?.invoke().orEmpty() }
-        val client = SharedHttpClient.derive {
-            addInterceptor { chain ->
-                val request = chain.request()
-                val extra = headers()
-                if (extra.isEmpty()) {
-                    chain.proceed(request)
-                } else {
-                    val builder = request.newBuilder()
-                    for ((name, value) in extra) {
-                        if (request.header(name) == null) builder.header(name, value)
-                    }
-                    chain.proceed(builder.build())
-                }
-            }
-        }
-        return DefaultDataSource.Factory(appContext, OkHttpDataSource.Factory(client))
-    }
-
-    // Browse answers are suspend and a car asks on a binder thread it expects
-    // back immediately, so every one of them is resolved off this scope and
-    // handed over as a future. Off the main thread by default: a tree backed by
-    // the network would otherwise resolve on the thread drawing the UI.
-    private val browseScope = CoroutineScope(browseDispatcher + SupervisorJob())
-
-    private fun <T : Any> answer(block: suspend () -> LibraryResult<T>): ListenableFuture<LibraryResult<T>> {
-        val pending: SettableFuture<LibraryResult<T>> = SettableFuture.create()
-        browseScope.launch {
-            // A tree that throws is a catalogue that failed to load, not a
-            // reason to leave the car waiting on a future nobody completes.
-            val answered: LibraryResult<T> = runCatching { block() }
-                .getOrElse { LibraryResult.ofError(LibraryResult.RESULT_ERROR_UNKNOWN) }
-            pending.set(answered)
-        }
-        return pending
-    }
-
     // id -> what to run when the system reports that command pressed.
     // Rebuilt in full on every setCustomButtons call, same replace-the-whole-
     // map shape as TransportSimpleBasePlayer.setActions.
     private val customButtonHandlers = mutableMapOf<String, () -> Unit>()
+
+    private val controls = object : TransportControls {
+        override val commandIds: Set<String> get() = customButtonHandlers.keys.toSet()
+
+        override fun press(id: String) {
+            customButtonHandlers[id]?.invoke()
+        }
+    }
+
+    // The process-wide session this transport's bridge is attached to. Not
+    // built or released here: a car bound to it must outlive any one playback.
+    private val session: MediaLibrarySession =
+        SharedLibrarySession.attach(appContext, bridge, controls, browseDispatcher)
 
     // What the session's custom layout last drew, so an unchanged set of buttons
     // is not pushed again. Nothing is drawn before the first call.
@@ -208,84 +77,7 @@ internal class Media3SystemTransport(
 
     private var customLayoutShape: List<ButtonShape> = emptyList()
 
-    // The other half of the custom layout — the system reporting which of
-    // those command ids was pressed, and the one place that needs to know
-    // which app-level buttons exist at all so it can advertise them to a
-    // connecting controller.
-    private inner class TransportSessionCallback : MediaLibrarySession.Callback {
-
-        override fun onConnect(
-            controllerSession: MediaSession,
-            controller: MediaSession.ControllerInfo,
-        ): MediaSession.ConnectionResult {
-            val available = MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
-            customButtonHandlers.keys.forEach { id -> available.add(SessionCommand(id, Bundle.EMPTY)) }
-            return MediaSession.ConnectionResult.accept(
-                available.build(),
-                MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS,
-            )
-        }
-
-        override fun onCustomCommand(
-            controllerSession: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            customCommand: SessionCommand,
-            args: Bundle,
-        ): ListenableFuture<SessionResult> {
-            android.util.Log.d(
-                "NMTransport",
-                "customCommand=${customCommand.customAction} known=${customButtonHandlers.keys}",
-            )
-            customButtonHandlers[customCommand.customAction]?.invoke()
-            return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
-        }
-
-        // The three questions a car, a watch or an assistant asks. Answered
-        // from whatever tree the app installed; an app that installed none
-        // answers a root with nothing under it, which is a true statement
-        // about a player nobody gave a catalogue to.
-        override fun onGetLibraryRoot(
-            librarySession: MediaLibrarySession,
-            browser: MediaSession.ControllerInfo,
-            params: LibraryParams?,
-        ): ListenableFuture<LibraryResult<MediaItem>> = answer {
-            LibraryResult.ofItem(PlatformEnvironment.browseTree.root().toMediaItem(), params)
-        }
-
-        override fun onGetChildren(
-            librarySession: MediaLibrarySession,
-            browser: MediaSession.ControllerInfo,
-            parentId: String,
-            page: Int,
-            pageSize: Int,
-            params: LibraryParams?,
-        ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> = answer {
-            val tree: BrowseTreeProvider = PlatformEnvironment.browseTree
-            val all: List<BrowseNode> = tree.children(parentId)
-            LibraryResult.ofItemList(all.browsePage(page, pageSize).map { it.toMediaItem() }, params)
-        }
-
-        // A car tapped something. Nothing is added to the bridge — it is a
-        // transport surface with no queue of its own, and handing it items it
-        // cannot open would replace what is playing with silence. The empty
-        // list is the honest answer to "what did you add"; the app plays the
-        // selection through the same path its own screens use, and the
-        // resulting metadata arrives back here as setNowPlaying.
-        override fun onAddMediaItems(
-            mediaSession: MediaSession,
-            controller: MediaSession.ControllerInfo,
-            mediaItems: List<MediaItem>,
-        ): ListenableFuture<List<MediaItem>> {
-            val chosen: String? = mediaItems.firstOrNull()?.mediaId
-            if (chosen != null) PlatformEnvironment.browseSelection?.invoke(chosen)
-            return Futures.immediateFuture(emptyList())
-        }
-    }
-
-    // Guards [release] against running twice: the pre-emptive release above
-    // takes the OLD instance's own Media3 [MediaSession] out from under it,
-    // and Media3 throws if `.release()` runs on an already-released session
-    // when that old instance's own (suspend, slower) dispose() catches up.
+    // Guards [release] against running twice.
     private var released = false
 
     init {
@@ -430,7 +222,7 @@ internal class Media3SystemTransport(
             // Republish here so the NEXT play after a stop has a session for
             // the service's onGetSession to answer, exactly like the initial
             // publish in init.
-            if (PlaybackForegroundSession.session.value !== session) {
+            if (isCurrent && PlaybackForegroundSession.session.value !== session) {
                 PlaybackForegroundSession.publish(session)
             }
             // Latched only on success — a rejected start (e.g. this device was
@@ -472,6 +264,8 @@ internal class Media3SystemTransport(
     override fun setCustomButtons(buttons: List<CustomTransportButton>) {
         customButtonHandlers.clear()
         buttons.forEach { button -> customButtonHandlers[button.id] = button.onPress }
+        // A superseded transport must not draw over the one that replaced it.
+        if (!SharedLibrarySession.isAttached(bridge)) return
         // Handlers are always current; the layout and the re-grant below are two
         // notification updates each, so they go out only when a button changed.
         val shape = buttons.map { ButtonShape(it.id, it.label, it.iconKey) }
@@ -541,12 +335,12 @@ internal class Media3SystemTransport(
         customButtonHandlers.clear()
         if (customLayoutShape.isNotEmpty()) {
             customLayoutShape = emptyList()
-            session.setCustomLayout(emptyList())
+            if (isCurrent) session.setCustomLayout(emptyList())
         }
         holdLocks(false)
         pendingStop?.let { mainHandler.removeCallbacks(it) }
         val stop = Runnable {
-            if (PlaybackForegroundSession.session.value === session) {
+            if (isCurrent && PlaybackForegroundSession.session.value === session) {
                 PlaybackForegroundSession.publish(null)
             }
             servicePromotionRequested = false
@@ -556,21 +350,13 @@ internal class Media3SystemTransport(
         mainHandler.postDelayed(stop, STOP_DEBOUNCE_MS)
     }
 
-    // released is only ever set by this instance's OWN release() below — the
-    // constructor's pre-emptive takeover a few lines up calls .release() on
-    // the raw MediaLibrarySession it reads out of PlaybackForegroundSession,
-    // which has no reference back to whichever Media3SystemTransport wrapper
-    // used to own it, so a takeover can never flip that wrapper's own
-    // `released` this way. Comparing session identity against the currently
-    // published one catches that case too: once a NEWER instance's own
-    // constructor has published a different session, this one is exactly as
-    // dead as if it had released itself, whether or not that ever happened.
-    // Confirmed live, real device, 2026-09-09: leaving a video screen while
-    // passively mirroring music left `released` false on the superseded
-    // instance forever, so liveTransport() kept handing it back and no new
-    // Media3SystemTransport — and no notification — was ever built again.
+    // A newer transport attaching its bridge supersedes this one without calling
+    // release() here, so the released flag alone stays false for good (device,
+    // 2026-09-09).
+    private val isCurrent: Boolean get() = SharedLibrarySession.isAttached(bridge)
+
     override val isReleased: Boolean
-        get() = released || PlaybackForegroundSession.session.value !== session
+        get() = released || !isCurrent || PlaybackForegroundSession.session.value !== session
 
     override fun release() {
         if (released) return
@@ -579,21 +365,12 @@ internal class Media3SystemTransport(
         pendingStop = null
         pendingBlank?.let { mainHandler.removeCallbacks(it) }
         pendingBlank = null
-        browseScope.cancel()
         bridge.cancelPendingUpdate()
-        artworkLoader.release()
         holdLocks(false)
-        // Publish before releasing the Media3 object, so the service's own
-        // reconcile sees the `null` transition and removeSession()s a
-        // session that still answers, rather than one already torn down
-        // underneath it.
-        if (PlaybackForegroundSession.session.value === session) {
-            PlaybackForegroundSession.publish(null)
-        }
-        // Guarded: the constructor's own pre-emptive release (above) may already
-        // have released this exact object from a newer instance — not confirmed
-        // idempotent, so this is a no-op either way if Media3 already threw.
-        runCatching { session.release() }
+        val owned: Boolean = isCurrent && PlaybackForegroundSession.session.value === session
+        // Detached first, so the service can dispose an idle session on the null.
+        SharedLibrarySession.detach(bridge)
+        if (owned) PlaybackForegroundSession.publish(null)
     }
 
     // `startForegroundService`, not `startService` — a background-started
@@ -643,12 +420,6 @@ internal class Media3SystemTransport(
     }
 
     private companion object {
-        const val SESSION_ID = "nomercy-player"
-
-        // Process-wide: the id is process-wide too.
-        @Volatile
-        private var lastBuilt: MediaLibrarySession? = null
-
         const val WAKE_TAG = "nomercy:playback"
         const val WIFI_TAG = "nomercy:streaming"
 
@@ -674,8 +445,7 @@ internal class Media3SystemTransport(
 
 // The artwork-loader executor's own lifecycle, split out so it carries no
 // Android Context dependency and a host test can prove [release] actually
-// shuts it down — see [Media3SystemTransport.artworkLoader]'s own comment for
-// why that proof cannot live on the transport class itself.
+// shuts it down — see [SharedLibrarySession], which owns it.
 internal class ArtworkLoaderExecutor {
 
     val service: ListeningExecutorService =
