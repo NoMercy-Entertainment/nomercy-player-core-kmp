@@ -55,7 +55,20 @@ import kotlinx.coroutines.flow.onEach
 public class NoMercyPlaybackService : MediaLibraryService() {
 
     private var scopeJob: Job? = null
-    private var attached: MediaLibrarySession? = null
+    private var browseOnly: BrowseOnlySession? = null
+    private var startedByCommand = false
+
+    // A browser (car, watch) can bind before any player exists; it is answered
+    // with a browse-only session until the transport publishes its own.
+    private val sessions = BrowseSessionCoordinator<MediaLibrarySession>(
+        build = { BrowseOnlySession(this).also { browseOnly = it }.session },
+        add = { session -> addSession(session) },
+        remove = { session -> removeSession(session) },
+        release = {
+            browseOnly?.release()
+            browseOnly = null
+        },
+    )
 
     override fun onCreate() {
         super.onCreate()
@@ -115,6 +128,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // with a placeholder, but only once Media3 has demonstrably not done it
     // first, and only for as long as it takes Media3 to catch up.
     override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
+        startedByCommand = true
         mainHandler.removeCallbacks(promoteIfMedia3HasNot)
         mainHandler.postDelayed(promoteIfMedia3HasNot, BACKSTOP_PROMOTION_MS)
         mainHandler.removeCallbacks(stopIfNeverPromoted)
@@ -149,7 +163,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
                 }
                 return
             }
-            if (attached != null) mainHandler.postDelayed(this, HANDOVER_POLL_MS)
+            if (sessions.transport != null) mainHandler.postDelayed(this, HANDOVER_POLL_MS)
         }
     }
 
@@ -195,7 +209,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         // playWhenReady rather than isPlaying: a stream still opening has not
         // started yet and is exactly the case worth waiting for.
         val wanted: Boolean = runCatching {
-            attached?.player?.let { it.isPlaying || it.playWhenReady } == true
+            sessions.transport?.player?.let { it.isPlaying || it.playWhenReady } == true
         }.getOrDefault(false)
         if (!wanted && !media3HasPosted()) stopWithoutLeavingAPromotionPending()
     }
@@ -217,7 +231,32 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         stopSelf()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = attached
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
+        sessions.sessionForBrowser()
+
+    override fun onBind(intent: android.content.Intent?): android.os.IBinder? {
+        sessions.onBind()
+        return super.onBind(intent)
+    }
+
+    override fun onUnbind(intent: android.content.Intent?): Boolean {
+        if (sessions.onUnbind()) {
+            // Nothing was ever promoted for a service that was only bound, so
+            // there is no start clock to answer; a started one still is.
+            if (startedByCommand) stopWithoutLeavingAPromotionPending() else stopSelf()
+        }
+        return super.onUnbind(intent)
+    }
+
+    // Promotes and demotes at once, only to answer the platform's start clock
+    // when a started service ends its playback while a browser stays bound.
+    private fun answerStartClockWithoutStopping() {
+        if (!startedByCommand || media3HasPosted()) return
+        runCatching {
+            startForeground(STARTUP_NOTIFICATION_ID, startupNotification())
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        }
+    }
 
     // A `null` published session — playback stopped and
     // [Media3SystemTransport.release] ran — is `MediaLibraryService`'s own
@@ -234,17 +273,14 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         // which also permanently killed this StateFlow collector — every
         // later publish() went unreconciled, producing the next crash
         // downstream ("Session ID must be unique") on the next transition.
-        attached?.let { old -> if (old !== session) runCatching { removeSession(old) } }
-        attached = session
-        if (session != null) {
-            // Guarded for the same reason the removal is: a session id that is
-            // already registered answers with a throw, and this runs on a
-            // collector whose death silently strands every later transition.
-            runCatching { addSession(session) }
-        } else {
+        // Guarded inside the coordinator for the same reasons: a throw here would
+        // kill this collector and strand every later transition.
+        val hadTransport: Boolean = sessions.transport != null
+        val stop: Boolean = sessions.onPublished(session)
+        if (session == null && hadTransport) {
             mainHandler.removeCallbacks(stopIfNeverPromoted)
             mainHandler.removeCallbacks(promoteIfMedia3HasNot)
-            stopWithoutLeavingAPromotionPending()
+            if (stop) stopWithoutLeavingAPromotionPending() else answerStartClockWithoutStopping()
         }
     }
 
@@ -276,8 +312,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         mainHandler.removeCallbacks(stopIfNeverPromoted)
         mainHandler.removeCallbacks(promoteIfMedia3HasNot)
         mainHandler.removeCallbacks(retireePlaceholder)
-        attached?.let { runCatching { removeSession(it) } }
-        attached = null
+        sessions.shutdown()
         scopeJob?.cancel()
         scopeJob = null
         super.onDestroy()
