@@ -204,6 +204,14 @@ internal class TransportSimpleBasePlayer(
         return Futures.immediateVoidFuture()
     }
 
+    // The base class throws here. The core owns the queue, so a media item
+    // handed in is ignored and what is playing stays.
+    override fun handleSetMediaItems(
+        mediaItems: List<MediaItem>,
+        startIndex: Int,
+        startPositionMs: Long,
+    ): ListenableFuture<*> = Futures.immediateVoidFuture()
+
     override fun handleStop(): ListenableFuture<*> {
         actions.onStop?.invoke()
         return Futures.immediateVoidFuture()
@@ -278,24 +286,31 @@ internal class TransportSimpleBasePlayer(
     // move: everything else this transport offers is wired by the plugin every
     // time, and these are the pair a consumer building TransportActions by hand
     // can leave out.
-    private fun commandsFor(actions: TransportActions): Player.Commands {
-        val builder = Player.Commands.Builder()
-        ALWAYS.forEach { command -> builder.add(command) }
-        if (actions.onSkipBackward != null) builder.add(Player.COMMAND_SEEK_BACK)
-        if (actions.onSkipForward != null) builder.add(Player.COMMAND_SEEK_FORWARD)
-        // Declared only when someone wants the presses. Media3 hands a volume
-        // key to the player only if the player says it takes one; otherwise the
-        // platform moves this device's own stream and the press never leaves.
-        if (actions.onVolumeStep != null) {
-            builder.add(Player.COMMAND_ADJUST_DEVICE_VOLUME_WITH_FLAGS)
-            builder.add(Player.COMMAND_ADJUST_DEVICE_VOLUME)
-            builder.add(Player.COMMAND_SET_DEVICE_VOLUME_WITH_FLAGS)
-            builder.add(Player.COMMAND_GET_DEVICE_VOLUME)
+    internal companion object {
+        fun commandsFor(actions: TransportActions): Player.Commands {
+            val builder = Player.Commands.Builder()
+            commandIdsFor(actions).forEach { command -> builder.add(command) }
+            return builder.build()
         }
-        return builder.build()
-    }
 
-    private companion object {
+        // Plain ints so a host test can read them: Player.Commands needs
+        // android.util at runtime.
+        fun commandIdsFor(actions: TransportActions): List<Int> {
+            val ids = ALWAYS.toMutableList()
+            if (actions.onSkipBackward != null) ids.add(Player.COMMAND_SEEK_BACK)
+            if (actions.onSkipForward != null) ids.add(Player.COMMAND_SEEK_FORWARD)
+            // Declared only when someone wants the presses. Media3 hands a volume
+            // key to the player only if the player says it takes one; otherwise the
+            // platform moves this device's own stream and the press never leaves.
+            if (actions.onVolumeStep != null) {
+                ids.add(Player.COMMAND_ADJUST_DEVICE_VOLUME_WITH_FLAGS)
+                ids.add(Player.COMMAND_ADJUST_DEVICE_VOLUME)
+                ids.add(Player.COMMAND_SET_DEVICE_VOLUME_WITH_FLAGS)
+                ids.add(Player.COMMAND_GET_DEVICE_VOLUME)
+            }
+            return ids
+        }
+
         // One item, because the core owns the queue and Media3 is being told
         // what is playing rather than asked to manage a playlist. Next and
         // previous still work: they arrive as commands, not as index changes.
@@ -319,6 +334,9 @@ internal class TransportSimpleBasePlayer(
         val ALWAYS: IntArray = intArrayOf(
             Player.COMMAND_PLAY_PAUSE,
             Player.COMMAND_STOP,
+            // Media3 drops a car's playFromMediaId before onAddMediaItems
+            // unless the player takes a media item.
+            Player.COMMAND_SET_MEDIA_ITEM,
             Player.COMMAND_SEEK_TO_NEXT,
             Player.COMMAND_SEEK_TO_PREVIOUS,
             Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM,
