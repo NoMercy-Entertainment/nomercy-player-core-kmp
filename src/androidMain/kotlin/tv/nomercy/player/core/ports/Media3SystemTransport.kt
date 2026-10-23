@@ -202,6 +202,12 @@ internal class Media3SystemTransport(
     // map shape as TransportSimpleBasePlayer.setActions.
     private val customButtonHandlers = mutableMapOf<String, () -> Unit>()
 
+    // What the session's custom layout last drew, so an unchanged set of buttons
+    // is not pushed again. Nothing is drawn before the first call.
+    private data class ButtonShape(val id: String, val label: String, val iconKey: String)
+
+    private var customLayoutShape: List<ButtonShape> = emptyList()
+
     // The other half of the custom layout — the system reporting which of
     // those command ids was pressed, and the one place that needs to know
     // which app-level buttons exist at all so it can advertise them to a
@@ -465,10 +471,15 @@ internal class Media3SystemTransport(
     // this library invented.
     override fun setCustomButtons(buttons: List<CustomTransportButton>) {
         customButtonHandlers.clear()
+        buttons.forEach { button -> customButtonHandlers[button.id] = button.onPress }
+        // Handlers are always current; the layout and the re-grant below are two
+        // notification updates each, so they go out only when a button changed.
+        val shape = buttons.map { ButtonShape(it.id, it.label, it.iconKey) }
+        if (shape == customLayoutShape) return
+        customLayoutShape = shape
         val resolver = PlatformEnvironment.customTransportButtonIconResolver
 
         val layout = buttons.map { button ->
-            customButtonHandlers[button.id] = button.onPress
             CommandButton.Builder(CommandButton.ICON_UNDEFINED)
                 .setDisplayName(button.label)
                 .setSessionCommand(SessionCommand(button.id, Bundle.EMPTY))
@@ -528,7 +539,10 @@ internal class Media3SystemTransport(
         pendingBlank = null
         bridge.blank()
         customButtonHandlers.clear()
-        session.setCustomLayout(emptyList())
+        if (customLayoutShape.isNotEmpty()) {
+            customLayoutShape = emptyList()
+            session.setCustomLayout(emptyList())
+        }
         holdLocks(false)
         pendingStop?.let { mainHandler.removeCallbacks(it) }
         val stop = Runnable {
@@ -566,6 +580,7 @@ internal class Media3SystemTransport(
         pendingBlank?.let { mainHandler.removeCallbacks(it) }
         pendingBlank = null
         browseScope.cancel()
+        bridge.cancelPendingUpdate()
         artworkLoader.release()
         holdLocks(false)
         // Publish before releasing the Media3 object, so the service's own

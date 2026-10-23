@@ -48,7 +48,7 @@ class Media3SystemTransportTest {
         var title: CharSequence? = null
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setNowPlaying(
                 NowPlaying(
                     title = "Blade Runner 2049",
@@ -72,7 +72,7 @@ class Media3SystemTransportTest {
         var routingControllerId: String? = null
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setActions(TransportActions(onVolumeStep = {}, isVolumeRemote = { true }))
             bridge.setNowPlaying(NowPlaying(title = "x"))
             bridge.setRoutingControllerId("route-42")
@@ -91,7 +91,7 @@ class Media3SystemTransportTest {
         var wants = false
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setNowPlaying(NowPlaying(title = "x", durationMs = 1_000))
             bridge.setPlayback(TransportPlaybackState.PLAYING, 12_000)
             ready = bridge.playbackState == androidx.media3.common.Player.STATE_READY
@@ -114,7 +114,7 @@ class Media3SystemTransportTest {
         var position: Long = -1
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setNowPlaying(NowPlaying(title = "x", durationMs = 100_000))
             bridge.setPlayback(TransportPlaybackState.PLAYING, 12_000)
             position = bridge.currentPosition
@@ -133,7 +133,7 @@ class Media3SystemTransportTest {
         var played = false
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setActions(TransportActions(onPlay = { played = true }))
             bridge.setNowPlaying(NowPlaying(title = "x"))
             bridge.playWhenReady = true
@@ -147,7 +147,7 @@ class Media3SystemTransportTest {
         var seekedTo: Long = -1
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setActions(TransportActions(onSeekTo = { position -> seekedTo = position }))
             bridge.setNowPlaying(NowPlaying(title = "x", durationMs = 100_000))
             bridge.seekTo(30_000)
@@ -165,7 +165,7 @@ class Media3SystemTransportTest {
         var deviceVolume = -1
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setActions(TransportActions(onVolumeStep = { }, isVolumeRemote = { true }))
             bridge.setRemoteVolume(64)
             deviceVolume = bridge.deviceVolume
@@ -182,7 +182,7 @@ class Media3SystemTransportTest {
         var sentPercent = -1
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setActions(
                 TransportActions(
                     onVolumeStep = { },
@@ -203,7 +203,7 @@ class Media3SystemTransportTest {
         var steppedDirection: Int? = null
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setActions(TransportActions(onVolumeStep = { direction -> steppedDirection = direction }))
             bridge.setDeviceVolume(80, 0)
         }
@@ -336,7 +336,7 @@ class Media3SystemTransportTest {
         var title: CharSequence? = "still here"
 
         onMainThread {
-            val bridge = TransportSimpleBasePlayer()
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
             bridge.setNowPlaying(NowPlaying(title = "Blade Runner 2049"))
             bridge.blank()
             title = bridge.mediaMetadata.title

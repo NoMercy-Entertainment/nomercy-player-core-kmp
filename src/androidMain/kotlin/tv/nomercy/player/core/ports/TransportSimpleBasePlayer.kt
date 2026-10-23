@@ -8,7 +8,9 @@
 
 package tv.nomercy.player.core.ports
 
+import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import androidx.media3.common.C
 import androidx.media3.common.DeviceInfo
 import androidx.media3.common.MediaItem
@@ -30,12 +32,22 @@ import com.google.common.util.concurrent.ListenableFuture
 // Media3's commands into TransportActions and Media3's questions into whatever
 // the plugin last pushed.
 @UnstableApi
-internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper()) {
+internal class TransportSimpleBasePlayer(
+    // Zero publishes every change at once; a device test reads state right
+    // after two setters and needs that.
+    updateWindowMs: Long = UPDATE_WINDOW_MS,
+    scheduler: UpdateScheduler = mainLooperScheduler(),
+    nowMs: () -> Long = { SystemClock.elapsedRealtime() },
+) : SimpleBasePlayer(Looper.getMainLooper()) {
 
     private var actions: TransportActions = TransportActions()
 
+    // Every setter below ends here instead of in invalidateState(): Android
+    // sheds a package's notification updates above about five a second.
+    private val updates = UpdateCoalescer(updateWindowMs, scheduler) { invalidateState() }
+    private val progress = PlaybackProgress(nowMs)
+
     private var playing: Boolean = false
-    private var positionMs: Long = 0
     private var durationMs: Long = 0
     private var isLive: Boolean = false
     private var metadata: MediaMetadata = MediaMetadata.EMPTY
@@ -65,30 +77,36 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
 
     fun setActions(actions: TransportActions) {
         this.actions = actions
-        available = commandsFor(actions)
-        invalidateState()
+        val commands = commandsFor(actions)
+        if (commands == available) return
+        available = commands
+        updates.request()
     }
 
     // Every setter invalidates rather than pushing. Media3 pulls its state when
     // it is told something changed, and building a State object on the caller's
-    // thread would race the session reading the last one.
+    // thread would race the session reading the last one. A setter whose value
+    // changes nothing Media3 draws does not invalidate at all.
     fun setNowPlaying(nowPlaying: NowPlaying) {
-        metadata = MediaMetadata.Builder()
+        val next = MediaMetadata.Builder()
             .setTitle(nowPlaying.title)
             .setArtist(nowPlaying.artist)
             .setAlbumTitle(nowPlaying.album)
             .setArtworkUri(nowPlaying.artworkUrl?.let(android.net.Uri::parse))
             .build()
+        val unchanged = hasItem && next == metadata &&
+            durationMs == nowPlaying.durationMs && isLive == nowPlaying.isLive
+        metadata = next
         durationMs = nowPlaying.durationMs
         isLive = nowPlaying.isLive
         hasItem = true
-        invalidateState()
+        if (!unchanged) updates.request()
     }
 
     fun setPlayback(state: TransportPlaybackState, positionMs: Long) {
-        playing = state == TransportPlaybackState.PLAYING
-        this.positionMs = positionMs
-        invalidateState()
+        val isPlaying = state == TransportPlaybackState.PLAYING
+        playing = isPlaying
+        if (progress.report(isPlaying, positionMs)) updates.request()
     }
 
     // The inbound half of the volume conversation — see
@@ -97,8 +115,10 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     // whatever this bridge last showed, same explicit-setter-plus-invalidate
     // shape as [setNowPlaying]/[setPlayback] above.
     fun setRemoteVolume(percent: Int) {
-        remoteVolume = percent.coerceIn(0, REMOTE_VOLUME_MAX)
-        invalidateState()
+        val next = percent.coerceIn(0, REMOTE_VOLUME_MAX)
+        if (next == remoteVolume) return
+        remoteVolume = next
+        updates.request()
     }
 
     // The real MediaRouter2 route this playback is now going through, handed
@@ -109,26 +129,31 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
     private var routingControllerId: String? = null
 
     fun setRoutingControllerId(routingControllerId: String?) {
+        if (routingControllerId == this.routingControllerId) return
         this.routingControllerId = routingControllerId
-        invalidateState()
+        updates.request()
     }
 
     fun blank() {
+        val wasBlank = !hasItem && !playing && metadata == MediaMetadata.EMPTY
         metadata = MediaMetadata.EMPTY
         hasItem = false
         playing = false
-        positionMs = 0
+        progress.reset()
         durationMs = 0
         isLive = false
-        invalidateState()
+        if (!wasBlank) updates.request()
     }
+
+    // A stop must not publish into a session about to be released.
+    fun cancelPendingUpdate() = updates.cancel()
 
     override fun getState(): State {
         val builder = State.Builder()
             .setAvailableCommands(available)
             .setPlayWhenReady(playing, Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
             .setPlaybackState(if (hasItem) Player.STATE_READY else Player.STATE_IDLE)
-            .setContentPositionMs(positionMs)
+            .setContentPositionMs(progress.currentPositionMs())
             .also { state ->
                 // A session whose volume is LOCAL has its keys handled by the
                 // platform against this device's own stream, and the player is
@@ -278,6 +303,10 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
 
         const val MICROS_PER_MILLI = 1_000L
 
+        // Four a second at most, under the five Android sheds at, and under
+        // the 300 ms a viewer takes to see a control change.
+        const val UPDATE_WINDOW_MS = 250L
+
         // 100, not a small integer range — Media3's DeviceInfo places no
         // upper bound on it, and Connect's own wire volume (MusicHub's
         // volume_percentage) is already a clean 0-100 percent. Matching it
@@ -297,5 +326,15 @@ internal class TransportSimpleBasePlayer : SimpleBasePlayer(Looper.getMainLooper
             Player.COMMAND_GET_METADATA,
             Player.COMMAND_GET_TIMELINE,
         )
+    }
+}
+
+private fun mainLooperScheduler(): UpdateScheduler {
+    val handler = Handler(Looper.getMainLooper())
+    return UpdateScheduler { delayMs, task ->
+        val runnable = Runnable { task() }
+        handler.postDelayed(runnable, delayMs)
+        val cancel: () -> Unit = { handler.removeCallbacks(runnable) }
+        cancel
     }
 }
