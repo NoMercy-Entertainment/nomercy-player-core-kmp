@@ -250,8 +250,14 @@ private fun dataSourceFactory(
     context: Context,
     auth: AuthHeaders,
     onVariants: (List<QualityDescriptor>) -> Unit,
-): DataSource.Factory {
-    val client = SharedHttpClient.derive {
+): DataSource.Factory =
+    DefaultDataSource.Factory(context, OkHttpDataSource.Factory(engineHttpClient(auth, onVariants)))
+
+internal fun engineHttpClient(
+    auth: AuthHeaders,
+    onVariants: (List<QualityDescriptor>) -> Unit,
+): OkHttpClient {
+    return SharedHttpClient.derive {
         // A live-transcoded segment does not exist until the encoder writes
         // it, and the server holds the request open until it does. OkHttp's
         // 10s default gave up first: measured on an SM-A137F playing a
@@ -273,8 +279,6 @@ private fun dataSourceFactory(
             ),
         )
     }
-
-    return DefaultDataSource.Factory(context, OkHttpDataSource.Factory(client))
 }
 
 // The allocator is primed to the whole budget up front.

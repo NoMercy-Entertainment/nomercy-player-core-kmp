@@ -21,6 +21,12 @@ assume the `ui-compose` surface in particular has more movement than is written
 down: it is the module `nomercy-video-player-compose` publishes, it changed more
 than any other during this campaign, and it is not covered below.
 
+## [0.2.23]
+
+### Added
+
+- `SharedHttpClient.addInterceptor` and `removeInterceptor` let a host run an OkHttp interceptor on every request the engine makes.
+
 ## [Unreleased]
 
 ### Breaking
