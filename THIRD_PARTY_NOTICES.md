@@ -5,7 +5,8 @@ says which, under what licence, and what obligations they carry.
 
 Nothing here applies to the Android or Apple targets. Android decodes through
 Media3, which is a Maven dependency and carries its own notices; the Apple
-targets use AVFoundation, which is Apple's.
+targets use AVFoundation, which is Apple's. The one exception is the equalizer
+presets, at the end of this file, which ship on every target.
 
 ## JNA
 
@@ -157,3 +158,31 @@ source-availability requirement, which the payload's own `NOTICE-NoMercy.txt`
 answers by naming VideoLAN's source download for the exact release. Trimming the
 set to the modules above would remove most of that obligation; the
 `libavcodec_plugin` finding is what would remain, and it needs a decision.
+
+## Equalizer presets
+
+The equalizer presets (`src/commonMain/kotlin/tv/nomercy/player/core/dsp/EqPresets.kt`) are derived from nmplayer-equalizer-plugin by FiLL, https://forgejo.phillippepelzer.me/fiLL/nmplayer-equalizer-plugin, licensed under the MIT License.
+
+```
+MIT License
+
+Copyright (c) FiLL
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

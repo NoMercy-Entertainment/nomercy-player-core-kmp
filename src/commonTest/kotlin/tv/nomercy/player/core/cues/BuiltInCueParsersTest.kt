@@ -28,7 +28,7 @@ private const val SECONDS_TOLERANCE = 1e-6
 // A parser for a format this library has never heard of, to prove a consumer
 // still outranks what the kit seeded.
 private class KaraokeParser : CueParser<String> {
-    override val id: String = "fillz:karaoke"
+    override val id: String = "karaoke"
 
     override fun canParse(url: String, contentType: String?): Boolean = url.endsWith(".vtt")
 
@@ -99,7 +99,7 @@ class BuiltInCueParsersTest {
         val player = ComposedPlayer()
         player.registerCueParser(KaraokeParser())
 
-        assertEquals("fillz:karaoke", player.resolveCueParser("subs.vtt")?.id)
+        assertEquals("karaoke", player.resolveCueParser("subs.vtt")?.id)
     }
 
     @Test

@@ -184,13 +184,13 @@ class PluginSurfaceTest {
     @Test
     fun aPluginSeesTheHostsRegisteredParserNotAPrivateOne() = runTest {
         val karaoke = object : CueParser<String> {
-            override val id: String = "fillz:karaoke"
+            override val id: String = "karaoke"
             override fun canParse(url: String, contentType: String?): Boolean = url.endsWith(".karaoke")
             override fun parse(raw: String, baseUrl: String?): List<Cue<String>> = emptyList()
         }
         val host = FakePluginHost(cueParserResolver = { url, _ -> karaoke.takeIf { url.endsWith(".karaoke") } })
         val (plugin, _) = wire(host, CoroutineScope(StandardTestDispatcher(testScheduler)))
 
-        assertEquals("fillz:karaoke", plugin.findCueParser("song.karaoke")?.id)
+        assertEquals("karaoke", plugin.findCueParser("song.karaoke")?.id)
     }
 }

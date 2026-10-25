@@ -12,7 +12,7 @@ package tv.nomercy.player.core.errors
 // string on the web, here, in the docs and in a bug report.
 //
 // The namespace is what makes the scheme extensible without a registry. Core
-// owns "core"; a plugin owns its own id, so fillz:viz/canvas-init is a valid
+// owns "core"; a plugin owns its own id, so viz:render/canvas-init is a valid
 // code nobody had to allow-list. Parsing is strict — lower-case, hyphenated,
 // exactly three parts — because a code that only nearly matches would be
 // grouped separately by every dashboard that reads it.

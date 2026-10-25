@@ -28,7 +28,7 @@ public abstract class VisualizationPlugin(
 
     public companion object Manifest : PluginManifest {
         // The web's base plugin carries this id and its subclasses override it
-        // — a consumer's own visualiser ships as `fillz:winamp-classic`. The
+        // — a consumer's own visualizer ships as `winamp-classic`. The
         // base here carried none at all, so `visualization` did not exist in
         // the native trio's surface even though every piece of it did.
         override val id: String = "visualization"

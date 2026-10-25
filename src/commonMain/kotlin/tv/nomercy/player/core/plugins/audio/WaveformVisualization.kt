@@ -29,11 +29,9 @@ public open class WaveformVisualization(
 ) : VisualizationPlugin(spectrum) {
 
     public companion object Manifest : tv.nomercy.player.core.plugin.PluginManifest {
-        // `fillz:waveform`, the web's own id — namespaced there because the
-        // plugin came from Fillz's reference player. A consumer calling
-        // getPlugin() uses the string, so renaming it is a plugin they
-        // cannot find.
-        override val id: String = "fillz:waveform"
+        // `waveform`, the web's own id. A consumer calling getPlugin() uses
+        // the string, so renaming it is a plugin they cannot find.
+        override val id: String = "waveform"
         override val version: String = "2.0.0"
     }
 

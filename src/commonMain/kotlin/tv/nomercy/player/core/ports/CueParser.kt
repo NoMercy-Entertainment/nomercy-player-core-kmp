@@ -27,7 +27,7 @@ import tv.nomercy.player.core.cues.Cue
 // was never the fix a narrower payload could have been.
 public interface CueParser<T> {
     // 'vtt', 'lrc', 'sprite-vtt'. Vendor-prefixed for anything custom —
-    // 'fillz:karaoke' — so a consumer's format cannot collide with one this
+    // '<vendor>:<name>' — so a consumer's format cannot collide with one this
     // library adds later.
     public val id: String
 

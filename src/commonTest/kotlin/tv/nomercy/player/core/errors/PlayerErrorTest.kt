@@ -143,9 +143,9 @@ class PlayerErrorTest {
     fun theHierarchyStaysOpenSoAConsumerCanMintItsOwn() {
         // The taxonomy is a vocabulary, not a wall: this compiles, and that is
         // the assertion.
-        val vendored = object : PlayerError("fillz:viz/canvas-init", ErrorScope.plugin("fillz")) {}
+        val vendored = object : PlayerError("viz:render/canvas-init", ErrorScope.plugin("viz")) {}
 
         assertIs<PlayerError>(vendored)
-        assertEquals("fillz", vendored.scope.id)
+        assertEquals("viz", vendored.scope.id)
     }
 }

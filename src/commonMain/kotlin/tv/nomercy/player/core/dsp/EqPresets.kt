@@ -10,7 +10,8 @@ package tv.nomercy.player.core.dsp
 
 // A named set of band gains.
 //
-// Extracted from the web player's presets.ts rather than retyped. These are
+// Extracted from the web player's presets.ts rather than retyped (MIT, see
+// THIRD_PARTY_NOTICES.md). These are
 // nineteen lists of ten numbers each, and a hand-copied one would be wrong
 // somewhere nobody would notice until a listener said the rock preset sounded
 // off.

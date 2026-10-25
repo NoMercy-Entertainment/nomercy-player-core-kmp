@@ -28,9 +28,9 @@ class ErrorCodeTest {
     fun aPluginNamespaceParsesWithoutBeingAllowListed() {
         // The reason the scheme has a namespace at all: a plugin mints codes
         // nobody registered.
-        val code = ErrorCode.parse("fillz:viz/canvas-init")
+        val code = ErrorCode.parse("viz:render/canvas-init")
 
-        assertEquals("fillz", code.namespace)
+        assertEquals("viz", code.namespace)
         assertEquals("canvas-init", code.reason)
     }
 

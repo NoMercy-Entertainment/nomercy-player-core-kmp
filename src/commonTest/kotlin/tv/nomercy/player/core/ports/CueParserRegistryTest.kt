@@ -54,11 +54,11 @@ class CueParserRegistryTest {
         // matter of registering one that does the same job.
         val subject: CueParserRegistry = registry()
         subject.register(ExtensionParser("vtt", ".vtt", label = "built-in"))
-        subject.register(ExtensionParser("fillz:vtt", ".vtt", label = "consumer"))
+        subject.register(ExtensionParser("custom-vtt", ".vtt", label = "consumer"))
 
         val chosen: CueParser<*>? = subject.resolve("subs.vtt")
 
-        assertEquals("fillz:vtt", chosen?.id)
+        assertEquals("custom-vtt", chosen?.id)
         assertEquals("consumer", chosen?.parse("")?.single()?.payload)
     }
 
