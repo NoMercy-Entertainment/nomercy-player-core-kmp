@@ -21,6 +21,12 @@ assume the `ui-compose` surface in particular has more movement than is written
 down: it is the module `nomercy-video-player-compose` publishes, it changed more
 than any other during this campaign, and it is not covered below.
 
+## [0.2.24]
+
+### Fixed
+
+- The spectrum analysis no longer stalls music playback on weak devices. It runs on its own low-priority thread and allocates no per-frame arrays. The frame API is unchanged.
+
 ## [0.2.23]
 
 ### Added
