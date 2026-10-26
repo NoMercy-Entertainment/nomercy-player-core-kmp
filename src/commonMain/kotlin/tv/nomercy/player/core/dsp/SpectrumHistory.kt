@@ -61,6 +61,20 @@ public class SpectrumHistory(smoothingTimeConstant: Double) {
     // instead would average logarithms rather than take the logarithm of an
     // average, and the two disagree on exactly the transients this exists to
     // smooth.
+    // The same blend with no allocation after the first frame: the carried array
+    // is updated in place and returned. Callers read it before the next frame.
+    internal fun smoothInPlace(current: DoubleArray): DoubleArray {
+        val previous: DoubleArray? = magnitudes
+        if (previous == null || previous.size != current.size) {
+            magnitudes = current.copyOf()
+            return current
+        }
+
+        val carry: Double = smoothingTimeConstant
+        for (bin in current.indices) previous[bin] = carry * previous[bin] + (1.0 - carry) * current[bin]
+        return previous
+    }
+
     internal fun smooth(current: DoubleArray): DoubleArray {
         val previous: DoubleArray? = magnitudes
 

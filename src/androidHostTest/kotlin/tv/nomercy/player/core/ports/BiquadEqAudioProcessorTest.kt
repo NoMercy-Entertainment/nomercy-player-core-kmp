@@ -16,6 +16,7 @@ import tv.nomercy.player.core.dsp.HannWindow
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.log10
@@ -140,13 +141,16 @@ class BiquadEqAudioProcessorTest {
     @Test
     fun theSpectrumTapSeesTheToneThatWasPlayed() {
         val processor: BiquadEqAudioProcessor = configured()
-        var frame: VisualizationFrame? = null
-        processor.graph().installFrameTap { frame = it }
+        val frame = AtomicReference<VisualizationFrame>()
+        processor.graph().installFrameTap { frame.set(it) }
 
         processor.queueInput(sine(BASS_TONE))
         processor.output
+        // The transform runs on its own thread, so the frame arrives shortly after.
+        val deadline: Long = System.nanoTime() + FRAME_WAIT_NANOS
+        while (frame.get() == null && System.nanoTime() < deadline) Thread.sleep(1)
 
-        val seen: VisualizationFrame = assertNotNull(frame, "no frame reached the tap")
+        val seen: VisualizationFrame = assertNotNull(frame.get(), "no frame reached the tap")
         assertTrue(
             seen.bandEnergies.bass > seen.bandEnergies.treble,
             "an 80Hz tone did not light the bass band: ${seen.bandEnergies}",
@@ -185,6 +189,7 @@ private const val SAMPLE_RATE = 48_000
 private const val CHANNELS = 2
 private const val BYTES_PER_SAMPLE = 2
 private const val FFT_SIZE = 4_096
+private const val FRAME_WAIT_NANOS = 2_000_000_000L
 private const val FULL_SCALE = 32_768.0
 
 // Well short of full scale, so a boost has somewhere to go before it clips and

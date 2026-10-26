@@ -155,7 +155,7 @@ class AudioSpectrumTest {
 
     @Test
     fun theFrameCarriesWhatItWasToldAboutTime() {
-        val frame: VisualizationFrame = AudioSpectrum.analyse(tone(MID_TONE), SAMPLE_RATE, FRAME_MS, 12.5, null)
+        val frame: VisualizationFrame = reference(tone(MID_TONE), 12.5, null)
 
         assertEquals(12.5, frame.time)
         assertEquals(FRAME_MS, frame.deltaMs)
@@ -171,7 +171,53 @@ class AudioSpectrumTest {
 
         assertEquals(FFT_SIZE / 2, frame.frequency.size)
     }
+
+    @Test
+    fun theReusableAnalyzerDrawsTheSameFramesAsTheReferenceAcrossSmoothing() {
+        val referenceHistory = SpectrumHistory()
+        val reused = SpectrumHistory()
+        val analyzer = SpectrumAnalyzer(FFT_SIZE)
+
+        for (round in 0 until PARITY_ROUNDS) {
+            val pcm: DoubleArray = tone(PARITY_TONES[round % PARITY_TONES.size])
+            val expected: VisualizationFrame = reference(pcm.copyOf(), 0.5, referenceHistory)
+            val actual: VisualizationFrame = analyzer.analyze(pcm, SAMPLE_RATE, FRAME_MS, 0.5, reused)
+
+            assertContentClose(expected.frequency, actual.frequency)
+            assertContentClose(expected.waveform, actual.waveform)
+            assertEquals(expected.bandEnergies.bass, actual.bandEnergies.bass, absoluteTolerance = PARITY_TOLERANCE)
+            val peaks = expected.peakBandEnergies.mid to actual.peakBandEnergies.mid
+            assertEquals(peaks.first, peaks.second, absoluteTolerance = PARITY_TOLERANCE)
+            assertEquals(expected.peakHz, actual.peakHz, absoluteTolerance = PARITY_TOLERANCE)
+        }
+    }
+
+    @Test
+    fun theReusableAnalyzerHandsOutTheSameArraysEveryRingFrames() {
+        val analyzer = SpectrumAnalyzer(FFT_SIZE)
+        val pcm: DoubleArray = tone(MID_TONE)
+
+        val frames = List(SpectrumAnalyzer.OUTPUT_RING * 2) { analyzer.analyze(pcm, SAMPLE_RATE, FRAME_MS, 0.0, null) }
+
+        assertTrue(frames[0].frequency === frames[SpectrumAnalyzer.OUTPUT_RING].frequency)
+        assertTrue(frames[0].frequency !== frames[1].frequency)
+        assertTrue(frames[1].waveform === frames[SpectrumAnalyzer.OUTPUT_RING + 1].waveform)
+    }
+
+    private fun reference(pcm: DoubleArray, timeSeconds: Double, history: SpectrumHistory?): VisualizationFrame =
+        AudioSpectrum.analyse(pcm, SAMPLE_RATE, FRAME_MS, timeSeconds, history)
+
+    private fun assertContentClose(expected: DoubleArray, actual: DoubleArray) {
+        assertEquals(expected.size, actual.size)
+        for (index in expected.indices) {
+            assertTrue(abs(expected[index] - actual[index]) < PARITY_TOLERANCE, "bin $index differs")
+        }
+    }
 }
+
+private const val PARITY_ROUNDS = 12
+private const val PARITY_TOLERANCE = 1e-9
+private val PARITY_TONES = doubleArrayOf(80.0, 1_000.0, 6_000.0)
 
 private const val SAMPLE_RATE = 48_000
 private const val FFT_SIZE = 4_096

@@ -8,12 +8,12 @@
 
 package tv.nomercy.player.core.ports
 
-import tv.nomercy.player.core.dsp.AudioSpectrum
 import tv.nomercy.player.core.dsp.BiquadCoefficients
 import tv.nomercy.player.core.dsp.BiquadPeaking
 import tv.nomercy.player.core.dsp.BiquadState
 import tv.nomercy.player.core.dsp.EqBand
 import tv.nomercy.player.core.dsp.EqBands
+import tv.nomercy.player.core.dsp.SpectrumAnalyzer
 import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
@@ -68,6 +68,8 @@ public class PcmEqualiser(
 
     private val window = DoubleArray(FFT_SIZE)
 
+    private val analyzer = SpectrumAnalyzer(FFT_SIZE)
+
     private var windowFill: Int = 0
 
     private var frameTap: ((VisualizationFrame) -> Unit)? = null
@@ -121,9 +123,7 @@ public class PcmEqualiser(
         val deltaMs: Double = FFT_SIZE * MILLIS_PER_SECOND / sampleRate
         elapsedSeconds += deltaMs / MILLIS_PER_SECOND
 
-        val frame: VisualizationFrame =
-            AudioSpectrum.analyse(window.copyOf(), sampleRate, deltaMs, elapsedSeconds, history)
-        tap(frame)
+        tap(analyzer.analyze(window, sampleRate, deltaMs, elapsedSeconds, history))
     }
 
     // A seek makes the next buffer discontinuous with the last, and a filter

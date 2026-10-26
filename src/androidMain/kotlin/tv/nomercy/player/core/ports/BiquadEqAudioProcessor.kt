@@ -13,17 +13,19 @@ import androidx.media3.common.C
 import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.audio.BaseAudioProcessor
 import androidx.media3.common.util.UnstableApi
-import tv.nomercy.player.core.dsp.AudioSpectrum
 import tv.nomercy.player.core.dsp.BiquadCoefficients
 import tv.nomercy.player.core.dsp.BiquadPeaking
 import tv.nomercy.player.core.dsp.BiquadState
 import tv.nomercy.player.core.dsp.EqBand
 import tv.nomercy.player.core.dsp.EqBands
+import tv.nomercy.player.core.dsp.SpectrumAnalyzer
 import tv.nomercy.player.core.dsp.SpectrumHistory
 import tv.nomercy.player.core.events.Subscription
 import tv.nomercy.player.core.plugins.audio.VisualizationFrame
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.locks.LockSupport
 
 // The equaliser and the spectrum, as a stage in Media3's audio sink.
 //
@@ -60,20 +62,39 @@ public class BiquadEqAudioProcessor(
 
     private var enabled: Boolean = true
 
+    @Volatile
     private var sampleRate: Int = 0
 
     private var channels: Int = 0
 
     // Samples accumulate here until there are enough for a transform. An FFT
     // needs a power of two and a decoder hands over whatever the container
-    // happened to hold, so the two never line up on their own.
-    private var window: DoubleArray = DoubleArray(FFT_SIZE)
+    // happened to hold, so the two never line up on their own. Two windows: the
+    // audio thread fills one while the spectrum thread reads the other.
+    private val windows: Array<DoubleArray> = arrayOf(DoubleArray(FFT_SIZE), DoubleArray(FFT_SIZE))
+
+    private var writing: Int = 0
 
     private var windowFill: Int = 0
 
+    @Volatile
     private var frameTap: ((VisualizationFrame) -> Unit)? = null
 
     private var elapsedSeconds: Double = 0.0
+
+    // Index of the window waiting for analysis, or NO_WINDOW. The audio thread
+    // sets it, the spectrum thread clears it when the frame is delivered.
+    private val ready = AtomicInteger(NO_WINDOW)
+
+    @Volatile
+    private var readyElapsedSeconds: Double = 0.0
+
+    @Volatile
+    private var resetPending: Boolean = false
+
+    private val analyzer = SpectrumAnalyzer(FFT_SIZE)
+
+    private var worker: SpectrumWorker? = null
 
     public fun graph(): AudioDspGraph = Graph()
 
@@ -99,6 +120,14 @@ public class BiquadEqAudioProcessor(
         resetStates()
         windowFill = 0
         elapsedSeconds = 0.0
+        // The spectrum thread owns the history while it runs, so it applies the reset.
+        resetPending = true
+    }
+
+    override fun onReset() {
+        worker?.stopNow()
+        worker = null
+        ready.set(NO_WINDOW)
         history.reset()
     }
 
@@ -149,18 +178,47 @@ public class BiquadEqAudioProcessor(
     // speaker, and running two transforms to average the answers costs twice
     // as much to show the same thing.
     private fun accumulate(sample: Double) {
-        window[windowFill] = sample
+        windows[writing][windowFill] = sample
         windowFill++
         if (windowFill < FFT_SIZE) return
 
         windowFill = 0
-        val tap: ((VisualizationFrame) -> Unit) = frameTap ?: return
-        val deltaMs: Double = FFT_SIZE * MILLIS_PER_SECOND / sampleRate
-        elapsedSeconds += deltaMs / MILLIS_PER_SECOND
+        if (frameTap == null) return
+        elapsedSeconds += FFT_SIZE.toDouble() / sampleRate
 
-        val frame: VisualizationFrame =
-            AudioSpectrum.analyse(window.copyOf(), sampleRate, deltaMs, elapsedSeconds, history)
-        tap(frame)
+        // The transform runs on its own low-priority thread: on a weak TV it
+        // starved the audio track. A window arriving while the last one is still
+        // being analyzed is dropped; the display catches up on the next.
+        if (ready.get() != NO_WINDOW) return
+
+        readyElapsedSeconds = elapsedSeconds
+        ready.set(writing)
+        writing = 1 - writing
+        (worker ?: SpectrumWorker(::analyzeReady).also { worker = it; it.start() }).wake()
+    }
+
+    // False when nothing waits, so the worker parks.
+    private fun analyzeReady(): Boolean {
+        val index: Int = ready.get()
+        if (index == NO_WINDOW) return false
+
+        if (resetPending) {
+            resetPending = false
+            history.reset()
+        }
+        try {
+            val tap: ((VisualizationFrame) -> Unit)? = frameTap
+            if (tap != null) {
+                val deltaMs: Double = FFT_SIZE * MILLIS_PER_SECOND / sampleRate
+                // A throwing listener must not end the thread that feeds every other one.
+                runCatching {
+                    tap(analyzer.analyze(windows[index], sampleRate, deltaMs, readyElapsedSeconds, history))
+                }
+            }
+        } finally {
+            ready.set(NO_WINDOW)
+        }
+        return true
     }
 
     private fun rebuild() {
@@ -235,6 +293,33 @@ public class BiquadEqAudioProcessor(
         }
     }
 }
+
+// The transform's own thread, at the lowest priority so the audio and video
+// threads always win a busy CPU. Parks when no window waits.
+private class SpectrumWorker(private val step: () -> Boolean) : Thread("nm-spectrum") {
+    @Volatile
+    private var running = true
+
+    init {
+        isDaemon = true
+        priority = MIN_PRIORITY
+    }
+
+    override fun run() {
+        while (running) {
+            if (!step()) LockSupport.park(this)
+        }
+    }
+
+    fun wake() = LockSupport.unpark(this)
+
+    fun stopNow() {
+        running = false
+        LockSupport.unpark(this)
+    }
+}
+
+private const val NO_WINDOW = -1
 
 private const val BYTES_PER_SAMPLE = 2
 
