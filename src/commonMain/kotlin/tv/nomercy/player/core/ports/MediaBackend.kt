@@ -35,6 +35,11 @@ public interface MediaBackend {
     // too coarse to pin an overlay to a frame.
     public fun presentedTime(): Double? = null
 
+    // Called for every frame the decoder announces, ahead of its release: the
+    // frame's own media time in seconds and its release time on the System.nanoTime
+    // clock. One listener; null removes it. Engines without frame reports never call it.
+    public fun onFrameAnnounced(listener: ((ptsSeconds: Double, releaseNs: Long) -> Unit)?) {}
+
     public fun duration(): Double
 
     // 0..1, unlike the player's 0..100: this is the engine's own scale and

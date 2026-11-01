@@ -190,6 +190,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun now ()J
 	public fun on (Ltv/nomercy/player/core/events/EventKey;Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public fun onAll (Lkotlin/jvm/functions/Function2;)Ltv/nomercy/player/core/events/Subscription;
+	public fun onFrameAnnounced (Lkotlin/jvm/functions/Function2;)V
 	public fun options ()Ltv/nomercy/player/core/player/PlayerConfig;
 	public fun pause (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun pause$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -6412,6 +6413,7 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun getReportsRenderedFirstFrame (Ltv/nomercy/player/core/ports/AudioBackend;)Z
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/AudioBackend;D)Z
 	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/AudioBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
+	public static fun onFrameAnnounced (Ltv/nomercy/player/core/ports/AudioBackend;Lkotlin/jvm/functions/Function2;)V
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
 	public static fun prerollSource (Ltv/nomercy/player/core/ports/AudioBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
@@ -7411,6 +7413,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public abstract fun mute ()V
 	public abstract fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public abstract fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun onFrameAnnounced (Lkotlin/jvm/functions/Function2;)V
 	public abstract fun pause ()V
 	public abstract fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public abstract fun playbackRate ()D
@@ -7437,6 +7440,7 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/MediaBackend;D)Z
 	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
 	public static synthetic fun load$default (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
+	public static fun onFrameAnnounced (Ltv/nomercy/player/core/ports/MediaBackend;Lkotlin/jvm/functions/Function2;)V
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
 	public static fun prerollSource (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
@@ -7534,6 +7538,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun onFrameAnnounced (Lkotlin/jvm/functions/Function2;)V
 	public fun pause ()V
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
@@ -7610,6 +7615,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun onFrameAnnounced (Lkotlin/jvm/functions/Function2;)V
 	public fun pause ()V
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
@@ -8640,6 +8646,7 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun hdrOnSdrFallback (Ltv/nomercy/player/core/ports/VideoBackend;Ltv/nomercy/player/core/ports/HdrOnSdrFallback;)V
 	public static fun isPrerolled (Ltv/nomercy/player/core/ports/VideoBackend;D)Z
 	public static fun isSourcePrerolled (Ltv/nomercy/player/core/ports/VideoBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)Z
+	public static fun onFrameAnnounced (Ltv/nomercy/player/core/ports/VideoBackend;Lkotlin/jvm/functions/Function2;)V
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
 	public static fun prerollSource (Ltv/nomercy/player/core/ports/VideoBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V

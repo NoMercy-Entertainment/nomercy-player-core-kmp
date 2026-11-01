@@ -946,6 +946,10 @@ public open class ComposedPlayer(
 
     public open fun presentedTime(): Double = time.presentedTime()
 
+    public open fun onFrameAnnounced(listener: ((ptsSeconds: Double, releaseNs: Long) -> Unit)?) {
+        context.backend?.onFrameAnnounced(listener)
+    }
+
     public open suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()): Unit =
         time.time(seconds, opts)
 

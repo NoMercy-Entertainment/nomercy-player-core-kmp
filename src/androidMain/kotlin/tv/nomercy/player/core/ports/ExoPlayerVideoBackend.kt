@@ -49,6 +49,7 @@ import tv.nomercy.player.core.events.SubtitleCueChange
 
 private const val LOG_TAG = "nm-video-backend"
 private const val MILLIS_PER_SECOND = 1000.0
+private const val MICROS_PER_SECOND = 1_000_000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
 private const val STANDBY_OUTPUT_SIZE = 16
 private const val STANDBY_OUTPUT_IMAGES = 2
@@ -502,8 +503,15 @@ public class ExoPlayerVideoBackend(
 
     private val frameClock = PresentedFrameClock()
 
+    @Volatile private var frameAnnounced: ((Double, Long) -> Unit)? = null
+
     private val frameListener = VideoFrameMetadataListener { presentationTimeUs, releaseTimeNs, _, _ ->
         frameClock.onFrame(presentationTimeUs, releaseTimeNs)
+        frameAnnounced?.invoke(presentationTimeUs / MICROS_PER_SECOND, releaseTimeNs)
+    }
+
+    override fun onFrameAnnounced(listener: ((ptsSeconds: Double, releaseNs: Long) -> Unit)?) {
+        frameAnnounced = listener
     }
 
     override fun presentedTime(): Double? = frameClock.timeAt(System.nanoTime())

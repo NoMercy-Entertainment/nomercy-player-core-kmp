@@ -87,6 +87,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun onFrameAnnounced (Lkotlin/jvm/functions/Function2;)V
 	public fun pause ()V
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
@@ -225,6 +226,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun mute ()V
 	public fun off (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public fun on (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public fun onFrameAnnounced (Lkotlin/jvm/functions/Function2;)V
 	public fun pause ()V
 	public fun play (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun playbackRate ()D
