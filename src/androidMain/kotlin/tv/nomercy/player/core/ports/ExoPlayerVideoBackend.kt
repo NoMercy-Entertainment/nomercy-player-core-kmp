@@ -51,6 +51,7 @@ private const val MILLIS_PER_SECOND = 1000.0
 private const val TIME_UPDATE_INTERVAL_MS = 250L
 private const val STANDBY_OUTPUT_SIZE = 16
 private const val STANDBY_OUTPUT_IMAGES = 2
+private const val HTTP_UNAUTHORIZED = 401
 
 // Mirrors the web trio's HLS_EXT_RE: `.m3u8` then a query, fragment, or end of
 // URL — a plain endsWith miss on `master.m3u8#t=30` wrongly disabled tunneling.
@@ -480,8 +481,11 @@ public class ExoPlayerVideoBackend(
 
             override fun onPlayerError(error: PlaybackException) {
                 if (recoverFromTunnelingRefusal(error)) return
-                if (rideOutSourceOutage(error)) return
-                bus.emit(CanonicalBackendEvent.ERROR, terminalCodeFor(error))
+                val status: Int = SourceOutage.httpStatusOf(error)
+                val endsAtOnce: Boolean = !sawConnectionFailure &&
+                    SourceOutage.endsLoadAtOnce(status, loading = !announcedCanPlay)
+                if (!endsAtOnce && rideOutSourceOutage(error)) return
+                bus.emit(CanonicalBackendEvent.ERROR, terminalFailureFor(error, status))
             }
 
             // The cues of whichever text track is selected, as the engine
@@ -561,12 +565,18 @@ public class ExoPlayerVideoBackend(
      * failure a viewer can act on gets its own name so a consumer can offer to
      * move to the next item instead of showing a dead end.
      */
-    private fun terminalCodeFor(error: PlaybackException): String =
-        if (SourceOutage.isMediaAbsentStatus(SourceOutage.httpStatusOf(error))) {
-            CoreErrorCodes.MEDIA_ABSENT
-        } else {
-            error.errorCodeName
-        }
+    private fun terminalCodeFor(error: PlaybackException, status: Int): String = when {
+        SourceOutage.isMediaAbsentStatus(status) -> CoreErrorCodes.MEDIA_ABSENT
+        !announcedCanPlay && status == HTTP_UNAUTHORIZED -> CoreErrorCodes.UNAUTHENTICATED
+        !announcedCanPlay && SourceOutage.isServerFaultStatus(status) -> CoreErrorCodes.SERVER_ERROR
+        else -> error.errorCodeName
+    }
+
+    // The status rides along so next() can tell a missing item from a server fault.
+    private fun terminalFailureFor(error: PlaybackException, status: Int): Any {
+        val code: String = terminalCodeFor(error, status)
+        return if (status == 0) code else EngineFailure(code, status)
+    }
 
     /**
      * A server that went away is an outage to ride out, not a dead file.

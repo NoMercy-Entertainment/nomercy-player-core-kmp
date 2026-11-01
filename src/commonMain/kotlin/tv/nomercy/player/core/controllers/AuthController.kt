@@ -69,4 +69,7 @@ public open class AuthController {
     // token to refresh, and making them implement a method to say so would be a
     // requirement invented by the library.
     public open suspend fun refresh(): Boolean = true
+
+    /** How many times next() refreshes and retries an item that answered 401. */
+    public open fun retryAfterRefresh(): Int = 1
 }

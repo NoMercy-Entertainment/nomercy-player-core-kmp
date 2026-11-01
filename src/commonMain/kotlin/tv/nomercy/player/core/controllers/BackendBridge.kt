@@ -28,9 +28,11 @@ import tv.nomercy.player.core.player.PlayState
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.core.ports.Clock
+import tv.nomercy.player.core.ports.EngineFailure
 import tv.nomercy.player.core.ports.MediaBackend
 import tv.nomercy.player.core.ports.defaultClock
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 private const val PERCENT = 100.0
 
@@ -262,6 +264,7 @@ public class BackendBridge(
 
         listen(backend, CanonicalBackendEvent.CAN_PLAY) {
             announcedCanPlay = true
+            ctx.loadFailureHandler = null
             ctx.bufferState = BufferState.IDLE
             // The stream is healthy, so the retries it took to get here are spent
             // budget rather than a running total. A film watched through three bad
@@ -308,6 +311,18 @@ public class BackendBridge(
     // the one surface a consumer subscribes to in order to know something went
     // wrong, and it should not have to enumerate every specific failure first.
     private fun announceFailure(backend: MediaBackend, reported: Any?) {
+        // A failure of the item next() is loading is next()'s to answer; what it
+        // does not claim is announced as before.
+        val handler = ctx.loadFailureHandler
+        if (reported is EngineFailure && handler != null && scope != null) {
+            ctx.bufferState = BufferState.IDLE
+            scope.launch { if (!handler(reported)) announceUnclaimed(backend, reported) }
+            return
+        }
+        announceUnclaimed(backend, reported)
+    }
+
+    private fun announceUnclaimed(backend: MediaBackend, reported: Any?) {
         val engineWord: String? = reported?.toString()?.takeIf { it.isNotBlank() }
 
         // Only a code that is one. Media3 reports its own name for a failure and

@@ -85,6 +85,7 @@ public object CoreEvents {
     public val Info: EventKey<PlayerErrorEvent> = EventKey("info")
     public val Item: EventKey<ItemChange> = EventKey("item")
     public val ItemEndingSoon: EventKey<tv.nomercy.player.core.events.ItemEndingSoon> = EventKey("itemEndingSoon")
+    public val ItemSkipped: EventKey<tv.nomercy.player.core.events.ItemSkipped> = EventKey("itemSkipped")
     public val Language: EventKey<LanguagePayload> = EventKey("language")
     public val LanguagePrevented: EventKey<LanguagePreventedPayload> = EventKey("languagePrevented")
     public val LevelSwitched: EventKey<LevelSwitchedPayload> = EventKey("level-switched")
@@ -241,6 +242,7 @@ public object CoreEvents {
         Info,
         Item,
         ItemEndingSoon,
+        ItemSkipped,
         Language,
         LanguagePrevented,
         LevelSwitched,

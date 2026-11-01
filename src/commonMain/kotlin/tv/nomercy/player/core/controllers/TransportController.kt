@@ -9,6 +9,12 @@
 package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.CancellationException
+import tv.nomercy.player.core.errors.CoreErrorCodes
+import tv.nomercy.player.core.errors.ErrorScope
+import tv.nomercy.player.core.errors.Severity
+import tv.nomercy.player.core.events.ItemSkipped
+import tv.nomercy.player.core.events.PlayerErrorEvent
+import tv.nomercy.player.core.ports.EngineFailure
 import tv.nomercy.player.core.events.BeforeDispatchResult
 import tv.nomercy.player.core.events.BeforeEvent
 import tv.nomercy.player.core.events.CoreEvents
@@ -118,6 +124,7 @@ public class TransportController(
         ctx.assertReady()
         if (!allowed(CoreEvents.BeforeStop, opts, CoreEvents.StopPrevented)) return
 
+        ctx.loadFailureHandler = null
         ctx.playState = PlayState.STOPPED
         ctx.transitionPhase(PlayerPhase.STOPPED)
         ctx.internalCurrentTime = 0.0
@@ -139,13 +146,75 @@ public class TransportController(
         if (!allowed(CoreEvents.BeforeNext, opts, CoreEvents.NextPrevented)) return
 
         ctx.emit(CoreEvents.Next, PlaySource(opts.source))
+        val run = Advance(opts)
         when {
             ctx.repeatState == RepeatState.ONE && opts.source == ActionSource.AUTO_ADVANCE ->
-                ctx.queue.current()?.let { loadAndPlay(it, opts) }
-            ctx.queue.peekNext() != null -> advanceTo(ctx.queue.currentIndex() + 1, opts)
-            ctx.repeatState == RepeatState.ALL -> advanceTo(0, opts)
+                ctx.queue.current()?.let { loadAndPlay(it, opts, run = run) }
+            ctx.queue.peekNext() != null -> advanceTo(ctx.queue.currentIndex() + 1, opts, run)
+            ctx.repeatState == RepeatState.ALL -> advanceTo(0, opts, run)
             else -> ctx.emit(CoreEvents.QueueExhausted, Unit)
         }
+    }
+
+    // One next() call: the ids it tried bound any run of missing items, and the
+    // refresh count bounds the 401 retries.
+    private class Advance(val opts: ActionOptions) {
+        val tried: MutableSet<String> = mutableSetOf()
+        var refreshes: Int = 0
+    }
+
+    // The engine's answer to the item next() loaded. False hands the failure back
+    // to be announced like any other.
+    private suspend fun answer(run: Advance, failure: EngineFailure): Boolean {
+        val item: PlaylistItem = ctx.queue.current() ?: return false
+        return when (failure.code) {
+            CoreErrorCodes.MEDIA_ABSENT -> skip(run, item, failure.httpStatus)
+            CoreErrorCodes.UNAUTHENTICATED -> refreshAndRetry(run, item)
+            CoreErrorCodes.SERVER_ERROR -> raiseFatal(failure)
+            else -> false
+        }
+    }
+
+    private suspend fun skip(run: Advance, item: PlaylistItem, status: Int): Boolean {
+        ctx.emit(CoreEvents.ItemSkipped, ItemSkipped(item, status))
+
+        val following: PlaylistItem? = ctx.queue.peekNext()
+        if (following == null || following.id in run.tried) {
+            ctx.loadFailureHandler = null
+            ctx.emit(CoreEvents.QueueExhausted, Unit)
+            return true
+        }
+
+        ctx.queue.setCurrent(ctx.queue.currentIndex() + 1)
+        loadAndPlay(following, run.opts, LoadOptions(startFresh = true), run)
+        return true
+    }
+
+    private suspend fun refreshAndRetry(run: Advance, item: PlaylistItem): Boolean {
+        if (run.refreshes >= (ctx.auth?.retryAfterRefresh() ?: 1)) return false
+
+        run.refreshes += 1
+        if (ctx.authRefresher?.invoke() == false) return false
+
+        loadAndPlay(item, run.opts, LoadOptions(startFresh = true), run)
+        return true
+    }
+
+    // The server is up and failing, so the items after this one will fail too.
+    private fun raiseFatal(failure: EngineFailure): Boolean {
+        ctx.loadFailureHandler = null
+        ctx.playState = PlayState.ERROR
+        ctx.emit(
+            CoreEvents.Fatal,
+            PlayerErrorEvent(
+                code = failure.code,
+                message = "The server answered ${failure.httpStatus} for the item.",
+                severity = Severity.FATAL,
+                scope = ErrorScope.core(),
+                context = mapOf("httpStatus" to failure.httpStatus),
+            ),
+        )
+        return true
     }
 
     // No exhausted event at the start of the queue: reaching the beginning is
@@ -193,14 +262,21 @@ public class TransportController(
         return true
     }
 
-    private suspend fun advanceTo(index: Int, opts: ActionOptions) {
+    private suspend fun advanceTo(index: Int, opts: ActionOptions, run: Advance? = null) {
         // The cursor moves before the media does, so the item event a chrome
         // renders arrives before the buffering it is about to show.
         ctx.queue.setCurrent(index)
-        ctx.queue.current()?.let { loadAndPlay(it, opts, LoadOptions(startFresh = true)) }
+        ctx.queue.current()?.let { loadAndPlay(it, opts, LoadOptions(startFresh = true), run) }
     }
 
-    private suspend fun loadAndPlay(item: PlaylistItem, opts: ActionOptions, load: LoadOptions = LoadOptions()) {
+    private suspend fun loadAndPlay(
+        item: PlaylistItem,
+        opts: ActionOptions,
+        load: LoadOptions = LoadOptions(),
+        run: Advance? = null,
+    ) {
+        run?.tried?.add(item.id)
+        ctx.loadFailureHandler = run?.let { { failure: EngineFailure -> answer(it, failure) } }
         if (!ctx.loadQuietly(item, load)) return
         ctx.emit(CoreEvents.MediaReady, Unit)
         play(opts)
