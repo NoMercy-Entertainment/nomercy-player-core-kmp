@@ -67,6 +67,7 @@ public class tv/nomercy/player/core/controllers/AuthController {
 	public fun <init> ()V
 	public fun refresh (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun requestHeaders (Ljava/lang/String;)Ljava/util/Map;
+	public fun retryAfterRefresh ()I
 	public fun signRequest (Ljava/lang/String;Ltv/nomercy/player/core/ports/FetchOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun transformUrl (Ljava/lang/String;)Ljava/lang/String;
 }
@@ -2024,6 +2025,7 @@ public final class tv/nomercy/player/core/events/CoreEvents {
 	public final fun getInfo ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getItem ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getItemEndingSoon ()Ltv/nomercy/player/core/events/EventKey;
+	public final fun getItemSkipped ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getLanguage ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getLanguagePrevented ()Ltv/nomercy/player/core/events/EventKey;
 	public final fun getLevelSwitched ()Ltv/nomercy/player/core/events/EventKey;
@@ -2243,6 +2245,19 @@ public final class tv/nomercy/player/core/events/ItemEndingSoon {
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
 	public final fun getRemaining ()D
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class tv/nomercy/player/core/events/ItemSkipped {
+	public fun <init> (Ltv/nomercy/player/core/media/PlaylistItem;I)V
+	public final fun component1 ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun component2 ()I
+	public final fun copy (Ltv/nomercy/player/core/media/PlaylistItem;I)Ltv/nomercy/player/core/events/ItemSkipped;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/events/ItemSkipped;Ltv/nomercy/player/core/media/PlaylistItem;IILjava/lang/Object;)Ltv/nomercy/player/core/events/ItemSkipped;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItem ()Ltv/nomercy/player/core/media/PlaylistItem;
+	public final fun getStatus ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -7016,6 +7031,19 @@ public final class tv/nomercy/player/core/ports/EmbedMessage {
 public abstract interface class tv/nomercy/player/core/ports/EmbedTransport {
 	public abstract fun receive (Lkotlin/jvm/functions/Function1;)Ltv/nomercy/player/core/events/Subscription;
 	public abstract fun send (Ljava/lang/String;)V
+}
+
+public final class tv/nomercy/player/core/ports/EngineFailure {
+	public fun <init> (Ljava/lang/String;I)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()I
+	public final fun copy (Ljava/lang/String;I)Ltv/nomercy/player/core/ports/EngineFailure;
+	public static synthetic fun copy$default (Ltv/nomercy/player/core/ports/EngineFailure;Ljava/lang/String;IILjava/lang/Object;)Ltv/nomercy/player/core/ports/EngineFailure;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCode ()Ljava/lang/String;
+	public final fun getHttpStatus ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class tv/nomercy/player/core/ports/EqualPowerCrossfader {

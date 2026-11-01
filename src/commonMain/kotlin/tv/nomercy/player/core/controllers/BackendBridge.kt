@@ -313,13 +313,16 @@ public class BackendBridge(
     private fun announceFailure(backend: MediaBackend, reported: Any?) {
         // A failure of the item next() is loading is next()'s to answer; what it
         // does not claim is announced as before.
-        val handler = ctx.loadFailureHandler
-        if (reported is EngineFailure && handler != null && scope != null) {
-            ctx.bufferState = BufferState.IDLE
-            scope.launch { if (!handler(reported)) announceUnclaimed(backend, reported) }
-            return
-        }
+        if (reported is EngineFailure && handOver(backend, reported)) return
         announceUnclaimed(backend, reported)
+    }
+
+    private fun handOver(backend: MediaBackend, failure: EngineFailure): Boolean {
+        val handler = ctx.loadFailureHandler ?: return false
+        val launcher = scope ?: return false
+        ctx.bufferState = BufferState.IDLE
+        launcher.launch { if (!handler(failure)) announceUnclaimed(backend, failure) }
+        return true
     }
 
     private fun announceUnclaimed(backend: MediaBackend, reported: Any?) {

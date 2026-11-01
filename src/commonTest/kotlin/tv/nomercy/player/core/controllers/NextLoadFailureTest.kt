@@ -11,9 +11,6 @@ package tv.nomercy.player.core.controllers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.errors.CoreErrorCodes
@@ -33,6 +30,10 @@ import kotlin.test.assertTrue
 // refreshed and retried once, and a server error is fatal without a skip.
 @OptIn(ExperimentalCoroutinesApi::class)
 class NextLoadFailureTest {
+
+    private companion object {
+        const val PUMPS: Int = 20
+    }
 
     // Answers each url with the next status in its script; 0 loads normally.
     private class ScriptedBackend : FakeMediaBackend() {
@@ -56,7 +57,7 @@ class NextLoadFailureTest {
 
     private class Rig(val scope: TestScope, val backend: ScriptedBackend) {
         val auth: CountingAuth = CountingAuth()
-        val player: ComposedPlayer = ComposedPlayer(backend, scope = CoroutineScope(StandardTestDispatcher(scope.testScheduler) + SupervisorJob())).also { it.auth(auth) }
+        val player: ComposedPlayer = ComposedPlayer(backend, scope = scope.backgroundScope).also { it.auth(auth) }
         val skipped: MutableList<ItemSkipped> = mutableListOf()
         val exhausted: MutableList<Unit> = mutableListOf()
         val fatals: MutableList<String> = mutableListOf()
@@ -86,9 +87,13 @@ class NextLoadFailureTest {
         return rig
     }
 
-    // Runs what is due now, nested launches included; the player's own tickers
-    // would keep an advance-until-idle going forever.
-    private fun TestScope.advanceUntilIdle(): Unit = runCurrent()
+    // A bounded pump: the player's own tickers would keep advance-until-idle going.
+    private fun TestScope.advanceUntilIdle() {
+        repeat(PUMPS) {
+            runCurrent()
+            advanceTimeBy(1)
+        }
+    }
 
     private fun url(id: String): String = "https://example.test/$id"
 
@@ -108,7 +113,7 @@ class NextLoadFailureTest {
         rig.backend.fail("b", absent())
 
         rig.player.next()
-        runCurrent()
+        advanceUntilIdle()
 
         assertEquals(listOf("b"), rig.skipped.map { it.item.id })
         assertEquals(listOf(404), rig.skipped.map { it.status })

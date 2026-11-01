@@ -69,7 +69,7 @@ class CoreEventsRegistryTest {
 
     @Test
     fun theRegistryIsNotEmptyAndCarriesTheSeamsItIsAboutParityFor() {
-        assertEquals(152, CoreEvents.all.size)
+        assertEquals(153, CoreEvents.all.size)
 
         val names = CoreEvents.all.map { it.name }.toSet()
         assertTrue(names.containsAll(listOf("play", "beforePlay", "playPrevented", "stream:error", "phase")))
