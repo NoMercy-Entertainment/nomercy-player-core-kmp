@@ -944,6 +944,8 @@ public open class ComposedPlayer(
 
     public open fun time(): Double = time.time()
 
+    public open fun presentedTime(): Double = time.presentedTime()
+
     public open suspend fun time(seconds: Double, opts: ActionOptions = ActionOptions()): Unit =
         time.time(seconds, opts)
 

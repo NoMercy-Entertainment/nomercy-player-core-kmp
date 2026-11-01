@@ -29,6 +29,12 @@ public interface MediaBackend {
     // getter/setter pair is the contract's shape.
     public fun currentTime(): Double
     public fun currentTime(seconds: Double)
+
+    // Media time of the picture on screen, from the decoder's frame reports; null
+    // when this engine has none. currentTime() may be a poll up to 250ms old,
+    // too coarse to pin an overlay to a frame.
+    public fun presentedTime(): Double? = null
+
     public fun duration(): Double
 
     // 0..1, unlike the player's 0..100: this is the engine's own scale and

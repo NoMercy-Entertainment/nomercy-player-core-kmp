@@ -27,6 +27,7 @@ import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.hls.HlsManifest
+import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineDispatcher
@@ -499,8 +500,18 @@ public class ExoPlayerVideoBackend(
             }
         }
 
+    private val frameClock = PresentedFrameClock()
+
+    private val frameListener = VideoFrameMetadataListener { presentationTimeUs, releaseTimeNs, _, _ ->
+        frameClock.onFrame(presentationTimeUs, releaseTimeNs)
+    }
+
+    override fun presentedTime(): Double? =
+        frameClock.timeAt(System.nanoTime(), cachedRate, cachedState == BackendState.PLAYING)
+
     init {
         player.addListener(engineListener)
+        player.setVideoFrameMetadataListener(frameListener)
     }
 
     // Re-decided per item, because it depends on the container rather than the
@@ -887,6 +898,7 @@ public class ExoPlayerVideoBackend(
     override fun currentTime(): Double = cachedTime
 
     override fun currentTime(seconds: Double): Unit = fireAndForget {
+        frameClock.reset()
         seekOrSwap((seconds * MILLIS_PER_SECOND).toLong())
     }
 
@@ -998,9 +1010,12 @@ public class ExoPlayerVideoBackend(
     private fun exchangeEngines(next: StandbyEngine, playWhenReady: Boolean) {
         val previous: ExoEngine = engine
         previous.player.removeListener(engineListener)
+        previous.player.clearVideoFrameMetadataListener(frameListener)
         next.engine.player.removeListener(standbyListener)
         previous.player.addListener(standbyListener)
         next.engine.player.addListener(engineListener)
+        next.engine.player.setVideoFrameMetadataListener(frameListener)
+        frameClock.reset()
 
         standby = StandbyEngine(previous, trackSelector, next.output)
         engine = next.engine

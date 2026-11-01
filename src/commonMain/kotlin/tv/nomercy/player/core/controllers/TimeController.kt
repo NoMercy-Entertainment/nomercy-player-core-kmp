@@ -186,6 +186,12 @@ public class TimeController(
         return answer
     }
 
+    // The time of the frame on screen when the engine can say, else [time].
+    public fun presentedTime(): Double {
+        if (ctx.mediaIsStale()) return ctx.internalCurrentTime
+        return ctx.backend?.presentedTime() ?: time()
+    }
+
     // Takes a new report and remembers when it arrived.
     //
     // A report is not a correction to apply on the spot, it is the truth this
