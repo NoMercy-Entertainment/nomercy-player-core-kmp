@@ -511,7 +511,18 @@ public class ExoPlayerVideoBackend(
 
     init {
         player.addListener(engineListener)
-        player.setVideoFrameMetadataListener(frameListener)
+        installFrameListener()
+    }
+
+    // ExoPlayer accepts this call only on its own thread, and the app builds
+    // the backend from a background dispatcher.
+    private fun installFrameListener() {
+        val target = player
+        if (Looper.myLooper() == target.applicationLooper) {
+            target.setVideoFrameMetadataListener(frameListener)
+        } else {
+            Handler(target.applicationLooper).post { target.setVideoFrameMetadataListener(frameListener) }
+        }
     }
 
     // Re-decided per item, because it depends on the container rather than the
