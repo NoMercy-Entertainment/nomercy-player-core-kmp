@@ -94,6 +94,7 @@ public class tv/nomercy/player/testing/FakeMediaBackend : tv/nomercy/player/core
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
 	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public fun presentedTime ()Ljava/lang/Double;
 	public fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public final fun setBufferedValue (D)V
@@ -231,6 +232,7 @@ public class tv/nomercy/player/testing/FakeVideoBackend : tv/nomercy/player/core
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
 	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public fun presentedTime ()Ljava/lang/Double;
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;

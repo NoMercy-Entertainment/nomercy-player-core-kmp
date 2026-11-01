@@ -211,6 +211,7 @@ public class tv/nomercy/player/core/controllers/ComposedPlayer : tv/nomercy/play
 	public fun plugins ()Ljava/util/List;
 	public fun preloadNow (Ltv/nomercy/player/core/media/PlaylistItem;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun preloadStrategy ()Ltv/nomercy/player/core/ports/PreloadStrategy;
+	public fun presentedTime ()D
 	public fun previous (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun previous$default (Ltv/nomercy/player/core/controllers/ComposedPlayer;Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public fun previousChapter (Ltv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -560,6 +561,7 @@ public final class tv/nomercy/player/core/controllers/TimeController {
 	public final fun playbackRate (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun playbackRate$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 	public final fun playbackRates ()Ljava/util/List;
+	public final fun presentedTime ()D
 	public final fun resetItemEndingSoonLatch ()V
 	public final fun rewind (DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public static synthetic fun rewind$default (Ltv/nomercy/player/core/controllers/TimeController;DLtv/nomercy/player/core/player/ActionOptions;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
@@ -6413,6 +6415,7 @@ public final class tv/nomercy/player/core/ports/AudioBackend$DefaultImpls {
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/AudioBackend;D)V
 	public static fun prerollSource (Ltv/nomercy/player/core/ports/AudioBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public static fun presentedTime (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/lang/Double;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/AudioBackend;)Ljava/util/List;
 }
 
@@ -7415,6 +7418,7 @@ public abstract interface class tv/nomercy/player/core/ports/MediaBackend {
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
 	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public fun presentedTime ()Ljava/lang/Double;
 	public abstract fun release ()V
 	public fun seekableRanges ()Ljava/util/List;
 	public abstract fun state ()Ltv/nomercy/player/core/ports/BackendState;
@@ -7436,6 +7440,7 @@ public final class tv/nomercy/player/core/ports/MediaBackend$DefaultImpls {
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/MediaBackend;D)V
 	public static fun prerollSource (Ltv/nomercy/player/core/ports/MediaBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public static fun presentedTime (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/lang/Double;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/MediaBackend;)Ljava/util/List;
 }
 
@@ -7536,6 +7541,7 @@ public final class tv/nomercy/player/core/ports/MpvAudioBackend : tv/nomercy/pla
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
 	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public fun presentedTime ()Ljava/lang/Double;
 	public fun primeSecondary (JLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public fun release ()V
 	public fun secondaryGain ()F
@@ -7611,6 +7617,7 @@ public final class tv/nomercy/player/core/ports/MpvVideoBackend : tv/nomercy/pla
 	public fun prefetchAt (D)V
 	public fun prerollAt (D)V
 	public fun prerollSource (Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public fun presentedTime ()Ljava/lang/Double;
 	public fun quality ()Ltv/nomercy/player/core/ports/QualityLevel;
 	public fun quality (Ltv/nomercy/player/core/ports/QualityLevel;)V
 	public fun qualityLevels ()Ljava/util/List;
@@ -8636,6 +8643,7 @@ public final class tv/nomercy/player/core/ports/VideoBackend$DefaultImpls {
 	public static fun prefetchAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
 	public static fun prerollAt (Ltv/nomercy/player/core/ports/VideoBackend;D)V
 	public static fun prerollSource (Ltv/nomercy/player/core/ports/VideoBackend;Ljava/lang/String;Ltv/nomercy/player/core/ports/LoadOptions;)V
+	public static fun presentedTime (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/lang/Double;
 	public static fun seekableRanges (Ltv/nomercy/player/core/ports/VideoBackend;)Ljava/util/List;
 	public static fun surfaceSize (Ltv/nomercy/player/core/ports/VideoBackend;II)V
 }

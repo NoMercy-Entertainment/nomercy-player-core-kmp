@@ -1518,6 +1518,7 @@ abstract interface tv.nomercy.player.core.ports/MediaBackend { // tv.nomercy.pla
     open fun prefetchAt(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.prefetchAt|prefetchAt(kotlin.Double){}[0]
     open fun prerollAt(kotlin/Double) // tv.nomercy.player.core.ports/MediaBackend.prerollAt|prerollAt(kotlin.Double){}[0]
     open fun prerollSource(kotlin/String, tv.nomercy.player.core.ports/LoadOptions) // tv.nomercy.player.core.ports/MediaBackend.prerollSource|prerollSource(kotlin.String;tv.nomercy.player.core.ports.LoadOptions){}[0]
+    open fun presentedTime(): kotlin/Double? // tv.nomercy.player.core.ports/MediaBackend.presentedTime|presentedTime(){}[0]
     open fun seekableRanges(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.ports/MediaBackend.seekableRanges|seekableRanges(){}[0]
 }
 
@@ -3156,6 +3157,7 @@ final class tv.nomercy.player.core.controllers/TimeController { // tv.nomercy.pl
     final fun percentage(): kotlin/Double // tv.nomercy.player.core.controllers/TimeController.percentage|percentage(){}[0]
     final fun playbackRate(): kotlin/Double // tv.nomercy.player.core.controllers/TimeController.playbackRate|playbackRate(){}[0]
     final fun playbackRates(): kotlin.collections/List<kotlin/Double> // tv.nomercy.player.core.controllers/TimeController.playbackRates|playbackRates(){}[0]
+    final fun presentedTime(): kotlin/Double // tv.nomercy.player.core.controllers/TimeController.presentedTime|presentedTime(){}[0]
     final fun resetItemEndingSoonLatch() // tv.nomercy.player.core.controllers/TimeController.resetItemEndingSoonLatch|resetItemEndingSoonLatch(){}[0]
     final fun seekable(): kotlin.collections/List<tv.nomercy.player.core.ports/TimeRange> // tv.nomercy.player.core.controllers/TimeController.seekable|seekable(){}[0]
     final fun time(): kotlin/Double // tv.nomercy.player.core.controllers/TimeController.time|time(){}[0]
@@ -7707,6 +7709,7 @@ open class tv.nomercy.player.core.controllers/ComposedPlayer : tv.nomercy.player
     open fun pluginList(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.controllers/ComposedPlayer.pluginList|pluginList(){}[0]
     open fun plugins(): kotlin.collections/List<tv.nomercy.player.core.plugin/Plugin<*>> // tv.nomercy.player.core.controllers/ComposedPlayer.plugins|plugins(){}[0]
     open fun preloadStrategy(): tv.nomercy.player.core.ports/PreloadStrategy // tv.nomercy.player.core.controllers/ComposedPlayer.preloadStrategy|preloadStrategy(){}[0]
+    open fun presentedTime(): kotlin/Double // tv.nomercy.player.core.controllers/ComposedPlayer.presentedTime|presentedTime(){}[0]
     open fun quality(): tv.nomercy.player.core.ports/QualityLevel? // tv.nomercy.player.core.controllers/ComposedPlayer.quality|quality(){}[0]
     open fun quality(tv.nomercy.player.core.ports/QualityLevel?) // tv.nomercy.player.core.controllers/ComposedPlayer.quality|quality(tv.nomercy.player.core.ports.QualityLevel?){}[0]
     open fun qualityLevels(): kotlin.collections/List<tv.nomercy.player.core.ports/QualityLevel> // tv.nomercy.player.core.controllers/ComposedPlayer.qualityLevels|qualityLevels(){}[0]

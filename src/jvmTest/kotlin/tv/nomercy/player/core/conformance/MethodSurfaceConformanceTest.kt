@@ -177,6 +177,8 @@ class MethodSurfaceConformanceTest {
             "stateFlow", "rootLogger", "rootStorage", "emit", "on", "onAll", "once", "off",
             "dispatchBefore", "fetch", "websocket", "report", "aspectRatio",
             "pluginList", "contributions", "coreVersion", "formatTitle",
+            // The web reads the frame on screen from requestVideoFrameCallback on the element.
+            "presentedTime",
             // The reference reaches its preload machinery from
             // AutoAdvancePlugin.preloadNext, which loads into the browser's
             // "next" slot through player.load(item, { slot: 'next' }).
