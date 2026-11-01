@@ -506,8 +506,7 @@ public class ExoPlayerVideoBackend(
         frameClock.onFrame(presentationTimeUs, releaseTimeNs)
     }
 
-    override fun presentedTime(): Double? =
-        frameClock.timeAt(System.nanoTime(), cachedRate, cachedState == BackendState.PLAYING)
+    override fun presentedTime(): Double? = frameClock.timeAt(System.nanoTime())
 
     init {
         player.addListener(engineListener)

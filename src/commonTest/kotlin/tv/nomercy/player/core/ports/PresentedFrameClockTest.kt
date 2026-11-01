@@ -18,7 +18,7 @@ class PresentedFrameClockTest {
 
     @Test
     fun noFrameYetIsNoAnswer() {
-        assertNull(PresentedFrameClock().timeAt(nowNs = 5 * ms, rate = 1.0, playing = true))
+        assertNull(PresentedFrameClock().timeAt(nowNs = 5 * ms))
     }
 
     @Test
@@ -26,55 +26,53 @@ class PresentedFrameClockTest {
         val clock = PresentedFrameClock()
         clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
 
-        assertEquals(10.0, clock.timeAt(nowNs = 100 * ms, rate = 1.0, playing = true))
+        assertEquals(10.0, clock.timeAt(nowNs = 100 * ms))
     }
 
     @Test
-    fun timeAdvancesFromTheLastFrameNotFromAPollEveryQuarterSecond() {
+    fun betweenTwoFramesTheShownFrameKeepsItsOwnPresentationTime() {
         val clock = PresentedFrameClock()
         clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
 
-        assertEquals(10.033, clock.timeAt(nowNs = 133 * ms, rate = 1.0, playing = true)!!, 1e-9)
+        assertEquals(10.0, clock.timeAt(nowNs = 133 * ms))
     }
 
     @Test
-    fun aFrameAnnouncedAheadOfItsReleaseDoesNotRunTheClockForward() {
+    fun aFrameAnnouncedAheadOfItsReleaseIsNotShownYet() {
         val clock = PresentedFrameClock()
-        clock.onFrame(ptsUs = 10_000_000L, releaseNs = 120 * ms)
+        clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
+        clock.onFrame(ptsUs = 10_041_667L, releaseNs = 141 * ms)
 
-        assertEquals(9.98, clock.timeAt(nowNs = 100 * ms, rate = 1.0, playing = true)!!, 1e-9)
+        assertEquals(10.0, clock.timeAt(nowNs = 120 * ms))
+        assertEquals(10.041667, clock.timeAt(nowNs = 142 * ms))
     }
 
     @Test
-    fun theRateScalesTheElapsedWallTime() {
+    fun severalFramesAnnouncedAheadStillAnswerWithTheOneOnScreen() {
+        val clock = PresentedFrameClock()
+        clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
+        clock.onFrame(ptsUs = 10_041_667L, releaseNs = 141 * ms)
+        clock.onFrame(ptsUs = 10_083_333L, releaseNs = 183 * ms)
+
+        assertEquals(10.041667, clock.timeAt(nowNs = 150 * ms))
+    }
+
+    @Test
+    fun aPausedVideoHoldsTheLastShownFrame() {
         val clock = PresentedFrameClock()
         clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
 
-        assertEquals(10.2, clock.timeAt(nowNs = 200 * ms, rate = 2.0, playing = true)!!, 1e-9)
+        assertEquals(10.0, clock.timeAt(nowNs = 5_000 * ms))
     }
 
     @Test
-    fun pausedHoldsTheLastShownFrame() {
-        val clock = PresentedFrameClock()
-        clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
-
-        assertEquals(10.0, clock.timeAt(nowNs = 5_000 * ms, rate = 1.0, playing = false))
-    }
-
-    @Test
-    fun aClockThatStoppedReceivingFramesParksInsteadOfRunningAway() {
-        val clock = PresentedFrameClock()
-        clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
-
-        assertNull(clock.timeAt(nowNs = 100 * ms + PresentedFrameClock.MAX_CARRY_NS + 1, rate = 1.0, playing = true))
-    }
-
-    @Test
-    fun aSeekDropsTheAnchorUntilTheNextFrameArrives() {
+    fun aSeekDropsTheFramesUntilTheNextOneArrives() {
         val clock = PresentedFrameClock()
         clock.onFrame(ptsUs = 10_000_000L, releaseNs = 100 * ms)
         clock.reset()
 
-        assertNull(clock.timeAt(nowNs = 110 * ms, rate = 1.0, playing = true))
+        assertNull(clock.timeAt(nowNs = 110 * ms))
+        clock.onFrame(ptsUs = 60_000_000L, releaseNs = 120 * ms)
+        assertEquals(60.0, clock.timeAt(nowNs = 121 * ms))
     }
 }
