@@ -143,6 +143,27 @@ class PolicyControllerTest {
     }
 
     @Test
+    fun policyReleasesTheControllerItAcquiredFromAGetter() = runTest {
+        val delegate = DrivablePlatform()
+        val locks = mutableListOf<RecordingWakeLock>()
+        val platform = object : Platform by delegate {
+            override val wakeLock: WakeLock
+                get() = RecordingWakeLock().also { locks += it }
+        }
+        val player = ComposedPlayer(backend = FakeMediaBackend(), platform = platform, scope = backgroundScope)
+        player.queue(listOf(TestItem("a")))
+        player.setup(PlayerConfig(wakeLock = WakeLockPolicy.AUTO))
+        player.play()
+        runCurrent()
+        assertEquals(1, locks.sumOf { it.acquisitions })
+
+        player.pause()
+        runCurrent()
+
+        assertTrue(locks.none { it.held })
+    }
+
+    @Test
     fun neverMeansNever() = runTest {
         val platform = DrivablePlatform()
 

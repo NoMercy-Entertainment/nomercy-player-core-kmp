@@ -403,7 +403,9 @@ public open class ComposedPlayer(
     // still fire. Only a host that wired a fetcher pays for the request.
     private suspend fun warmAsset(asset: PreloadAsset) {
         if (fetcher == null) return
-        fetch(asset.url, FetchOptions(method = "HEAD"))
+        val category = UrlCategory.entries.firstOrNull { it.token == asset.category } ?: UrlCategory.MEDIA
+        val resolved = resolveUrl(asset.url, category)
+        fetch(resolved.href, FetchOptions(method = "HEAD"))
     }
 
     // Built at setup, when the configured inactivity window is known. Until
@@ -498,6 +500,7 @@ public open class ComposedPlayer(
         configuredBaseUrl = config.baseUrl
         configuredImageBaseUrl = config.baseImageUrl
         configuration = config
+        if (preload is DefaultPreloadStrategy) preload = DefaultPreloadStrategy(config.preloadLeadSeconds)
         context.mutationGuards = config.mutationGuards
         // The registry is what knows which plugin declared what, and the context
         // is what raises the advisory. Wired here rather than at construction
@@ -792,6 +795,7 @@ public open class ComposedPlayer(
         // The outgoing strategy may have work in flight against an item this
         // player is about to stop caring about.
         preload.cancel()
+        preloading.cancelPreload()
         preload = strategy
     }
 

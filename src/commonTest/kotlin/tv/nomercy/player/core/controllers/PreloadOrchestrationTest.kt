@@ -8,6 +8,8 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -18,9 +20,14 @@ import tv.nomercy.player.core.media.PlaylistItem
 import tv.nomercy.player.core.player.PlayerConfig
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.core.ports.CrossfadeTransitionStrategy
+import tv.nomercy.player.core.ports.DefaultPreloadStrategy
+import tv.nomercy.player.core.ports.FetchResponse
 import tv.nomercy.player.core.ports.PreloadAsset
 import tv.nomercy.player.core.ports.PreloadContext
 import tv.nomercy.player.core.ports.PreloadStrategy
+import tv.nomercy.player.core.ports.ResolvedUrl
+import tv.nomercy.player.core.ports.UrlCategory
+import tv.nomercy.player.core.ports.UrlResolver
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -88,6 +95,87 @@ class PreloadOrchestrationTest {
         runCurrent()
 
         assertEquals(0, starts)
+    }
+
+    @Test
+    fun zeroLeadDisablesTheDefaultPreloader() = runTest {
+        val (player, backend) = rig(PlayerConfig(preloadLeadSeconds = 0.0))
+        var starts = 0
+        player.on(CoreEvents.PreloadStart) { starts += 1 }
+
+        backend.tick(position = 100.0)
+        runCurrent()
+
+        assertEquals(0, starts)
+    }
+
+    @Test
+    fun configuredLeadControlsTheDefaultPreloadWindow() = runTest {
+        val (player, backend) = rig(PlayerConfig(preloadLeadSeconds = 2.0))
+        val started = mutableListOf<String>()
+        player.on(CoreEvents.PreloadStart) { started += it.item.id }
+
+        backend.tick(position = 95.0)
+        runCurrent()
+        assertEquals(emptyList(), started)
+        backend.tick(position = 98.0)
+        runCurrent()
+        assertEquals(listOf("b"), started)
+    }
+
+    @Test
+    fun preloadedAssetUsesItsCategoryResolver() = runTest {
+        var requested: String? = null
+        val player = ComposedPlayer(
+            backend = FakeMediaBackend(),
+            fetcher = { url, _ ->
+                requested = url
+                FetchResponse(status = 200)
+            },
+        )
+        player.urlResolver(UrlResolver { url, context ->
+            assertEquals(UrlCategory.POSTER, context.category)
+            ResolvedUrl(raw = url, href = "https://images.test/poster.jpg")
+        })
+        player.setPreloadStrategy(object : PreloadStrategy by DefaultPreloadStrategy() {
+            override fun assetsToPreload(item: PlaylistItem): List<PreloadAsset> =
+                listOf(PreloadAsset(url = "/poster.jpg", category = "poster"))
+        })
+
+        player.preloadNow(TestItem("next"))
+
+        assertEquals("https://images.test/poster.jpg", requested)
+    }
+
+    @Test
+    fun leavingAnItemCancelsItsInFlightPreload() = runTest {
+        val entered = CompletableDeferred<Unit>()
+        val cancelled = CompletableDeferred<Unit>()
+        val backend = FakeMediaBackend()
+        val player = ComposedPlayer(
+            backend = backend,
+            scope = backgroundScope,
+            fetcher = { _, _ ->
+                entered.complete(Unit)
+                try {
+                    awaitCancellation()
+                } finally {
+                    cancelled.complete(Unit)
+                }
+            },
+        )
+        player.queue(listOf(TestItem("a"), TestItem("b")))
+        backgroundScope.launch { player.setup() }
+        runCurrent()
+        player.setPreloadStrategy(NamingPreloadStrategy())
+
+        backend.tick(position = 95.0)
+        runCurrent()
+        assertTrue(entered.isCompleted)
+        player.next()
+        runCurrent()
+
+        assertTrue(cancelled.isCompleted)
     }
 
     @Test

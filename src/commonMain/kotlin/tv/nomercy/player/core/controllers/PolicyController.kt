@@ -21,6 +21,7 @@ import tv.nomercy.player.core.player.PlayerConfig
 import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.player.WakeLockPolicy
 import tv.nomercy.player.core.ports.Platform
+import tv.nomercy.player.core.ports.WakeLock
 
 // Under this and a 1080p rung is not going to hold. The web player's number,
 // kept so a consumer moving between them sees the same badge at the same moment.
@@ -42,6 +43,8 @@ public class PolicyController(
 ) {
 
     private val subscriptions: MutableList<Subscription> = mutableListOf()
+    private val wakeLock: WakeLock = platform.wakeLock
+    private var acquisitionPending: Boolean = false
 
     // Whether the last reading was already slow, so `network:slow` announces the
     // crossing rather than every reading taken while it stays slow.
@@ -60,7 +63,7 @@ public class PolicyController(
         for (subscription in subscriptions) subscription.dispose()
         subscriptions.clear()
         wasNetworkSlow = false
-        if (platform.wakeLock.isHeld()) releaseWakeLock()
+        if (wakeLock.isHeld() || acquisitionPending) releaseWakeLock()
     }
 
     // Off by default, and it has to be: a music player is expected to keep
@@ -121,18 +124,26 @@ public class PolicyController(
 
     private fun followPhase(change: PhaseChange) {
         if (change.to in HOLDING_PHASES) {
-            if (!platform.wakeLock.isHeld()) acquireWakeLock()
+            if (!wakeLock.isHeld() && !acquisitionPending) acquireWakeLock()
             return
         }
-        if (change.to in RELEASING_PHASES && platform.wakeLock.isHeld()) releaseWakeLock()
+        val shouldRelease = wakeLock.isHeld() || acquisitionPending
+        if (change.to in RELEASING_PHASES && shouldRelease) releaseWakeLock()
     }
 
     private fun acquireWakeLock() {
-        scope.launch { platform.wakeLock.acquire() }
+        acquisitionPending = true
+        scope.launch {
+            try {
+                wakeLock.acquire()
+            } finally {
+                acquisitionPending = false
+            }
+        }
     }
 
     private fun releaseWakeLock() {
-        scope.launch { platform.wakeLock.release() }
+        scope.launch { wakeLock.release() }
     }
 
     // Named PLATFORM, because this one knows the answer. An unsourced pause

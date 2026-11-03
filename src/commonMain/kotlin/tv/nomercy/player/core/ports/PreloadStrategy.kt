@@ -43,6 +43,7 @@ public class DefaultPreloadStrategy(private val leadSeconds: Double = 10.0) : Pr
     override fun shouldPreload(context: PreloadContext): Boolean {
         // Nothing to preload, and an unknown duration means there is no end to
         // measure from — a live stream, or metadata that has not arrived.
+        if (leadSeconds <= 0.0) return false
         if (context.nextItem == null || context.duration <= 0.0) return false
         return context.currentTime >= context.duration - leadSeconds
     }

@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.controllers
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -79,6 +80,7 @@ public class PreloadController(
     private var epoch: Long = 0L
 
     private var fade: Job? = null
+    private var preloadJob: Job? = null
 
     public fun setup(config: PlayerConfig) {
         crossfadeEnabled = config.crossfadeEnabled
@@ -93,12 +95,14 @@ public class PreloadController(
         for (subscription in subscriptions) subscription.dispose()
         subscriptions.clear()
         cancelFade()
+        cancelPreload()
     }
 
     private fun resetCycle() {
         preloadFired = false
         transitionFired = false
         preload().cancel()
+        cancelPreload()
         transition().cancel(CURSOR_CHANGED)
         epoch += 1
         cancelFade()
@@ -144,7 +148,7 @@ public class PreloadController(
         val nextItem: PlaylistItem = context.nextItem ?: return
 
         preloadFired = true
-        scope.launch { runPreload(nextItem, preload()) }
+        preloadJob = scope.launch { runPreload(nextItem, preload()) }
     }
 
     private fun maybeTransition(context: PreloadContext) {
@@ -211,6 +215,8 @@ public class PreloadController(
         return try {
             fetch(asset)
             true
+        } catch (cause: CancellationException) {
+            throw cause
         } catch (cause: Throwable) {
             if (epoch == capturedEpoch) {
                 ctx.emit(CoreEvents.PreloadError, PreloadErrorPayload(nextItem, cause.message))
@@ -287,5 +293,10 @@ public class PreloadController(
     private fun cancelFade() {
         fade?.cancel()
         fade = null
+    }
+
+    internal fun cancelPreload() {
+        preloadJob?.cancel()
+        preloadJob = null
     }
 }
