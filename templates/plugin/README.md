@@ -106,7 +106,7 @@ through `this.launch`:
 ```kotlin
 override fun use() {
     on(CoreEvents.Item) { change ->
-        launch {
+        this.launch {
             val sheet = fetch(spriteUrl(change.item)).body
             emit(MyEvents.Loaded, parseVttSprite(sheet))
         }
