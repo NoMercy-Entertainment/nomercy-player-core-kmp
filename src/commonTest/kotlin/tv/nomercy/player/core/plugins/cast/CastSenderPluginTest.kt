@@ -148,6 +148,38 @@ class CastSenderPluginTest {
     }
 
     @Test
+    fun disconnectWithoutReceiverStateKeepsTheLocalPosition() = runTest {
+        val session = FakeSession()
+        val transport = RecordingTransport()
+        val sender = plugin(session, transport, opts = CastSenderOptions(resumeLocalOnDisconnect = true))
+        sender.use()
+
+        session.report(CastSenderEvents.Connected("Living room"))
+        session.report(CastSenderEvents.Disconnected)
+
+        assertEquals(listOf("play"), transport.calls)
+        assertEquals(0.0, sender.remotePosition())
+    }
+
+    @Test
+    fun secondSessionCannotReuseThePreviousReceiverPosition() = runTest {
+        val session = FakeSession()
+        val transport = RecordingTransport()
+        val sender = plugin(session, transport, opts = CastSenderOptions(resumeLocalOnDisconnect = true))
+        sender.use()
+
+        session.report(CastSenderEvents.Connected("Living room"))
+        session.report(CastSenderEvents.RemoteState(1284.0, CastPlaybackState.PLAYING))
+        session.report(CastSenderEvents.Disconnected)
+        transport.calls.clear()
+        session.report(CastSenderEvents.Connected("Living room"))
+        session.report(CastSenderEvents.Disconnected)
+
+        assertEquals(listOf("play"), transport.calls)
+        assertEquals(0.0, sender.remotePosition())
+    }
+
+    @Test
     fun disconnectingLeavesPlaybackAloneWhenResumingWasNotAskedFor() = runTest {
         val session = FakeSession()
         val transport = RecordingTransport()

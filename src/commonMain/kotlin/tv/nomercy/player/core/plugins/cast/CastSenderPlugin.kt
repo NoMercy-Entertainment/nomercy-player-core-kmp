@@ -61,7 +61,7 @@ public open class CastSenderPlugin(
      * receiver goes away, and the local player's own clock is frozen at
      * whatever it read when the session began.
      */
-    private var remotePositionSeconds: Double = 0.0
+    private var remotePositionSeconds: Double? = null
 
     private var connected: Boolean = false
 
@@ -73,7 +73,7 @@ public open class CastSenderPlugin(
     public fun isConnected(): Boolean = connected
 
     /** Where the receiver is, in seconds. Zero before anything has been cast. */
-    public fun remotePosition(): Double = remotePositionSeconds
+    public fun remotePosition(): Double = remotePositionSeconds ?: 0.0
 
     override fun use() {
         val remote: CastSession = session ?: run {
@@ -132,6 +132,7 @@ public open class CastSenderPlugin(
         when (event) {
             is CastSenderEvents.Connected -> {
                 connected = true
+                remotePositionSeconds = null
                 emit(CastSenderEventKeys.Connected, event)
             }
 
@@ -164,11 +165,13 @@ public open class CastSenderPlugin(
     private fun onDisconnected() {
         connected = false
         lastSentContentId = null
+        val resumePosition = remotePositionSeconds
+        remotePositionSeconds = null
         emit(CastSenderEventKeys.Disconnected, Unit)
 
         if (!opts.resumeLocalOnDisconnect) return
 
-        commands.seekTo((remotePositionSeconds * MILLIS_PER_SECOND).toLong())
+        if (resumePosition != null) commands.seekTo((resumePosition * MILLIS_PER_SECOND).toLong())
         commands.play()
     }
 
