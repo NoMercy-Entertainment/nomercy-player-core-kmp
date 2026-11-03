@@ -75,7 +75,14 @@ path, checksum, tag = sys.argv[1], sys.argv[2], sys.argv[3]
 text = io.open(path, encoding="utf-8", newline="").read()
 
 before = text
-text = text.replace('checksum: "REPLACED_BY_RELEASE_JOB"', 'checksum: "%s"' % checksum)
+text, count = re.subn(
+    r'(\.binaryTarget\(\s*name:\s*"[^"]+"\s*,\s*url:\s*"[^"]+"\s*,[^)]*?checksum:\s*")[^"]+("\s*\))',
+    lambda match: match.group(1) + checksum + match.group(2),
+    text,
+    flags=re.S,
+)
+if count != 1:
+    raise SystemExit("expected one release binaryTarget checksum, found %d" % count)
 text = re.sub(r"/download/v[^/]+/", "/download/%s/" % tag, text)
 
 if text == before:
