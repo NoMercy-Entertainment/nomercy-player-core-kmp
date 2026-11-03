@@ -14,6 +14,7 @@ import tv.nomercy.player.core.errors.Severity
 import tv.nomercy.player.core.events.BackendErrorPayload
 import tv.nomercy.player.core.events.BackendLoadedPayload
 import tv.nomercy.player.core.events.BackendLoadingPayload
+import tv.nomercy.player.core.events.AudioTrackPayload
 import tv.nomercy.player.core.events.BackendStalledPayload
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.events.EventKey
@@ -22,6 +23,7 @@ import tv.nomercy.player.core.events.PlayerErrorEvent
 import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
+import tv.nomercy.player.core.events.SubtitlePayload
 import tv.nomercy.player.core.player.ActionSource
 import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
@@ -29,6 +31,7 @@ import tv.nomercy.player.core.player.PlayerPhase
 import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.core.ports.Clock
 import tv.nomercy.player.core.ports.MediaBackend
+import tv.nomercy.player.core.ports.VideoBackend
 import tv.nomercy.player.core.ports.defaultClock
 import kotlinx.coroutines.CoroutineScope
 
@@ -77,6 +80,7 @@ public class BackendBridge(
     }
 
     public fun attach(backend: MediaBackend) {
+        attachTrackSelections(backend)
         // An engine that learns its length late says so here.
         listen(backend, CanonicalBackendEvent.DURATION_CHANGE) {
             val duration: Double = backend.duration()
@@ -120,6 +124,20 @@ public class BackendBridge(
 
         attachPositionUpdates(backend)
         attachAdaptationTelemetry(backend)
+    }
+
+    private fun attachTrackSelections(backend: MediaBackend) {
+        val video = backend as? VideoBackend ?: return
+        listen(backend, CanonicalBackendEvent.AUDIO_SELECTION_APPLIED) {
+            val selected = video.audioTrack()
+            val index = selected?.let { video.audioTracks().indexOf(it).takeIf { at -> at >= 0 }?.toDouble() }
+            ctx.emit(CoreEvents.AudioTrack, AudioTrackPayload(index))
+        }
+        listen(backend, CanonicalBackendEvent.SUBTITLE_SELECTION_APPLIED) {
+            val selected = video.subtitleTrack()
+            val index = selected?.let { video.subtitleTracks().indexOf(it).takeIf { at -> at >= 0 }?.toDouble() }
+            ctx.emit(CoreEvents.Subtitle, SubtitlePayload(index))
+        }
     }
 
     // What the adaptive pipeline did, forwarded rather than interpreted.

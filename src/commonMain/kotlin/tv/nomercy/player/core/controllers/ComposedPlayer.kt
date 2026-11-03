@@ -1361,7 +1361,7 @@ public open class ComposedPlayer(
         // one is what gets applied — so neither does this.
         val requested: Double? = indexIn(audioTracks(), track)
 
-        if (requested != null) {
+        val selected: AudioTrack? = if (requested != null) {
             val outcome: BeforeDispatchResult<BeforeAudioTrackPayload> =
                 context.dispatchBefore(CoreEvents.BeforeAudioTrack, BeforeAudioTrackPayload(id = requested))
 
@@ -1373,14 +1373,17 @@ public open class ComposedPlayer(
                 return
             }
 
-            audioTracks().getOrNull(outcome.data.id.toInt())?.let { video?.audioTrack(it) }
+            audioTracks().getOrNull(outcome.data.id.toInt())?.also { video?.audioTrack(it) }
         }
         else {
             video?.audioTrack(track)
+            track
         }
 
         audioTrackChoice = AudioTrackState.MANUAL
-        context.emit(CoreEvents.AudioTrack, AudioTrackPayload(indexIn(audioTracks(), track)))
+        if (video == null || video.audioTrack() == selected) {
+            context.emit(CoreEvents.AudioTrack, AudioTrackPayload(selected?.let { indexIn(audioTracks(), it) }))
+        }
         context.emit(CoreEvents.AudioTrackState, AudioTrackStatePayload(AudioTrackState.MANUAL.token))
     }
 
@@ -1444,7 +1447,9 @@ public open class ComposedPlayer(
 
         val chosen: SubtitleTrack? = decision.data.track?.let { subtitles().getOrNull(it.toInt()) }
         video?.subtitleTrack(chosen)
-        context.emit(CoreEvents.Subtitle, SubtitlePayload(decision.data.track))
+        if (video == null || video.subtitleTrack() == chosen) {
+            context.emit(CoreEvents.Subtitle, SubtitlePayload(decision.data.track))
+        }
     }
 
     // Where the track sits in the list the viewer was shown, or null when the

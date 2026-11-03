@@ -377,7 +377,15 @@ public class ExoPlayerVideoBackend(
                 // state change happened to see — for a file that plays straight
                 // through with no rebuffer, that is nothing at all, and both
                 // menus stay empty for the whole title.
+                val previousAudio = cachedAudioTrack
+                val previousSubtitle = cachedSubtitleTrack
                 refreshCache()
+                if (cachedAudioTrack != previousAudio) {
+                    bus.emit(CanonicalBackendEvent.AUDIO_SELECTION_APPLIED, null)
+                }
+                if (cachedSubtitleTrack != previousSubtitle) {
+                    bus.emit(CanonicalBackendEvent.SUBTITLE_SELECTION_APPLIED, null)
+                }
                 reportUnsupportedVideo(tracks)
             }
 

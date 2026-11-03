@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import tv.nomercy.player.core.events.CoreEvents
 import tv.nomercy.player.core.player.AudioTrackState
 import tv.nomercy.player.core.ports.AudioOutput
+import tv.nomercy.player.core.ports.CanonicalBackendEvent
 import tv.nomercy.player.core.ports.AudioTrack
 import tv.nomercy.player.core.ports.AudioOutputKind
 import tv.nomercy.player.core.ports.AudioOutputRouter
@@ -45,19 +46,36 @@ private val TRACKS = listOf(
     AudioTrack(id = "1", language = "en", label = "English"),
     AudioTrack(id = "2", language = "nl", label = "Nederlands"),
 )
+private val CAPTIONS = listOf(SubtitleTrack(id = "sub-1", language = "nl", label = "Nederlands"))
 
-private class TrackedBackend : FakeMediaBackend(), VideoBackend {
+private class TrackedBackend(private val delayedSelections: Boolean = false) : FakeMediaBackend(), VideoBackend {
     private var chosen: AudioTrack? = null
+    private var pendingAudio: AudioTrack? = null
+    private var chosenSubtitle: SubtitleTrack? = null
+    private var pendingSubtitle: SubtitleTrack? = null
+
+    fun applySelections() {
+        val previousAudio = chosen
+        val previousSubtitle = chosenSubtitle
+        chosen = pendingAudio
+        chosenSubtitle = pendingSubtitle
+        if (chosen != previousAudio) fire(CanonicalBackendEvent.AUDIO_SELECTION_APPLIED)
+        if (chosenSubtitle != previousSubtitle) fire(CanonicalBackendEvent.SUBTITLE_SELECTION_APPLIED)
+    }
 
     override fun audioTracks(): List<AudioTrack> = TRACKS
     override fun audioTrack(): AudioTrack? = chosen
-    override fun audioTrack(track: AudioTrack) { chosen = track }
+    override fun audioTrack(track: AudioTrack) {
+        if (delayedSelections) pendingAudio = track else chosen = track
+    }
     override fun qualityLevels(): List<QualityLevel> = emptyList()
     override fun quality(): QualityLevel? = null
     override fun quality(level: QualityLevel?) = Unit
-    override fun subtitleTracks(): List<SubtitleTrack> = emptyList()
-    override fun subtitleTrack(): SubtitleTrack? = null
-    override fun subtitleTrack(track: SubtitleTrack?) = Unit
+    override fun subtitleTracks(): List<SubtitleTrack> = CAPTIONS
+    override fun subtitleTrack(): SubtitleTrack? = chosenSubtitle
+    override fun subtitleTrack(track: SubtitleTrack?) {
+        if (delayedSelections) pendingSubtitle = track else chosenSubtitle = track
+    }
 }
 
 // A platform that can route audio, and one that cannot.
@@ -183,5 +201,24 @@ class AudioRoutingTest {
 
         assertEquals(AudioTrackState.MANUAL, player.audioTrackMode())
         assertEquals("nl", player.audioTrack()?.language)
+    }
+
+    @Test
+    fun selectionEventsReportTracksAfterTheBackendAppliesThem() = runTest {
+        val backend = TrackedBackend(delayedSelections = true)
+        val player = ComposedPlayer(backend = backend, video = backend)
+        val audioSeen = mutableListOf<AudioTrack?>()
+        val subtitleSeen = mutableListOf<SubtitleTrack?>()
+        player.on(CoreEvents.AudioTrack) { audioSeen += player.audioTrack() }
+        player.on(CoreEvents.Subtitle) { subtitleSeen += player.subtitle() }
+
+        player.audioTrack(TRACKS[1])
+        player.subtitle(CAPTIONS[0])
+        assertEquals(emptyList(), audioSeen)
+        assertEquals(emptyList(), subtitleSeen)
+        backend.applySelections()
+
+        assertEquals(TRACKS[1], audioSeen.last())
+        assertEquals(CAPTIONS[0], subtitleSeen.last())
     }
 }
