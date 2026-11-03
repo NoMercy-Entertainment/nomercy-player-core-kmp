@@ -61,19 +61,19 @@ done
 # /opt/homebrew is one that anything linking against it will look for there.
 log "── rewriting install names"
 for object in "$out"/*.dylib; do
-  install_name_tool -id "@loader_path/$(basename "$object")" "$object" 2>/dev/null || true
+  install_name_tool -id "@loader_path/$(basename "$object")" "$object"
   while read -r needed; do
     case "$needed" in
       /usr/lib/*|/System/*|@*) continue ;;
     esac
-    install_name_tool -change "$needed" "@loader_path/$(basename "$needed")" "$object" 2>/dev/null || true
+    install_name_tool -change "$needed" "@loader_path/$(basename "$needed")" "$object"
   done < <(otool -L "$object" | awk '/^\t/{print $1}')
 
   # Every rewrite invalidates the ad-hoc signature macOS put on the binary, and
   # an unsigned dylib is refused by the loader on arm64 — silently enough that
   # it reads as a missing library. Re-signing ad-hoc is what makes the payload
   # loadable at all on Apple silicon.
-  codesign --force --sign - "$object" 2>/dev/null || true
+  codesign --force --sign - "$object"
 done
 
 mkdir -p "$out/licences"
