@@ -138,7 +138,7 @@ public open class MediaSessionPlugin(
         on(CoreEvents.Ended) { push(TransportPlaybackState.STOPPED) }
         on(CoreEvents.Stop) {
             push(TransportPlaybackState.STOPPED)
-            opened.clear()
+            liveTransport()?.clear()
         }
 
         // What is already playing, for the attach that arrives late.

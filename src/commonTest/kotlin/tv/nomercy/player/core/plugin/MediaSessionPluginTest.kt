@@ -171,6 +171,24 @@ class MediaSessionPluginTest {
     }
 
     @Test
+    fun stopClearsTheReopenedTransportAfterTakeover() = runTest {
+        val opened = mutableListOf<FakeSystemTransport>()
+        val player = ComposedPlayer(backend = null)
+        player.setup(PlayerConfig())
+        player.addPlugin(MediaSessionPlugin(RecordingTransportCommands()) {
+            FakeSystemTransport().also { opened += it }
+        })
+
+        opened.single().release()
+        player.emit(CoreEvents.Play, PlaySource())
+        val reopened = opened[1]
+        player.emit(CoreEvents.Stop, PlaySource())
+
+        assertEquals(TransportPlaybackState.STOPPED, reopened.lastState)
+        assertTrue(reopened.cleared, "stop left the reopened transport visible")
+    }
+
+    @Test
     fun aSeekDoesTalkToTheOperatingSystemBecauseItCannotBeInferred() = runTest {
         // The one thing a system extrapolating from position and rate cannot
         // work out. Without this the lock screen's scrubber walks on from where
