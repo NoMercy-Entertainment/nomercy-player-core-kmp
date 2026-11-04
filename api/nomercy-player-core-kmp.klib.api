@@ -4284,6 +4284,22 @@ final class tv.nomercy.player.core.events/ItemEndingSoon { // tv.nomercy.player.
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/ItemEndingSoon.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.events/ItemSkipped { // tv.nomercy.player.core.events/ItemSkipped|null[0]
+    constructor <init>(tv.nomercy.player.core.media/PlaylistItem, kotlin/Int) // tv.nomercy.player.core.events/ItemSkipped.<init>|<init>(tv.nomercy.player.core.media.PlaylistItem;kotlin.Int){}[0]
+
+    final val item // tv.nomercy.player.core.events/ItemSkipped.item|{}item[0]
+        final fun <get-item>(): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.events/ItemSkipped.item.<get-item>|<get-item>(){}[0]
+    final val status // tv.nomercy.player.core.events/ItemSkipped.status|{}status[0]
+        final fun <get-status>(): kotlin/Int // tv.nomercy.player.core.events/ItemSkipped.status.<get-status>|<get-status>(){}[0]
+
+    final fun component1(): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.events/ItemSkipped.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.events/ItemSkipped.component2|component2(){}[0]
+    final fun copy(tv.nomercy.player.core.media/PlaylistItem = ..., kotlin/Int = ...): tv.nomercy.player.core.events/ItemSkipped // tv.nomercy.player.core.events/ItemSkipped.copy|copy(tv.nomercy.player.core.media.PlaylistItem;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/ItemSkipped.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/ItemSkipped.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.events/ItemSkipped.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.events/LanguagePayload { // tv.nomercy.player.core.events/LanguagePayload|null[0]
     constructor <init>(kotlin/String) // tv.nomercy.player.core.events/LanguagePayload.<init>|<init>(kotlin.String){}[0]
 
@@ -6868,6 +6884,22 @@ final class tv.nomercy.player.core.ports/EmbedMessage { // tv.nomercy.player.cor
     final fun toString(): kotlin/String // tv.nomercy.player.core.ports/EmbedMessage.toString|toString(){}[0]
 }
 
+final class tv.nomercy.player.core.ports/EngineFailure { // tv.nomercy.player.core.ports/EngineFailure|null[0]
+    constructor <init>(kotlin/String, kotlin/Int) // tv.nomercy.player.core.ports/EngineFailure.<init>|<init>(kotlin.String;kotlin.Int){}[0]
+
+    final val code // tv.nomercy.player.core.ports/EngineFailure.code|{}code[0]
+        final fun <get-code>(): kotlin/String // tv.nomercy.player.core.ports/EngineFailure.code.<get-code>|<get-code>(){}[0]
+    final val httpStatus // tv.nomercy.player.core.ports/EngineFailure.httpStatus|{}httpStatus[0]
+        final fun <get-httpStatus>(): kotlin/Int // tv.nomercy.player.core.ports/EngineFailure.httpStatus.<get-httpStatus>|<get-httpStatus>(){}[0]
+
+    final fun component1(): kotlin/String // tv.nomercy.player.core.ports/EngineFailure.component1|component1(){}[0]
+    final fun component2(): kotlin/Int // tv.nomercy.player.core.ports/EngineFailure.component2|component2(){}[0]
+    final fun copy(kotlin/String = ..., kotlin/Int = ...): tv.nomercy.player.core.ports/EngineFailure // tv.nomercy.player.core.ports/EngineFailure.copy|copy(kotlin.String;kotlin.Int){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.ports/EngineFailure.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // tv.nomercy.player.core.ports/EngineFailure.hashCode|hashCode(){}[0]
+    final fun toString(): kotlin/String // tv.nomercy.player.core.ports/EngineFailure.toString|toString(){}[0]
+}
+
 final class tv.nomercy.player.core.ports/EqualPowerCrossfader { // tv.nomercy.player.core.ports/EqualPowerCrossfader|null[0]
     constructor <init>(kotlin/Long = ...) // tv.nomercy.player.core.ports/EqualPowerCrossfader.<init>|<init>(kotlin.Long){}[0]
 
@@ -7601,6 +7633,7 @@ open class tv.nomercy.player.core.controllers/AuthController { // tv.nomercy.pla
     constructor <init>() // tv.nomercy.player.core.controllers/AuthController.<init>|<init>(){}[0]
 
     open fun requestHeaders(kotlin/String): kotlin.collections/Map<kotlin/String, kotlin/String> // tv.nomercy.player.core.controllers/AuthController.requestHeaders|requestHeaders(kotlin.String){}[0]
+    open fun retryAfterRefresh(): kotlin/Int // tv.nomercy.player.core.controllers/AuthController.retryAfterRefresh|retryAfterRefresh(){}[0]
     open fun transformUrl(kotlin/String): kotlin/String // tv.nomercy.player.core.controllers/AuthController.transformUrl|transformUrl(kotlin.String){}[0]
     open suspend fun refresh(): kotlin/Boolean // tv.nomercy.player.core.controllers/AuthController.refresh|refresh(){}[0]
     open suspend fun signRequest(kotlin/String, tv.nomercy.player.core.ports/FetchOptions): tv.nomercy.player.core.ports/FetchOptions // tv.nomercy.player.core.controllers/AuthController.signRequest|signRequest(kotlin.String;tv.nomercy.player.core.ports.FetchOptions){}[0]
@@ -8792,6 +8825,8 @@ final object tv.nomercy.player.core.events/CoreEvents { // tv.nomercy.player.cor
         final fun <get-Item>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/ItemChange> // tv.nomercy.player.core.events/CoreEvents.Item.<get-Item>|<get-Item>(){}[0]
     final val ItemEndingSoon // tv.nomercy.player.core.events/CoreEvents.ItemEndingSoon|{}ItemEndingSoon[0]
         final fun <get-ItemEndingSoon>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/ItemEndingSoon> // tv.nomercy.player.core.events/CoreEvents.ItemEndingSoon.<get-ItemEndingSoon>|<get-ItemEndingSoon>(){}[0]
+    final val ItemSkipped // tv.nomercy.player.core.events/CoreEvents.ItemSkipped|{}ItemSkipped[0]
+        final fun <get-ItemSkipped>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/ItemSkipped> // tv.nomercy.player.core.events/CoreEvents.ItemSkipped.<get-ItemSkipped>|<get-ItemSkipped>(){}[0]
     final val Language // tv.nomercy.player.core.events/CoreEvents.Language|{}Language[0]
         final fun <get-Language>(): tv.nomercy.player.core.events/EventKey<tv.nomercy.player.core.events/LanguagePayload> // tv.nomercy.player.core.events/CoreEvents.Language.<get-Language>|<get-Language>(){}[0]
     final val LanguagePrevented // tv.nomercy.player.core.events/CoreEvents.LanguagePrevented|{}LanguagePrevented[0]

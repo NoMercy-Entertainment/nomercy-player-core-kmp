@@ -103,6 +103,14 @@ public object SourceOutage {
     public fun isMediaAbsentStatus(httpStatus: Int): Boolean =
         httpStatus == HTTP_NOT_FOUND || httpStatus == HTTP_GONE
 
+    /** A 5xx from a live server; the origin-down statuses stay on the ladder. */
+    public fun isServerFaultStatus(httpStatus: Int): Boolean =
+        httpStatus in HTTP_SERVER_ERROR_RANGE && !isOriginDownStatus(httpStatus)
+
+    /** While an item loads, a 401 or a server fault skips the ladder. */
+    public fun endsLoadAtOnce(httpStatus: Int, loading: Boolean): Boolean =
+        loading && (httpStatus == HTTP_UNAUTHORIZED || isServerFaultStatus(httpStatus))
+
     /**
      * How many rungs this failure is allowed.
      *
@@ -134,6 +142,8 @@ public object SourceOutage {
     /** No rung at all: the answer will not change by asking again. */
     public const val NO_RETRIES: Int = 0
 
+    private const val HTTP_UNAUTHORIZED = 401
+    private val HTTP_SERVER_ERROR_RANGE = 500..599
     private const val HTTP_NOT_FOUND = 404
     private const val HTTP_GONE = 410
 

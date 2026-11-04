@@ -47,4 +47,4 @@ class EventRegistryTest {
 // What CORE held when this was written - not the trio-wide count, which spans
 // the video and music registries too. A floor, so an event removed on purpose
 // is a deliberate edit here rather than a silent loss.
-private const val REGISTERED = 152
+private const val REGISTERED = 153

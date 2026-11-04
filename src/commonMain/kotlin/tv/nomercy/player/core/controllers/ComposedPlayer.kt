@@ -415,6 +415,7 @@ public open class ComposedPlayer(
 
     init {
         queue.transport = transport
+        context.authRefresher = { refreshAuth() }
         queue.wireQueue()
         backend?.let { bridge.attach(it) }
 

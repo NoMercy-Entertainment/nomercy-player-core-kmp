@@ -21,6 +21,11 @@ assume the `ui-compose` surface in particular has more movement than is written
 down: it is the module `nomercy-video-player-compose` publishes, it changed more
 than any other during this campaign, and it is not covered below.
 
+## [Unreleased]
+
+### Added
+- `next()` skips an item that answers 404 or 410 (`itemSkipped` with `{ item, status }`), refreshes auth once on a 401, and raises a fatal error on a live-server 5xx. Android only for now.
+
 ## [0.2.24]
 
 ### Fixed

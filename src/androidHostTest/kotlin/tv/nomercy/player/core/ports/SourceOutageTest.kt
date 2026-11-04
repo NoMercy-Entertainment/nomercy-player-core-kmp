@@ -24,6 +24,25 @@ class SourceOutageTest {
     }
 
     @Test
+    fun `a live server's 5xx is a fault and the origin-down statuses are not`() {
+        listOf(500, 501, 505, 519, 531, 599).forEach { assertTrue(SourceOutage.isServerFaultStatus(it), "$it") }
+        listOf(502, 503, 504, 520, 525, 530, 404, 401, 200).forEach { assertFalse(SourceOutage.isServerFaultStatus(it), "$it") }
+    }
+
+    @Test
+    fun `a missing item skips and a 401 or a live fault ends the load at once`() {
+        assertTrue(SourceOutage.isMediaAbsentStatus(404))
+        assertTrue(SourceOutage.isMediaAbsentStatus(410))
+        assertTrue(SourceOutage.endsLoadAtOnce(401, loading = true))
+        assertTrue(SourceOutage.endsLoadAtOnce(500, loading = true))
+        assertFalse(SourceOutage.endsLoadAtOnce(404, loading = true))
+        assertFalse(SourceOutage.endsLoadAtOnce(503, loading = true))
+        assertFalse(SourceOutage.endsLoadAtOnce(524, loading = true))
+        assertFalse(SourceOutage.endsLoadAtOnce(401, loading = false))
+        assertFalse(SourceOutage.endsLoadAtOnce(500, loading = false))
+    }
+
+    @Test
     fun `a broken decode is not an outage`() {
         assertFalse(SourceOutage.isTransient(PlaybackException.ERROR_CODE_DECODING_FAILED))
         assertFalse(SourceOutage.isTransient(PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED))

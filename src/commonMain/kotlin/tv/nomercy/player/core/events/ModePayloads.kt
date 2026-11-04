@@ -28,3 +28,10 @@ public data class ItemEndingSoon(
     val item: PlaylistItem?,
     val remaining: Double,
 )
+
+// next() found this item's media gone and moved on. [status] is the raw HTTP
+// status (404 or 410), same name and fields as the web trio's itemSkipped.
+public data class ItemSkipped(
+    val item: PlaylistItem,
+    val status: Int,
+)

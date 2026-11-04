@@ -204,6 +204,12 @@ public class PlayerContext(
 
     public var auth: AuthController? = null
 
+    // Set while next() has a load in flight; claims an engine failure that carries a status.
+    internal var loadFailureHandler: (suspend (tv.nomercy.player.core.ports.EngineFailure) -> Boolean)? = null
+
+    // The player's refreshAuth, so a load can refresh without holding the player.
+    internal var authRefresher: (suspend () -> Boolean)? = null
+
     /**
      * Where an item should begin when nothing asked for a position.
      *
