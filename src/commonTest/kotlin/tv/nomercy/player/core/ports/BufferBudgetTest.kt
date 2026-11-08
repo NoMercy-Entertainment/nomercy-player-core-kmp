@@ -21,6 +21,9 @@ class BufferBudgetTest {
 
     private val heap = 256
 
+    // 30 Mbps, the worst case the budget's time windows are written for.
+    private val designBytesPerMs = 3_750L
+
     @Test
     fun aTelevisionGetsALowerCeilingThanAPhoneWithTheSameHeap() {
         // Not tuning. The budget a phone handles comfortably is the one the
@@ -121,6 +124,40 @@ class BufferBudgetTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun theBackBufferNeverTakesMoreThanAQuarterOfTheByteBudget() {
+        // The byte target counts everything the engine holds, played media
+        // included. A back buffer sized only in seconds can fill it alone.
+        for ((available, tv, lowRam) in everyDeviceClass()) {
+            val config: BufferConfig = BufferBudget.forMemory(available, isTv = tv, isLowRam = lowRam)
+            val backBytes: Long = config.backBufferMs.toLong() * designBytesPerMs
+
+            assertTrue(
+                backBytes * 4 <= config.targetBufferBytes,
+                "back buffer ${config.backBufferMs}ms is ${backBytes / BYTES_PER_MB}MB of a " +
+                    "${config.targetBufferBytes / BYTES_PER_MB}MB budget at $available tv=$tv lowRam=$lowRam",
+            )
+        }
+    }
+
+    private fun everyDeviceClass(): List<Triple<Int, Boolean, Boolean>> =
+        listOf(32, 64, 128, 256, 384, 512, 1_024, 4_096).flatMap { available ->
+            listOf(false, true).flatMap { tv -> listOf(false, true).map { lowRam -> Triple(available, tv, lowRam) } }
+        }
+
+    @Test
+    fun a4kStreamOnTheNokiaBoxHeapKeepsTenSecondsAhead() {
+        // Nokia Streaming Box 8010: 256MB heap class. A 4K segment there is
+        // about 14MB per 6s. The player logged "target buffer size reached
+        // with less than 500ms of buffered media" every 18 seconds.
+        val config: BufferConfig = BufferBudget.forMemory(availableMb = 256, isTv = true)
+        val measuredBytesPerMs = 2_400L
+        val backBytes: Long = config.backBufferMs * measuredBytesPerMs
+        val forwardMs: Long = (config.targetBufferBytes - backBytes) / measuredBytesPerMs
+
+        assertTrue(forwardMs >= 10_000, "only ${forwardMs}ms fits ahead of the playhead")
     }
 
     @Test

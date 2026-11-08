@@ -81,11 +81,23 @@ public object BufferBudget {
             } else {
                 (PHONE_REBUFFER_MS * scale).toInt().coerceIn(PHONE_REBUFFER_FLOOR_MS, PHONE_REBUFFER_CEILING_MS)
             },
-            backBufferMs = (BACK_BUFFER_MS * scale).toInt().coerceIn(BACK_BUFFER_FLOOR_MS, BACK_BUFFER_CEILING_MS),
+            backBufferMs = minOf(
+                (BACK_BUFFER_MS * scale).toInt().coerceIn(BACK_BUFFER_FLOOR_MS, BACK_BUFFER_CEILING_MS),
+                backBufferCapMs(budgetMb),
+            ),
             targetBufferBytes = budgetMb * BYTES_PER_MB,
             isTvDevice = isTv,
         )
     }
+
+    // The byte target also counts media already played, so seconds of back buffer
+    // must fit a share of it at the design bitrate or nothing is left ahead.
+    private fun backBufferCapMs(budgetMb: Int): Int =
+        (budgetMb.toLong() * BYTES_PER_MB * BACK_BUFFER_BYTE_SHARE / DESIGN_BYTES_PER_MS).toInt()
+
+    // 30 Mbps, the worst case the time windows above are written for.
+    private const val DESIGN_BYTES_PER_MS = 3_750L
+    private const val BACK_BUFFER_BYTE_SHARE = 0.2
 
     // One share for every device, because the constraint is the same everywhere:
     // the buffer lives in the Java heap, two engines can hold one each, and a
