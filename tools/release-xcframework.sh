@@ -99,5 +99,13 @@ if ! git diff --quiet -- "$manifest"; then
   git commit -m "build(dist): stamp the $tag XCFramework checksum into $manifest"
   # Onto the default branch rather than the detached tag checkout, or the commit
   # exists only in the runner and the next consumer resolves the placeholder.
-  git push origin "HEAD:${GITHUB_DEFAULT_BRANCH:-master}"
+  # Master can move during the build (v0.2.27 of video lost its stamp that way),
+  # so a refused push rebases onto it and tries again.
+  branch="${GITHUB_DEFAULT_BRANCH:-master}"
+  for attempt in 1 2 3; do
+    if git push origin "HEAD:$branch"; then break; fi
+    if [ "$attempt" = 3 ]; then echo "stamp push refused 3 times" >&2; exit 1; fi
+    git fetch origin "$branch"
+    git rebase "origin/$branch"
+  done
 fi
