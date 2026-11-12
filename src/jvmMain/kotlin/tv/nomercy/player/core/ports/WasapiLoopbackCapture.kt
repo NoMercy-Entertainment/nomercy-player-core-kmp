@@ -38,7 +38,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 // every one of them) rather than anything reverse-engineered — the risk
 // this file carries is a transcription error in that layout, not an
 // invented one.
-internal class WasapiLoopbackCapture : AudioLoopbackCapture {
+internal class WasapiLoopbackCapture(
+    private val comApi: WasapiCom = NativeWasapiCom,
+) : AudioLoopbackCapture {
 
     private val running = AtomicBoolean(false)
     private var captureThread: Thread? = null
@@ -63,17 +65,26 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     // turns a null into the cleanup, so acquisition reads as a sequence rather
     // than as eight separate exits.
     private fun openCaptureClient(sampleRate: Int, channels: Int): Unknown? {
-        val initHr = Ole32.INSTANCE.CoInitializeEx(Pointer.NULL, Ole32.COINIT_MULTITHREADED)
-        comInitialized = COMUtils.SUCCEEDED(initHr.toInt())
+        comInitialized = comApi.initialize()
         if (!comInitialized) return null
 
-        val client = createDeviceEnumerator()
-            ?.let(::getDefaultRenderDevice)
-            ?.let(::activateAudioClient)
-            ?: return null
+        val enumerator = comApi.createDeviceEnumerator() ?: return null
+        return try {
+            openFromEnumerator(enumerator, sampleRate, channels)
+        } finally {
+            comApi.release(enumerator)
+        }
+    }
 
-        audioClient = client
-        return startCapture(client, sampleRate, channels)
+    private fun openFromEnumerator(enumerator: Unknown, sampleRate: Int, channels: Int): Unknown? {
+        val device = getDefaultRenderDevice(enumerator) ?: return null
+        return try {
+            val client = activateAudioClient(device) ?: return null
+            audioClient = client
+            startCapture(client, sampleRate, channels)
+        } finally {
+            comApi.release(device)
+        }
     }
 
     private fun startCapture(client: Unknown, sampleRate: Int, channels: Int): Unknown? {
@@ -100,16 +111,20 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
         captureThread?.join(THREAD_JOIN_TIMEOUT_MS)
         captureThread = null
         audioClient?.let { invoke(it, VTBL_AUDIOCLIENT_STOP) }
-        audioClient?.Release()
-        captureClient?.Release()
-        audioClient = null
+        releaseClientsAndUninitialize()
+    }
+
+    private fun releaseClientsAndUninitialize() {
+        captureClient?.let(comApi::release)
+        audioClient?.let(comApi::release)
         captureClient = null
-        if (comInitialized) Ole32.INSTANCE.CoUninitialize()
+        audioClient = null
+        if (comInitialized) comApi.uninitialize()
         comInitialized = false
     }
 
     private fun cleanupAndFail(): Boolean {
-        stop()
+        releaseClientsAndUninitialize()
         return false
     }
 
@@ -154,17 +169,6 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
 
         invoke(capture, VTBL_CAPTURECLIENT_RELEASE_BUFFER, frames)
         return true
-    }
-
-    private fun createDeviceEnumerator(): Unknown? {
-        val clsid = CLSID(CLSID_MMDEVICEENUMERATOR)
-        val iid = IID(IID_IMMDEVICEENUMERATOR)
-        val result = PointerByReference()
-        val hr = Ole32.INSTANCE.CoCreateInstance(
-            clsid, null, com.sun.jna.platform.win32.WTypes.CLSCTX_ALL, iid, result,
-        )
-        if (!COMUtils.SUCCEEDED(hr.toInt()) || result.value == null) return null
-        return Unknown(result.value)
     }
 
     private fun getDefaultRenderDevice(enumerator: Unknown): Unknown? {
@@ -216,12 +220,32 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     // COM vtable at the given zero-based slot (IUnknown's QueryInterface/
     // AddRef/Release occupy 0-2, so every index below is that method's
     // documented position minus those three).
-    private fun invoke(target: Unknown, vtableIndex: Int, vararg args: Any?): Int {
-        val result = target.pointer.getPointer(0).getPointer((vtableIndex * Native.POINTER_SIZE).toLong())
-        // A COM vtable slot is an untyped function pointer by construction —
-        // there is nothing to check the cast against until the call is made.
-        @Suppress("UNCHECKED_CAST", "NoUncheckedCast")
-        return com.sun.jna.Function.getFunction(result).invokeInt(arrayOf(target.pointer, *args))
+    private fun invoke(target: Unknown, vtableIndex: Int, vararg args: Any?): Int =
+        comApi.invoke(target, vtableIndex, *args)
+
+    private object NativeWasapiCom : WasapiCom {
+        override fun initialize(): Boolean = COMUtils.SUCCEEDED(
+            Ole32.INSTANCE.CoInitializeEx(Pointer.NULL, Ole32.COINIT_MULTITHREADED).toInt(),
+        )
+
+        override fun uninitialize() { Ole32.INSTANCE.CoUninitialize() }
+
+        override fun createDeviceEnumerator(): Unknown? {
+            val result = PointerByReference()
+            val hr = Ole32.INSTANCE.CoCreateInstance(
+                CLSID(CLSID_MMDEVICEENUMERATOR), null, com.sun.jna.platform.win32.WTypes.CLSCTX_ALL,
+                IID(IID_IMMDEVICEENUMERATOR), result,
+            )
+            if (!COMUtils.SUCCEEDED(hr.toInt()) || result.value == null) return null
+            return Unknown(result.value)
+        }
+
+        override fun release(target: Unknown) { target.Release() }
+
+        override fun invoke(target: Unknown, vtableIndex: Int, vararg args: Any?): Int {
+            val function = target.pointer.getPointer(0).getPointer((vtableIndex * Native.POINTER_SIZE).toLong())
+            return com.sun.jna.Function.getFunction(function).invokeInt(arrayOf(target.pointer, *args))
+        }
     }
 
     private companion object {
@@ -257,12 +281,20 @@ internal class WasapiLoopbackCapture : AudioLoopbackCapture {
     }
 }
 
+internal interface WasapiCom {
+    fun initialize(): Boolean
+    fun uninitialize()
+    fun createDeviceEnumerator(): Unknown?
+    fun release(target: Unknown)
+    fun invoke(target: Unknown, vtableIndex: Int, vararg args: Any?): Int
+}
+
 // WAVEFORMATEX, byte-for-byte — the format WASAPI's Initialize takes a
 // pointer to. Field order matches the Win32 struct exactly; JNA lays out a
 // Structure's fields in the order [getFieldOrder] names, not declaration
 // order, which is why that override exists below rather than relying on it
 // matching source order by accident.
-private class WaveFormatEx : com.sun.jna.Structure() {
+internal class WaveFormatEx : com.sun.jna.Structure() {
     @JvmField var wFormatTag: WORD = WORD(0)
     @JvmField var nChannels: WORD = WORD(0)
     @JvmField var nSamplesPerSec: DWORD = DWORD(0)
