@@ -206,18 +206,19 @@ public class BiquadEqAudioProcessor(
             resetPending = false
             history.reset()
         }
-        try {
-            val tap: ((VisualizationFrame) -> Unit)? = frameTap
-            if (tap != null) {
-                val deltaMs: Double = FFT_SIZE * MILLIS_PER_SECOND / sampleRate
-                // A throwing listener must not end the thread that feeds every other one.
-                runCatching {
-                    tap(analyzer.analyze(windows[index], sampleRate, deltaMs, readyElapsedSeconds, history))
-                }
+        val tap: ((VisualizationFrame) -> Unit)? = frameTap
+        val frame: VisualizationFrame? = try {
+            val deltaMs: Double = FFT_SIZE * MILLIS_PER_SECOND / sampleRate
+            tap?.let {
+                runCatching { analyzer.analyze(windows[index], sampleRate, deltaMs, readyElapsedSeconds, history) }
+                    .getOrNull()
             }
         } finally {
+            // Free before the listener runs: a window fed while it still runs is kept, not dropped.
             ready.set(NO_WINDOW)
         }
+        // A throwing listener must not end the thread that feeds every other one.
+        if (tap != null && frame != null) runCatching { tap(frame) }
         return true
     }
 

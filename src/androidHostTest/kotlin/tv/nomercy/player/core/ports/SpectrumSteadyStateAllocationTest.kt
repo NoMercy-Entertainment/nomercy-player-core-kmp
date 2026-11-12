@@ -92,6 +92,27 @@ class SpectrumSteadyStateAllocationTest {
         assertEquals(frames.size, frames.map { it.sampleRate }.size)
         processor.reset()
     }
+
+    // The listener is outside the slot: a window fed while it still runs is
+    // analyzed, not dropped (the CI flake behind core-kmp#77).
+    @Test
+    fun aWindowFedWhileTheListenerStillRunsIsAnalyzed() {
+        val processor = BiquadEqAudioProcessor()
+        processor.configure(AudioProcessor.AudioFormat(RATE, 2, C.ENCODING_PCM_16BIT))
+        processor.flush()
+        val seen = AtomicInteger()
+        processor.graph().installFrameTap {
+            seen.incrementAndGet()
+            Thread.sleep(LISTENER_MILLIS)
+        }
+        val input: ByteBuffer = window()
+
+        feed(processor, seen, input)
+        feed(processor, seen, input)
+
+        assertEquals(2, seen.get())
+        processor.reset()
+    }
 }
 
 private const val RATE = 48_000
@@ -100,6 +121,7 @@ private const val TONE = 440.0
 private const val WARM_UP = 20
 private const val ROUNDS = 1_000
 private const val BUDGET_BYTES = 4_096L
+private const val LISTENER_MILLIS = 300L
 private const val DISTINCT_LIMIT = 3
 private const val WAIT_NANOS = 2_000_000_000L
 private const val SPIN_NANOS = 200_000
