@@ -133,6 +133,9 @@ public class AVPlayerVideoBackend : VideoBackend {
     // what a scrubber can show; asking for sixty would wake the CPU for nothing.
     private var timeObserver: Any? = null
 
+    // Kept so release() can remove it; the notification is process-wide.
+    private var endObserver: Any? = null
+
     // The observer runs on its own serial queue rather than the main one.
     //
     // Passing null means the main queue, and then nothing is reported while the
@@ -156,11 +159,13 @@ public class AVPlayerVideoBackend : VideoBackend {
     private var cachedState: BackendState = BackendState.IDLE
 
     init {
-        NSNotificationCenter.defaultCenter.addObserverForName(
+        endObserver = NSNotificationCenter.defaultCenter.addObserverForName(
             name = AVPlayerItemDidPlayToEndTimeNotification,
             `object` = null,
             queue = NSOperationQueue.mainQueue,
-        ) { _ ->
+        ) { notification ->
+            val ended = notification?.`object`
+            if (ended == null || ended != player.currentItem) return@addObserverForName
             cachedState = BackendState.READY
             bus.emit(CanonicalBackendEvent.ENDED)
         }
@@ -316,6 +321,8 @@ public class AVPlayerVideoBackend : VideoBackend {
     override fun release() {
         timeObserver?.let { player.removeTimeObserver(it) }
         timeObserver = null
+        endObserver?.let { NSNotificationCenter.defaultCenter.removeObserver(it) }
+        endObserver = null
         legible.detach()
         player.replaceCurrentItemWithPlayerItem(null)
         externalPlayback.dispose()
