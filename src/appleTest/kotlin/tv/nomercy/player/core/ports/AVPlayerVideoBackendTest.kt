@@ -18,7 +18,10 @@ import kotlinx.cinterop.usePinned
 import platform.AVFAudio.AVAudioSession
 import platform.AVFAudio.AVAudioSessionCategoryPlayback
 import platform.AVFAudio.setActive
+import platform.AVFoundation.AVPlayerItem
+import platform.AVFoundation.AVPlayerItemDidPlayToEndTimeNotification
 import platform.AVFoundation.currentItem
+import platform.Foundation.NSNotificationCenter
 import platform.AVFoundation.preferredPeakBitRate
 import platform.Foundation.NSData
 import platform.Foundation.NSDate
@@ -162,6 +165,34 @@ class AVPlayerVideoBackendTest {
         backend.unmute()
 
         assertEquals(BackendState.IDLE, backend.state())
+    }
+
+    @Test
+    fun anotherItemPlayingToItsEndDoesNotEndThisBackend() = withBackend { backend, recorder, url ->
+        kotlinx.coroutines.runBlocking { backend.load(url, LoadOptions()) }
+        settle(SETTLE_SECONDS)
+
+        postPlayedToEnd(AVPlayerItem(uRL = NSURL.URLWithString(url)!!))
+        settle(SETTLE_SECONDS)
+
+        assertTrue(CanonicalBackendEvent.ENDED !in recorder.names(), "ended: ${recorder.names()}")
+    }
+
+    @Test
+    fun aReleasedBackendStaysSilentWhenItsItemEnds() {
+        activateAudioSession()
+        val backend = AVPlayerVideoBackend()
+        val recorder = BackendEventRecorder(backend)
+        backend.release()
+
+        postPlayedToEnd(backend.avPlayer.currentItem)
+        settle(SETTLE_SECONDS)
+
+        assertTrue(CanonicalBackendEvent.ENDED !in recorder.names(), "ended: ${recorder.names()}")
+    }
+
+    private fun postPlayedToEnd(item: AVPlayerItem?) {
+        NSNotificationCenter.defaultCenter.postNotificationName(AVPlayerItemDidPlayToEndTimeNotification, item)
     }
 
     @Test
