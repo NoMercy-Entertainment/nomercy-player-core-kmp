@@ -196,13 +196,12 @@ internal class WasapiLoopbackCapture(
     }
 
     private fun audioClientInitialize(client: Unknown, format: WaveFormatEx): Int {
-        // AUDCLNT_SHAREMODE_SHARED = 0, AUDCLNT_STREAMFLAGS_LOOPBACK =
-        // 0x00020000. Buffer/periodicity both 0 lets WASAPI pick its own
-        // default shared-mode engine period rather than this asking for one
-        // it has no measured basis for.
+        // Shared mode takes only the device mix format (often 48 kHz) unless the
+        // stream auto-converts, so ask for that. Buffer and period 0 let WASAPI
+        // pick its own shared-mode defaults.
         return invoke(
             client, VTBL_AUDIOCLIENT_INITIALIZE,
-            0, AUDCLNT_STREAMFLAGS_LOOPBACK, 0L, 0L, format, Pointer.NULL,
+            0, LOOPBACK_STREAM_FLAGS, 0L, 0L, format, Pointer.NULL,
         )
     }
 
@@ -260,6 +259,11 @@ internal class WasapiLoopbackCapture(
         // AUDCLNT_BUFFERFLAGS_SILENT.
         const val BUFFERFLAGS_SILENT = 0x2
         const val AUDCLNT_STREAMFLAGS_LOOPBACK = 0x00020000
+        const val AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM = 0x80000000.toInt()
+        const val AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY = 0x08000000
+        const val LOOPBACK_STREAM_FLAGS = AUDCLNT_STREAMFLAGS_LOOPBACK or
+            AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM or
+            AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY
         const val THREAD_JOIN_TIMEOUT_MS = 1_000L
         const val POLL_INTERVAL_MS = 10L
 
