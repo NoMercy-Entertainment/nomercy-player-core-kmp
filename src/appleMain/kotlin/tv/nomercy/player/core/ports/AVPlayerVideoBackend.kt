@@ -165,9 +165,10 @@ public class AVPlayerVideoBackend : VideoBackend {
             queue = NSOperationQueue.mainQueue,
         ) { notification ->
             val ended = notification?.`object`
-            if (ended == null || ended != player.currentItem) return@addObserverForName
-            cachedState = BackendState.READY
-            bus.emit(CanonicalBackendEvent.ENDED)
+            if (ended != null && ended == player.currentItem) {
+                cachedState = BackendState.READY
+                bus.emit(CanonicalBackendEvent.ENDED)
+            }
         }
 
         timeObserver = player.addPeriodicTimeObserverForInterval(
