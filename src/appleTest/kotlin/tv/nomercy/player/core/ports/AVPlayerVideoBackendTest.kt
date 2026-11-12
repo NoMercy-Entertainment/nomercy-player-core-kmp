@@ -35,6 +35,7 @@ private const val SAMPLE_RATE = 44_100
 private const val SECONDS = 3
 private const val SETTLE_SECONDS = 0.5
 private const val PLAY_SECONDS = 1.5
+private val LOADED_KEYS_FOR_TEST = listOf("playable", "duration", "tracks")
 
 // The canonical spine without timeupdate. See the assertion for why.
 private val SIMULATOR_OBSERVABLE_SPINE = listOf(
@@ -161,6 +162,36 @@ class AVPlayerVideoBackendTest {
         backend.unmute()
 
         assertEquals(BackendState.IDLE, backend.state())
+    }
+
+    @Test
+    fun anEarlierLoadThatFinishesLastNeverReachesThePlayer() = withBackend { backend, _, urlA ->
+        val pathB = "${NSTemporaryDirectory()}nomercy-gate-b.wav"
+        assertTrue(writeSilentWav(pathB, SECONDS + 2), "could not write the second gate media")
+        val urlB: String = NSURL.fileURLWithPath(pathB).absoluteString ?: error("no URL for $pathB")
+
+        // The first load's completion is held until the second has landed,
+        // which is the order a slow server produces.
+        var releaseFirst: (() -> Unit)? = null
+        var held = false
+        backend.assetLoader = { asset, done ->
+            if (!held) {
+                held = true
+                releaseFirst = { asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS_FOR_TEST) { done() } }
+            } else {
+                asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS_FOR_TEST) { done() }
+            }
+        }
+
+        kotlinx.coroutines.runBlocking {
+            backend.load(urlA, LoadOptions())
+            backend.load(urlB, LoadOptions())
+        }
+        settle(SETTLE_SECONDS)
+        releaseFirst?.invoke()
+        settle(SETTLE_SECONDS)
+
+        assertEquals((SECONDS + 2).toDouble(), backend.duration(), absoluteTolerance = 0.5)
     }
 
     // Forty-four bytes of header and the rest zeroes. Real media for the

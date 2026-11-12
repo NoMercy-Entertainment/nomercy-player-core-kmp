@@ -222,7 +222,7 @@ public class AVPlayerVideoBackend : VideoBackend {
         // its encoder was never told to write. Applied in onAssetLoaded, the
         // one moment the item is both present and ready.
         pendingStartMs = opts.startPositionMs.coerceAtLeast(0L)
-        asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) { onAssetLoaded(asset) }
+        assetLoader(asset) { onAssetLoaded(asset) }
         refreshCache()
     }
 
@@ -503,6 +503,11 @@ public class AVPlayerVideoBackend : VideoBackend {
     }
 
     @Volatile private var loadedAsset: AVAsset? = null
+
+    // Test seam: lets a test finish one asset's key load after another's.
+    internal var assetLoader: (AVURLAsset, () -> Unit) -> Unit = { asset, done ->
+        asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) { done() }
+    }
 
     /** Where the pending load should begin, applied once its item is in the player. */
     @Volatile private var pendingStartMs: Long = 0L
