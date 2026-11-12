@@ -26,12 +26,34 @@ package tv.nomercy.player.core.ports
 // Installed the same way, and read the same way, as [MediaNotificationBranding]
 // beside it — a provider rather than a captured value, because the token this
 // answers with today is not the one that answers tomorrow.
+//
+// The provider gets the URL so the token goes only to the host that owns it,
+// never to a third-party cover host.
 @Volatile
 private var installedArtworkAuthHeaders: (() -> Map<String, String>)? = null
 
+@Volatile
+private var installedArtworkRequestHeaders: ((url: String) -> Map<String, String>)? = null
+
+public fun PlatformEnvironment.installArtworkRequestHeaders(provider: (url: String) -> Map<String, String>) {
+    installedArtworkRequestHeaders = provider
+}
+
+@Deprecated(
+    "Sends the headers to every artwork host. Use installArtworkRequestHeaders, which gets the URL.",
+    ReplaceWith("installArtworkRequestHeaders { _ -> provider() }"),
+)
 public fun PlatformEnvironment.installArtworkAuthHeaders(provider: () -> Map<String, String>) {
     installedArtworkAuthHeaders = provider
 }
 
 public val PlatformEnvironment.artworkAuthHeaders: (() -> Map<String, String>)?
     get() = installedArtworkAuthHeaders
+
+internal fun clearArtworkHeaderProviders() {
+    installedArtworkAuthHeaders = null
+    installedArtworkRequestHeaders = null
+}
+
+internal fun artworkHeadersFor(url: String): Map<String, String> =
+    installedArtworkRequestHeaders?.invoke(url) ?: installedArtworkAuthHeaders?.invoke().orEmpty()

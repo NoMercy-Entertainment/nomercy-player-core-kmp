@@ -123,11 +123,10 @@ internal object SharedLibrarySession {
     // Media3's default loader sends no Authorization header, so a car or the
     // lock screen would get the title but never the cover (ArtworkAuthHeaders).
     private fun artworkDataSourceFactory(context: Context): DataSource.Factory {
-        val headers: () -> Map<String, String> = { PlatformEnvironment.artworkAuthHeaders?.invoke().orEmpty() }
         val client = SharedHttpClient.derive {
             addInterceptor { chain ->
                 val request = chain.request()
-                val extra = headers()
+                val extra = artworkHeadersFor(request.url.toString())
                 if (extra.isEmpty()) {
                     chain.proceed(request)
                 } else {

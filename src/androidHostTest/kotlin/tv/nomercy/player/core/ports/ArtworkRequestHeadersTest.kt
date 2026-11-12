@@ -16,8 +16,7 @@ import org.junit.Test
 class ArtworkRequestHeadersTest {
     @After
     fun reset() {
-        PlatformEnvironment.installArtworkRequestHeaders { emptyMap() }
-        PlatformEnvironment.installArtworkAuthHeaders { emptyMap() }
+        clearArtworkHeaderProviders()
     }
 
     @Test
