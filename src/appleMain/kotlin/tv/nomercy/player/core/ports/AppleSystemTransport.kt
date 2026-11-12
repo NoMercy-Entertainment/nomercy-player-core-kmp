@@ -42,7 +42,9 @@ import platform.MediaPlayer.MPSkipIntervalCommandEvent
 // is Apple's design and it means the same one-owner rule applies for a different
 // reason: two players adding targets both receive every button.
 @OptIn(ExperimentalForeignApi::class)
-internal class AppleSystemTransport : SystemTransport {
+internal class AppleSystemTransport(
+    private val artwork: AppleArtworkLoader = AppleArtworkLoader(),
+) : SystemTransport {
 
     private val center: MPNowPlayingInfoCenter = MPNowPlayingInfoCenter.defaultCenter()
 
@@ -53,8 +55,6 @@ internal class AppleSystemTransport : SystemTransport {
     // What was last announced, kept because the centre takes the whole
     // dictionary every time. Pushing a state without it would blank the title.
     private var info: MutableMap<Any?, Any?> = mutableMapOf()
-
-    private val artwork: AppleArtworkLoader = AppleArtworkLoader()
 
     // Which announcement the in-flight cover belongs to. See setNowPlaying.
     private var artworkGeneration: Long = 0
