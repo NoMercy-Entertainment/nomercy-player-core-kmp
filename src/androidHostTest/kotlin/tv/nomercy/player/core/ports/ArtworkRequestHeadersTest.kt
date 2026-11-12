@@ -32,6 +32,33 @@ class ArtworkRequestHeadersTest {
         )
     }
 
+    @Test
+    fun theArtworkInterceptorSendsTheTokenOnlyWhereTheProviderAllows() {
+        PlatformEnvironment.installArtworkRequestHeaders { url ->
+            if (url.startsWith("https://media.example.test/")) mapOf("Authorization" to "Bearer test") else emptyMap()
+        }
+        val sent = mutableListOf<okhttp3.Request>()
+        val client = okhttp3.OkHttpClient.Builder()
+            .addInterceptor(artworkHeaderInterceptor)
+            .addInterceptor { chain ->
+                sent += chain.request()
+                okhttp3.Response.Builder()
+                    .request(chain.request())
+                    .protocol(okhttp3.Protocol.HTTP_1_1)
+                    .code(200)
+                    .message("OK")
+                    .body(okhttp3.ResponseBody.create(null, ByteArray(0)))
+                    .build()
+            }
+            .build()
+
+        client.newCall(okhttp3.Request.Builder().url("https://images.example.org/x.jpg").build()).execute().close()
+        client.newCall(okhttp3.Request.Builder().url("https://media.example.test/x.jpg").build()).execute().close()
+
+        assertEquals(null, sent[0].header("Authorization"))
+        assertEquals("Bearer test", sent[1].header("Authorization"))
+    }
+
     @Suppress("DEPRECATION")
     @Test
     fun legacyProviderStillAppliesToEveryHost() {

@@ -57,3 +57,19 @@ internal fun clearArtworkHeaderProviders() {
 
 internal fun artworkHeadersFor(url: String): Map<String, String> =
     installedArtworkRequestHeaders?.invoke(url) ?: installedArtworkAuthHeaders?.invoke().orEmpty()
+
+// Adds the provider's headers for this request's URL; a header the request
+// already carries is never overwritten.
+internal val artworkHeaderInterceptor: okhttp3.Interceptor = okhttp3.Interceptor { chain ->
+    val request = chain.request()
+    val extra = artworkHeadersFor(request.url.toString())
+    if (extra.isEmpty()) {
+        chain.proceed(request)
+    } else {
+        val builder = request.newBuilder()
+        for ((name, value) in extra) {
+            if (request.header(name) == null) builder.header(name, value)
+        }
+        chain.proceed(builder.build())
+    }
+}
