@@ -218,6 +218,11 @@ private class AudioObjectPropertyAddress(selector: Int) : com.sun.jna.Structure(
 private const val SIZE_OF_UINT32 = 4
 private const val SIZE_OF_POINTER = 8
 
+// AudioBufferList on 64-bit: mNumberBuffers is padded to the pointer alignment of mBuffers.
+private const val BUFFERS_OFFSET = SIZE_OF_POINTER
+private const val DATA_BYTE_SIZE_OFFSET = BUFFERS_OFFSET + SIZE_OF_UINT32
+private const val DATA_POINTER_OFFSET = BUFFERS_OFFSET + SIZE_OF_UINT32 + SIZE_OF_UINT32
+
 private const val kAudioObjectSystemObject = 1
 private const val kAudioObjectPropertyScopeGlobal = 0x676c6f62 // 'glob'
 private const val kAudioObjectPropertyElementMain = 0
@@ -255,14 +260,12 @@ internal fun ioProcCallback(channels: Int, onFrame: (FloatArray, Int) -> Unit) =
 internal typealias AudioBufferListPointer = Pointer
 
 internal fun AudioBufferListPointer.frameCount(channels: Int): Int {
-    // skip mNumberBuffers + mBuffers[0].mNumberChannels
-    val dataByteSize = getInt((SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
+    val dataByteSize = getInt(DATA_BYTE_SIZE_OFFSET.toLong())
     return dataByteSize / (Float.SIZE_BYTES * channels)
 }
 
 internal fun AudioBufferListPointer.readInterleavedFloat(channels: Int, frames: Int): FloatArray {
-    // mNumberBuffers + mNumberChannels + mDataByteSize
-    val dataPointer = getPointer((SIZE_OF_UINT32 + SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
+    val dataPointer = getPointer(DATA_POINTER_OFFSET.toLong())
     val out = FloatArray(frames * channels)
     dataPointer.read(0, out, 0, out.size)
     return out
