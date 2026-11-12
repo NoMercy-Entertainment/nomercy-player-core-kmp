@@ -141,6 +141,7 @@ internal class AppleSystemTransport(
     }
 
     override fun clear() {
+        artworkGeneration += 1
         info = mutableMapOf()
         center.setNowPlayingInfo(null)
         center.setPlaybackState(MPNowPlayingPlaybackStateStopped)
