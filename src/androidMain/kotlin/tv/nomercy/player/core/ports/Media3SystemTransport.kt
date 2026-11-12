@@ -109,8 +109,18 @@ internal class Media3SystemTransport(
     private val mainHandler = Handler(Looper.getMainLooper())
     private var pendingStop: Runnable? = null
 
-    // The same handle for the metadata-only blank — see [clearNowPlaying].
-    private var pendingBlank: Runnable? = null
+    // Metadata-only blanks use the same main looper, with a testable clock seam.
+    private val blankDebouncer = NowPlayingBlankDebouncer<NowPlaying>(
+        BLANK_DEBOUNCE_MS,
+        UpdateScheduler { delayMs, task ->
+            val callback = Runnable { task() }
+            mainHandler.postDelayed(callback, delayMs)
+            val cancel: () -> Unit = { mainHandler.removeCallbacks(callback) }
+            cancel
+        },
+        bridge::setNowPlaying,
+        bridge::blank,
+    )
 
     // Held while playing and released the moment it stops.
     //
@@ -128,11 +138,7 @@ internal class Media3SystemTransport(
             ?.createWifiLock(WifiManager.WIFI_MODE_FULL_LOW_LATENCY, WIFI_TAG)
 
     override fun setNowPlaying(nowPlaying: NowPlaying) {
-        // The replacement arrived, so the blank the transient cursor asked for
-        // never has to happen — see [clearNowPlaying].
-        pendingBlank?.let { mainHandler.removeCallbacks(it) }
-        pendingBlank = null
-        bridge.setNowPlaying(nowPlaying)
+        blankDebouncer.setNowPlaying(nowPlaying)
     }
 
     // Metadata only — no lock, no service, no session-publish state touched.
@@ -150,13 +156,7 @@ internal class Media3SystemTransport(
     // first; a clear that really was final still blanks, a beat later, and a
     // real stop does not come through here at all (see [clear]).
     override fun clearNowPlaying() {
-        pendingBlank?.let { mainHandler.removeCallbacks(it) }
-        val blank = Runnable {
-            bridge.blank()
-            pendingBlank = null
-        }
-        pendingBlank = blank
-        mainHandler.postDelayed(blank, BLANK_DEBOUNCE_MS)
+        blankDebouncer.clearNowPlaying()
     }
 
     override fun setPlaybackState(
@@ -329,8 +329,7 @@ internal class Media3SystemTransport(
     override fun clear() {
         // A real stop blanks now rather than in a beat: the debounce exists for
         // the transient cursor between two tracks, and this is not that.
-        pendingBlank?.let { mainHandler.removeCallbacks(it) }
-        pendingBlank = null
+        blankDebouncer.cancel()
         bridge.blank()
         customButtonHandlers.clear()
         if (customLayoutShape.isNotEmpty()) {
@@ -363,8 +362,7 @@ internal class Media3SystemTransport(
         released = true
         pendingStop?.let { mainHandler.removeCallbacks(it) }
         pendingStop = null
-        pendingBlank?.let { mainHandler.removeCallbacks(it) }
-        pendingBlank = null
+        blankDebouncer.cancel()
         bridge.cancelPendingUpdate()
         holdLocks(false)
         val owned: Boolean = isCurrent && PlaybackForegroundSession.session.value === session
