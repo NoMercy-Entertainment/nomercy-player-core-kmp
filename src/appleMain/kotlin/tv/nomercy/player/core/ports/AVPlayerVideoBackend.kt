@@ -222,6 +222,7 @@ public class AVPlayerVideoBackend : VideoBackend {
         // its encoder was never told to write. Applied in onAssetLoaded, the
         // one moment the item is both present and ready.
         pendingStartMs = opts.startPositionMs.coerceAtLeast(0L)
+        requestedAsset = asset
         assetLoader(asset) { onAssetLoaded(asset) }
         refreshCache()
     }
@@ -504,6 +505,9 @@ public class AVPlayerVideoBackend : VideoBackend {
 
     @Volatile private var loadedAsset: AVAsset? = null
 
+    // The asset of the latest load(); a slower earlier one must not reach the player.
+    @Volatile private var requestedAsset: AVURLAsset? = null
+
     // Test seam: lets a test finish one asset's key load after another's.
     internal var assetLoader: (AVURLAsset, () -> Unit) -> Unit = { asset, done ->
         asset.loadValuesAsynchronouslyForKeys(LOADED_KEYS) { done() }
@@ -522,6 +526,7 @@ public class AVPlayerVideoBackend : VideoBackend {
     }
 
     private fun onAssetLoaded(asset: AVURLAsset) {
+        if (asset !== requestedAsset) return
         val loaded: Boolean = asset.statusOfValueForKey(PLAYABLE_KEY, null) == AVKeyValueStatusLoaded
         if (!loaded || !asset.playable) {
             bus.emit(CanonicalBackendEvent.ERROR)
