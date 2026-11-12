@@ -254,13 +254,13 @@ internal fun ioProcCallback(channels: Int, onFrame: (FloatArray, Int) -> Unit) =
 // field before the rest of the layout can be walked.
 internal typealias AudioBufferListPointer = Pointer
 
-private fun AudioBufferListPointer.frameCount(channels: Int): Int {
+internal fun AudioBufferListPointer.frameCount(channels: Int): Int {
     // skip mNumberBuffers + mBuffers[0].mNumberChannels
     val dataByteSize = getInt((SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
     return dataByteSize / (Float.SIZE_BYTES * channels)
 }
 
-private fun AudioBufferListPointer.readInterleavedFloat(channels: Int, frames: Int): FloatArray {
+internal fun AudioBufferListPointer.readInterleavedFloat(channels: Int, frames: Int): FloatArray {
     // mNumberBuffers + mNumberChannels + mDataByteSize
     val dataPointer = getPointer((SIZE_OF_UINT32 + SIZE_OF_UINT32 + SIZE_OF_UINT32).toLong())
     val out = FloatArray(frames * channels)
