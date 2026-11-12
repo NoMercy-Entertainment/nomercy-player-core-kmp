@@ -61,6 +61,10 @@ public object CanonicalBackendEvent {
     // renderer is told to wipe what it is drawing when the cue ends, the track
     // is turned off, or a new source is loaded.
     public const val SUBTITLE_CUE: String = "subtitleCue"
+
+    // The in-container subtitle list changed after load. The web name verbatim.
+    // The bridge turns it into the player's subtitles event.
+    public const val SUBTITLE_TRACKS: String = "subtitleTracks"
     internal const val AUDIO_SELECTION_APPLIED: String = "audioselectionapplied"
     internal const val SUBTITLE_SELECTION_APPLIED: String = "subtitleselectionapplied"
     public const val ERROR: String = "error"

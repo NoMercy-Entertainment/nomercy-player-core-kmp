@@ -380,7 +380,11 @@ public class ExoPlayerVideoBackend(
                 // menus stay empty for the whole title.
                 val previousAudio = cachedAudioTrack
                 val previousSubtitle = cachedSubtitleTrack
+                val previousSubtitles = cachedSubtitleTracks
                 refreshCache()
+                if (cachedSubtitleTracks != previousSubtitles) {
+                    bus.emit(CanonicalBackendEvent.SUBTITLE_TRACKS, null)
+                }
                 if (cachedAudioTrack != previousAudio) {
                     bus.emit(CanonicalBackendEvent.AUDIO_SELECTION_APPLIED, null)
                 }

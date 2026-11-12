@@ -9319,6 +9319,8 @@ final object tv.nomercy.player.core.ports/CanonicalBackendEvent { // tv.nomercy.
         final fun <get-STREAM_ERROR>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.STREAM_ERROR.<get-STREAM_ERROR>|<get-STREAM_ERROR>(){}[0]
     final const val SUBTITLE_CUE // tv.nomercy.player.core.ports/CanonicalBackendEvent.SUBTITLE_CUE|{}SUBTITLE_CUE[0]
         final fun <get-SUBTITLE_CUE>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.SUBTITLE_CUE.<get-SUBTITLE_CUE>|<get-SUBTITLE_CUE>(){}[0]
+    final const val SUBTITLE_TRACKS // tv.nomercy.player.core.ports/CanonicalBackendEvent.SUBTITLE_TRACKS|{}SUBTITLE_TRACKS[0]
+        final fun <get-SUBTITLE_TRACKS>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.SUBTITLE_TRACKS.<get-SUBTITLE_TRACKS>|<get-SUBTITLE_TRACKS>(){}[0]
     final const val TIME_UPDATE // tv.nomercy.player.core.ports/CanonicalBackendEvent.TIME_UPDATE|{}TIME_UPDATE[0]
         final fun <get-TIME_UPDATE>(): kotlin/String // tv.nomercy.player.core.ports/CanonicalBackendEvent.TIME_UPDATE.<get-TIME_UPDATE>|<get-TIME_UPDATE>(){}[0]
     final const val WAITING // tv.nomercy.player.core.ports/CanonicalBackendEvent.WAITING|{}WAITING[0]

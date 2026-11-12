@@ -78,6 +78,7 @@ public class MpvVideoBackend internal constructor(
     private var lastWaiting: Boolean = false
     private var lastDuration: Double = 0.0
     private var announcedMetadata: Boolean = false
+    private var lastSubtitleTracks: List<SubtitleTrack> = emptyList()
     private var released: Boolean = false
 
     // The one thing the poll cannot see. Every property a failed open leaves
@@ -123,6 +124,7 @@ public class MpvVideoBackend internal constructor(
 
         announcedMetadata = false
         lastEnded = false
+        lastSubtitleTracks = emptyList()
         mpv.mpv_command(handle, arrayOf("loadfile", url, "replace", null))
     }
 
@@ -402,6 +404,7 @@ public class MpvVideoBackend internal constructor(
             announceMetadataOnce()
             val paused: Boolean = announcePlayState()
             announceStall()
+            announceSubtitleTracks()
             announceTime()
 
             // Adaptation, on the same clock as the events. Only while something
@@ -444,6 +447,15 @@ public class MpvVideoBackend internal constructor(
         val waiting: Boolean = flag("paused-for-cache")
         if (waiting && !lastWaiting) bus.emit(BackendEvents.WAITING)
         lastWaiting = waiting
+    }
+
+    // mpv learns the container's tracks after the open, so the list is compared
+    // on every poll and announced only when it differs.
+    private fun announceSubtitleTracks() {
+        val tracks: List<SubtitleTrack> = subtitleTracks()
+        if (tracks == lastSubtitleTracks) return
+        lastSubtitleTracks = tracks
+        bus.emit(CanonicalBackendEvent.SUBTITLE_TRACKS)
     }
 
     private fun announceTime() {

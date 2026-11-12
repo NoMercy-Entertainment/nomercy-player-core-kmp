@@ -144,6 +144,7 @@ public class AVPlayerVideoBackend : VideoBackend {
     private val observerQueue = dispatch_queue_create("tv.nomercy.player.avplayer.observer", null)
 
     private var announcedCanPlay: Boolean = false
+    private var lastSubtitleTracks: List<SubtitleTrack> = emptyList()
 
     // Mirrors of what the engine last reported. AVFoundation is main-thread
     // affine like every other Apple UI object, and the contract above is
@@ -177,6 +178,7 @@ public class AVPlayerVideoBackend : VideoBackend {
     override suspend fun load(url: String, opts: LoadOptions) {
         bus.emit(CanonicalBackendEvent.LOAD_START, url)
         announcedCanPlay = false
+        lastSubtitleTracks = emptyList()
         refusedAsUnplayable = false
         // The previous item's last line, taken off the picture before the next
         // one's first frame arrives. The web backend does this in unload().
@@ -545,7 +547,17 @@ public class AVPlayerVideoBackend : VideoBackend {
             AVPlayerItemStatusFailed -> bus.emit(CanonicalBackendEvent.ERROR)
             else -> Unit
         }
+        reportSubtitleTrackChanges()
         reportTimeControlChanges()
+    }
+
+    // The legible group answers empty until its key loads, so the list is
+    // compared on each tick and announced only when it differs.
+    private fun reportSubtitleTrackChanges() {
+        val tracks: List<SubtitleTrack> = subtitleTracks()
+        if (tracks == lastSubtitleTracks) return
+        lastSubtitleTracks = tracks
+        bus.emit(CanonicalBackendEvent.SUBTITLE_TRACKS)
     }
 
     private fun announceReadyOnce() {

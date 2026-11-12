@@ -6782,6 +6782,7 @@ public final class tv/nomercy/player/core/ports/CanonicalBackendEvent {
 	public static final field STALLED Ljava/lang/String;
 	public static final field STREAM_ERROR Ljava/lang/String;
 	public static final field SUBTITLE_CUE Ljava/lang/String;
+	public static final field SUBTITLE_TRACKS Ljava/lang/String;
 	public static final field TIME_UPDATE Ljava/lang/String;
 	public static final field WAITING Ljava/lang/String;
 	public final fun getALL ()Ljava/util/List;

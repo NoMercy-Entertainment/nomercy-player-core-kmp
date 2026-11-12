@@ -24,6 +24,8 @@ import tv.nomercy.player.core.events.StreamError
 import tv.nomercy.player.core.events.ProgressPayload
 import tv.nomercy.player.core.events.TimeUpdate
 import tv.nomercy.player.core.events.SubtitlePayload
+import tv.nomercy.player.core.events.SubtitlesPayload
+import tv.nomercy.player.core.ports.SubtitleTrack
 import tv.nomercy.player.core.player.ActionSource
 import tv.nomercy.player.core.player.BufferState
 import tv.nomercy.player.core.player.PlayState
@@ -71,6 +73,9 @@ public class BackendBridge(
 ) {
     private val recovery: FailureRecovery = FailureRecovery(ctx, scope, clock)
 
+
+    // The player's own subtitles(), so a subclass that adds sidecars sends its full list.
+    internal var subtitleList: (() -> List<SubtitleTrack>)? = null
 
     private val handlers: MutableList<Pair<String, (Any?) -> Unit>> = mutableListOf()
 
@@ -134,6 +139,9 @@ public class BackendBridge(
             val selected = video.audioTrack()
             val index = selected?.let { video.audioTracks().indexOf(it).takeIf { at -> at >= 0 }?.toDouble() }
             ctx.emit(CoreEvents.AudioTrack, AudioTrackPayload(index))
+        }
+        listen(backend, CanonicalBackendEvent.SUBTITLE_TRACKS) {
+            ctx.emit(CoreEvents.Subtitles, SubtitlesPayload((subtitleList?.invoke() ?: video.subtitleTracks())))
         }
         listen(backend, CanonicalBackendEvent.SUBTITLE_SELECTION_APPLIED) {
             val selected = video.subtitleTrack()

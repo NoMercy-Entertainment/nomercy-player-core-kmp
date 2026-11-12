@@ -376,7 +376,9 @@ public open class ComposedPlayer(
     // With the scope and the clock, which is what lets it retry rather than only
     // report. A bridge given neither still works and gives up on the first
     // failure, which is what every platform did before this.
-    public val bridge: BackendBridge = BackendBridge(context, playerScope, clock)
+    public val bridge: BackendBridge = BackendBridge(context, playerScope, clock).also {
+        it.subtitleList = ::subtitles
+    }
 
     public val bandwidth: BandwidthController = BandwidthController(context)
 
