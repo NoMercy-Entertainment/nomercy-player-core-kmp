@@ -22,13 +22,13 @@ class NowPlayingBlankDebouncerTest {
         override fun schedule(delayMs: Long, task: () -> Unit): () -> Unit {
             val scheduled = Scheduled(nowMs + delayMs, task)
             tasks += scheduled
-            return { scheduled.cancelled = true }
+            return { scheduled.canceled = true }
         }
 
         fun advanceBy(ms: Long) {
             val target = nowMs + ms
             while (true) {
-                val next = tasks.filter { !it.cancelled && it.atMs <= target }
+                val next = tasks.filter { !it.canceled && it.atMs <= target }
                     .minByOrNull { it.atMs } ?: break
                 tasks.remove(next)
                 nowMs = next.atMs
