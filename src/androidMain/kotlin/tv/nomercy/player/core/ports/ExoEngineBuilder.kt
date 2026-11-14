@@ -9,7 +9,9 @@
 package tv.nomercy.player.core.ports
 
 import android.content.Context
+import android.hardware.display.DisplayManager
 import android.os.Looper
+import android.view.Display
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.TrackSelectionParameters.AudioOffloadPreferences
@@ -57,9 +59,20 @@ import tv.nomercy.player.core.media.QualityDescriptor
 // turned. Taking the larger edge for both is what Media3's own helper does.
 private fun physicalDisplaySize(context: Context): Pair<Int, Int> {
     val metrics: DisplayMetrics = context.resources.displayMetrics
-    val edge: Int = maxOf(metrics.widthPixels, metrics.heightPixels)
+    val mode: Display.Mode? = context.getSystemService(DisplayManager::class.java)
+        ?.getDisplay(Display.DEFAULT_DISPLAY)?.mode
+    val edge: Int = panelEdgePx(
+        uiWidth = metrics.widthPixels,
+        uiHeight = metrics.heightPixels,
+        panelWidth = mode?.physicalWidth ?: 0,
+        panelHeight = mode?.physicalHeight ?: 0,
+    )
     return edge to edge
 }
+
+// A 4K box draws its UI at 1080p, so the UI surface alone caps ABR at 1080p.
+internal fun panelEdgePx(uiWidth: Int, uiHeight: Int, panelWidth: Int, panelHeight: Int): Int =
+    maxOf(uiWidth, uiHeight, panelWidth, panelHeight)
 
 private fun applySelectorParameters(
     selector: DefaultTrackSelector,
