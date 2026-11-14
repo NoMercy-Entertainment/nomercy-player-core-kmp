@@ -582,13 +582,12 @@ public class ExoPlayerVideoBackend(
     // an earlier pick.
     private fun pickMainAudio(target: Player) {
         val slots: List<ExoTrackMapper.AudioSlot> = ExoTrackMapper.audioSlots(target.currentTracks, ::decodesNatively)
-        if (slots.isEmpty()) return
         val overrides = target.trackSelectionParameters.overrides
-        if (slots.any { overrides.containsKey(it.group.mediaTrackGroup) }) return
+        if (slots.isEmpty() || slots.any { overrides.containsKey(it.group.mediaTrackGroup) }) return
 
         val current: Int = slots.indexOfFirst { it.group.isTrackSelected(it.index) }.coerceAtLeast(0)
-        val picked: Int = MainAudioPick.pick(slots.map { it.candidate }, current, maxOutputChannels) ?: return
-        if (picked == current) return
+        val picked: Int? = MainAudioPick.pick(slots.map { it.candidate }, current, maxOutputChannels)
+        if (picked == null || picked == current) return
 
         val slot: ExoTrackMapper.AudioSlot = slots[picked]
         target.trackSelectionParameters = target.trackSelectionParameters

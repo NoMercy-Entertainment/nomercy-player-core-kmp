@@ -104,7 +104,12 @@ class MainAudioPickTest {
 
     @Test
     fun unlabeledTracksOnADeviceThatCannotDecodeSurroundPlayTheDefaultStereoTrack() {
-        val noSurround = listOf(aacOther, eac3Side.copy(decodesNatively = false), aacDefault, eac3Default.copy(decodesNatively = false))
+        val noSurround = listOf(
+            aacOther,
+            eac3Side.copy(decodesNatively = false),
+            aacDefault,
+            eac3Default.copy(decodesNatively = false),
+        )
 
         assertEquals(aacDefault, pick(noSurround, current = 0, max = 2))
     }
