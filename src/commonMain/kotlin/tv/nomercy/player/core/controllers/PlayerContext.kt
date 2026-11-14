@@ -8,6 +8,7 @@
 
 package tv.nomercy.player.core.controllers
 
+import kotlin.math.roundToLong
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -43,6 +44,7 @@ import tv.nomercy.player.core.ports.LoadOptions
 import tv.nomercy.player.core.ports.MediaBackend
 
 private const val FULL_VOLUME = 100
+private const val MILLIS_PER_SECOND = 1000.0
 
 // The one thing every controller reads and writes.
 //
@@ -372,6 +374,14 @@ public class PlayerContext(
         }
     }
 
+    // The start a beforeLoad listener left on the event wins over the caller's,
+    // startFresh included. A 0 is a real start, so it keeps saved progress out.
+    private fun startingAt(opts: LoadOptions, startAt: Double?): LoadOptions {
+        if (startAt == null) return opts
+        val startMs: Long = (startAt * MILLIS_PER_SECOND).roundToLong().coerceAtLeast(0L)
+        return opts.copy(startPositionMs = startMs, startFresh = opts.startFresh || startMs == 0L)
+    }
+
     @Suppress("ReturnCount")
     private suspend fun loadNow(item: PlaylistItem, opts: LoadOptions): Boolean {
         // Announced before the engine sees anything, and refusable.
@@ -387,7 +397,14 @@ public class PlayerContext(
             // forwards opts.source here; the native LoadOptions has no such
             // field yet, and inventing a value would be worse than the absence
             // — a listener switching on it would branch on a fiction.
-            dispatchBefore(CoreEvents.BeforeLoad, BeforeLoadPayload(item = item, source = null))
+            dispatchBefore(
+                CoreEvents.BeforeLoad,
+                BeforeLoadPayload(
+                    item = item,
+                    source = null,
+                    startAt = opts.startPositionMs.takeIf { it > 0L }?.let { it / MILLIS_PER_SECOND },
+                ),
+            )
 
         if (decision.prevented) {
             emit(
@@ -402,10 +419,10 @@ public class PlayerContext(
 
         val engine: MediaBackend = engineFor(item)
 
-        val (url: String, authorised: LoadOptions) = sourceFor(item, opts)
+        val (url: String, authorized: LoadOptions) = sourceFor(item, startingAt(opts, decision.data.startAt))
 
         try {
-            engine.load(url, authorised)
+            engine.load(url, authorized)
         }
         catch (cause: CancellationException) {
             throw cause

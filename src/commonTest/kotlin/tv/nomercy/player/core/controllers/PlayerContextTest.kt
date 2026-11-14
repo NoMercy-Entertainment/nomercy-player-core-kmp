@@ -171,6 +171,30 @@ class PlayerContextTest {
     }
 
     @Test
+    fun aBeforeLoadListenerDecidesWhereAStartFreshLoadStarts() = runTest {
+        val ctx = newContext()
+        ctx.startPositionFor = { 90_000L }
+        ctx.on(CoreEvents.BeforeLoad) { it.data = it.data.copy(startAt = 103.0) }
+
+        ctx.load(TestItem("a"), LoadOptions(startFresh = true))
+
+        assertEquals(103_000L, ctx.fakeBackend().loadedOptions.single().startPositionMs)
+    }
+
+    @Test
+    fun aStartFreshLoadWhoseListenerSetsNoStartStillStartsAtZero() = runTest {
+        val ctx = newContext()
+        ctx.startPositionFor = { 90_000L }
+        val offered: MutableList<Double?> = mutableListOf()
+        ctx.on(CoreEvents.BeforeLoad) { offered += it.data.startAt }
+
+        ctx.load(TestItem("a"), LoadOptions(startFresh = true))
+
+        assertEquals(listOf<Double?>(null), offered)
+        assertEquals(0L, ctx.fakeBackend().loadedOptions.single().startPositionMs)
+    }
+
+    @Test
     fun aContextWithNoBackendSaysSoRatherThanLoadingNothing() = runTest {
         // This used to be a no-op on the reasoning that setup wires the backend
         // and a load before that is harmless. It is not harmless: the load

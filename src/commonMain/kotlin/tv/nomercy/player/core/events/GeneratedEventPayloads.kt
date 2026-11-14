@@ -81,6 +81,7 @@ public data class BeforeLanguagePayload(
 public data class BeforeLoadPayload(
     val item: PlaylistItem,
     val source: String? = null,
+    val startAt: Double? = null,
 )
 
 public data class BeforeMutationPayload(

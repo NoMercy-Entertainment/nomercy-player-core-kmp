@@ -4027,16 +4027,19 @@ final class tv.nomercy.player.core.events/BeforeLanguagePayload { // tv.nomercy.
 }
 
 final class tv.nomercy.player.core.events/BeforeLoadPayload { // tv.nomercy.player.core.events/BeforeLoadPayload|null[0]
-    constructor <init>(tv.nomercy.player.core.media/PlaylistItem, kotlin/String? = ...) // tv.nomercy.player.core.events/BeforeLoadPayload.<init>|<init>(tv.nomercy.player.core.media.PlaylistItem;kotlin.String?){}[0]
+    constructor <init>(tv.nomercy.player.core.media/PlaylistItem, kotlin/String? = ..., kotlin/Double? = ...) // tv.nomercy.player.core.events/BeforeLoadPayload.<init>|<init>(tv.nomercy.player.core.media.PlaylistItem;kotlin.String?;kotlin.Double?){}[0]
 
     final val item // tv.nomercy.player.core.events/BeforeLoadPayload.item|{}item[0]
         final fun <get-item>(): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.events/BeforeLoadPayload.item.<get-item>|<get-item>(){}[0]
     final val source // tv.nomercy.player.core.events/BeforeLoadPayload.source|{}source[0]
         final fun <get-source>(): kotlin/String? // tv.nomercy.player.core.events/BeforeLoadPayload.source.<get-source>|<get-source>(){}[0]
+    final val startAt // tv.nomercy.player.core.events/BeforeLoadPayload.startAt|{}startAt[0]
+        final fun <get-startAt>(): kotlin/Double? // tv.nomercy.player.core.events/BeforeLoadPayload.startAt.<get-startAt>|<get-startAt>(){}[0]
 
     final fun component1(): tv.nomercy.player.core.media/PlaylistItem // tv.nomercy.player.core.events/BeforeLoadPayload.component1|component1(){}[0]
     final fun component2(): kotlin/String? // tv.nomercy.player.core.events/BeforeLoadPayload.component2|component2(){}[0]
-    final fun copy(tv.nomercy.player.core.media/PlaylistItem = ..., kotlin/String? = ...): tv.nomercy.player.core.events/BeforeLoadPayload // tv.nomercy.player.core.events/BeforeLoadPayload.copy|copy(tv.nomercy.player.core.media.PlaylistItem;kotlin.String?){}[0]
+    final fun component3(): kotlin/Double? // tv.nomercy.player.core.events/BeforeLoadPayload.component3|component3(){}[0]
+    final fun copy(tv.nomercy.player.core.media/PlaylistItem = ..., kotlin/String? = ..., kotlin/Double? = ...): tv.nomercy.player.core.events/BeforeLoadPayload // tv.nomercy.player.core.events/BeforeLoadPayload.copy|copy(tv.nomercy.player.core.media.PlaylistItem;kotlin.String?;kotlin.Double?){}[0]
     final fun equals(kotlin/Any?): kotlin/Boolean // tv.nomercy.player.core.events/BeforeLoadPayload.equals|equals(kotlin.Any?){}[0]
     final fun hashCode(): kotlin/Int // tv.nomercy.player.core.events/BeforeLoadPayload.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // tv.nomercy.player.core.events/BeforeLoadPayload.toString|toString(){}[0]
