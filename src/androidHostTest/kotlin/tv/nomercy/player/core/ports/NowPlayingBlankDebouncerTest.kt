@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 
 class NowPlayingBlankDebouncerTest {
     private class ManualScheduler : UpdateScheduler {
-        private data class Scheduled(val atMs: Long, val task: () -> Unit, var cancelled: Boolean = false)
+        private data class Scheduled(val atMs: Long, val task: () -> Unit, var canceled: Boolean = false)
 
         var nowMs = 0L
             private set
