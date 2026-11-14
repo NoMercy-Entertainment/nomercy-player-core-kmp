@@ -889,7 +889,7 @@ public class ExoPlayerVideoBackend(
         if (!StandbySwap.matchesSource(standbyUrl, standbyTargetMs, url, startMs)) return false
 
         val ready: Boolean = standbyReady
-        exchangeEngines(next, playWhenReady = false)
+        exchangeEngines(next, StandbySwap.playsOnLoadSwap(player.playWhenReady, opts.startFresh))
         loadedUrl = url
         beginSource(url)
         carryHeaders(opts)
@@ -1065,9 +1065,11 @@ public class ExoPlayerVideoBackend(
         standbyUrl = null
         standbyReady = false
 
-        player.playWhenReady = playWhenReady
-        active.value = player
-        previous.player.stop()
+        StandbySwap.handOver(
+            startNew = { player.playWhenReady = playWhenReady },
+            showNew = { active.value = player },
+            stopOld = { previous.player.stop() },
+        )
         announceCues(emptyList())
     }
 

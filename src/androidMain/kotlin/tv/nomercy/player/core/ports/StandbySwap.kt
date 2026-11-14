@@ -23,6 +23,18 @@ internal object StandbySwap {
     fun endsIntoNextSource(standbyUrl: String?, loadedUrl: String?, durationMs: Long, targetMs: Long): Boolean =
         standbyUrl != null && standbyUrl != loadedUrl && durationMs > 0 && targetMs >= durationMs - END_SLACK_MS
 
+    // A next-episode load that swaps in a warm engine carries the old engine's play intent, so
+    // the new renderers start in the swap itself and not after the load's callers have run.
+    fun playsOnLoadSwap(previousPlayWhenReady: Boolean, startsFresh: Boolean): Boolean =
+        startsFresh && previousPlayWhenReady
+
+    // The new engine plays and is on screen before the old one stops.
+    inline fun handOver(startNew: () -> Unit, showNew: () -> Unit, stopOld: () -> Unit) {
+        startNew()
+        showNew()
+        stopOld()
+    }
+
     fun matchesSource(prerolledUrl: String?, prerolledMs: Long?, url: String?, requestedMs: Long): Boolean =
         url != null && prerolledUrl == url && matches(prerolledMs, requestedMs)
 }

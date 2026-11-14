@@ -9,6 +9,7 @@
 package tv.nomercy.player.core.ports
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -62,6 +63,32 @@ class StandbySwapTest {
     @Test
     fun aStandbyForThisEpisodeDoesNotEndIt() {
         assertFalse(StandbySwap.endsIntoNextSource(EPISODE_ONE, EPISODE_ONE, 1_506_000L, 1_506_088L))
+    }
+
+    @Test
+    fun aNextEpisodeSwapPlaysAtOnceWhenTheOldOneWasPlaying() {
+        assertTrue(StandbySwap.playsOnLoadSwap(previousPlayWhenReady = true, startsFresh = true))
+    }
+
+    @Test
+    fun aNextEpisodeSwapStaysPausedWhenTheOldOneWasPaused() {
+        assertFalse(StandbySwap.playsOnLoadSwap(previousPlayWhenReady = false, startsFresh = true))
+    }
+
+    @Test
+    fun aLoadThatIsNotAFreshStartDoesNotPlayOnItsOwn() {
+        assertFalse(StandbySwap.playsOnLoadSwap(previousPlayWhenReady = true, startsFresh = false))
+    }
+
+    @Test
+    fun theOldEngineStopsOnlyAfterTheNewOnePlaysAndShows() {
+        val events: MutableList<String> = mutableListOf()
+        StandbySwap.handOver(
+            startNew = { events += "new plays" },
+            showNew = { events += "new shown" },
+            stopOld = { events += "old stops" },
+        )
+        assertEquals(listOf("new plays", "new shown", "old stops"), events)
     }
 
     @Test
