@@ -26,6 +26,8 @@ import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.audio.AudioCapabilities
+import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 import androidx.media3.exoplayer.hls.HlsManifest
 import androidx.media3.exoplayer.video.VideoFrameMetadataListener
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
@@ -284,6 +286,10 @@ public class ExoPlayerVideoBackend(
     private class StandbyEngine(val engine: ExoEngine, val selector: DefaultTrackSelector, val output: ImageReader)
 
     private val standbyListener: Player.Listener = object : Player.Listener {
+        override fun onTracksChanged(tracks: Tracks) {
+            pickMainAudio(standby?.engine?.player ?: return)
+        }
+
         override fun onPlaybackStateChanged(state: Int) {
             standbyReady = state == Player.STATE_READY
         }
@@ -358,6 +364,7 @@ public class ExoPlayerVideoBackend(
             // have excluded" and "an override forced one past them" is the
             // whole diagnosis, and neither is visible from the failure.
             override fun onTracksChanged(tracks: Tracks) {
+                pickMainAudio(player)
                 val chosen: Format? = tracks.groups
                     .filter { group -> group.type == C.TRACK_TYPE_VIDEO }
                     .flatMap { group -> (0 until group.length).mapNotNull { index ->
@@ -569,6 +576,35 @@ public class ExoPlayerVideoBackend(
             sourceIsHls = HLS_EXT_RE.containsMatchIn(url),
             refusedByAudioSink = tunnelingRefusedByAudioSink,
         )
+
+    // Among the tracks of the language the selector chose, the main one. Skipped
+    // once any audio track of this item carries an override: a viewer's choice or
+    // an earlier pick.
+    private fun pickMainAudio(target: Player) {
+        val slots: List<ExoTrackMapper.AudioSlot> = ExoTrackMapper.audioSlots(target.currentTracks, ::decodesNatively)
+        if (slots.isEmpty()) return
+        val overrides = target.trackSelectionParameters.overrides
+        if (slots.any { overrides.containsKey(it.group.mediaTrackGroup) }) return
+
+        val current: Int = slots.indexOfFirst { it.group.isTrackSelected(it.index) }.coerceAtLeast(0)
+        val picked: Int = MainAudioPick.pick(slots.map { it.candidate }, current, maxOutputChannels) ?: return
+        if (picked == current) return
+
+        val slot: ExoTrackMapper.AudioSlot = slots[picked]
+        target.trackSelectionParameters = target.trackSelectionParameters
+            .buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+            .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+            .addOverride(TrackSelectionOverride(slot.group.mediaTrackGroup, slot.index))
+            .build()
+    }
+
+    private val maxOutputChannels: Int
+        get() = AudioCapabilities.getCapabilities(androidContext).maxChannelCount
+
+    private fun decodesNatively(format: Format): Boolean = runCatching {
+        MediaCodecUtil.getDecoderInfos(format.sampleMimeType.orEmpty(), false, false).isNotEmpty()
+    }.getOrDefault(false)
 
     private fun withPreferredAudio(
         builder: DefaultTrackSelector.Parameters.Builder,

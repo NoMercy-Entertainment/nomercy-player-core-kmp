@@ -44,6 +44,30 @@ public object ExoTrackMapper {
             )
         }
 
+    // One entry per audio track, in the same flat order as audioTracks(), with
+    // the group and index an override needs to select it.
+    internal class AudioSlot(val group: Tracks.Group, val index: Int, val candidate: AudioPickCandidate)
+
+    internal fun audioSlots(tracks: Tracks, decodesNatively: (Format) -> Boolean): List<AudioSlot> =
+        tracks.groups.filter { it.type == C.TRACK_TYPE_AUDIO }.flatMap { group ->
+            (0 until group.length).map { index ->
+                val format: Format = group.getTrackFormat(index)
+                AudioSlot(
+                    group,
+                    index,
+                    AudioPickCandidate(
+                        language = format.language ?: UNKNOWN_LANGUAGE,
+                        label = format.label.orEmpty(),
+                        isDefault = format.selectionFlags and C.SELECTION_FLAG_DEFAULT != 0,
+                        isCommentaryRole = format.roleFlags and COMMENTARY_ROLES != 0,
+                        channels = format.channelCount.takeIf { it != Format.NO_VALUE } ?: DEFAULT_CHANNELS,
+                        decodesNatively = decodesNatively(format),
+                        playable = group.isTrackSupported(index),
+                    ),
+                )
+            }
+        }
+
     public fun subtitleTracks(tracks: Tracks): List<SubtitleTrack> =
         formatsOf(tracks, C.TRACK_TYPE_TEXT).mapIndexed { index, format ->
             SubtitleTrack(
@@ -117,6 +141,7 @@ public object ExoTrackMapper {
 
     private const val DEFAULT_CHANNELS = 2
     private const val UNKNOWN_LANGUAGE = "und"
+    private const val COMMENTARY_ROLES: Int = C.ROLE_FLAG_COMMENTARY or C.ROLE_FLAG_DESCRIBES_VIDEO
 }
 
 // The value-level half of the mapping, split from the Tracks-level half
