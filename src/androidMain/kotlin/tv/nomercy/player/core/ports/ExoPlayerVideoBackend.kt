@@ -25,7 +25,9 @@ import androidx.media3.common.Format
 import androidx.media3.common.TrackSelectionOverride
 import androidx.media3.common.Tracks
 import androidx.media3.common.text.CueGroup
+import androidx.media3.exoplayer.DecoderReuseEvaluation
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.audio.AudioCapabilities
 import androidx.media3.exoplayer.mediacodec.MediaCodecUtil
 import androidx.media3.exoplayer.hls.HlsManifest
@@ -354,6 +356,20 @@ public class ExoPlayerVideoBackend(
     @Volatile private var cachedSubtitleTrack: SubtitleTrack? = null
     @Volatile private var cachedAudioTrack: AudioTrack? = null
 
+    private val rungLog = RungLog()
+
+    // An adaptive switch stays inside one track group, so onTracksChanged never
+    // sees it. The renderer's input format is the rung that plays.
+    private val rungListener: AnalyticsListener = object : AnalyticsListener {
+        override fun onVideoInputFormatChanged(
+            eventTime: AnalyticsListener.EventTime,
+            format: Format,
+            decoderReuseEvaluation: DecoderReuseEvaluation?,
+        ) {
+            rungLog.inputFormatChanged(format.width, format.height, format.codecs, format.bitrate)
+        }
+    }
+
     private val engineListener: Player.Listener =
         object : Player.Listener {
             // Which rung was taken, and whether anything forced it.
@@ -373,12 +389,14 @@ public class ExoPlayerVideoBackend(
                     .firstOrNull()
                 val overrides: Int = player.trackSelectionParameters
                     .overrides.keys.count { group -> group.type == C.TRACK_TYPE_VIDEO }
-                Log.i(
-                    "nm-rung",
-                    "video rung: ${chosen?.width}x${chosen?.height} ${chosen?.codecs} " +
-                        "bitrate=${chosen?.bitrate} overrides=$overrides " +
-                        "viewport=${trackSelector.parameters.viewportWidth}x" +
-                        "${trackSelector.parameters.viewportHeight}",
+                rungLog.tracksChanged(
+                    width = chosen?.width,
+                    height = chosen?.height,
+                    codecs = chosen?.codecs,
+                    bitrate = chosen?.bitrate,
+                    overrides = overrides,
+                    viewportWidth = trackSelector.parameters.viewportWidth,
+                    viewportHeight = trackSelector.parameters.viewportHeight,
                 )
                 // The tracks the menus read. Nothing else refreshed them on this
                 // event, so the audio and subtitle lists held whatever the last
@@ -541,6 +559,7 @@ public class ExoPlayerVideoBackend(
 
     init {
         player.addListener(engineListener)
+        player.addAnalyticsListener(rungListener)
         installFrameListener()
     }
 
@@ -1085,10 +1104,12 @@ public class ExoPlayerVideoBackend(
     private fun exchangeEngines(next: StandbyEngine, playWhenReady: Boolean) {
         val previous: ExoEngine = engine
         previous.player.removeListener(engineListener)
+        previous.player.removeAnalyticsListener(rungListener)
         previous.player.clearVideoFrameMetadataListener(frameListener)
         next.engine.player.removeListener(standbyListener)
         previous.player.addListener(standbyListener)
         next.engine.player.addListener(engineListener)
+        next.engine.player.addAnalyticsListener(rungListener)
         next.engine.player.setVideoFrameMetadataListener(frameListener)
         frameClock.reset()
 
@@ -1466,4 +1487,30 @@ public class ExoPlayerVideoBackend(
 // ExoTrackMapperTest's own comment).
 internal fun releaseOwnedScope(scope: CoroutineScope, owns: Boolean) {
     if (owns) scope.cancel()
+}
+
+// The `nm-rung` lines, from plain values so a host test can read them.
+internal class RungLog(private val write: (String) -> Unit = { line -> Log.i("nm-rung", line) }) {
+
+    // Which rung the selector took, and whether an override forced it.
+    @Suppress("LongParameterList")
+    fun tracksChanged(
+        width: Int?,
+        height: Int?,
+        codecs: String?,
+        bitrate: Int?,
+        overrides: Int,
+        viewportWidth: Int,
+        viewportHeight: Int,
+    ) {
+        write(
+            "video rung: ${width}x$height $codecs bitrate=$bitrate overrides=$overrides " +
+                "viewport=${viewportWidth}x$viewportHeight",
+        )
+    }
+
+    // Which rung reached the decoder, track change or not.
+    fun inputFormatChanged(width: Int, height: Int, codecs: String?, bitrate: Int) {
+        write("video rung playing: ${width}x$height $codecs bitrate=$bitrate")
+    }
 }

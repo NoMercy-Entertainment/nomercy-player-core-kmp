@@ -35,6 +35,25 @@ class DelayedRecoveryReloadTest {
     private val networkDrop = "ERROR_CODE_IO_NETWORK_CONNECTION_FAILED"
 
     @Test
+    fun aNetworkFailureReloadsTheSameItemAtThePositionItDiedOn() = runTest {
+        val backend = FakeMediaBackend()
+        val player = ComposedPlayer(backend = backend, scope = backgroundScope)
+        player.queue(listOf(TestItem("a")))
+        player.setup()
+        player.play()
+        val loadsBeforeTheDrop: Int = backend.loadedUrls.size
+        backend.currentTimeValue = 42.5
+
+        backend.fire(CanonicalBackendEvent.ERROR, networkDrop)
+        advanceTimeBy(StreamRecovery.FIRST_RETRY_DELAY_MS + 1)
+
+        assertEquals(loadsBeforeTheDrop + 1, backend.loadedUrls.size)
+        assertEquals("https://example.test/a", backend.loadedUrls.last())
+        assertEquals(42_500L, backend.loadedOptions.last().startPositionMs)
+        assertEquals(true, backend.loadedOptions.last().autoplay)
+    }
+
+    @Test
     fun aPendingReloadIsDroppedOnceTheViewerMovedToAnotherItem() = runTest {
         val backend = FakeMediaBackend()
         val player = ComposedPlayer(backend = backend, scope = backgroundScope)
