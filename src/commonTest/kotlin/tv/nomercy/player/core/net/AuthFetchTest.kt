@@ -259,6 +259,60 @@ class AuthFetchTest {
     }
 
     @Test
+    fun aTransformUrlHookThatThrowsIsAnAuthErrorWithItsCause() = runTest {
+        val boom = IllegalStateException("transform broke")
+        val auth = object : AuthController() {
+            override fun transformUrl(url: String): String = throw boom
+        }
+
+        val raised = assertFailsWith<AuthError> {
+            pipeline(ScriptedFetcher(200), auth).fetch("https://example.test/a", retry = NO_WAIT)
+        }
+
+        assertEquals(boom, raised.cause)
+    }
+
+    @Test
+    fun aSignRequestHookThatThrowsIsAnAuthErrorWithItsCause() = runTest {
+        val boom = IllegalStateException("sign broke")
+        val auth = object : AuthController() {
+            override suspend fun signRequest(url: String, request: FetchOptions): FetchOptions = throw boom
+        }
+
+        val raised = assertFailsWith<AuthError> {
+            pipeline(ScriptedFetcher(200), auth).fetch("https://example.test/a", retry = NO_WAIT)
+        }
+
+        assertEquals(boom, raised.cause)
+    }
+
+    @Test
+    fun theLastFailedAttemptEmitsNoRetryAndWaitsNoTime() = runTest {
+        val seen: MutableList<FetchSignal> = mutableListOf()
+        val pipeline = AuthFetch(fetcher = ScriptedFetcher(503), onSignal = { seen += it })
+
+        val raised = assertFailsWith<NetworkError> {
+            pipeline.fetch("https://example.test/a", retry = RetryConfig(attempts = 0, baseMs = 1_000))
+        }
+
+        assertEquals(CoreErrorCodes.SERVICE_UNAVAILABLE, raised.code)
+        assertEquals(0, seen.count { it is FetchSignal.Retry }, "retry signal after the last attempt")
+        assertEquals(0L, testScheduler.currentTime, "virtual time spent after the last attempt")
+    }
+
+    @Test
+    fun twoAttemptsEmitExactlyOneRetry() = runTest {
+        val seen: MutableList<FetchSignal> = mutableListOf()
+        val pipeline = AuthFetch(fetcher = ScriptedFetcher(503), onSignal = { seen += it })
+
+        assertFailsWith<NetworkError> {
+            pipeline.fetch("https://example.test/a", retry = RetryConfig(attempts = 2, baseMs = 0))
+        }
+
+        assertEquals(1, seen.count { it is FetchSignal.Retry })
+    }
+
+    @Test
     fun aPlayerFetchAnnouncesItselfOnTheBus() = runTest {
         // The three fetch:* keys were declared, had payload classes, and were
         // fired by nothing — a consumer subscribing to them heard silence for

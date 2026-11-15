@@ -163,10 +163,12 @@ public class AuthFetch(
             refreshed = outcome.reason == UNAUTHENTICATED_RETRY,
             consumesAttempt = outcome.consumesAttempt,
         )
+        if (outcome.consumesAttempt && !ledger.hasAttemptLeft()) return
         onSignal(FetchSignal.Retry(url, ledger.attemptNumber(), outcome.reason, outcome.delayMs))
         delay(outcome.delayMs)
     }
 
+    @Suppress("ReturnCount")
     private suspend fun attemptOnce(
         url: String,
         opts: FetchOptions,
@@ -174,8 +176,19 @@ public class AuthFetch(
         ledger: RetryLedger,
     ): Outcome {
         val attempt: Int = ledger.attemptNumber()
-        val signed: String = auth?.transformUrl(url) ?: url
-        val request: FetchOptions = auth?.signRequest(signed, opts) ?: opts
+        val signed: String
+        val request: FetchOptions
+        try {
+            signed = auth?.transformUrl(url) ?: url
+            request = auth?.signRequest(signed, opts) ?: opts
+        }
+        catch (cause: CancellationException) {
+            throw cause
+        }
+        // A hook can throw anything; the caller gets the player's auth error with the cause.
+        catch (@Suppress("TooGenericExceptionCaught") cause: Throwable) {
+            return Outcome.Fail(authError(CoreErrorCodes.UNAUTHENTICATED, null, "auth hook threw", cause))
+        }
 
         val response: FetchResponse = try {
             withTimeoutOrNull(timeoutMs) { fetcher.fetch(signed, request) }
