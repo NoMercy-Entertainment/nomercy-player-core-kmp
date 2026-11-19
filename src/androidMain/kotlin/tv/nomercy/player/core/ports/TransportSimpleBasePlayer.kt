@@ -181,7 +181,11 @@ internal class TransportSimpleBasePlayer(
             builder.setPlaylist(
                 listOf(
                     MediaItemData.Builder(ITEM_ID)
-                        .setMediaItem(MediaItem.Builder().setMediaId(ITEM_ID).build())
+                        // On the item too: the platform queue a car lists is
+                        // built from the item, not from the metadata beside it.
+                        .setMediaItem(
+                            MediaItem.Builder().setMediaId(ITEM_ID).setMediaMetadata(metadata).build(),
+                        )
                         .setMediaMetadata(metadata)
                         // TIME_UNSET when live OR not-yet-known — both are
                         // "no seek bar", the difference is app-UI-facing

@@ -63,6 +63,39 @@ class Media3SystemTransportTest {
     }
 
     @Test
+    fun theQueueACarReadsNamesTheTrack() {
+        // A car builds its now-playing list from the platform session's queue.
+        // Android's Bluetooth stack prints "Not Provided" for an untitled item.
+        var session: androidx.media3.session.MediaSession? = null
+        var controller: android.media.session.MediaController? = null
+
+        onMainThread {
+            val bridge = TransportSimpleBasePlayer(updateWindowMs = 0)
+            val built = androidx.media3.session.MediaSession.Builder(context(), bridge)
+                .setId("queue-names-the-track")
+                .build()
+            session = built
+            controller = android.media.session.MediaController(context(), built.platformToken)
+            bridge.setNowPlaying(
+                NowPlaying(title = "First Light", artist = "The Lanterns", album = "Harbour", durationMs = 110_000),
+            )
+        }
+
+        var queueTitle: CharSequence? = null
+        val deadline = android.os.SystemClock.elapsedRealtime() + 5_000
+        while (queueTitle == null && android.os.SystemClock.elapsedRealtime() < deadline) {
+            Thread.sleep(100)
+            queueTitle = controller?.queue?.firstOrNull()?.description?.title
+        }
+        val metadataTitle = controller?.metadata?.getString(android.media.MediaMetadata.METADATA_KEY_TITLE)
+
+        onMainThread { session?.release() }
+
+        assertEquals("First Light", metadataTitle, "the session's metadata did not name the track")
+        assertEquals("First Light", queueTitle?.toString(), "the session's queue item did not name the track")
+    }
+
+    @Test
     fun theRoutingControllerIdReachesTheSessionsDeviceInfo() {
         // The output-switcher chip reads DeviceInfo.routingControllerId to
         // resolve a real device name — without it Android falls back to a
