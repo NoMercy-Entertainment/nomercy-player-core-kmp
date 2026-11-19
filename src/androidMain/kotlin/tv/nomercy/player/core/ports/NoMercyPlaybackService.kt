@@ -55,7 +55,21 @@ import kotlinx.coroutines.flow.onEach
 public class NoMercyPlaybackService : MediaLibraryService() {
 
     private var scopeJob: Job? = null
-    private var startedByCommand = false
+
+    private val startClock = StartClock(
+        media3Notification = { media3Notification() },
+        promote = { existing ->
+            runCatching {
+                if (existing != null) {
+                    startForeground(DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID, existing)
+                    // A paused session stays dismissable, as Media3 leaves it.
+                    if (!playbackWanted()) stopForeground(STOP_FOREGROUND_DETACH)
+                } else {
+                    startForeground(STARTUP_NOTIFICATION_ID, startupNotification())
+                }
+            }
+        },
+    )
 
     // A browser (car, watch) can bind before any player exists. It is answered
     // with the shared session, which playback later attaches its player to.
@@ -124,7 +138,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // with a placeholder, but only once Media3 has demonstrably not done it
     // first, and only for as long as it takes Media3 to catch up.
     override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
-        startedByCommand = true
+        startClock.onStartCommand()
         mainHandler.removeCallbacks(promoteIfMedia3HasNot)
         mainHandler.postDelayed(promoteIfMedia3HasNot, BACKSTOP_PROMOTION_MS)
         mainHandler.removeCallbacks(stopIfNeverPromoted)
@@ -140,11 +154,11 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // `addSession`, and promoting with a placeholder before that REPLACES it
     // — the shade kept the blank placeholder and lost the controls, because
     // Media3 does not re-post a notification whose state it believes is
-    // already current. So this asks whether Media3 got there first and stays
-    // out of the way when it did.
+    // already current. So when Media3 has posted, the clock is answered with
+    // Media3's own notification instead (a second start sees the old one).
     private val promoteIfMedia3HasNot: Runnable = Runnable {
-        if (!media3HasPosted()) {
-            runCatching { startForeground(STARTUP_NOTIFICATION_ID, startupNotification()) }
+        val placeholder = !media3HasPosted()
+        if (startClock.answer() && placeholder) {
             // Media3 promotes onto its own id once the source finally opens; this
             // placeholder is then just a second notification nobody asked for.
             mainHandler.postDelayed(retireePlaceholder, HANDOVER_POLL_MS)
@@ -163,11 +177,21 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         }
     }
 
-    private fun media3HasPosted(): Boolean =
+    private fun media3HasPosted(): Boolean = media3Notification() != null
+
+    private fun media3Notification(): Notification? =
         runCatching {
             getSystemService(NotificationManager::class.java)
                 .activeNotifications
-                .any { it.id == DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID }
+                .firstOrNull { it.id == DefaultMediaNotificationProvider.DEFAULT_NOTIFICATION_ID }
+                ?.notification
+        }.getOrNull()
+
+    // playWhenReady rather than isPlaying: a stream still opening has not
+    // started yet and is exactly the case worth waiting for.
+    private fun playbackWanted(): Boolean =
+        runCatching {
+            sessions.transport?.player?.let { it.isPlaying || it.playWhenReady } == true
         }.getOrDefault(false)
 
     // Deliberately minimal — branding may not be installed, and this is
@@ -198,16 +222,10 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         // local playback keeps its notification and its resume button.
         // Confirmed live, real phone and TV, 2026-09-20.
         //
-        // Once Media3 has posted, the platform's start deadline is already
-        // answered and this guard has nothing left to guard. A playback that
-        // really ends still tears the service down through reconcile(null).
-        //
-        // playWhenReady rather than isPlaying: a stream still opening has not
-        // started yet and is exactly the case worth waiting for.
-        val wanted: Boolean = runCatching {
-            sessions.transport?.player?.let { it.isPlaying || it.playWhenReady } == true
-        }.getOrDefault(false)
-        if (!wanted && !media3HasPosted()) stopWithoutLeavingAPromotionPending()
+        // Once Media3 has posted, the backstop has answered the start clock
+        // and this guard has nothing left to guard. A playback that really
+        // ends still tears the service down through reconcile(null).
+        if (!playbackWanted() && !media3HasPosted()) stopWithoutLeavingAPromotionPending()
     }
 
     // Stopping is only a safe answer to the platform's clock once something
@@ -221,10 +239,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // has, and the promotion it posts is torn down by the stop that follows
     // it a moment later.
     private fun stopWithoutLeavingAPromotionPending() {
-        if (!media3HasPosted()) {
-            runCatching { startForeground(STARTUP_NOTIFICATION_ID, startupNotification()) }
-        }
-        stopSelf()
+        startClock.answerThenStop { stopSelf() }
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
@@ -239,7 +254,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         if (sessions.onUnbind()) {
             // Nothing was ever promoted for a service that was only bound, so
             // there is no start clock to answer; a started one still is.
-            if (startedByCommand) stopWithoutLeavingAPromotionPending() else stopSelf()
+            stopWithoutLeavingAPromotionPending()
         }
         return super.onUnbind(intent)
     }
@@ -247,11 +262,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
     // Promotes and demotes at once, only to answer the platform's start clock
     // when a started service ends its playback while a browser stays bound.
     private fun answerStartClockWithoutStopping() {
-        if (!startedByCommand || media3HasPosted()) return
-        runCatching {
-            startForeground(STARTUP_NOTIFICATION_ID, startupNotification())
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        }
+        if (startClock.answer()) runCatching { stopForeground(STOP_FOREGROUND_REMOVE) }
     }
 
     // A `null` published session — playback stopped and
@@ -312,6 +323,34 @@ public class NoMercyPlaybackService : MediaLibraryService() {
         scopeJob?.cancel()
         scopeJob = null
         super.onDestroy()
+    }
+}
+
+// Each startForegroundService starts a new platform clock; a notification
+// left over from an earlier start does not answer it.
+internal class StartClock<N : Any>(
+    private val media3Notification: () -> N?,
+    private val promote: (existingMedia3: N?) -> Unit,
+) {
+    var pending: Boolean = false
+        private set
+
+    fun onStartCommand() {
+        pending = true
+    }
+
+    // Promotes with Media3's own notification when it is posted, so the rich
+    // notification is kept rather than replaced by the placeholder.
+    fun answer(): Boolean {
+        if (!pending) return false
+        promote(media3Notification())
+        pending = false
+        return true
+    }
+
+    fun answerThenStop(stopSelf: () -> Unit) {
+        answer()
+        stopSelf()
     }
 }
 
