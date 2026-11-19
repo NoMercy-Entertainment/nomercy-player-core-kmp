@@ -8,8 +8,10 @@
 
 package tv.nomercy.player.core.ports
 
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -19,12 +21,40 @@ class StartClockTest {
 
     private class Rig(var media3: String? = null) {
         val events = mutableListOf<String>()
+        val requested = AtomicBoolean(false)
         val clock = StartClock(
             media3Notification = { media3 },
             promote = { existing -> events += if (existing == null) PLACEHOLDER else PROMOTED_MEDIA3 },
+            startRequested = requested,
         )
 
         fun stop() = clock.answerThenStop { events += STOP }
+    }
+
+    @Test
+    fun stopBeforeOnStartCommandStillPromotesFirst() {
+        val rig = Rig(media3 = MEDIA3)
+        rig.clock.onStartCommand()
+        rig.clock.answer()
+        requestStart(rig.requested) {}
+
+        rig.stop()
+
+        assertEquals(listOf(PROMOTED_MEDIA3, PROMOTED_MEDIA3, STOP), rig.events)
+        assertFalse(rig.requested.get())
+    }
+
+    @Test
+    fun rejectedRequestLeavesNothingPending() {
+        val rig = Rig()
+
+        assertFailsWith<IllegalStateException> {
+            requestStart(rig.requested) { error("ForegroundServiceStartNotAllowedException") }
+        }
+        rig.stop()
+
+        assertFalse(rig.requested.get())
+        assertEquals(listOf(STOP), rig.events)
     }
 
     @Test

@@ -396,7 +396,9 @@ internal class Media3SystemTransport(
         // forfeits the notification for the rest of this instance's life, even
         // once the app is later foregrounded and the same start would succeed.
         return runCatching {
-                requestForegroundService(appContext, Intent(appContext, NoMercyPlaybackService::class.java))
+                PlaybackForegroundSession.requestStart {
+                    requestForegroundService(appContext, Intent(appContext, NoMercyPlaybackService::class.java))
+                }
             }
             .onFailure { failure ->
                 android.util.Log.w("Media3SystemTransport", "playback service not started: ${failure.message}")

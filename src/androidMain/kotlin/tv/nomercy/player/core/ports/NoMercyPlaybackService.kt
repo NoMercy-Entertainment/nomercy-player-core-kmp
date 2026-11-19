@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import java.util.concurrent.atomic.AtomicBoolean
 
 // What keeps the process alive with the screen off (P21.20).
 //
@@ -69,6 +70,7 @@ public class NoMercyPlaybackService : MediaLibraryService() {
                 }
             }
         },
+        startRequested = PlaybackForegroundSession.startRequested,
     )
 
     // A browser (car, watch) can bind before any player exists. It is answered
@@ -331,20 +333,20 @@ public class NoMercyPlaybackService : MediaLibraryService() {
 internal class StartClock<N : Any>(
     private val media3Notification: () -> N?,
     private val promote: (existingMedia3: N?) -> Unit,
+    private val startRequested: AtomicBoolean = AtomicBoolean(false),
 ) {
-    var pending: Boolean = false
-        private set
+    val pending: Boolean get() = startRequested.get()
 
     fun onStartCommand() {
-        pending = true
+        startRequested.set(true)
     }
 
     // Promotes with Media3's own notification when it is posted, so the rich
     // notification is kept rather than replaced by the placeholder.
     fun answer(): Boolean {
-        if (!pending) return false
+        if (!startRequested.get()) return false
         promote(media3Notification())
-        pending = false
+        startRequested.set(false)
         return true
     }
 
@@ -352,6 +354,12 @@ internal class StartClock<N : Any>(
         answer()
         stopSelf()
     }
+}
+
+// A rejected request starts no clock, so it must not leave one pending.
+internal fun requestStart(flag: AtomicBoolean, request: () -> Unit) {
+    val before = flag.getAndSet(true)
+    runCatching(request).onFailure { flag.set(before) }.getOrThrow()
 }
 
 // The publish side of the bridge [NoMercyPlaybackService] reads from.
@@ -363,6 +371,13 @@ internal class StartClock<N : Any>(
 // [Media3SystemTransport] triggers, immediately after) and needs the current
 // value the moment it does.
 public object PlaybackForegroundSession {
+    // The platform clock starts at the request, before onStartCommand arrives.
+    internal val startRequested: AtomicBoolean = AtomicBoolean(false)
+
+    internal fun requestStart(request: () -> Unit) {
+        requestStart(startRequested, request)
+    }
+
     private val mutable = MutableStateFlow<MediaLibrarySession?>(null)
     public val session: StateFlow<MediaLibrarySession?> = mutable.asStateFlow()
 
